@@ -51,7 +51,7 @@ export const batch2: FactBatch = {
     f('Hagia Sophia in Istanbul was built in 537 as a church, with a giant dome.', 'Hagia Sophia is in which city?', 'Istanbul', 'Athens'),
     f('Cappadocia in Turkey has rock towers called "fairy chimneys", and hundreds of hot-air balloons fly over them.', 'Cappadocia is famous for rides in…', 'hot-air balloons', 'submarines'),
     f('Mount Ararat in eastern Turkey is where Noah\'s Ark is said to have landed.', 'Noah\'s Ark is said to have landed on…', 'Mount Ararat', 'Mount Olympus'),
-    f('People in Georgia have been making wine for about 8,000 years.', 'People in Georgia have made wine for about…', '8,000 years', '200 years'),
+    f('People in the country of Georgia have been making wine for about 8,000 years.', 'People in the country of Georgia have made wine for about…', '8,000 years', '200 years'),
     f('The Georgian language is written in its own alphabet, used nowhere else.', 'Georgian is written with…', 'its own alphabet', 'Chinese characters'),
     f('In the year 301, Armenia became the first country to make Christianity its official religion.', 'Which was the first country with Christianity as its official religion?', 'Armenia', 'Spain'),
     f('Azerbaijan is called the "Land of Fire". At Yanar Dag, gas from the ground burns all the time.', 'Azerbaijan is called the Land of…', 'Fire', 'Ice'),
