@@ -78,6 +78,34 @@ export interface Player {
   citizenship: string[] | null;
   // The citizenship request in progress (the player stays in the area until it ends).
   exam: Exam | null;
+  // The starting area: where "go home" sends a player who has run out of money.
+  home: string | null;
+  // Turns in a row blocked because the player can't pay (a visa, tour fee or ticket).
+  // At GO_HOME_TURNS the player is sent home (docs/engine.md, task 9).
+  broke: number;
+}
+
+// Businesses (rulebook section 6): guided tours at a wonder, an airline at an airport,
+// a ferry agency at a port. Bought by the player standing in the area; no selling yet.
+export type BusinessKind = 'tours' | 'airline' | 'ferry';
+
+export interface Business {
+  kind: BusinessKind;
+  area: string;
+  // Seat of the owner; null while nobody has bought it.
+  owner: number | null;
+}
+
+// A payment made by the last move, so the screens can say who was paid.
+// `to` is null when the points went to nobody (buying a business, a ticket with no owner).
+export interface Payment {
+  reason: 'visa' | 'tour' | 'ticket' | 'buy';
+  from: number;
+  to: number | null;
+  amount: number;
+  area: string;
+  // The business involved: the one bought, or the airline or ferry agency a ticket went to.
+  business?: BusinessKind;
 }
 
 // Citizenship steps (docs/engine.md, task 8, owner's shorter timeline). The arrival turn is
@@ -108,6 +136,9 @@ export interface Travel {
   // the trip costs nothing on landing: a player is never charged for a rule that did not
   // exist when they left (owner's choice, task 8).
   visa?: true;
+  // The destination's guided tours had another owner when the player boarded: the tour fee
+  // is paid on landing. Tours bought during the trip cost nothing (same rule as the visa).
+  tours?: true;
   // Ask for citizenship on landing, if the area can still take one.
   citizenship?: true;
 }
@@ -143,6 +174,10 @@ export interface GameState {
   totalRounds: number;
   // The airline-quiz question the current player must answer now.
   quiz: PendingQuiz | null;
+  // Every business on the map, with its owner.
+  businesses: Business[];
+  // The payments made by the last move (empty when nothing was paid).
+  payments: Payment[];
   result: GameResult | null;
 }
 
@@ -170,6 +205,11 @@ export type Action =
   | { type: 'examAnswer'; choice: 0 | 1 }
   // A turn in the air or at sea (challenges and event cards come in tasks 11–12).
   | { type: 'travel' }
-  // Only legal when every neighbouring area is taken. Not in the rulebook;
-  // it stops the engine from freezing (see docs/engine.md).
+  // Buy the business in the player's area. The turn goes on: the player still moves.
+  | { type: 'buy'; business: BusinessKind }
+  // Blocked by lack of money for the 3rd turn in a row: the trip ends and the player is
+  // sent home for free (docs/engine.md, task 9).
+  | { type: 'goHome' }
+  // Only legal when no neighbouring area can be entered and there is no trip. Not in the
+  // rulebook; it stops the engine from freezing (see docs/engine.md).
   | { type: 'blocked' };

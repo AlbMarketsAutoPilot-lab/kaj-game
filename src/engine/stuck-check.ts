@@ -7,6 +7,8 @@ import type { GameMap } from './types.ts';
 // and can always fly or sail for free with the airline quiz (unlimited tries).
 // So a player is never trapped by one visa area if the map stays connected
 // (walking + airports + ports) after that visa area is taken out.
+// Every single area is checked this way, so this also covers a guided-tours area whose 1-point
+// fee the player can't pay (task 9). Anything worse ends with "go home" (docs/engine.md).
 
 // Every citizenship that can exist on the map, as a list of area ids.
 export function visaUnits(map: GameMap): string[][] {

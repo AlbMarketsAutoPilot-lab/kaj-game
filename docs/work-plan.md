@@ -34,7 +34,8 @@ Every task also adds its part to the test board, so there is **always a playable
 | 7 | Planes, ships, tickets, airline quiz | **high** | 1 | 2 | ✅ done |
 | C | Facts: about 12 per area (5 batches, in parallel) | medium | 1.5 | 3–8 | ✅ done |
 | 8 | Visas and citizenship (exam) | **high** | 2 | 4–5 | ✅ done |
-| 9 | Businesses | **high** | 1.5 | 6 | |
+| 9 | Businesses, strict fees, go home | **high** | 1 | 6 | ✅ done |
+| 9b | Selling, 2 areas with airport and port | **high** | 1 | 6–7 | |
 | 10 | Profile bonuses, save and resume | medium | 1 | 7 | |
 | 11 | Event cards | medium | 1 | 7–8 | |
 | 12 | Challenges (6 types from open data) | medium | 1.5 | 8–9 | |
@@ -111,7 +112,19 @@ on day 14 it could miss the deadline.
 - The first player to arrive may buy (⭐ right to buy at a wonder); if not, the next one.
 - Income: 1 point from every other player entering a tour area; tickets to the owner.
 - No selling in v1.
-- Open question: a player with 0 points enters a tour area (points never go below 0).
+- Done: rules and the 6 owner-approved choices in `docs/engine.md` (task 9): buying is an option
+  on the move (no turn used), strict fees (no money, no entry), businesses count their price at
+  the end, "go home" after 3 turns blocked by money. Tests in `tests/business.test.ts`.
+
+### 9b. Selling and 2 areas with an airport and a port — day 6–7 (high)
+
+- Selling (owner-approved in task 9): at the price it was bought for, to another player, who
+  answers Yes or No on the same screen; robots accept if they can pay. Offered on the move panel,
+  and suggested in the "out of money" warning.
+- Map: UK & Ireland gets an airport (↔ Arabian Peninsula), Japan a port (↔ USA West). The test
+  "each of the 9 connections is needed" checks only the original 9 (owner-approved).
+- Stuck-state checker and 1,000 random games on the new map.
+- This extra session uses the 1-day buffer.
 
 ### 10. Profile bonuses, save and resume — day 7
 
