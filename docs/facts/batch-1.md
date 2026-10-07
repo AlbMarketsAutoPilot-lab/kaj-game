@@ -48,7 +48,7 @@ The right answer is in **bold**.
 | 3 | Ireland is called the "Emerald Isle" because of its green countryside. | What is Ireland's nickname? | **The Emerald Isle** / The Ruby Isle |
 | 4 | William Shakespeare, born in Stratford-upon-Avon, England, wrote Romeo and Juliet. | Who wrote Romeo and Juliet? | **William Shakespeare** / Charles Dickens |
 | 5 | The Giant's Causeway in Northern Ireland has about 40,000 stone columns made by an old volcano. Most have six sides. | Most columns of the Giant's Causeway have how many sides? | **Six** / Three |
-| 6 | The national animal of Scotland is the unicorn. | What is Scotland's national animal? | **The unicorn** / The lion |
+| 6 | The national animal of Scotland is the unicorn. | What is Scotland's national animal? | **The unicorn** / The dragon |
 | 7 | The world's first underground railway opened in London in 1863. | The world's first underground railway opened in which city? | **London** / Paris |
 | 8 | Ben Nevis in Scotland is the highest mountain in the United Kingdom. | Which is the highest mountain in the United Kingdom? | **Ben Nevis** / Snowdon |
 | 9 | Loch Ness, a deep lake in Scotland, is famous for stories of a monster called "Nessie". | Nessie is said to live in which lake? | **Loch Ness** / Lough Neagh |
@@ -116,7 +116,7 @@ The right answer is in **bold**.
 | 3 | Iceland's parliament, the Althing, was founded in the year 930. It is one of the oldest in the world. | The Althing is Iceland's… | **parliament** / biggest volcano |
 | 4 | Iceland sits on the line where the North American and Eurasian tectonic plates are pulling apart. | Iceland sits between the Eurasian plate and the… | **North American plate** / African plate |
 | 5 | Most homes in Iceland are heated with natural hot water from underground. | Most homes in Iceland are heated with… | **hot water from underground** / coal |
-| 6 | There are no mosquitoes in Iceland. | Which insect is not found in Iceland? | **The mosquito** / The housefly |
+| 6 | There are no snakes living in the wild in Iceland. | Which animal does not live in the wild in Iceland? | **Snakes** / The Arctic fox |
 | 7 | Icelandic horses are small and strong. No horses from other countries may be brought into Iceland. | Can horses from other countries be brought into Iceland? | **No** / Yes |
 | 8 | Vatnajökull is the biggest glacier in Iceland and covers about 8% of the country. | Vatnajökull is a… | **glacier** / waterfall |
 | 9 | In 2010, ash from the Icelandic volcano Eyjafjallajökull stopped flights across Europe for days. | In 2010, ash from an Icelandic volcano stopped… | **flights across Europe** / trains in Asia |
