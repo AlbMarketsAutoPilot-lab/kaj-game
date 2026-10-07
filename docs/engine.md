@@ -148,8 +148,9 @@ These points are not spelled out in the rulebook or the v1 scope.
 6. **Visa by plane or ship:** ticket plus 2 to board; paid on landing; **a citizenship granted
    during the trip costs nothing on landing** (a player is never charged for a rule that did
    not exist when they left).
-7. **On the tiny test map** (no airports or ports), turns blocked by a visa are not counted in
-   the "blocked" check; the real map keeps the full check.
+7. **On the tiny test map** (no airports or ports) the random robots never ask for
+   citizenship, so its "blocked" check tests walking only; citizenship and visas are checked
+   on the real map, with the full check, and by the rule tests.
 
 ## Project setup
 

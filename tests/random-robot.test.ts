@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { apply, createGame, currentPlayer, legalActions } from '../src/engine/engine.ts';
-import { VISA_PRICE } from '../src/engine/constants.ts';
+import { randomInt } from '../src/engine/rng.ts';
 import { randomRobotAction } from '../src/engine/robot.ts';
-import type { GameState } from '../src/engine/types.ts';
+import type { Action, GameState } from '../src/engine/types.ts';
 import { map30 } from '../src/maps/map30.ts';
 import { testMap } from './fixtures/test-map.ts';
 import { seats } from './helpers.ts';
@@ -16,12 +16,13 @@ function checkInvariants(s: GameState): void {
   assert.equal(new Set(areas).size, areas.length, `two players share an area: ${areas}`);
 }
 
-// Blocked with a neighbour that is a visa area the player can't pay.
-function blockedByVisa(s: GameState, type: string): boolean {
-  if (type !== 'blocked') return false;
-  const me = currentPlayer(s);
-  return me.points < VISA_PRICE && testMap.areas.find((a) => a.id === me.area)!.neighbours
-    .some((n) => s.players.some((p) => p.seat !== me.seat && p.citizenship?.includes(n)));
+// This tiny map has no airports or ports, so (unlike the real map) a visa area or a player
+// staying for citizenship can trap others here. On it the robots never ask for citizenship
+// (owner-approved, task 8); citizenship and visas are checked on the real map below.
+function plainRobotAction(s: GameState, seed: number): [Action, number] {
+  const plain = legalActions(s, testMap).filter((a) => !('citizenship' in a && a.citizenship));
+  const [i, next] = randomInt(seed, plain.length);
+  return [plain[i], next];
 }
 
 test(`random robots play ${GAMES} games: nobody stuck, points ≥ 0, never two in one area`, () => {
@@ -36,11 +37,9 @@ test(`random robots play ${GAMES} games: nobody stuck, points ≥ 0, never two i
     while (s.phase !== 'finished') {
       assert.ok(legalActions(s, testMap).length > 0, `game ${g}: no legal action`);
       const seat = currentPlayer(s).seat;
-      const [action, next] = randomRobotAction(s, testMap, robotSeed);
+      const [action, next] = plainRobotAction(s, robotSeed);
       robotSeed = next;
-      // This tiny map has no airports or ports, so (unlike the real map) a visa area can
-      // trap a player here. Turns blocked by a visa are not counted (owner-approved, task 8).
-      if (s.phase === 'play' && !blockedByVisa(s, action.type)) {
+      if (s.phase === 'play') {
         blockedInARow[seat] = action.type === 'blocked' ? blockedInARow[seat] + 1 : 0;
         longestBlock = Math.max(longestBlock, blockedInARow[seat]);
       }
