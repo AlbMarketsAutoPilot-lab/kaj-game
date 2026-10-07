@@ -282,19 +282,26 @@ function depart(
   // Task 9: the ticket goes to the owner of the departure airport or port.
   // Until there are owners it goes to nobody (there is no bank).
   me.points = addPoints(me.points, -ticket);
-  me.travel = { kind, from: me.area!, to, turnsLeft: TRAVEL_TURNS[me.profile!][kind], ...(ask ? { citizenship: true as const } : {}) };
+  const visa = visaOwner(state, me, me.area, to) !== null;
+  me.travel = {
+    kind, from: me.area!, to, turnsLeft: TRAVEL_TURNS[me.profile!][kind],
+    ...(visa ? { visa: true as const } : {}),
+    ...(ask ? { citizenship: true as const } : {}),
+  };
   me.area = null;
   me.quizWrong = 0;
   if (me.travel.turnsLeft === 0) land(state, map, me);
 }
 
 // Two players are never in one area: if the destination is taken, the plane or ship
-// waits and tries again at the end of the next travel turn. It also waits if the player
-// can't pay the destination's visa (no money, no entry).
+// waits and tries again at the end of the next travel turn.
+// The visa is paid on landing, only if it was due when the player boarded (boarding needed
+// the ticket plus the visa). Points can't drop in the air yet; if they ever do (challenges,
+// task 12), the plane waits rather than enter unpaid.
 function land(state: GameState, map: GameMap, me: Player): void {
   const trip = me.travel!;
   if (occupiedAreas(state, me.seat).has(trip.to)) return;
-  const owner = visaOwner(state, me, trip.from, trip.to);
+  const owner = trip.visa ? visaOwner(state, me, trip.from, trip.to) : null;
   if (owner && me.points < VISA_PRICE) return;
   if (owner) payVisa(me, owner);
   me.travel = null;

@@ -1,8 +1,8 @@
 // First playable screen (task 3): a plain test board on top of the engine.
 // No final art yet. Robots pick random legal moves.
 
-import { TICKET_PRICE, TRAVEL_TURNS } from '../engine/constants.ts';
-import { apply, createGame, currentPlayer, legalActions } from '../engine/engine.ts';
+import { POINTS_BUSINESS_CITIZENSHIP, TICKET_PRICE, TRAVEL_TURNS, VISA_PRICE } from '../engine/constants.ts';
+import { apply, createGame, currentPlayer, legalActions, visaOwner } from '../engine/engine.ts';
 import { randomRobotAction } from '../engine/robot.ts';
 import type { Action, Area, GameState, Player, Profile, RouteKind, SeatKind } from '../engine/types.ts';
 import { map30 } from '../maps/map30.ts';
@@ -17,6 +17,8 @@ const PROFILE_LABEL: Record<Profile, string> = {
 };
 const ROBOT_DELAY_MS = 600;
 const QUIZ_SECONDS = 15;
+// Citizenship test: 15 seconds for each question (owner's choice, task 8).
+const EXAM_SECONDS = 15;
 const VEHICLE: Record<RouteKind, string> = { airport: '✈️', port: '⛴️' };
 
 const app = document.getElementById('app')!;
@@ -27,6 +29,10 @@ let state: GameState | null = null;
 let robotSeed = 1;
 let robotTimer = 0;
 let quizTimer = 0;
+// "Ask for citizenship where I arrive" (the tick box on the move panel).
+let askCitizenship = false;
+// A short message about the last move (e.g. "request submitted"), shown on the next screen.
+let note = '';
 
 // ---------- small DOM helpers ----------
 
@@ -109,9 +115,26 @@ function renderSetup(): void {
 
 function act(action: Action): void {
   if (!state) return;
+  const mover = currentPlayer(state);
+  const before = mover.exam;
   state = apply(state, map30, action);
+  const after = state.players[mover.seat].exam;
+  note = !before && after
+    ? `🛂 ${COLOUR_NAMES[mover.seat]}: your citizenship request for ${areaById.get(after.area)!.name} has been submitted!`
+    : '';
+  askCitizenship = false;
   render();
 }
+
+// The move to make for a button: with the citizenship request if it is ticked and offered.
+function pick(actions: Action[], plain: Action): Action {
+  if (!askCitizenship) return plain;
+  const key = JSON.stringify({ ...plain, citizenship: true });
+  return actions.find((a) => JSON.stringify(a) === key) ?? plain;
+}
+
+const asksOffered = (actions: Action[]) => actions.filter((a) => 'citizenship' in a && a.citizenship);
+const plainActions = (actions: Action[]) => actions.filter((a) => !('citizenship' in a && a.citizenship));
 
 function render(): void {
   if (!state) return renderSetup();
@@ -154,6 +177,9 @@ function renderPlayers(s: GameState): HTMLElement {
         el('div', { className: 'small', textContent: p.profile ? PROFILE_LABEL[p.profile] : 'no profile yet' }),
         el('div', { className: 'points', textContent: `${p.points} points` }),
         el('div', { className: 'small', textContent: `📍 ${area}` }),
+        el('div', { className: 'small', textContent: p.citizenship
+          ? `🛂 Citizen of ${citizenshipName(p.citizenship)}`
+          : p.exam ? `🛂 Asking for citizenship in ${areaById.get(p.exam.area)!.name}` : '' }),
         el('div', { className: 'small', textContent: `${plural(p.visitedContinents.length, 'continent')} · ${plural(p.visitedAreas.length, 'area')}` }));
       card.style.borderColor = COLOURS[seat];
       return card;
@@ -178,6 +204,7 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
     return box;
   }
 
+  if (note) box.append(el('p', { className: 'note', textContent: note }));
   if (isRobot) {
     box.append(el('h2', {}, who, ' is thinking… 🤖'));
     return box;
@@ -193,6 +220,8 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
       el('p', { className: 'small', textContent: 'Tap a green area on the map below.' }));
   } else if (s.quiz) {
     renderQuiz(box, s, who);
+  } else if (me.exam && me.exam.stage !== 'granted') {
+    renderCitizenship(box, s, who);
   } else if (me.travel) {
     const trip = me.travel;
     const to = areaById.get(trip.to)!.name;
@@ -205,18 +234,31 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
       el('div', { className: 'row' }, button('Continue the journey', () => act({ type: 'travel' }))));
   } else {
     const here = areaById.get(me.area!)!;
+    if (me.exam?.stage === 'granted') {
+      box.append(el('p', { className: 'note', textContent: `🎉 Citizenship granted! ${citizenshipName(me.citizenship!)} is now yours. You may travel on.` }));
+    }
     box.append(el('h2', {}, who, `, you are in ${here.name}`), el('p', { className: 'small', textContent: travelNote(me) }));
+    const offered = asksOffered(actions);
+    if (offered.length > 0) {
+      const tick = el('input', { type: 'checkbox', checked: askCitizenship });
+      tick.addEventListener('change', () => { askCitizenship = tick.checked; render(); });
+      box.append(el('label', { className: 'ask' }, tick,
+        ' 🛂 Ask for citizenship where I arrive — you can ask only once per game. Moves marked 🛂 allow it.'));
+    }
+    const canAsk = (a: Action) => offered.some((o) => 'to' in o && 'to' in a && o.type === a.type && o.to === a.to
+      && (!('kind' in a) || ('kind' in o && o.kind === a.kind)));
     const row = el('div', { className: 'row' });
-    for (const a of actions) {
+    for (const a of plainActions(actions)) {
+      const mark = canAsk(a) ? ' 🛂' : '';
       if (a.type === 'walk') {
         const to = areaById.get(a.to)!;
-        row.append(button(`🚶 ${to.name}${gainLabel(s, a, to)}`, () => act(a)));
+        row.append(button(`🚶 ${to.name}${gainLabel(s, a, to)}${visaLabel(s, a.to)}${mark}`, () => act(pick(actions, a))));
       } else if (a.type === 'board') {
-        row.append(button(`${VEHICLE[a.kind]} Pay ${TICKET_PRICE[me.profile!]} → ${areaById.get(a.to)!.name}`, () => act(a)));
+        row.append(button(`${VEHICLE[a.kind]} Pay ${TICKET_PRICE[me.profile!]} → ${areaById.get(a.to)!.name}${visaLabel(s, a.to)}${mark}`, () => act(pick(actions, a))));
       } else if (a.type === 'quiz') {
-        row.append(button(`${VEHICLE[a.kind]} Quiz for a free ticket → ${areaById.get(a.to)!.name}`, () => act(a)));
+        row.append(button(`${VEHICLE[a.kind]} Quiz for a free ticket → ${areaById.get(a.to)!.name}${visaLabel(s, a.to)}${mark}`, () => act(pick(actions, a))));
       } else if (a.type === 'blocked') {
-        row.append(button('⛔ All neighbours are taken — wait this turn', () => act(a)));
+        row.append(button('⛔ No area you can enter — wait this turn', () => act(a)));
       }
     }
     box.append(row,
@@ -226,14 +268,81 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
   return box;
 }
 
-// Points this move would give, found by trying it on a copy of the state.
+// Points this move would give, found by trying it on a copy of the state (visa not included).
 function gainLabel(s: GameState, action: Action, to: Area): string {
   const before = currentPlayer(s).points;
   const after = apply(s, map30, action).players[currentPlayer(s).seat].points;
-  const gain = after - before;
+  const gain = after - before + (visaOwner(s, currentPlayer(s), currentPlayer(s).area, to.id) ? VISA_PRICE : 0);
   if (gain > 0) return ` ✨ +${gain}`;
   const me = currentPlayer(s);
   return to.bigCountry && !me.visitedAreas.includes(to.id) ? ' 🧩' : '';
+}
+
+function visaLabel(s: GameState, to: string): string {
+  const owner = visaOwner(s, currentPlayer(s), currentPlayer(s).area, to);
+  return owner ? ` 🛂 visa −${VISA_PRICE} to ${COLOUR_NAMES[owner.seat]}` : '';
+}
+
+function citizenshipName(areas: string[]): string {
+  const first = areaById.get(areas[0])!;
+  return areas.length > 1 && first.bigCountry ? first.bigCountry : first.name;
+}
+
+// The citizenship turns (owner's timeline, docs/engine.md task 8). Luxury skips the test.
+function renderCitizenship(box: HTMLElement, s: GameState, who: HTMLElement): void {
+  const me = currentPlayer(s);
+  const exam = me.exam!;
+  const where = areaById.get(exam.area)!.name;
+  const ok = (label: string) => el('div', { className: 'row' }, button(label, () => act({ type: 'exam' })));
+  const passed = exam.questions.every((q, i) => exam.answers[i] === q.correct);
+
+  if (exam.stage === 'submitted') {
+    box.append(el('h2', {}, who, `: your citizenship request for ${where} has been approved! 📨`),
+      el('p', { textContent: `Next turn you take the citizenship test: 3 questions about ${where}, ${EXAM_SECONDS} seconds each. No looking things up!` }),
+      el('p', { className: 'small', textContent: 'You stay here this turn.' }),
+      ok('Got it'));
+  } else if (exam.stage === 'test') {
+    renderExamQuestion(box, s, who);
+  } else if (exam.stage === 'result' && passed) {
+    box.append(el('h2', {}, who, `: 🎉 Citizenship granted! Welcome, citizen of ${citizenshipName(me.citizenship!)}!`),
+      el('p', { textContent: `Every other player now pays you a ${VISA_PRICE}-point visa to enter.${me.profile === 'business' ? ` 💼 Business Traveler: +${POINTS_BUSINESS_CITIZENSHIP} points.` : ''}` }),
+      el('p', { className: 'small', textContent: 'You stay here this turn and travel on next turn.' }),
+      ok('Continue'));
+  } else if (exam.stage === 'result') {
+    box.append(el('h2', {}, who, ': you did not pass the citizenship test this time.'),
+      el('p', { textContent: 'You will spend one more turn learning the right answers. Then citizenship is yours.' }),
+      ok('Continue'));
+  } else if (exam.stage === 'learning') {
+    box.append(el('h2', {}, who, ': here are the right answers. Learn them! 📖'),
+      el('ol', {}, ...exam.questions.map((q, i) => {
+        const mine = exam.answers[i];
+        return el('li', {}, `${q.text} ✅ ${q.options[q.correct]}`, mine === q.correct ? '' : ` (you said: ${q.options[mine]})`);
+      })),
+      el('p', { textContent: `🎉 Your citizenship of ${citizenshipName(me.citizenship!)} is now granted! You travel on next turn.${me.profile === 'business' ? ` 💼 +${POINTS_BUSINESS_CITIZENSHIP} points.` : ''}` }),
+      ok('Continue'));
+  }
+}
+
+// One test question, 15 seconds. Time out = wrong answer.
+function renderExamQuestion(box: HTMLElement, s: GameState, who: HTMLElement): void {
+  const exam = currentPlayer(s).exam!;
+  const n = exam.answers.length;
+  const q = exam.questions[n];
+  let left = EXAM_SECONDS;
+  const clock = el('p', { className: 'small', textContent: `⏱️ ${left} s` });
+  box.append(el('h2', {}, who, `: citizenship test for ${areaById.get(exam.area)!.name} — question ${n + 1} of ${exam.questions.length}`),
+    el('p', { textContent: q.text }),
+    el('div', { className: 'row' }, ...q.options.map((o, i) => button(o, () => act({ type: 'examAnswer', choice: i as 0 | 1 })))),
+    clock);
+  quizTimer = window.setInterval(() => {
+    if (state !== s) return clearInterval(quizTimer);
+    left -= 1;
+    clock.textContent = `⏱️ ${left} s`;
+    if (left <= 0) {
+      clearInterval(quizTimer);
+      act({ type: 'examAnswer', choice: (1 - q.correct) as 0 | 1 });
+    }
+  }, 1000);
 }
 
 function renderBigCountries(me: GameState['players'][number]): HTMLElement {
@@ -297,8 +406,9 @@ function renderMap(s: GameState): HTMLElement {
           const visitedBy = s.players.filter((p) => p.visitedAreas.includes(a.id));
           const canGo = humanTurn && legal.has(a.id);
           const tags = `${a.wonder ? '⭐' : ''}${a.bigCountry ? '🧩' : ''}${(map30.routes ?? []).some((r) => r.kind === 'airport' && (r.a === a.id || r.b === a.id)) ? '✈️' : ''}${(map30.routes ?? []).some((r) => r.kind === 'port' && (r.a === a.id || r.b === a.id)) ? '⛴️' : ''}`;
+          const citizen = s.players.find((p) => p.citizenship?.includes(a.id));
           const tile = el('div', { className: 'area' + (canGo ? ' legal' : '') + (here ? ' occupied' : ''), title: (a.countries ?? []).join(', ') },
-            el('div', { className: 'name', textContent: `${a.name} ${tags}` }),
+            el('div', { className: 'name' }, `${a.name} ${tags}`, ...(citizen ? [' 🛂', dot(citizen.seat)] : [])),
             el('div', { className: 'marks' }, ...visitedBy.map((p) => {
               const m = dot(p.seat);
               m.classList.add(p.area === a.id ? 'big' : 'faint');
@@ -309,7 +419,7 @@ function renderMap(s: GameState): HTMLElement {
             const action = s.phase === 'chooseStart'
               ? { type: 'chooseStart' as const, area: a.id }
               : { type: 'walk' as const, to: a.id };
-            tile.addEventListener('click', () => act(action));
+            tile.addEventListener('click', () => act(pick(legalActions(s, map30), action)));
           }
           return tile;
         })))));

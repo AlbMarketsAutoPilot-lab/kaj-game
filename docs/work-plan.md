@@ -33,7 +33,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | 6 | Android shell and APK build (early) | medium | 1 | 2 | ✅ done |
 | 7 | Planes, ships, tickets, airline quiz | **high** | 1 | 2 | ✅ done |
 | C | Facts: about 12 per area (5 batches, in parallel) | medium | 1.5 | 3–8 | ✅ done |
-| 8 | Visas and citizenship (exam) | **high** | 2 | 4–5 | |
+| 8 | Visas and citizenship (exam) | **high** | 2 | 4–5 | 🟡 built; one test-map question open |
 | 9 | Businesses | **high** | 1.5 | 6 | |
 | 10 | Profile bonuses, save and resume | medium | 1 | 7 | |
 | 11 | Event cards | medium | 1 | 7–8 | |

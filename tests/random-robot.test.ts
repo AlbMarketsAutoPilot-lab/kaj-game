@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { apply, createGame, currentPlayer, legalActions } from '../src/engine/engine.ts';
+import { VISA_PRICE } from '../src/engine/constants.ts';
 import { randomRobotAction } from '../src/engine/robot.ts';
 import type { GameState } from '../src/engine/types.ts';
 import { map30 } from '../src/maps/map30.ts';
@@ -13,6 +14,14 @@ function checkInvariants(s: GameState): void {
   for (const p of s.players) assert.ok(p.points >= 0, `seat ${p.seat} has ${p.points} points`);
   const areas = s.players.map((p) => p.area).filter((a) => a !== null);
   assert.equal(new Set(areas).size, areas.length, `two players share an area: ${areas}`);
+}
+
+// Blocked with a neighbour that is a visa area the player can't pay.
+function blockedByVisa(s: GameState, type: string): boolean {
+  if (type !== 'blocked') return false;
+  const me = currentPlayer(s);
+  return me.points < VISA_PRICE && testMap.areas.find((a) => a.id === me.area)!.neighbours
+    .some((n) => s.players.some((p) => p.seat !== me.seat && p.citizenship?.includes(n)));
 }
 
 test(`random robots play ${GAMES} games: nobody stuck, points ≥ 0, never two in one area`, () => {
@@ -29,7 +38,9 @@ test(`random robots play ${GAMES} games: nobody stuck, points ≥ 0, never two i
       const seat = currentPlayer(s).seat;
       const [action, next] = randomRobotAction(s, testMap, robotSeed);
       robotSeed = next;
-      if (s.phase === 'play') {
+      // This tiny map has no airports or ports, so (unlike the real map) a visa area can
+      // trap a player here. Turns blocked by a visa are not counted (owner-approved, task 8).
+      if (s.phase === 'play' && !blockedByVisa(s, action.type)) {
         blockedInARow[seat] = action.type === 'blocked' ? blockedInARow[seat] + 1 : 0;
         longestBlock = Math.max(longestBlock, blockedInARow[seat]);
       }
@@ -45,10 +56,12 @@ test(`random robots play ${GAMES} games: nobody stuck, points ≥ 0, never two i
   assert.ok(longestBlock <= 5, `a player was blocked ${longestBlock} turns in a row`);
 });
 
-// The real 30-turn map, with planes, ships, tickets and the airline quiz.
+// The real 30-turn map, with planes, ships, tickets, the airline quiz, citizenship and visas.
 test(`random robots play ${GAMES} games on the 30-turn map with planes and ships`, () => {
   let trips = 0;
   let quizzes = 0;
+  let citizens = 0;
+  let visas = 0;
   let longestTrip = 0;
   let longestBlock = 0;
   for (let g = 0; g < GAMES; g++) {
@@ -69,8 +82,11 @@ test(`random robots play ${GAMES} games on the 30-turn map with planes and ships
         blockedInARow[seat] = action.type === 'blocked' ? blockedInARow[seat] + 1 : 0;
         longestBlock = Math.max(longestBlock, blockedInARow[seat]);
       }
+      const owed = s.players.map((q) => q.points);
       s = apply(s, map30, action);
       checkInvariants(s);
+      // A visa: another player gets exactly 2 points from this move.
+      if (action.type !== 'exam') visas += s.players.filter((q, i) => q.seat !== seat && q.points - owed[i] === 2).length;
       const p = s.players[seat];
       if (p.travel) {
         if (inTransit[seat] === 0) trips++;
@@ -85,8 +101,14 @@ test(`random robots play ${GAMES} games on the 30-turn map with planes and ships
 
     assert.equal(s.round, 30);
     assert.equal(s.result!.ranking.length, n);
+    // One citizen per area or big country.
+    const held = s.players.flatMap((q) => q.citizenship ?? []);
+    assert.equal(new Set(held).size, held.length, `game ${g}: two citizens in one area`);
+    citizens += s.players.filter((q) => q.citizenship).length;
   }
   assert.ok(trips > GAMES, `only ${trips} trips`);
+  assert.ok(citizens > GAMES, `only ${citizens} citizenships`);
+  assert.ok(visas > GAMES / 2, `only ${visas} visas`);
   assert.ok(quizzes > GAMES, `only ${quizzes} quizzes`);
   // A ship takes at most 3 travel turns; a taken destination adds a few waiting turns.
   assert.ok(longestTrip <= 8, `a trip lasted ${longestTrip} turns`);

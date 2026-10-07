@@ -100,9 +100,12 @@ export interface Travel {
   kind: RouteKind;
   from: string;
   to: string;
-  // Travel turns still to come. At 0 the player lands, or waits if the destination is
-  // taken or the player can't pay its visa.
+  // Travel turns still to come. At 0 the player lands, or waits if the destination is taken.
   turnsLeft: number;
+  // The destination needed a visa when the player boarded. A citizenship granted during
+  // the trip costs nothing on landing: a player is never charged for a rule that did not
+  // exist when they left (owner's choice, task 8).
+  visa?: true;
   // Ask for citizenship on landing, if the area can still take one.
   citizenship?: true;
 }
