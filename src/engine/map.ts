@@ -35,7 +35,7 @@ export function validateMap(map: GameMap): string[] {
     }
   }
 
-  // An area has at most one airport and one port. Each has 1 or 2 fixed destinations
+  // An area has at most one airport and one port. Each has 1 to 3 fixed destinations
   // (v1 scope section 4); the traveller chooses one when boarding.
   const destinations = new Map<string, string[]>();
   for (const r of map.routes ?? []) {

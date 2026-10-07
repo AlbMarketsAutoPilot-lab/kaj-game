@@ -32,5 +32,5 @@ export const WELCOME_BONUS: Readonly<Record<Continent, number>> = {
 export const POINTS_NEW_AREA = 1;
 export const POINTS_NEW_CONTINENT = 2;
 
-// An airport or port has 1 or 2 fixed destinations (v1 scope section 4).
-export const MAX_DESTINATIONS = 2;
+// An airport or port has 1 to 3 fixed destinations (v1 scope section 4).
+export const MAX_DESTINATIONS = 3;

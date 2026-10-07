@@ -1,6 +1,6 @@
 import type { Area, Continent, GameMap, Route } from '../engine/types.ts';
 
-// The 30-turn map: 50 areas, airports and ports (task 2b, in progress).
+// The 30-turn map: 50 areas, 7 airports and 4 ports (9 connections).
 // Each walking link is written once in BORDERS below; neighbours are built from it.
 
 interface AreaInfo {
@@ -209,7 +209,8 @@ const BORDERS: [string, string][] = [
   ['australia-west', 'australia-east'],
 ];
 
-// Airports and ports (owner-approved plan A, task 2b). Some have 2 destinations.
+// Airports and ports (owner-approved, task 2b). Some have 2 destinations.
+// The stuck-state checker needs every one of these 9 connections.
 const ROUTES: Route[] = [
   { kind: 'port', a: 'iberia', b: 'uk-ireland' },
   { kind: 'port', a: 'uk-ireland', b: 'iceland' },
@@ -219,7 +220,7 @@ const ROUTES: Route[] = [
   { kind: 'airport', a: 'maritime-asia', b: 'japan' },
   { kind: 'airport', a: 'japan', b: 'new-zealand' },
   { kind: 'airport', a: 'new-zealand', b: 'chile' },
-  // 9th connection (Southern Africa airport) waits for the owner's approval.
+  { kind: 'airport', a: 'southern-africa', b: 'chile' },
 ];
 
 function build(): GameMap {
