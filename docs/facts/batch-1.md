@@ -28,7 +28,7 @@ The right answer is in **bold**.
 |---|---|---|---|
 | 1 | The Eiffel Tower in Paris was built for the World's Fair of 1889. | The Eiffel Tower was built for the World's Fair of… | **1889** / 1925 |
 | 2 | The Louvre museum in Paris holds the Mona Lisa, painted by Leonardo da Vinci. | Which painting hangs in the Louvre? | **The Mona Lisa** / The Starry Night |
-| 3 | The Tour de France is a famous bicycle race held every summer since 1903. | The Tour de France is a race for… | **bicycles** / horses |
+| 3 | The Tour de France is a famous bicycle race held almost every summer since 1903. | The Tour de France is a race for… | **bicycles** / horses |
 | 4 | Mont Blanc in the Alps is the highest mountain in Western Europe. France shares it with Italy. | Which is the highest mountain in Western Europe? | **Mont Blanc** / Mount Etna |
 | 5 | France makes hundreds of kinds of cheese, such as Camembert and Brie. | Camembert and Brie are French… | **cheeses** / breads |
 | 6 | Mont-Saint-Michel is an abbey on a small rocky island that the sea surrounds at high tide. | Mont-Saint-Michel becomes an island at… | **high tide** / midnight |
@@ -79,13 +79,13 @@ The right answer is in **bold**.
 |---|---|---|---|
 | 1 | The Colosseum in Rome held about 50,000 people who came to watch gladiator fights. | The Colosseum was used for… | **gladiator fights** / car races |
 | 2 | The Leaning Tower of Pisa started to lean while it was being built, because the ground is soft. | Why does the Tower of Pisa lean? | **Soft ground** / An earthquake |
-| 3 | Venice is built on more than 100 small islands, with canals instead of streets. | In Venice, people get around on… | **canals** / underground trains |
+| 3 | Venice is built on more than 100 small islands, with canals instead of roads for cars. | In Venice, people get around on… | **canals** / underground trains |
 | 4 | Vatican City, inside Rome, is the smallest country in the world. | Which is the smallest country in the world? | **Vatican City** / Monaco |
 | 5 | The Roman town of Pompeii was buried by the eruption of Mount Vesuvius in the year 79. | Which volcano buried Pompeii? | **Vesuvius** / Etna |
 | 6 | Pizza Margherita, named after Queen Margherita, comes from Naples. | Pizza Margherita comes from which city? | **Naples** / Milan |
 | 7 | Leonardo da Vinci, who painted the Mona Lisa, was born in Italy in 1452. | Who painted the Mona Lisa? | **Leonardo da Vinci** / Vincent van Gogh |
 | 8 | On a map, Italy is shaped like a boot. | Italy's shape is often compared to a… | **boot** / hat |
-| 9 | Mount Etna on the island of Sicily is the most active volcano in Europe. | Mount Etna is on which island? | **Sicily** / Sardinia |
+| 9 | Mount Etna on the island of Sicily is one of the most active volcanoes in Europe. | Mount Etna is on which island? | **Sicily** / Sardinia |
 | 10 | San Marino, completely surrounded by Italy, is one of the oldest republics in the world. | San Marino is completely surrounded by… | **Italy** / France |
 | 11 | Michelangelo painted the ceiling of the Sistine Chapel in Vatican City. | Who painted the ceiling of the Sistine Chapel? | **Michelangelo** / Claude Monet |
 | 12 | Galileo Galilei, born in Pisa, used a telescope to discover four moons of Jupiter in 1610. | Galileo discovered moons around which planet? | **Jupiter** / Mars |
