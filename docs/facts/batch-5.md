@@ -15,12 +15,12 @@ The right answer is in **bold**.
 | 4 | The Great Blue Hole, off the coast of Belize, is a giant round sinkhole under the sea. | The Great Blue Hole is a giant… | **underwater sinkhole** / volcano |
 | 5 | Reggae music comes from Jamaica. Its most famous singer was Bob Marley. | Bob Marley sang which kind of music? | **Reggae** / Opera |
 | 6 | Cuba is the largest island in the Caribbean Sea. | Which is the largest island in the Caribbean? | **Cuba** / Jamaica |
-| 7 | In 1492, Christopher Columbus first landed in the Americas on an island in the Bahamas. | Columbus's first landing in 1492 was in… | **the Bahamas** / Florida |
+| 7 | In 1492, Christopher Columbus first landed on an island in the Bahamas. | Columbus's first landing in 1492 was in… | **the Bahamas** / Florida |
 | 8 | In 1804, after a revolt of enslaved people, Haiti became the first independent Black republic. | Haiti became independent in… | **1804** / 1904 |
 | 9 | The bee hummingbird of Cuba is the smallest bird in the world. | The bee hummingbird is the world's smallest… | **bird** / fish |
 | 10 | The quetzal, a bird with very long green tail feathers, was sacred to the Maya. | The quetzal is a… | **bird** / snake |
 | 11 | Lake Nicaragua is a freshwater lake where bull sharks swim, coming up the river from the sea. | Lake Nicaragua is famous for its… | **sharks** / penguins |
-| 12 | Santo Domingo, in the Dominican Republic, is the oldest city built by Europeans in the Americas. | Santo Domingo is the oldest European-built city in the… | **Americas** / Pacific islands |
+| 12 | Santo Domingo, in the Dominican Republic, is the oldest city built by Europeans in the Americas where people still live today. | Santo Domingo is the oldest European-built city in the… | **Americas** / Pacific islands |
 
 ## Colombia, Venezuela & Guianas
 
@@ -30,13 +30,13 @@ The right answer is in **bold**.
 | 2 | On the Galápagos Islands of Ecuador, Charles Darwin studied finches and giant tortoises. | Darwin studied finches and giant tortoises on the… | **Galápagos Islands** / Canary Islands |
 | 3 | The equator runs through Ecuador, and "Ecuador" is the Spanish word for equator. | The name "Ecuador" means… | **equator** / mountain |
 | 4 | Colombia is famous for its emeralds, bright green gemstones. | Colombia is famous for which green gemstones? | **Emeralds** / Rubies |
-| 5 | Caño Cristales in Colombia is called the "river of five colours" because of red, yellow and green water plants. | Caño Cristales is called the river of… | **five colours** / no water |
+| 5 | Caño Cristales in Colombia is called the "river of five colours" because of its red water plants, yellow sand, green algae, blue water and black rocks. | Caño Cristales is called the river of… | **five colours** / no water |
 | 6 | Colombia is one of the biggest coffee growers in the world. | Colombia is famous for growing… | **coffee** / apples |
 | 7 | Gabriel García Márquez, a writer from Colombia, won the Nobel Prize in Literature in 1982. | Gabriel García Márquez was a famous… | **writer** / footballer |
 | 8 | "Panama hats" are actually made in Ecuador, from woven palm leaves. | Panama hats are actually made in… | **Ecuador** / Panama |
 | 9 | Suriname is the smallest country in South America, and its official language is Dutch. | Suriname's official language is… | **Dutch** / Italian |
 | 10 | Kaieteur Falls in Guyana is one of the most powerful single-drop waterfalls in the world. | Kaieteur, in Guyana, is a… | **waterfall** / mountain |
-| 11 | Over Lake Maracaibo in Venezuela, lightning flashes on most nights of the year: the "Catatumbo lightning". | The Catatumbo is famous for nearly constant… | **lightning** / snow |
+| 11 | Over Lake Maracaibo in Venezuela, lightning flashes on many nights of the year: the "Catatumbo lightning". | The Catatumbo is famous for nearly constant… | **lightning** / snow |
 | 12 | Because the Earth bulges at the equator, the top of Chimborazo in Ecuador is the point farthest from the centre of the Earth. | The top of Chimborazo is the point farthest from… | **the centre of the Earth** / the North Pole |
 
 ## Peru & Bolivia
@@ -61,7 +61,7 @@ The right answer is in **bold**.
 | # | Fact | Question | Answers |
 |---|---|---|---|
 | 1 | The Atacama Desert in Chile is the driest desert in the world outside the poles. | Which is the driest desert outside the poles? | **The Atacama** / The Sahara |
-| 2 | Easter Island, or Rapa Nui, belongs to Chile and is famous for its giant stone heads called moai. | The moai statues are on… | **Easter Island** / Hawaii |
+| 2 | Easter Island, or Rapa Nui, belongs to Chile and is famous for its giant stone statues called moai. | The moai statues are on… | **Easter Island** / Hawaii |
 | 3 | Chile is very long and thin: about 4,300 km long, but on average under 200 km wide. | Chile's shape is very… | **long and thin** / round |
 | 4 | The strongest earthquake ever recorded struck Chile in 1960. | The strongest earthquake ever recorded was in… | **Chile** / Japan |
 | 5 | Some of the world's biggest telescopes are in the Atacama Desert, because the sky there is very clear and dry. | Big telescopes are built in the Atacama because the sky is… | **clear and dry** / cloudy and wet |
@@ -149,7 +149,7 @@ The right answer is in **bold**.
 | 2 | The Sydney Opera House opened in 1973. Its roof looks like the sails of ships. | The roof of the Sydney Opera House looks like… | **sails** / mountains |
 | 3 | Koalas eat eucalyptus leaves and sleep up to 20 hours a day. | Koalas eat… | **eucalyptus leaves** / fish |
 | 4 | The platypus is a mammal that lays eggs. | The platypus is a mammal that… | **lays eggs** / can fly |
-| 5 | The Tasmanian devil, a fierce little marsupial, lives in the wild only on the island of Tasmania. | The Tasmanian devil is a… | **marsupial** / bird |
+| 5 | The Tasmanian devil, a fierce little marsupial, comes from the island of Tasmania, where almost all of them live in the wild. | The Tasmanian devil is a… | **marsupial** / bird |
 | 6 | Sydney Harbour Bridge is nicknamed "the Coathanger" because of its shape. | Sydney Harbour Bridge is nicknamed… | **the Coathanger** / the Toothbrush |
 | 7 | The Daintree in Queensland is one of the oldest rainforests in the world. | The Daintree is a… | **rainforest** / desert |
 | 8 | Australia is the only country that covers a whole continent. | Australia is the only country that covers a whole… | **continent** / ocean |
@@ -163,7 +163,7 @@ The right answer is in **bold**.
 | # | Fact | Question | Answers |
 |---|---|---|---|
 | 1 | The haka is a ceremonial dance of the Māori, the first people of New Zealand. | The haka is a Māori… | **dance** / boat |
-| 2 | The kiwi is a bird that cannot fly. It is a symbol of New Zealand, and New Zealanders are nicknamed "Kiwis". | The kiwi is a bird that cannot… | **fly** / sing |
+| 2 | The kiwi is a bird that cannot fly. It is a symbol of New Zealand, and New Zealanders are nicknamed "Kiwis". | The kiwi is a bird that cannot… | **fly** / climb trees |
 | 3 | The Lord of the Rings films were made in New Zealand. The Hobbiton film set is near Matamata. | The Hobbiton film set is in… | **New Zealand** / Ireland |
 | 4 | In 1893, New Zealand became the first country where women could vote in national elections. | Women in New Zealand won the vote in… | **1893** / 1993 |
 | 5 | In 1953, Edmund Hillary from New Zealand and Tenzing Norgay were the first to climb Mount Everest. | Hillary and Tenzing were the first to climb… | **Mount Everest** / Kilimanjaro |

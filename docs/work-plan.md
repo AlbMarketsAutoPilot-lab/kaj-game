@@ -32,7 +32,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | 5 | This work plan | high | 1 | 1 | ✅ done |
 | 6 | Android shell and APK build (early) | medium | 1 | 2 | ✅ done |
 | 7 | Planes, ships, tickets, airline quiz | **high** | 1 | 2 | ✅ done |
-| C | Facts: about 12 per area (5 batches, in parallel) | medium | 1.5 | 3–8 | 🟡 all 5 batches written; 1–3 checked, 4–5 owner checking |
+| C | Facts: about 12 per area (5 batches, in parallel) | medium | 1.5 | 3–8 | ✅ done |
 | 8 | Visas and citizenship (exam) | **high** | 2 | 4–5 | |
 | 9 | Businesses | **high** | 1.5 | 6 | |
 | 10 | Profile bonuses, save and resume | medium | 1 | 7 | |
@@ -88,7 +88,7 @@ on day 14 it could miss the deadline.
   the airline quiz switches to checked facts in task 8, not before.
 - Done so far: `src/facts/batch1-5.ts` (all 50 areas in map order, 600 facts), review pages
   `docs/facts/batch-N.md` (made by `node scripts/facts-review.ts`), checks in `tests/facts.test.ts`.
-  Batches 4–5 (areas 31–50) written; waiting for the owner's check.
+  All 5 batches checked and corrected by the owner.
 
 ### 8. Visas and citizenship — days 4–5 (high)
 

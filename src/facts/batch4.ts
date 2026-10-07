@@ -5,7 +5,7 @@ import { f, type FactBatch } from './types.ts';
 
 export const batch4: FactBatch = {
   'west-africa': [
-    f('In 1957, Ghana became the first country south of the Sahara to win independence from colonial rule.', 'In which year did Ghana become independent?', '1957', '1857'),
+    f('In 1957, Ghana became the first country in sub-Saharan Africa to win independence from colonial rule.', 'In which year did Ghana become independent?', '1957', '1857'),
     f('Côte d\'Ivoire grows more cocoa beans than any other country. Cocoa is used to make chocolate.', 'Cocoa beans from Côte d\'Ivoire are used to make…', 'chocolate', 'cheese'),
     f('Nigeria has more people than any other country in Africa.', 'Which African country has the most people?', 'Nigeria', 'Ghana'),
     f('Nigeria\'s film industry, called "Nollywood", makes a huge number of films every year.', 'Nigeria\'s film industry is called…', 'Nollywood', 'Bollywood'),
@@ -40,9 +40,9 @@ export const batch4: FactBatch = {
     f('The okapi of DR Congo has stripes on its legs like a zebra, but it is a relative of the giraffe.', 'The okapi is a relative of the…', 'giraffe', 'zebra'),
     f('The cities of Kinshasa and Brazzaville face each other across the Congo River.', 'Kinshasa and Brazzaville face each other across the…', 'Congo River', 'Niger River'),
     f('Cameroon is called "Africa in miniature" because it has deserts, mountains, rainforests, grasslands and beaches.', 'Cameroon is nicknamed…', 'Africa in miniature', 'the Land of Ice'),
-    f('Mount Cameroon, the highest mountain in Central Africa, is an active volcano.', 'Mount Cameroon is an active…', 'volcano', 'glacier'),
+    f('Mount Cameroon, the highest mountain in Cameroon, is an active volcano.', 'Mount Cameroon is an active…', 'volcano', 'glacier'),
     f('Most of Gabon is covered by rainforest, where forest elephants live.', 'Most of Gabon is covered by…', 'rainforest', 'desert'),
-    f('The equator passes through a small island of São Tomé and Príncipe.', 'Which line passes through São Tomé and Príncipe?', 'The equator', 'The Arctic Circle'),
+    f('The equator passes through a tiny islet of São Tomé and Príncipe.', 'Which line passes through São Tomé and Príncipe?', 'The equator', 'The Arctic Circle'),
     f('The Congo River crosses the equator twice.', 'How many times does the Congo River cross the equator?', 'Twice', 'Never'),
     f('Equatorial Guinea is the only country in Africa where Spanish is an official language.', 'Which language is official in Equatorial Guinea?', 'Spanish', 'Russian'),
   ],
