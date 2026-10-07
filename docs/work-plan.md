@@ -35,7 +35,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | C | Facts: about 12 per area (5 batches, in parallel) | medium | 1.5 | 3–8 | ✅ done |
 | 8 | Visas and citizenship (exam) | **high** | 2 | 4–5 | ✅ done |
 | 9 | Businesses, strict fees, go home | **high** | 1 | 6 | ✅ done |
-| 9b | Selling, 2 areas with airport and port | **high** | 1 | 6–7 | |
+| 9b | Selling, 2 areas with airport and port | **high** | 1 | 6 | ✅ done |
 | 10 | Profile bonuses, save and resume | medium | 1 | 7 | |
 | 11 | Event cards | medium | 1 | 7–8 | |
 | 12 | Challenges (6 types from open data) | medium | 1.5 | 8–9 | |
@@ -125,6 +125,8 @@ on day 14 it could miss the deadline.
   "each of the 9 connections is needed" checks only the original 9 (owner-approved).
 - Stuck-state checker and 1,000 random games on the new map.
 - This extra session uses the 1-day buffer.
+- Done: rules and the 5 owner-approved choices in `docs/engine.md` (task 9b); no sale offers to a
+  player who is travelling; 8 airports, 6 ports, 11 connections.
 
 ### 10. Profile bonuses, save and resume — day 7
 

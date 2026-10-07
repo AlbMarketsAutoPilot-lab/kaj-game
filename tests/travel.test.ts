@@ -51,8 +51,8 @@ test('Luxury: any other airport by plane, any other port by ship', () => {
   assert.deepEqual(destinations(travelMap, 'eu-west', 'airport', 'luxury').sort(), ['af-south', 'as-east']);
   assert.deepEqual(destinations(travelMap, 'eu-west', 'airport', 'nomad'), ['as-east']);
   assert.deepEqual(destinations(travelMap, 'eu-west', 'port', 'luxury'), []);
-  assert.equal(destinations(map30, 'japan', 'airport', 'luxury').length, 6);
-  assert.deepEqual(destinations(map30, 'iceland', 'port', 'luxury').sort(), ['canada-east', 'iberia', 'uk-ireland']);
+  assert.equal(destinations(map30, 'japan', 'airport', 'luxury').length, 7);
+  assert.deepEqual(destinations(map30, 'iceland', 'port', 'luxury').sort(), ['canada-east', 'iberia', 'japan', 'uk-ireland', 'usa-west']);
 });
 
 test('Business plane: pay 2, 0 travel turns, land on the boarding turn with the arrival points', () => {

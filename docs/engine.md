@@ -31,10 +31,12 @@ stuck-state checker (`src/engine/stuck-check.ts`). The checker proves on every t
 - every area can be reached (walking, airports, ports);
 - no single visa area (one area, or a whole big country) can trap anyone, because a player can
   always walk and can always travel free with the airline quiz;
-- each of the 9 connections is needed.
+- each of the 9 connections is needed (since task 9b: checked on the original 9-connection map;
+  the 2 added connections are extra by design).
 
 Known limit (owner-approved): with 3–4 players, two visa areas at once can trap a player in
-44 of 946 possible pairs, only while that player has fewer than 2 points. Event cards can give
+44 of 946 possible pairs (21 since task 9b's 2 new connections), only while that player has
+fewer than 2 points. Event cards can give
 the points back.
 
 Task 4: wonder and big-country scoring (`tests/scoring.test.ts`).
@@ -139,7 +141,24 @@ Task 9: businesses, strict fees and "go home" (`tests/business.test.ts`).
 - The stuck-state checker needs no change: every single area is already checked as a closed
   area, which covers a tour area as well as a visa area; going home covers the rest.
 
-Not yet: selling, areas with both an airport and a port (task 9b), event cards, challenges.
+Task 9b: selling, and 2 areas with both an airport and a port (`tests/business.test.ts`,
+`tests/map30.test.ts`).
+
+- **Selling:** on their own turn, before moving, a player may offer any business they own (wherever
+  it is) to another player who can pay the price it was bought for. The buyer answers Yes or No
+  on the same screen; the seller's turn goes on either way. One offer per turn. Not on travel or
+  citizenship turns, and never to a player in the air or at sea (they may owe a fee on landing).
+  The test board's robots accept whenever they can pay; the random robot answers at random.
+  The "out of money" warning suggests selling when the player owns a business.
+- **Map:** UK & Ireland ✈️ ↔ Arabian Peninsula, Japan ⛴️ ↔ USA West: 8 airports, 6 ports,
+  11 connections. Japan has 3 businesses (tours, airline, ferry agency), UK & Ireland 2.
+  The stuck-state check passes; two visa areas at once can trap someone in 21 of 946 pairs
+  (was 44). The "every connection is needed" test runs on the original 9-connection map.
+- 1,000 random-robot games: about 4,200 businesses bought, 13,700 sale offers and 6,900 sales,
+  1,200 points of tour fees and 1,400 of tickets paid to other players, about 1,600 visas,
+  longest "blocked" streak 3 turns, longest trip 7 turns, nobody stuck, nobody sent home.
+
+Not yet: event cards, challenges.
 
 ## Choices made in task 1 (approved by the owner)
 
@@ -199,8 +218,17 @@ These points are not spelled out in the rulebook or the v1 scope.
 4. **Businesses count their price at the end**; buying in the last round is allowed; no limit.
 5. **Go home** after 3 turns in a row blocked by money, for every profile (no Nomad exception),
    free of fees; nobody is eliminated.
-6. **Next (task 9b):** selling at the bought price to another player (who answers yes or no), and
+6. **Task 9b:** selling at the bought price to another player (who answers yes or no), and
    UK & Ireland gets an airport (to the Arabian Peninsula), Japan a port (to USA West).
+
+## Choices made in task 9b (approved by the owner)
+
+1. **Selling** on your own turn, before moving, any business you own, wherever you are; not on
+   travel or citizenship turns. **One offer per turn.** Only to a player who can pay.
+2. **No offers to a player in the air or at sea** (they may owe a visa or tour fee on landing).
+3. **Robot buyers** accept whenever they can pay (random robots in the tests: at random).
+4. A fee due when a player boarded goes to whoever owns the business when they land.
+5. **The "every connection is needed" test** runs on the original 9-connection map.
 
 ## Project setup
 

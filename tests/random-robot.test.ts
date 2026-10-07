@@ -62,6 +62,8 @@ test(`random robots play ${GAMES} games on the 30-turn map with planes and ships
   let citizens = 0;
   let visas = 0;
   let purchases = 0;
+  let offers = 0;
+  let sales = 0;
   let income = 0;
   let longestTrip = 0;
   let longestBlock = 0;
@@ -83,11 +85,13 @@ test(`random robots play ${GAMES} games on the 30-turn map with planes and ships
         blockedInARow[seat] = action.type === 'blocked' ? blockedInARow[seat] + 1 : 0;
         longestBlock = Math.max(longestBlock, blockedInARow[seat]);
       }
+      if (action.type === 'sell') offers++;
       s = apply(s, map30, action);
       checkInvariants(s);
       for (const pay of s.payments) {
         if (pay.reason === 'visa') visas++;
         if (pay.reason === 'buy') purchases++;
+        if (pay.reason === 'sale') sales++;
         if ((pay.reason === 'tour' || pay.reason === 'ticket') && pay.to !== null && pay.to !== pay.from) income += pay.amount;
       }
       const p = s.players[seat];
@@ -115,6 +119,7 @@ test(`random robots play ${GAMES} games on the 30-turn map with planes and ships
   assert.ok(quizzes > GAMES, `only ${quizzes} quizzes`);
   assert.ok(purchases > GAMES, `only ${purchases} businesses bought`);
   assert.ok(income > GAMES, `only ${income} points of business income`);
+  assert.ok(offers > GAMES && sales > GAMES / 2, `only ${offers} sale offers, ${sales} sales`);
   // A ship takes at most 3 travel turns; a taken destination adds a few waiting turns.
   assert.ok(longestTrip <= 8, `a trip lasted ${longestTrip} turns`);
   assert.ok(longestBlock <= 5, `a player was blocked ${longestBlock} turns in a row`);

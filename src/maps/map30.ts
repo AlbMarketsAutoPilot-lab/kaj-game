@@ -222,6 +222,9 @@ const ROUTES: Route[] = [
   { kind: 'airport', a: 'japan', b: 'new-zealand' },
   { kind: 'airport', a: 'new-zealand', b: 'chile' },
   { kind: 'airport', a: 'southern-africa', b: 'chile' },
+  // Task 9b (owner-approved): two areas with both an airport and a port.
+  { kind: 'airport', a: 'uk-ireland', b: 'arabia' },
+  { kind: 'port', a: 'japan', b: 'usa-west' },
 ];
 
 function build(): GameMap {

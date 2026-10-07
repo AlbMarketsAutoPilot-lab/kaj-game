@@ -96,10 +96,22 @@ export interface Business {
   owner: number | null;
 }
 
+// An offer to sell a business, waiting for the buyer's Yes or No (task 9b).
+// The seller's turn goes on either way.
+export interface SaleOffer {
+  business: BusinessKind;
+  area: string;
+  from: number;
+  to: number;
+  // The price it was bought for.
+  price: number;
+}
+
 // A payment made by the last move, so the screens can say who was paid.
 // `to` is null when the points went to nobody (buying a business, a ticket with no owner).
+// A sale: `from` is the buyer, `to` the seller.
 export interface Payment {
-  reason: 'visa' | 'tour' | 'ticket' | 'buy';
+  reason: 'visa' | 'tour' | 'ticket' | 'buy' | 'sale';
   from: number;
   to: number | null;
   amount: number;
@@ -178,6 +190,10 @@ export interface GameState {
   businesses: Business[];
   // The payments made by the last move (empty when nothing was paid).
   payments: Payment[];
+  // A sale offer waiting for the buyer's answer.
+  offer: SaleOffer | null;
+  // The current player has already made a sale offer this turn (one per turn).
+  offeredThisTurn: boolean;
   result: GameResult | null;
 }
 
@@ -207,6 +223,11 @@ export type Action =
   | { type: 'travel' }
   // Buy the business in the player's area. The turn goes on: the player still moves.
   | { type: 'buy'; business: BusinessKind }
+  // Offer one of the player's businesses to another player at the price it was bought for.
+  // One offer per turn; the turn goes on (task 9b).
+  | { type: 'sell'; business: BusinessKind; area: string; to: number }
+  // The buyer's answer to the offer (the buyer answers on the seller's turn).
+  | { type: 'sellAnswer'; accept: boolean }
   // Blocked by lack of money for the 3rd turn in a row: the trip ends and the player is
   // sent home for free (docs/engine.md, task 9).
   | { type: 'goHome' }
