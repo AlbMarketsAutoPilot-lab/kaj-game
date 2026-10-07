@@ -31,6 +31,10 @@ export const WELCOME_BONUS: Readonly<Record<Continent, number>> = {
 
 export const POINTS_NEW_AREA = 1;
 export const POINTS_NEW_CONTINENT = 2;
+// Wonder area, first visit: +1 extra on top of the area point.
+export const POINTS_WONDER = 1;
+// Big country with N parts, all parts visited: +1 (the area point) +N.
+export const POINTS_BIG_COUNTRY_AREA = 1;
 
 // An airport or port has 1 to 3 fixed destinations (v1 scope section 4).
 export const MAX_DESTINATIONS = 3;

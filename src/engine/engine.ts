@@ -2,8 +2,10 @@ import {
   MAX_ROBOTS,
   MAX_SEATS,
   MIN_SEATS,
+  POINTS_BIG_COUNTRY_AREA,
   POINTS_NEW_AREA,
   POINTS_NEW_CONTINENT,
+  POINTS_WONDER,
   PROFILES,
   START_CONTINENTS,
   TOTAL_ROUNDS,
@@ -11,7 +13,7 @@ import {
 } from './constants.ts';
 import { areaById, validateMap } from './map.ts';
 import { randomInt } from './rng.ts';
-import type { Action, GameConfig, GameMap, GameResult, GameState, Player } from './types.ts';
+import type { Action, Area, GameConfig, GameMap, GameResult, GameState, Player } from './types.ts';
 
 export function createGame(config: GameConfig, map: GameMap): GameState {
   const { seats } = config;
@@ -129,16 +131,7 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
       return next;
     }
     case 'walk': {
-      const area = areaById(map, action.to);
-      me.area = area.id;
-      if (!me.visitedAreas.includes(area.id)) {
-        me.visitedAreas.push(area.id);
-        me.points = addPoints(me.points, POINTS_NEW_AREA);
-      }
-      if (!me.visitedContinents.includes(area.continent)) {
-        me.visitedContinents.push(area.continent);
-        me.points = addPoints(me.points, POINTS_NEW_CONTINENT);
-      }
+      arrive(me, areaById(map, action.to), map);
       endTurn(next);
       return next;
     }
@@ -146,6 +139,33 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
       endTurn(next);
       return next;
   }
+}
+
+// Scoring for arriving in an area (rulebook section 3). Planes and ships will use it too.
+function arrive(me: Player, area: Area, map: GameMap): void {
+  me.area = area.id;
+  if (!me.visitedAreas.includes(area.id)) {
+    me.visitedAreas.push(area.id);
+    if (area.bigCountry) {
+      // All or nothing: a part gives 0 until every part is visited, then +1 +N once.
+      // Visited parts are kept, so a player can leave and continue later.
+      const parts = bigCountryParts(map, area.bigCountry);
+      if (parts.every((id) => me.visitedAreas.includes(id))) {
+        me.points = addPoints(me.points, POINTS_BIG_COUNTRY_AREA + parts.length);
+      }
+    } else {
+      me.points = addPoints(me.points, POINTS_NEW_AREA);
+      if (area.wonder) me.points = addPoints(me.points, POINTS_WONDER);
+    }
+  }
+  if (!me.visitedContinents.includes(area.continent)) {
+    me.visitedContinents.push(area.continent);
+    me.points = addPoints(me.points, POINTS_NEW_CONTINENT);
+  }
+}
+
+export function bigCountryParts(map: GameMap, country: string): string[] {
+  return map.areas.filter((a) => a.bigCountry === country).map((a) => a.id);
 }
 
 // Points can never go below 0 (rulebook section 3).
