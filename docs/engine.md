@@ -204,7 +204,8 @@ Task 11: event cards (`src/cards/cards.ts`, review page [`cards.md`](cards.md), 
 - **Saves:** version 2. A version-1 save can't be continued.
 - 1,000 random-robot games on the 30-turn map: 22,100 scheduled cards and 10,300 travel cards,
   1,600 lost turns and 1,650 late trips; 26,700 points won and 22,900 lost (about 4 points per
-  player per game in each direction); longest trip 9 turns (1 trip in 6,000; was 7), longest
+  player per game in each direction); longest trip 9 turns (1 trip in 6,000; was 7; the test limit was raised from 8 to 10,
+  owner-approved), longest
   "blocked" streak 2, nobody stuck.
 
 Not yet: challenges.

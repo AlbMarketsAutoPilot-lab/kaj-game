@@ -153,7 +153,8 @@ test(`random robots play ${GAMES} games on the 30-turn map with planes and ships
   assert.ok(purchases > GAMES, `only ${purchases} businesses bought`);
   assert.ok(income > GAMES, `only ${income} points of business income`);
   assert.ok(offers > GAMES && sales > GAMES / 2, `only ${offers} sale offers, ${sales} sales`);
-  // A ship takes at most 3 travel turns; a taken destination adds a few waiting turns.
-  assert.ok(longestTrip <= 8, `a trip lasted ${longestTrip} turns`);
+  // A ship takes at most 3 travel turns; a taken destination and "late" cards (task 11) add a few.
+  // Limit raised from 8 to 10 in task 11 (owner-approved).
+  assert.ok(longestTrip <= 10, `a trip lasted ${longestTrip} turns`);
   assert.ok(longestBlock <= 5, `a player was blocked ${longestBlock} turns in a row`);
 });

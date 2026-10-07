@@ -37,7 +37,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | 9 | Businesses, strict fees, go home | **high** | 1 | 6 | ✅ done |
 | 9b | Selling, 2 areas with airport and port | **high** | 1 | 6 | ✅ done |
 | 10 | Profile bonuses, save and resume | medium | 1 | 7 | ✅ done |
-| 11 | Event cards | medium | 1 | 7–8 | |
+| 11 | Event cards | medium | 1 | 7–8 | ✅ done |
 | 12 | Challenges (6 types from open data) | medium | 1.5 | 8–9 | |
 | 13 | Normal robot | medium | 1 | 10 | |
 | 14 | Real screens, art and sounds | medium | 3 | 11–13 | |
@@ -142,6 +142,10 @@ on day 14 it could miss the deadline.
 - Decks: country, plane, ship, Backpacker. Mostly ±1, some ±2 or "lose a turn", rare ±5.
 - No keep cards and no mini missions in v1.
 - About 40–60 cards, written into a file; the owner reads them once.
+- Done: 53 cards in `src/cards/cards.ts` (review page `docs/cards.md`, made by
+  `node scripts/cards-review.ts`), rules and the 11 owner-approved choices in `docs/engine.md`
+  (task 11), including the visa and tour fee paid at boarding. Saves are version 2. Test limit for
+  the longest trip raised from 8 to 10 (owner-approved).
 
 ### 12. Challenges — days 8–9
 
