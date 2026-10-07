@@ -28,7 +28,13 @@ export interface Area {
   id: string;
   name: string;
   continent: Continent;
+  // Walking neighbours: real land borders (plus fixed links such as the Channel Tunnel).
   neighbours: string[];
+  // Real countries inside this area. A rule that names a country applies to this area.
+  countries?: string[];
+  wonder?: boolean;
+  // Set on each part of a big country (USA, Canada, Russia, China, Brazil, Australia).
+  bigCountry?: string;
 }
 
 export interface GameMap {

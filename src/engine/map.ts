@@ -34,25 +34,29 @@ export function validateMap(map: GameMap): string[] {
     }
   }
 
-  // Walking only for now: every area must be reachable from every other.
-  // Airports and ports will join this check when they are added.
-  if (map.areas.length > 0 && problems.length === 0) {
-    const seen = new Set([map.areas[0].id]);
-    const queue = [map.areas[0].id];
-    while (queue.length > 0) {
-      for (const n of byId.get(queue.shift()!)!.neighbours) {
+  return problems;
+}
+
+// Groups of areas joined by walking. Airports and ports must link these groups.
+export function walkingGroups(map: GameMap): string[][] {
+  const byId = new Map(map.areas.map((a) => [a.id, a]));
+  const seen = new Set<string>();
+  const groups: string[][] = [];
+  for (const area of map.areas) {
+    if (seen.has(area.id)) continue;
+    const group = [area.id];
+    seen.add(area.id);
+    for (let i = 0; i < group.length; i++) {
+      for (const n of byId.get(group[i])!.neighbours) {
         if (!seen.has(n)) {
           seen.add(n);
-          queue.push(n);
+          group.push(n);
         }
       }
     }
-    for (const area of map.areas) {
-      if (!seen.has(area.id)) problems.push(`${area.id}: unreachable`);
-    }
+    groups.push(group);
   }
-
-  return problems;
+  return groups;
 }
 
 export function areaById(map: GameMap, id: string): Area {
