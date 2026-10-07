@@ -281,7 +281,9 @@ function renderPlayers(s: GameState): HTMLElement {
       const card = el('div', { className: 'player' + (p === me && s.phase !== 'finished' ? ' active' : '') },
         el('div', {}, dot(seat), ` ${COLOUR_NAMES[seat]} ${p.kind === 'robot' ? '🤖' : '🙂'}`),
         el('div', { className: 'small', textContent: p.profile ? PROFILE_LABEL[p.profile] : 'no profile yet' }),
-        el('div', { className: 'points', textContent: `${p.points} points${businessValue(s, seat) ? ` + 🏢 ${businessValue(s, seat)}` : ''}` }),
+        el('div', { className: 'points', textContent: s.phase === 'finished'
+          ? `${finalScore(s, p)} points`
+          : `${p.points} points${businessValue(s, seat) ? ` + 🏢 ${businessValue(s, seat)}` : ''}` }),
         el('div', { className: 'small', textContent: `📍 ${area}` }),
         el('div', { className: 'small', textContent: p.citizenship
           ? `🛂 Citizen of ${citizenshipName(p.citizenship)}`
@@ -324,9 +326,10 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
         const p = s.players[seat];
         const value = businessValue(s, seat);
         const penalty = nomadPenalty(p);
-        const detail = (value ? ` + 🏢 ${value} for businesses` : '')
-          + (penalty ? ` − ${penalty} 💻 Nomad penalty (fewer than ${NOMAD_MIN_CONTINENTS} continents)` : '');
-        return el('li', {}, dot(seat), ` ${COLOUR_NAMES[seat]}: ${finalScore(s, p)} points${detail ? ` (${p.points}${detail})` : ''}, ${p.visitedContinents.length} continents, ${p.visitedAreas.length} areas`);
+        // One total in points: travel points + assets (businesses at their price) − Nomad penalty.
+        const detail = [`${p.points} travel`, `${value} assets`]
+          .join(' + ') + (penalty ? ` − ${penalty} Nomad penalty` : '');
+        return el('li', {}, dot(seat), ` ${COLOUR_NAMES[seat]}: ${finalScore(s, p)} points (${detail}), ${p.visitedContinents.length} continents, ${p.visitedAreas.length} areas`);
       })),
       button('Play again', renderSetup));
     return box;

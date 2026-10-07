@@ -166,7 +166,8 @@ Task 10: profile bonuses, save and resume (`tests/profiles.test.ts`, `tests/save
 - **Digital Nomad −5** off the final score (points + businesses, never below 0) with fewer than
   3 continents; it counts for the winner.
 - Test board: a continent bar for Backpacker (x/3), Luxury (x/5) and Nomad (x/3); from round 25
-  the Nomad's bar turns red ("−5 at the end unless…"); the end screen shows the penalty. The
+  the Nomad's bar turns red ("−5 at the end unless…"). The end screen shows one total in points
+  (owner's request): e.g. "9 points (8 travel + 6 assets − 5 Nomad penalty)". The
   Backpacker tip shows on the Backpacker's start-area turn (checked true on the map: on foot,
   Europe/Asia/Africa reach 3 continents, the Americas 2, Oceania 1).
 - **Save:** `src/engine/save.ts` (`saveGame` / `loadGame`, with `SAVE_VERSION`). The test board
