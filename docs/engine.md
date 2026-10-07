@@ -23,12 +23,14 @@ Code: `src/engine/`. Tests: `tests/` (`npm test`). Type check: `npm run typechec
   never two players in one area).
 - A tiny made-up test map (`tests/fixtures/test-map.ts`), not real geography.
 
-Not yet: real map, planes and ships, quizzes, visas, citizenship, businesses, big countries,
+Task 2a: the 30-turn map data (`src/maps/map30.ts`, table in [`map-30.md`](map-30.md)).
+
+Not yet: planes and ships, quizzes, visas, citizenship, businesses, big countries,
 wonders, event cards, challenges, screens, Android app.
 
-## Choices made in task 1 that the owner should confirm
+## Choices made in task 1 (approved by the owner)
 
-These points are not spelled out in the rulebook or the v1 scope. Each is easy to change.
+These points are not spelled out in the rulebook or the v1 scope.
 
 1. **The starting area counts as visited but gives no +1.** The welcome bonus replaces it.
    Returning there later gives 0.
