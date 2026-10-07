@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { apply, createGame, currentPlayer, legalActions } from '../src/engine/engine.ts';
+import { apply, createGame, currentPlayer, finalScore, legalActions, nomadPenalty } from '../src/engine/engine.ts';
 import { randomInt } from '../src/engine/rng.ts';
 import { randomRobotAction } from '../src/engine/robot.ts';
+import { loadGame, saveGame } from '../src/engine/save.ts';
 import type { Action, GameState } from '../src/engine/types.ts';
 import { map30 } from '../src/maps/map30.ts';
 import { testMap } from './fixtures/test-map.ts';
@@ -67,6 +68,9 @@ test(`random robots play ${GAMES} games on the 30-turn map with planes and ships
   let income = 0;
   let longestTrip = 0;
   let longestBlock = 0;
+  const bonuses = { backpacker: 0, luxury: 0, nomadPenalty: 0, nomadPenaltyLostWin: 0 };
+  const profiles: Record<string, number> = {};
+  let resumes = 0;
   for (let g = 0; g < GAMES; g++) {
     const n = 2 + (g % 3);
     let s = createGame({ seats: seats(n, n - 1), seed: g * 7919 + 13 }, map30);
@@ -87,6 +91,13 @@ test(`random robots play ${GAMES} games on the 30-turn map with planes and ships
       }
       if (action.type === 'sell') offers++;
       s = apply(s, map30, action);
+      // Every 10th move, the game is saved and resumed from the save (task 10).
+      if (steps % 10 === 0) {
+        const loaded = loadGame(saveGame(s));
+        assert.ok('state' in loaded, `game ${g}: the save could not be loaded`);
+        s = loaded.state;
+        resumes++;
+      }
       checkInvariants(s);
       for (const pay of s.payments) {
         if (pay.reason === 'visa') visas++;
@@ -112,7 +123,18 @@ test(`random robots play ${GAMES} games on the 30-turn map with planes and ships
     const held = s.players.flatMap((q) => q.citizenship ?? []);
     assert.equal(new Set(held).size, held.length, `game ${g}: two citizens in one area`);
     citizens += s.players.filter((q) => q.citizenship).length;
+    // Profile bonuses (task 10).
+    for (const q of s.players) {
+      profiles[q.profile!] = (profiles[q.profile!] ?? 0) + 1;
+      if (q.profile === 'backpacker' && q.visitedContinents.length >= 3) bonuses.backpacker++;
+      if (q.profile === 'luxury' && q.visitedContinents.length >= 5) bonuses.luxury++;
+      if (q.profile === 'nomad' && nomadPenalty(q) > 0) {
+        bonuses.nomadPenalty++;
+        if (finalScore(s, q) + nomadPenalty(q) > Math.max(...s.players.filter((o) => o !== q).map((o) => finalScore(s, o)))) bonuses.nomadPenaltyLostWin++;
+      }
+    }
   }
+  console.log(`task 10: ${JSON.stringify(bonuses)} of ${JSON.stringify(profiles)}, ${resumes} save/resume round trips`);
   assert.ok(trips > GAMES, `only ${trips} trips`);
   assert.ok(citizens > GAMES, `only ${citizens} citizenships`);
   assert.ok(visas > GAMES / 2, `only ${visas} visas`);

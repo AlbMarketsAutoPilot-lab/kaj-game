@@ -158,6 +158,26 @@ Task 9b: selling, and 2 areas with both an airport and a port (`tests/business.t
   1,200 points of tour fees and 1,400 of tickets paid to other players, about 1,600 visas,
   longest "blocked" streak 3 turns, longest trip 7 turns, nobody stuck, nobody sent home.
 
+Task 10: profile bonuses, save and resume (`tests/profiles.test.ts`, `tests/save.test.ts`).
+
+- **Backpacker +3** on the move that reaches a 3rd continent; **Luxury +5** on the move that
+  reaches a 5th. Once each; the start continent counts. The ✨ on the move already includes it,
+  and a note says so afterwards.
+- **Digital Nomad −5** off the final score (points + businesses, never below 0) with fewer than
+  3 continents; it counts for the winner.
+- Test board: a continent bar for Backpacker (x/3), Luxury (x/5) and Nomad (x/3); from round 25
+  the Nomad's bar turns red ("−5 at the end unless…"); the end screen shows the penalty. The
+  Backpacker tip shows on the Backpacker's start-area turn (checked true on the map: on foot,
+  Europe/Asia/Africa reach 3 continents, the Americas 2, Oceania 1).
+- **Save:** `src/engine/save.ts` (`saveGame` / `loadGame`, with `SAVE_VERSION`). The test board
+  saves after every move (browser storage, one slot), removes the save when the game ends, and
+  shows "Continue game (round X / 30)" on the start screen. A damaged save or one from another
+  version is not continued. A resumed quiz or exam question restarts its 15-second timer.
+- 1,000 random-robot games on the 30-turn map, saved and resumed every 10th move (14,600 round
+  trips): Backpacker bonus 302 of 742 Backpackers, Luxury bonus 299 of 739, Nomad penalty 349 of
+  764 Nomads (in about 105 games it cost the Nomad first place). A game resumed after every move
+  ends exactly like one never saved (20 games).
+
 Not yet: event cards, challenges.
 
 ## Choices made in task 1 (approved by the owner)
@@ -229,6 +249,21 @@ These points are not spelled out in the rulebook or the v1 scope.
 3. **Robot buyers** accept whenever they can pay (random robots in the tests: at random).
 4. A fee due when a player boarded goes to whoever owns the business when they land.
 5. **The "every connection is needed" test** runs on the original 9-connection map.
+
+## Choices made in task 10 (approved by the owner)
+
+1. **The start continent counts** for the Backpacker, Luxury and Nomad.
+2. **The +3 / +5 is given on arrival**, on the move that reaches the 3rd / 5th continent.
+3. **The Nomad −5 comes off the final total** (points + businesses), never below 0.
+4. **Warning before −5:** the Nomad's bar is always shown and turns red from round 25; no popup.
+   The end screen says what happened.
+5. **The Backpacker tip shows before the choice**, on the start-area turn.
+6. **One save slot**; starting a new journey replaces it (the start screen says so); the save is
+   removed when the game ends.
+7. **A resumed quiz or exam question restarts its timer.**
+8. **Saves carry a version**; a save from another version can't be continued, so no game is
+   scored by rules that did not exist when its moves were made.
+9. **Robots carry on by themselves** after a resume.
 
 ## Project setup
 
