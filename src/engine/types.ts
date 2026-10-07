@@ -80,12 +80,14 @@ export interface Player {
   exam: Exam | null;
 }
 
-// Citizenship steps, one per turn after the arrival turn (docs/engine.md, task 8):
-// - submitted: turn 1, "request approved" (Luxury: granted at the start of turn 1, see 'granted');
-// - test: turn 2, 3 a/b questions;
-// - result: turn 3, granted if all were right, otherwise "one more turn learning";
-// - learning: turn 4, the right answers are shown and citizenship is granted;
-// - granted: Luxury only, turn 1: citizenship was granted, the player moves as usual.
+// Citizenship steps (docs/engine.md, task 8, owner's shorter timeline). The arrival turn is
+// citizenship turn 1: "request approved, the test is next turn".
+// - test: turn 2, 3 a/b questions; the player stays;
+// - result: turn 3 after a wrong answer: "one more turn learning"; the player stays;
+// - learning: turn 4: the right answers are shown, citizenship is granted, the player moves;
+// - granted: citizenship was granted at the start of this turn and the player moves
+//   (turn 3 after all right answers; Luxury: the turn after arriving, no test);
+// - submitted: Luxury only, until the start of its next turn.
 export type ExamStage = 'submitted' | 'test' | 'result' | 'learning' | 'granted';
 
 export interface Exam {

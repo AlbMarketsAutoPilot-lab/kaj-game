@@ -31,7 +31,6 @@ import type {
   GameState,
   Player,
   Profile,
-  QuizQuestion,
   RouteKind,
 } from './types.ts';
 
@@ -115,8 +114,8 @@ export function legalActions(state: GameState, map: GameMap): Action[] {
     }
     case 'play': {
       if (state.quiz) return [{ type: 'answer', choice: 0 }, { type: 'answer', choice: 1 }];
-      // During a citizenship request the player stays; Luxury moves on once it is granted.
-      if (me.exam && me.exam.stage !== 'granted') {
+      // During a citizenship request the player stays, until it is granted.
+      if (me.exam && !examOver(me.exam)) {
         return me.exam.stage === 'test'
           ? [{ type: 'examAnswer', choice: 0 }, { type: 'examAnswer', choice: 1 }]
           : [{ type: 'exam' }];
@@ -144,8 +143,8 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
   }
   const next = structuredClone(state);
   const me = currentPlayer(next);
-  // Luxury's "citizenship granted" turn: the request is over once the player moves on.
-  if (me.exam?.stage === 'granted') me.exam = null;
+  // The "citizenship granted" turn: the request is over once the player moves on.
+  if (me.exam && examOver(me.exam)) me.exam = null;
 
   switch (action.type) {
     case 'chooseProfile': {
@@ -210,10 +209,8 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
       return next;
     }
     case 'exam': {
-      const exam = me.exam!;
-      if (exam.stage === 'submitted') exam.stage = 'test';
-      else if (exam.stage === 'result' && !passed(exam)) exam.stage = 'learning';
-      else me.exam = null; // granted (at the start of this turn): moves again next turn
+      // Only after a wrong answer (turn 3): "one more turn learning the right answers".
+      me.exam!.stage = 'learning';
       endTurn(next, map);
       return next;
     }
@@ -339,13 +336,22 @@ export function canAskCitizenship(state: GameState, map: GameMap, me: Player, ar
   );
 }
 
-// The arrival turn: "your request has been submitted". The questions are drawn now
-// (nothing is secret in v1); Luxury needs no test.
+// The arrival turn (citizenship turn 1): "request approved, the test is next turn".
+// The questions are drawn now (nothing is secret in v1); Luxury needs no test.
 function submitCitizenship(state: GameState, map: GameMap, me: Player, areaId: string): void {
   me.askedCitizenship = true;
-  let questions: QuizQuestion[] = [];
-  if (me.profile !== 'luxury') [questions, state.rng] = makeExam(map, areaId, EXAM_QUESTIONS, state.rng);
-  me.exam = { area: areaId, stage: 'submitted', questions, answers: [] };
+  if (me.profile === 'luxury') {
+    me.exam = { area: areaId, stage: 'submitted', questions: [], answers: [] };
+    return;
+  }
+  const [questions, rng] = makeExam(map, areaId, EXAM_QUESTIONS, state.rng);
+  state.rng = rng;
+  me.exam = { area: areaId, stage: 'test', questions, answers: [] };
+}
+
+// Citizenship granted at the start of this turn: the player moves as usual.
+function examOver(exam: Exam): boolean {
+  return exam.stage === 'granted' || exam.stage === 'learning';
 }
 
 function passed(exam: Exam): boolean {
@@ -357,16 +363,16 @@ function grantCitizenship(map: GameMap, me: Player): void {
   if (me.profile === 'business') me.points = addPoints(me.points, POINTS_BUSINESS_CITIZENSHIP);
 }
 
-// Start of a player's turn: citizenship is granted at the start of turn 1 (Luxury),
-// turn 3 (all answers right) or turn 4 (after the learning turn).
+// Start of a player's turn: citizenship is granted at the start of the turn after arriving
+// (Luxury), turn 3 (all answers right) or turn 4 (after the learning turn).
 function startTurn(state: GameState, map: GameMap): void {
   const me = currentPlayer(state);
   const exam = me.exam;
   if (!exam) return;
-  if (exam.stage === 'submitted' && me.profile === 'luxury') {
+  if (exam.stage === 'submitted' || (exam.stage === 'result' && passed(exam))) {
     grantCitizenship(map, me);
     exam.stage = 'granted';
-  } else if ((exam.stage === 'result' && passed(exam)) || exam.stage === 'learning') {
+  } else if (exam.stage === 'learning') {
     grantCitizenship(map, me);
   }
 }

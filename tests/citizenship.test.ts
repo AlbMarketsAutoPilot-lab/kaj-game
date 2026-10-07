@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { POINTS_BUSINESS_CITIZENSHIP, VISA_PRICE } from '../src/engine/constants.ts';
-import { apply, legalActions } from '../src/engine/engine.ts';
+import { apply, canAskCitizenship, legalActions } from '../src/engine/engine.ts';
 import { makeExam, makeQuestion } from '../src/engine/quiz.ts';
 import type { Action, GameMap, GameState, Profile } from '../src/engine/types.ts';
 import { map30 } from '../src/maps/map30.ts';
@@ -63,55 +63,45 @@ test('the Digital Nomad can never ask for citizenship', () => {
   assert.deepEqual(asks(s), []);
 });
 
-test('all answers right: request, approved, test, granted (stays), then moves on turn 4', () => {
+test('all answers right: request approved on arrival, test next turn, granted and moves on turn 3', () => {
   let s = game(['eu-west', 'af-south'], 'backpacker');
-  s = go(s, { type: 'walk', to: 'eu-north', citizenship: true }); // arrival turn: submitted
-  assert.equal(me(s).exam!.stage, 'submitted');
+  s = go(s, { type: 'walk', to: 'eu-north', citizenship: true }); // turn 1: approved
+  assert.equal(me(s).exam!.stage, 'test');
   assert.equal(me(s).askedCitizenship, true);
   assert.equal(me(s).exam!.questions.length, 3);
   s = pass(s);
 
-  assert.deepEqual(types(s), ['exam']); // turn 1: "request approved", stays
-  s = go(s, { type: 'exam' });
-  s = pass(s);
-
-  assert.deepEqual(types(s), ['examAnswer']); // turn 2: the 3 questions, in one turn
+  assert.deepEqual(types(s), ['examAnswer']); // turn 2: the 3 questions, in one turn; stays
   s = answerTest(s, true);
   assert.equal(me(s).exam!.stage, 'result');
   assert.equal(me(s).citizenship, null);
   s = pass(s);
 
-  assert.deepEqual(me(s).citizenship, ['eu-north']); // turn 3: granted, still stays
-  assert.deepEqual(types(s), ['exam']);
-  s = go(s, { type: 'exam' });
+  assert.deepEqual(me(s).citizenship, ['eu-north']); // turn 3: granted, and moves
+  assert.equal(me(s).exam!.stage, 'granted');
+  assert.ok(types(s).includes('walk'));
+  s = go(s, { type: 'walk', to: 'eu-east' });
   assert.equal(me(s).exam, null);
-  s = pass(s);
-
-  assert.ok(types(s).includes('walk')); // turn 4: moves again
-  assert.equal(me(s).area, 'eu-north');
 });
 
-test('a wrong answer: one more turn learning, granted on turn 4, moves on turn 5', () => {
+test('a wrong answer: one more turn learning, then granted and moves on turn 4', () => {
   let s = game(['eu-west', 'af-south'], 'backpacker');
   s = go(s, { type: 'walk', to: 'eu-north', citizenship: true });
-  s = pass(s);
-  s = go(s, { type: 'exam' });
   s = pass(s);
   s = answerTest(s, false);
   s = pass(s);
 
-  assert.equal(me(s).citizenship, null); // turn 3: not passed
+  assert.equal(me(s).citizenship, null); // turn 3: not passed, stays
+  assert.deepEqual(types(s), ['exam']);
   s = go(s, { type: 'exam' });
   assert.equal(me(s).exam!.stage, 'learning');
   s = pass(s);
 
-  assert.deepEqual(me(s).citizenship, ['eu-north']); // turn 4: answers shown, granted, stays
-  assert.deepEqual(types(s), ['exam']);
-  s = go(s, { type: 'exam' });
-  s = pass(s);
-
-  assert.equal(me(s).exam, null); // turn 5: moves again
+  assert.deepEqual(me(s).citizenship, ['eu-north']); // turn 4: answers shown, granted, moves
+  assert.equal(me(s).exam!.stage, 'learning');
   assert.ok(types(s).includes('walk'));
+  s = pass(s); // its first move
+  assert.equal(me(s).exam, null);
 });
 
 test('Luxury: no test; granted at the start of the next turn, and moves in that turn', () => {
@@ -131,8 +121,6 @@ test('Business: +3 when citizenship is granted', () => {
   let s = game(['eu-west', 'af-south'], 'business');
   s = go(s, { type: 'walk', to: 'eu-north', citizenship: true });
   s = pass(s);
-  s = go(s, { type: 'exam' });
-  s = pass(s);
   s = answerTest(s, true);
   const before = me(s).points;
   s = pass(s);
@@ -149,10 +137,11 @@ test('only one request per game', () => {
 test('one citizen per area: nobody else can ask there, also during the test', () => {
   let s = game(['eu-north', 'af-north'], 'backpacker');
   s = go(s, { type: 'walk', to: 'eu-east', citizenship: true });
-  // The other player could walk to eu-west, but eu-east is in someone's request.
-  s = go(s, { type: 'walk', to: 'eu-west' });
-  s = go(s, { type: 'exam' });
-  assert.ok(!asks(s).some((a) => a.type === 'walk' && a.to === 'eu-east'));
+  assert.equal(canAskCitizenship(s, map, other(s), 'eu-east'), false); // during the request
+  s = pass(s);
+  s = answerTest(s, true);
+  s = pass(s);
+  assert.equal(canAskCitizenship(s, map, other(s), 'eu-east'), false); // held
 });
 
 test('a big country is one citizenship: every part is covered', () => {
