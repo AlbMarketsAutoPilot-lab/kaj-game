@@ -30,7 +30,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | 3 | First playable screen (test board) | medium | — | 1 | ✅ done |
 | 4 | Wonder and big-country scoring | high | — | 1 | ✅ done |
 | 5 | This work plan | high | 1 | 1 | ✅ done |
-| 6 | Android shell and APK build (early) | medium | 1 | 2 | in review |
+| 6 | Android shell and APK build (early) | medium | 1 | 2 | ✅ done |
 | 7 | Planes, ships, tickets, airline quiz | **high** | 2 | 2–3 | |
 | C | Facts: about 12 per area (5 batches, in parallel) | medium | 1.5 | 3–8 | |
 | 8 | Visas and citizenship (exam) | **high** | 2 | 4–5 | |
@@ -133,6 +133,11 @@ on day 14 it could miss the deadline.
   end screen. Style of the owner's poster and backgrounds. Sounds from the owner.
 - Phone first: portrait and landscape.
 - Open question: how the world map looks (simple drawn map of the 50 areas, or a list view).
+- Owner notes from the phone test (task 6):
+  - The background (portrait and landscape) is stretched past the screen; the poster's borders
+    must stay inside the screen.
+  - Show the poster at the start of the game.
+  - Write "Kris Ann's Journey" like on the poster, and use that design in the whole game.
 
 ### 15. Android release build — day 14
 
