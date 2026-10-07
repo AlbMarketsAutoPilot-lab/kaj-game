@@ -1,5 +1,5 @@
 import { apply, createGame, currentPlayer } from '../src/engine/engine.ts';
-import type { GameState, Profile, SeatConfig } from '../src/engine/types.ts';
+import type { GameMap, GameState, Profile, SeatConfig } from '../src/engine/types.ts';
 import { testMap } from './fixtures/test-map.ts';
 
 export const COLOURS = ['red', 'blue', 'green', 'yellow'];
@@ -11,15 +11,20 @@ export function seats(n: number, robots = 0): SeatConfig[] {
   }));
 }
 
-// Plays the setup phases. starts[k] is the start area of the k-th player in turn order.
-export function startedGame(starts: string[], seed = 1): GameState {
-  let s = createGame({ seats: seats(starts.length), seed }, testMap);
-  const profiles: Profile[] = ['backpacker', 'business', 'luxury', 'nomad'];
+// Plays the setup phases. starts[k] is the start area of the k-th player in turn order;
+// profiles are taken in the order given (the first one still free).
+export function startedGame(
+  starts: string[],
+  seed = 1,
+  map: GameMap = testMap,
+  profiles: Profile[] = ['backpacker', 'business', 'luxury', 'nomad'],
+): GameState {
+  let s = createGame({ seats: seats(starts.length), seed }, map);
   while (s.phase === 'chooseProfile') {
     const taken = new Set(s.players.map((p) => p.profile));
-    s = apply(s, testMap, { type: 'chooseProfile', profile: profiles.find((p) => !taken.has(p))! });
+    s = apply(s, map, { type: 'chooseProfile', profile: profiles.find((p) => !taken.has(p))! });
   }
-  for (const area of starts) s = apply(s, testMap, { type: 'chooseStart', area });
+  for (const area of starts) s = apply(s, map, { type: 'chooseStart', area });
   return s;
 }
 

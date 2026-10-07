@@ -21,3 +21,15 @@ export const testMap: GameMap = {
     { id: 'na-one', name: 'North America', continent: 'North America', neighbours: ['as-east'] },
   ],
 };
+
+// The same map with airports and ports, for the travel tests:
+//   ✈️ eu-west ↔ as-east ↔ af-south (as-east is a hub)   ⛴️ eu-north ↔ na-one
+export const travelMap: GameMap = {
+  ...testMap,
+  id: 'test-travel',
+  routes: [
+    { kind: 'airport', a: 'eu-west', b: 'as-east' },
+    { kind: 'airport', a: 'as-east', b: 'af-south' },
+    { kind: 'port', a: 'eu-north', b: 'na-one' },
+  ],
+};

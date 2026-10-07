@@ -1,0 +1,207 @@
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
+import { apply, destinations, legalActions } from '../src/engine/engine.ts';
+import type { Action, GameMap, GameState, Profile } from '../src/engine/types.ts';
+import { PROFILES } from '../src/engine/constants.ts';
+import { makeQuestion } from '../src/engine/quiz.ts';
+import { map30 } from '../src/maps/map30.ts';
+import { travelMap } from './fixtures/test-map.ts';
+import { currentPlayer, seatOf, startedGame } from './helpers.ts';
+
+// Player 1 (first in turn order) gets profiles[0], player 2 gets profiles[1].
+function game(starts: string[], first: Profile, second: Profile = first === 'nomad' ? 'business' : 'nomad'): GameState {
+  return startedGame(starts, 1, travelMap, [first, second, ...PROFILES]);
+}
+
+const go = (s: GameState, action: Action) => apply(s, travelMap, action);
+const walk = (s: GameState, to: string) => go(s, { type: 'walk', to });
+const board = (s: GameState, to: string, kind: 'airport' | 'port' = 'airport') => go(s, { type: 'board', kind, to });
+const quiz = (s: GameState, to: string) => go(s, { type: 'quiz', kind: 'airport', to });
+const travel = (s: GameState) => go(s, { type: 'travel' });
+
+function answer(s: GameState, right: boolean): GameState {
+  const correct = s.quiz!.question.correct;
+  return go(s, { type: 'answer', choice: right ? correct : ((1 - correct) as 0 | 1) });
+}
+
+const trips = (s: GameState) =>
+  legalActions(s, travelMap)
+    .filter((a) => a.type === 'board' || a.type === 'quiz')
+    .map((a) => `${a.type} ${'to' in a ? a.to : ''}`)
+    .sort();
+
+test('at an airport: pay or quiz for each destination, as well as walking (also on the first turn)', () => {
+  const s = game(['as-east', 'eu-north'], 'nomad');
+  assert.deepEqual(trips(s), ['board af-south', 'board eu-west', 'quiz af-south', 'quiz eu-west']);
+  assert.ok(legalActions(s, travelMap).some((a) => a.type === 'walk'));
+});
+
+test('the Backpacker never pays: quiz only', () => {
+  const s = game(['eu-west', 'af-north'], 'backpacker');
+  assert.deepEqual(trips(s), ['quiz as-east']);
+});
+
+test('no "pay" option without enough points', () => {
+  const s = game(['eu-west', 'af-north'], 'luxury');
+  seatOf(s, 0).points = 2; // Luxury ticket is 3
+  assert.deepEqual(trips(s), ['quiz af-south', 'quiz as-east']);
+});
+
+test('Luxury: any other airport by plane, any other port by ship', () => {
+  assert.deepEqual(destinations(travelMap, 'eu-west', 'airport', 'luxury').sort(), ['af-south', 'as-east']);
+  assert.deepEqual(destinations(travelMap, 'eu-west', 'airport', 'nomad'), ['as-east']);
+  assert.deepEqual(destinations(travelMap, 'eu-west', 'port', 'luxury'), []);
+  assert.equal(destinations(map30, 'japan', 'airport', 'luxury').length, 6);
+  assert.deepEqual(destinations(map30, 'iceland', 'port', 'luxury').sort(), ['canada-east', 'iberia', 'uk-ireland']);
+});
+
+test('Business plane: pay 2, 0 travel turns, land on the boarding turn with the arrival points', () => {
+  let s = game(['eu-west', 'af-north'], 'business');
+  s = board(s, 'as-east');
+  assert.equal(seatOf(s, 0).area, 'as-east');
+  assert.equal(seatOf(s, 0).travel, null);
+  assert.equal(seatOf(s, 0).points, 3 - 2 + 1 + 2); // ticket, new area, new continent
+  assert.equal(currentPlayer(s).seat, seatOf(s, 1).seat);
+});
+
+test('Nomad plane: pay 1, 1 travel turn (+1), then land', () => {
+  let s = game(['eu-west', 'af-north'], 'nomad');
+  s = board(s, 'as-east');
+  assert.equal(seatOf(s, 0).area, null);
+  assert.equal(seatOf(s, 0).points, 3 - 1);
+  s = walk(s, 'af-south');
+  assert.deepEqual(legalActions(s, travelMap), [{ type: 'travel' }]);
+  s = travel(s);
+  assert.equal(seatOf(s, 0).area, 'as-east');
+  assert.equal(seatOf(s, 0).points, 3 - 1 + 1 + 1 + 2);
+});
+
+test('Nomad ship: 3 travel turns (+3); Business ship: 1 travel turn', () => {
+  let s = game(['eu-north', 'af-north'], 'nomad');
+  s = board(s, 'na-one', 'port');
+  for (const p2 of ['af-south', 'af-north', 'af-south']) {
+    s = walk(s, p2);
+    assert.equal(seatOf(s, 0).area, null);
+    s = travel(s);
+  }
+  assert.equal(seatOf(s, 0).area, 'na-one');
+  assert.equal(seatOf(s, 0).points, 3 - 1 + 3 + 1 + 2);
+
+  let b = game(['eu-north', 'af-north'], 'business');
+  b = board(b, 'na-one', 'port');
+  b = walk(b, 'af-south');
+  b = travel(b);
+  assert.equal(seatOf(b, 0).area, 'na-one');
+  assert.equal(seatOf(b, 0).points, 3 - 2 + 1 + 2);
+});
+
+test('destination taken at landing: wait one more travel turn (Nomad +1), then land', () => {
+  let s = game(['eu-west', 'as-west'], 'nomad');
+  s = board(s, 'as-east');
+  s = walk(s, 'as-east'); // player 2 takes the destination
+  s = travel(s);
+  assert.equal(seatOf(s, 0).area, null);
+  assert.equal(seatOf(s, 0).points, 3 - 1 + 1);
+  s = walk(s, 'na-one'); // player 2 leaves
+  s = travel(s);
+  assert.equal(seatOf(s, 0).area, 'as-east');
+  assert.equal(seatOf(s, 0).points, 3 - 1 + 1 + 1 + 1 + 2);
+});
+
+test('quiz: the answer comes in the same turn; right = free ticket, board now', () => {
+  let s = game(['eu-west', 'af-north'], 'business');
+  s = quiz(s, 'as-east');
+  assert.equal(currentPlayer(s).seat, seatOf(s, 0).seat);
+  assert.deepEqual(legalActions(s, travelMap), [{ type: 'answer', choice: 0 }, { type: 'answer', choice: 1 }]);
+  s = answer(s, true);
+  assert.equal(s.quiz, null);
+  assert.equal(seatOf(s, 0).area, 'as-east');
+  assert.equal(seatOf(s, 0).points, 3 + 1 + 2); // no ticket paid
+});
+
+test('quiz: a wrong answer uses the turn; the 3rd wrong answer pays and boards', () => {
+  let s = game(['eu-west', 'af-north'], 'business');
+  for (let i = 1; i <= 2; i++) {
+    s = answer(quiz(s, 'as-east'), false);
+    assert.equal(seatOf(s, 0).area, 'eu-west');
+    assert.equal(seatOf(s, 0).quizWrong, i);
+    s = walk(s, i === 1 ? 'af-south' : 'af-north');
+  }
+  s = answer(quiz(s, 'as-east'), false);
+  assert.equal(seatOf(s, 0).area, 'as-east');
+  assert.equal(seatOf(s, 0).points, 3 - 2 + 1 + 2);
+  assert.equal(seatOf(s, 0).quizWrong, 0);
+});
+
+test("quiz: can't pay after 3 wrong answers → keep trying or walk away (count starts again)", () => {
+  let s = game(['eu-west', 'af-north'], 'luxury');
+  seatOf(s, 0).points = 2;
+  for (let i = 1; i <= 4; i++) {
+    s = answer(quiz(s, 'as-east'), false);
+    assert.equal(seatOf(s, 0).area, 'eu-west');
+    s = walk(s, i % 2 ? 'af-south' : 'af-north');
+  }
+  assert.equal(seatOf(s, 0).quizWrong, 4);
+  assert.ok(legalActions(s, travelMap).some((a) => a.type === 'quiz'));
+  s = walk(s, 'eu-north');
+  assert.equal(seatOf(s, 0).quizWrong, 0);
+});
+
+test('Backpacker: no limit on quiz tries', () => {
+  let s = game(['eu-west', 'af-north'], 'backpacker');
+  for (let i = 1; i <= 5; i++) {
+    s = answer(quiz(s, 'as-east'), false);
+    s = walk(s, i % 2 ? 'af-south' : 'af-north');
+  }
+  assert.equal(seatOf(s, 0).area, 'eu-west');
+  assert.equal(seatOf(s, 0).points, 3);
+  s = answer(quiz(s, 'as-east'), true);
+  assert.equal(seatOf(s, 0).area, null); // 1 turn in the air
+});
+
+// The stuck-state checker (task 2b) assumes the quiz is always possible:
+// any profile, any airport or port of the 30-turn map, even with 0 points.
+test('30-turn map: the quiz is offered for every destination, for every profile, with 0 points', () => {
+  for (const profile of PROFILES) {
+    for (const r of map30.routes ?? []) {
+      for (const [from, to] of [[r.a, r.b], [r.b, r.a]]) {
+        const s = withPlayerAt(map30, profile, from);
+        const offered = legalActions(s, map30).some((a) => a.type === 'quiz' && a.kind === r.kind && a.to === to);
+        assert.ok(offered, `${profile} at ${from}: no quiz to ${to}`);
+      }
+    }
+  }
+});
+
+test('placeholder quiz questions: two different options, and the marked one is right', () => {
+  const ends = new Set((map30.routes ?? []).flatMap((r) => [r.a, r.b]));
+  const names = new Map(map30.areas.map((a) => [a.id, a.name]));
+  let seed = 1;
+  for (const to of ends) {
+    const area = map30.areas.find((a) => a.id === to)!;
+    for (let i = 0; i < 20; i++) {
+      const [q, next] = makeQuestion(map30, to, seed);
+      seed = next;
+      assert.notEqual(q.options[0], q.options[1], q.text);
+      const right = q.options[q.correct];
+      const wrong = q.options[1 - q.correct];
+      if (q.text.startsWith('Which continent')) {
+        assert.equal(right, area.continent);
+      } else if (q.text.startsWith('Which area borders')) {
+        const borders = area.neighbours.map((n) => names.get(n));
+        assert.ok(borders.includes(right) && !borders.includes(wrong), q.text);
+      } else {
+        assert.ok(area.countries!.includes(right) && !area.countries!.includes(wrong), q.text);
+      }
+    }
+  }
+});
+
+function withPlayerAt(map: GameMap, profile: Profile, area: string): GameState {
+  const s = startedGame(['iberia', 'west-africa'], 1, map, [profile, ...PROFILES]);
+  const other = seatOf(s, 1);
+  if (other.area === area) other.area = 'france';
+  seatOf(s, 0).area = area;
+  seatOf(s, 0).points = 0;
+  return s;
+}

@@ -5,15 +5,30 @@ import {
   POINTS_BIG_COUNTRY_AREA,
   POINTS_NEW_AREA,
   POINTS_NEW_CONTINENT,
+  POINTS_NOMAD_TRAVEL_TURN,
   POINTS_WONDER,
   PROFILES,
+  QUIZ_TRIES,
   START_CONTINENTS,
+  TICKET_PRICE,
   TOTAL_ROUNDS,
+  TRAVEL_TURNS,
   WELCOME_BONUS,
 } from './constants.ts';
 import { areaById, validateMap } from './map.ts';
+import { makeQuestion } from './quiz.ts';
 import { randomInt } from './rng.ts';
-import type { Action, Area, GameConfig, GameMap, GameResult, GameState, Player } from './types.ts';
+import type {
+  Action,
+  Area,
+  GameConfig,
+  GameMap,
+  GameResult,
+  GameState,
+  Player,
+  Profile,
+  RouteKind,
+} from './types.ts';
 
 export function createGame(config: GameConfig, map: GameMap): GameState {
   const { seats } = config;
@@ -49,6 +64,8 @@ export function createGame(config: GameConfig, map: GameMap): GameState {
     points: 0,
     visitedAreas: [],
     visitedContinents: [],
+    travel: null,
+    quizWrong: 0,
   }));
 
   return {
@@ -60,6 +77,7 @@ export function createGame(config: GameConfig, map: GameMap): GameState {
     current: 0,
     round: 0,
     totalRounds: TOTAL_ROUNDS,
+    quiz: null,
     result: null,
   };
 }
@@ -88,10 +106,13 @@ export function legalActions(state: GameState, map: GameMap): Action[] {
         .map((a) => ({ type: 'chooseStart', area: a.id }));
     }
     case 'play': {
+      if (state.quiz) return [{ type: 'answer', choice: 0 }, { type: 'answer', choice: 1 }];
+      if (me.travel) return [{ type: 'travel' }];
       const occupied = occupiedAreas(state, me.seat);
       const moves: Action[] = areaById(map, me.area!)
         .neighbours.filter((n) => !occupied.has(n))
         .map((to) => ({ type: 'walk', to }));
+      moves.push(...tripActions(me, map));
       return moves.length > 0 ? moves : [{ type: 'blocked' }];
     }
     case 'finished':
@@ -131,7 +152,44 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
       return next;
     }
     case 'walk': {
+      me.quizWrong = 0;
       arrive(me, areaById(map, action.to), map);
+      endTurn(next);
+      return next;
+    }
+    case 'board':
+      depart(next, map, me, action.kind, action.to, TICKET_PRICE[me.profile!]!);
+      endTurn(next);
+      return next;
+    case 'quiz': {
+      // The question is about the destination. The turn goes on: the next move is the answer.
+      const [question, rng] = makeQuestion(map, action.to, next.rng);
+      next.rng = rng;
+      next.quiz = { kind: action.kind, to: action.to, question };
+      return next;
+    }
+    case 'answer': {
+      const quiz = next.quiz!;
+      next.quiz = null;
+      if (action.choice === quiz.question.correct) {
+        depart(next, map, me, quiz.kind, quiz.to, 0); // free ticket
+      } else {
+        me.quizWrong += 1;
+        // After the 3rd wrong answer a player who can pay must pay and board now.
+        // A player who can't pay may keep trying on later turns, or walk away.
+        const price = TICKET_PRICE[me.profile!];
+        if (price !== null && me.quizWrong >= QUIZ_TRIES && me.points >= price) {
+          depart(next, map, me, quiz.kind, quiz.to, price);
+        }
+      }
+      endTurn(next);
+      return next;
+    }
+    case 'travel': {
+      const trip = me.travel!;
+      if (me.profile === 'nomad') me.points = addPoints(me.points, POINTS_NOMAD_TRAVEL_TURN);
+      if (trip.turnsLeft > 0) trip.turnsLeft -= 1;
+      if (trip.turnsLeft === 0) land(next, map, me);
       endTurn(next);
       return next;
     }
@@ -141,7 +199,53 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
   }
 }
 
-// Scoring for arriving in an area (rulebook section 3). Planes and ships will use it too.
+// Where a plane (airport) or ship (port) can go from an area: its fixed routes.
+// Luxury: any other airport (by plane) or any other port (by ship).
+export function destinations(map: GameMap, from: string, kind: RouteKind, profile: Profile): string[] {
+  const routes = (map.routes ?? []).filter((r) => r.kind === kind);
+  if (!routes.some((r) => r.a === from || r.b === from)) return [];
+  if (profile === 'luxury') {
+    const all = new Set(routes.flatMap((r) => [r.a, r.b]));
+    all.delete(from);
+    return [...all];
+  }
+  return routes.flatMap((r) => (r.a === from ? [r.b] : r.b === from ? [r.a] : []));
+}
+
+// Boarding options in the player's area: pay the ticket (if they can) or try the quiz.
+// Every profile may always try the quiz, so a trip is always possible from an airport or port.
+function tripActions(me: Player, map: GameMap): Action[] {
+  const out: Action[] = [];
+  const price = TICKET_PRICE[me.profile!];
+  for (const kind of ['airport', 'port'] as const) {
+    for (const to of destinations(map, me.area!, kind, me.profile!)) {
+      if (price !== null && me.points >= price) out.push({ type: 'board', kind, to });
+      out.push({ type: 'quiz', kind, to });
+    }
+  }
+  return out;
+}
+
+function depart(state: GameState, map: GameMap, me: Player, kind: RouteKind, to: string, ticket: number): void {
+  // Task 9: the ticket goes to the owner of the departure airport or port.
+  // Until there are owners it goes to nobody (there is no bank).
+  me.points = addPoints(me.points, -ticket);
+  me.travel = { kind, from: me.area!, to, turnsLeft: TRAVEL_TURNS[me.profile!][kind] };
+  me.area = null;
+  me.quizWrong = 0;
+  if (me.travel.turnsLeft === 0) land(state, map, me);
+}
+
+// Two players are never in one area: if the destination is taken, the plane or ship
+// waits and tries again at the end of the next travel turn.
+function land(state: GameState, map: GameMap, me: Player): void {
+  const to = me.travel!.to;
+  if (occupiedAreas(state, me.seat).has(to)) return;
+  me.travel = null;
+  arrive(me, areaById(map, to), map);
+}
+
+// Scoring for arriving in an area (rulebook section 3), by walking, plane or ship.
 function arrive(me: Player, area: Area, map: GameMap): void {
   me.area = area.id;
   if (!me.visitedAreas.includes(area.id)) {

@@ -1,4 +1,4 @@
-import type { Continent, Profile } from './types.ts';
+import type { Continent, Profile, RouteKind } from './types.ts';
 
 // v1 has only the 30-turn map (KAJ-v1-scope.md section 4).
 export const TOTAL_ROUNDS = 30;
@@ -38,3 +38,25 @@ export const POINTS_BIG_COUNTRY_AREA = 1;
 
 // An airport or port has 1 to 3 fixed destinations (v1 scope section 4).
 export const MAX_DESTINATIONS = 3;
+
+// Ticket price per trip (rulebook sections 5 and 12). The Backpacker never pays: quiz only.
+export const TICKET_PRICE: Readonly<Record<Profile, number | null>> = {
+  backpacker: null,
+  business: 2,
+  luxury: 3,
+  nomad: 1,
+};
+
+// Travel turns: plane 1, ship 3; Business and Luxury: plane 0, ship 1.
+export const TRAVEL_TURNS: Readonly<Record<Profile, Readonly<Record<RouteKind, number>>>> = {
+  backpacker: { airport: 1, port: 3 },
+  business: { airport: 0, port: 1 },
+  luxury: { airport: 0, port: 1 },
+  nomad: { airport: 1, port: 3 },
+};
+
+// After this many wrong quiz answers in one area, a player who can pay must pay and board.
+export const QUIZ_TRIES = 3;
+
+// Digital Nomad: +1 for every turn on a plane or ship.
+export const POINTS_NOMAD_TRAVEL_TURN = 1;
