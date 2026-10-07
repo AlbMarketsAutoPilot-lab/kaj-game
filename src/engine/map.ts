@@ -1,3 +1,4 @@
+import { MAX_DESTINATIONS } from './constants.ts';
 import type { Area, GameMap } from './types.ts';
 
 const CONTINENTS = new Set([
@@ -34,15 +35,21 @@ export function validateMap(map: GameMap): string[] {
     }
   }
 
-  // An area has at most one airport and one port, each with one destination.
-  const facilities = new Set<string>();
+  // An area has at most one airport and one port. Each has 1 or 2 fixed destinations
+  // (v1 scope section 4); the traveller chooses one when boarding.
+  const destinations = new Map<string, string[]>();
   for (const r of map.routes ?? []) {
     if (r.a === r.b) problems.push(`${r.kind} ${r.a}: route to itself`);
-    for (const id of [r.a, r.b]) {
-      if (!byId.has(id)) problems.push(`${r.kind}: unknown area ${id}`);
-      if (facilities.has(`${r.kind}:${id}`)) problems.push(`${id}: more than one ${r.kind}`);
-      facilities.add(`${r.kind}:${id}`);
+    for (const [from, to] of [[r.a, r.b], [r.b, r.a]]) {
+      if (!byId.has(from)) problems.push(`${r.kind}: unknown area ${from}`);
+      const key = `${from} ${r.kind}`;
+      const list = destinations.get(key) ?? [];
+      if (list.includes(to)) problems.push(`${key}: route to ${to} listed twice`);
+      destinations.set(key, [...list, to]);
     }
+  }
+  for (const [key, list] of destinations) {
+    if (list.length > MAX_DESTINATIONS) problems.push(`${key}: ${list.length} destinations (max ${MAX_DESTINATIONS})`);
   }
 
   return problems;

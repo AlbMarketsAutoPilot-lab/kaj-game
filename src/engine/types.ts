@@ -40,6 +40,7 @@ export interface Area {
 export type RouteKind = 'airport' | 'port';
 
 // A fixed two-way route between two airports (or two ports): a <-> b.
+// One airport or port can be in up to 2 routes (a hub).
 export interface Route {
   kind: RouteKind;
   a: string;

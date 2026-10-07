@@ -1,6 +1,6 @@
-import type { Area, Continent, GameMap } from '../engine/types.ts';
+import type { Area, Continent, GameMap, Route } from '../engine/types.ts';
 
-// The 30-turn map: 50 areas. Airports and ports come in task 2b.
+// The 30-turn map: 50 areas, airports and ports (task 2b, in progress).
 // Each walking link is written once in BORDERS below; neighbours are built from it.
 
 interface AreaInfo {
@@ -209,6 +209,19 @@ const BORDERS: [string, string][] = [
   ['australia-west', 'australia-east'],
 ];
 
+// Airports and ports (owner-approved plan A, task 2b). Some have 2 destinations.
+const ROUTES: Route[] = [
+  { kind: 'port', a: 'iberia', b: 'uk-ireland' },
+  { kind: 'port', a: 'uk-ireland', b: 'iceland' },
+  { kind: 'port', a: 'iceland', b: 'canada-east' },
+  { kind: 'airport', a: 'arabia', b: 'australia-west' },
+  { kind: 'airport', a: 'australia-west', b: 'maritime-asia' },
+  { kind: 'airport', a: 'maritime-asia', b: 'japan' },
+  { kind: 'airport', a: 'japan', b: 'new-zealand' },
+  { kind: 'airport', a: 'new-zealand', b: 'chile' },
+  // 9th connection (Southern Africa airport) waits for the owner's approval.
+];
+
 function build(): GameMap {
   const areas: Area[] = AREAS.map((a) => ({ ...a, neighbours: [] }));
   const byId = new Map(areas.map((a) => [a.id, a]));
@@ -219,7 +232,7 @@ function build(): GameMap {
     from.neighbours.push(b);
     to.neighbours.push(a);
   }
-  return { id: 'map30', areas };
+  return { id: 'map30', areas, routes: ROUTES };
 }
 
 export const map30: GameMap = build();
