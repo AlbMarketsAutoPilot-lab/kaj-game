@@ -68,7 +68,41 @@ Task 7: planes, ships, tickets and the airline quiz (`tests/travel.test.ts`).
 - 1,000 random-robot games on the 30-turn map: nobody stuck, about 6,000 paid trips and
   10,700 quiz tries, longest time in transit 6 turns.
 
-Not yet: visas, citizenship, businesses, event cards, challenges.
+Task 8: visas and citizenship (`tests/citizenship.test.ts`).
+
+- **Asking.** There is no question on arrival. A move (walk, pay and board, or quiz) can carry
+  a citizenship request, offered only where it is still possible: a new area (never the start
+  area), nobody holds or is asking for that citizenship, the player has not asked before (once
+  per game), and never the Digital Nomad. The test board shows it as a tick box on the move
+  panel; moves marked 🛂 allow it. On a trip, the request is made on landing, if the area can
+  still take it; otherwise it is dropped and the player keeps their one request.
+- **Timeline** (owner's shorter version; the player stays in the area until it is granted):
+
+  | Turn | Normal | Luxury |
+  |---|---|---|
+  | 1 (arrival) | asks; "request approved, the test is next turn" | asks; "granted next turn" |
+  | 2 | 3 a/b questions from 3 different facts of the area, 15 s each (time out = wrong) | granted; moves |
+  | 3 | all right: granted, moves; any wrong: "one more turn learning", stays | — |
+  | 4 | wrong: right answers shown, granted, moves | — |
+
+  Business +3 when citizenship is granted. Nothing is secret in v1, so the questions sit in the
+  state (honour system).
+- **Citizenship** covers the area, or every part of a big country. One citizen per area.
+- **Visa:** 2 points to the citizen each time another player enters; moving inside a big
+  country is free; the citizen enters free. Without 2 points the area can't be entered.
+  The test board warns before a move into a visa area ("entering costs a 2-point visa, paid
+  to …", Pay and enter / Cancel) and says afterwards who was paid.
+- **By plane or ship:** boarding to a visa area needs the ticket plus 2 (the quiz: 2); the visa
+  is paid on landing. A citizenship granted while the player is travelling costs nothing on
+  landing.
+- **Blocked:** if no neighbour can be entered (taken, or a visa the player can't pay) and
+  there is no trip, the player gets the "blocked" turn.
+- **Airline quiz** now uses the checked facts of the destination (task C); areas without facts
+  (the test maps) still get placeholder questions.
+- 1,000 random-robot games on the 30-turn map: about 2,200 citizenships and 1,400 visas, never
+  two citizens in one area, longest "blocked" streak 4 turns, nobody stuck in the air.
+
+Not yet: businesses, event cards, challenges.
 
 ## Choices made in task 1 (approved by the owner)
 
@@ -101,6 +135,22 @@ These points are not spelled out in the rulebook or the v1 scope.
    and tries again. Any destination can be chosen when boarding.
 4. **Luxury "any":** plane to any airport, ship to any port.
 5. **Boarding on the first turn** from a starting airport or port is allowed.
+
+## Choices made in task 8 (approved by the owner)
+
+1. **No study step:** the test is 3 questions, 15 seconds each. The right answers are shown in
+   the extra turn after a wrong answer.
+2. **The shorter timeline above** (asking on arrival is turn 1; granted and moving on turn 3,
+   or turn 4 after a wrong answer), replacing the rulebook's "granted on turn 3 / turn 4".
+3. **No repeated question:** the request is an option on the move, not a question each turn.
+4. **One citizen per area or big country**, also while someone is asking there.
+5. **No citizenship in the start area.**
+6. **Visa by plane or ship:** ticket plus 2 to board; paid on landing; **a citizenship granted
+   during the trip costs nothing on landing** (a player is never charged for a rule that did
+   not exist when they left).
+7. **On the tiny test map** (no airports or ports) the random robots never ask for
+   citizenship, so its "blocked" check tests walking only; citizenship and visas are checked
+   on the real map, with the full check, and by the rule tests.
 
 ## Project setup
 

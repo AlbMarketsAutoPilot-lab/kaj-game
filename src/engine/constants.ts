@@ -60,3 +60,12 @@ export const QUIZ_TRIES = 3;
 
 // Digital Nomad: +1 for every turn on a plane or ship.
 export const POINTS_NOMAD_TRAVEL_TURN = 1;
+
+// Visa: paid to the citizen each time another player enters their area (rulebook section 7).
+export const VISA_PRICE = 2;
+
+// Business Traveler: +3 when granted citizenship (rulebook section 12).
+export const POINTS_BUSINESS_CITIZENSHIP = 3;
+
+// Citizenship test: 3 a/b questions (v1 scope, changed by the owner in task 8: no study step).
+export const EXAM_QUESTIONS = 3;

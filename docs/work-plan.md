@@ -33,7 +33,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | 6 | Android shell and APK build (early) | medium | 1 | 2 | ✅ done |
 | 7 | Planes, ships, tickets, airline quiz | **high** | 1 | 2 | ✅ done |
 | C | Facts: about 12 per area (5 batches, in parallel) | medium | 1.5 | 3–8 | ✅ done |
-| 8 | Visas and citizenship (exam) | **high** | 2 | 4–5 | |
+| 8 | Visas and citizenship (exam) | **high** | 2 | 4–5 | ✅ done |
 | 9 | Businesses | **high** | 1.5 | 6 | |
 | 10 | Profile bonuses, save and resume | medium | 1 | 7 | |
 | 11 | Event cards | medium | 1 | 7–8 | |
@@ -100,6 +100,10 @@ on day 14 it could miss the deadline.
 - Visa: 2 points to the citizen, every time another player enters; moving inside is free;
   no money, no entry.
 - Stuck-state checker with visas (keep the known limit from task 2b).
+- Done: rules and the 7 owner-approved choices in `docs/engine.md` (task 8): the request is an
+  option on the move, the owner's shorter timeline, no study step (3 questions, 15 s each), visa
+  warning on the test board, no visa for a citizenship granted during a trip. Tests in
+  `tests/citizenship.test.ts`; the airline quiz now uses the checked facts.
 
 ### 9. Businesses — day 6 (high)
 

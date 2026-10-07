@@ -54,3 +54,7 @@ select option { color: #000; }
 .area.legal:hover { background: rgba(63, 210, 154, 0.35); }
 .area.occupied { background: rgba(255, 255, 255, 0.1); }
 .marks { display: flex; gap: 3px; margin-top: 4px; }
+
+/* Task 8: citizenship */
+.note { border: 1px solid var(--accent); color: var(--accent); border-radius: 8px; padding: 6px 10px; margin: 0 0 8px; }
+.ask { display: block; margin: 8px 0; font-size: 0.9rem; }
