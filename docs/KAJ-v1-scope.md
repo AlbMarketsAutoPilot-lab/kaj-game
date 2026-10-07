@@ -30,7 +30,7 @@ Target: a complete, playable v1 within about 15 days of work.
 
 ## 4. Map
 
-- **Only the 30-turn map:** 45–50 areas, 6–7 wonders, **6 airports** and **4 ports**. Every airport and port has one fixed destination, in two-way pairs. Luxury can choose any airport or port.
+- **Only the 30-turn map:** 50 areas, 7 wonders, **7 airports** and **4 ports** with **9 two-way connections**. An airport or port has **1 to 3 fixed destinations**; the traveller chooses one when boarding. Luxury can choose any airport or port. (Changed in task 2b, owner-approved: 6 airports + 4 ports with one destination each could not pass the map check.)
 - **Starting continents: 6 choices**, all different between players: Europe, Asia, Africa, **North America**, **South America**, Oceania.
 - **Welcome bonus:** Europe, Asia, Africa +3 · North America +4 · South America +4 · Oceania +5.
 - Big countries: a country split into N parts gives +N when all parts are visited (e.g. USA East + USA West = +2).
@@ -92,6 +92,7 @@ Target: a complete, playable v1 within about 15 days of work.
 |---|---|
 | 2 players | **2–4 players**, with robots |
 | Three maps (30 / 50 / 100 turns) | **30-turn map only** |
+| Every airport and port has one fixed destination | **1 to 3 fixed destinations**; the traveller chooses one |
 | 5 starting continents (Americas as one) | **6** (North and South America separate) |
 | Keep cards (hold up to 2) | **Not in v1** |
 | Mini missions | **Not in v1** |

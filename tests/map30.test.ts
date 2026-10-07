@@ -3,6 +3,7 @@ import { test } from 'node:test';
 import { START_CONTINENTS } from '../src/engine/constants.ts';
 import { createGame } from '../src/engine/engine.ts';
 import { validateMap, walkingGroups } from '../src/engine/map.ts';
+import { stuckProblems, travelGroups, visaUnits } from '../src/engine/stuck-check.ts';
 import { map30 } from '../src/maps/map30.ts';
 import { seats } from './helpers.ts';
 
@@ -53,7 +54,7 @@ test('Taiwan and Cyprus are never on the map', () => {
   assert.ok(!all.includes('Taiwan') && !all.includes('Cyprus'));
 });
 
-test('walking groups: airports and ports (task 2b) must join these 6 groups', () => {
+test('walking groups: airports and ports join these 6 groups', () => {
   const groups = walkingGroups(map30).map((g) => g.sort());
   const small = groups.filter((g) => g.length < 10).map((g) => g.join(',')).sort();
   assert.equal(groups.length, 6);
@@ -64,4 +65,38 @@ test('walking groups: airports and ports (task 2b) must join these 6 groups', ()
 
 test('a game can start on the 30-turn map with 4 seats', () => {
   assert.doesNotThrow(() => createGame({ seats: seats(4), seed: 3 }, map30));
+});
+
+test('30-turn map: 7 airports, 4 ports, 9 connections, at most 3 destinations each', () => {
+  const routes = map30.routes ?? [];
+  const at = (kind: string) => new Set(routes.filter((r) => r.kind === kind).flatMap((r) => [r.a, r.b])).size;
+  assert.equal(routes.length, 9);
+  assert.equal(at('airport'), 7);
+  assert.equal(at('port'), 4);
+});
+
+test('30-turn map: every area reachable and no single visa area traps anyone', () => {
+  assert.deepEqual(stuckProblems(map30), []);
+});
+
+test('30-turn map: every one of the 9 connections is needed', () => {
+  const routes = map30.routes ?? [];
+  for (const r of routes) {
+    const without = { ...map30, routes: routes.filter((x) => x !== r) };
+    assert.ok(stuckProblems(without).length > 0, `${r.a} – ${r.b} is not needed`);
+  }
+});
+
+test('30-turn map: two visa areas at once trap someone in at most 44 of 946 pairs', () => {
+  const units = visaUnits(map30);
+  let pairs = 0;
+  let traps = 0;
+  for (let i = 0; i < units.length; i++) {
+    for (let j = i + 1; j < units.length; j++) {
+      pairs++;
+      if (travelGroups(map30, new Set([...units[i], ...units[j]])).length > 1) traps++;
+    }
+  }
+  assert.equal(pairs, 946);
+  assert.ok(traps <= 44, `${traps} trapping pairs`);
 });

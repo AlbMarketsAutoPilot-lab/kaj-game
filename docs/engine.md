@@ -25,7 +25,19 @@ Code: `src/engine/`. Tests: `tests/` (`npm test`). Type check: `npm run typechec
 
 Task 2a: the 30-turn map data (`src/maps/map30.ts`, table in [`map-30.md`](map-30.md)).
 
-Not yet: planes and ships, quizzes, visas, citizenship, businesses, big countries,
+Task 2b: airports and ports (7 airports, 4 ports, 9 connections, 1–3 destinations each) and the
+stuck-state checker (`src/engine/stuck-check.ts`). The checker proves on every test run:
+
+- every area can be reached (walking, airports, ports);
+- no single visa area (one area, or a whole big country) can trap anyone, because a player can
+  always walk and can always travel free with the airline quiz;
+- each of the 9 connections is needed.
+
+Known limit (owner-approved): with 3–4 players, two visa areas at once can trap a player in
+44 of 946 possible pairs, only while that player has fewer than 2 points. Event cards can give
+the points back.
+
+Not yet (movement by plane and ship comes with tickets): planes and ships, quizzes, visas, citizenship, businesses, big countries,
 wonders, event cards, challenges, screens, Android app.
 
 ## Choices made in task 1 (approved by the owner)

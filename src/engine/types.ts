@@ -37,9 +37,20 @@ export interface Area {
   bigCountry?: string;
 }
 
+export type RouteKind = 'airport' | 'port';
+
+// A fixed two-way route between two airports (or two ports): a <-> b.
+// One airport or port can be in up to 3 routes (a hub).
+export interface Route {
+  kind: RouteKind;
+  a: string;
+  b: string;
+}
+
 export interface GameMap {
   id: string;
   areas: Area[];
+  routes?: Route[];
 }
 
 export interface Player {
