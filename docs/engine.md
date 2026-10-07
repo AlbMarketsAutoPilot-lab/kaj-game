@@ -62,7 +62,7 @@ These points are not spelled out in the rulebook or the v1 scope.
 4. **Starting continent and starting area are one engine move** (choosing the area also
    chooses its continent). The screens can still show two steps (continent, then zoom in).
 
-## Choices made in task 4 (please confirm)
+## Choices made in task 4 (approved by the owner)
 
 1. **Starting in a wonder gives no wonder point**, like the start area gives no area point
    (choice 1 above): the welcome bonus replaces both.
