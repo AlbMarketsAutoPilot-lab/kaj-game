@@ -191,15 +191,36 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
     for (const a of actions) {
       if (a.type === 'walk') {
         const to = areaById.get(a.to)!;
-        const isNew = !me.visitedAreas.includes(to.id);
-        row.append(button(`🚶 ${to.name}${isNew ? ' ✨' : ''}`, () => act(a)));
+        row.append(button(`🚶 ${to.name}${gainLabel(s, a, to)}`, () => act(a)));
       } else if (a.type === 'blocked') {
         row.append(button('⛔ All neighbours are taken — wait this turn', () => act(a)));
       }
     }
-    box.append(row, el('p', { className: 'small', textContent: '✨ = new area (+1). A new continent gives +2 more.' }));
+    box.append(row,
+      el('p', { className: 'small', textContent: 'New area +1 · new continent +2 · ⭐ wonder +1 more · 🧩 big country: 0 until every part is visited, then +1 + number of parts.' }),
+      renderBigCountries(me));
   }
   return box;
+}
+
+// Points this move would give, found by trying it on a copy of the state.
+function gainLabel(s: GameState, action: Action, to: Area): string {
+  const before = currentPlayer(s).points;
+  const after = apply(s, map30, action).players[currentPlayer(s).seat].points;
+  const gain = after - before;
+  if (gain > 0) return ` ✨ +${gain}`;
+  const me = currentPlayer(s);
+  return to.bigCountry && !me.visitedAreas.includes(to.id) ? ' 🧩' : '';
+}
+
+function renderBigCountries(me: GameState['players'][number]): HTMLElement {
+  const names = [...new Set(map30.areas.flatMap((a) => (a.bigCountry ? [a.bigCountry] : [])))];
+  const started = names.flatMap((c) => {
+    const parts = map30.areas.filter((a) => a.bigCountry === c);
+    const done = parts.filter((a) => me.visitedAreas.includes(a.id)).length;
+    return done > 0 ? [`${c} ${done}/${parts.length}${done === parts.length ? ' ✅' : ''}`] : [];
+  });
+  return el('p', { className: 'small', textContent: started.length ? `🧩 Big countries: ${started.join(' · ')}` : '' });
 }
 
 function travelNote(area: Area): string {
@@ -226,7 +247,7 @@ function renderMap(s: GameState): HTMLElement {
           const here = s.players.find((p) => p.area === a.id);
           const visitedBy = s.players.filter((p) => p.visitedAreas.includes(a.id));
           const canGo = humanTurn && legal.has(a.id);
-          const tags = `${a.wonder ? '⭐' : ''}${(map30.routes ?? []).some((r) => r.kind === 'airport' && (r.a === a.id || r.b === a.id)) ? '✈️' : ''}${(map30.routes ?? []).some((r) => r.kind === 'port' && (r.a === a.id || r.b === a.id)) ? '⛴️' : ''}`;
+          const tags = `${a.wonder ? '⭐' : ''}${a.bigCountry ? '🧩' : ''}${(map30.routes ?? []).some((r) => r.kind === 'airport' && (r.a === a.id || r.b === a.id)) ? '✈️' : ''}${(map30.routes ?? []).some((r) => r.kind === 'port' && (r.a === a.id || r.b === a.id)) ? '⛴️' : ''}`;
           const tile = el('div', { className: 'area' + (canGo ? ' legal' : '') + (here ? ' occupied' : ''), title: (a.countries ?? []).join(', ') },
             el('div', { className: 'name', textContent: `${a.name} ${tags}` }),
             el('div', { className: 'marks' }, ...visitedBy.map((p) => {

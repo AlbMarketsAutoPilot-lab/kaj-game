@@ -37,8 +37,17 @@ Known limit (owner-approved): with 3–4 players, two visa areas at once can tra
 44 of 946 possible pairs, only while that player has fewer than 2 points. Event cards can give
 the points back.
 
-Not yet (movement by plane and ship comes with tickets): planes and ships, quizzes, visas, citizenship, businesses, big countries,
-wonders, event cards, challenges, screens, Android app.
+Task 4: wonder and big-country scoring (`tests/scoring.test.ts`).
+
+- Wonder area, first visit: +1 area +1 wonder. Repeat visits give 0.
+- Big country with N parts: each part gives 0 until every part is visited; the last new part
+  gives +1 +N once (USA, Canada, China, Brazil, Australia, Russia: +3 each on this map).
+- Visited parts are kept, so a player can leave halfway and continue later.
+- The test board shows the points each move gives (✨ +N), 🧩 on big-country parts, and each
+  player's big-country progress (e.g. "Canada 1/2").
+
+Not yet (movement by plane and ship comes with tickets): planes and ships, quizzes, visas, citizenship, businesses,
+event cards, challenges, Android app.
 
 ## Choices made in task 1 (approved by the owner)
 
@@ -52,6 +61,15 @@ These points are not spelled out in the rulebook or the v1 scope.
    In 1,000 test games the longest wait was 3 turns.
 4. **Starting continent and starting area are one engine move** (choosing the area also
    chooses its continent). The screens can still show two steps (continent, then zoom in).
+
+## Choices made in task 4 (please confirm)
+
+1. **Starting in a wonder gives no wonder point**, like the start area gives no area point
+   (choice 1 above): the welcome bonus replaces both.
+2. **A starting area inside a big country counts as a visited part.** Starting in USA East and
+   walking to USA West gives the full +1 +2.
+3. **The new-continent +2 is not all or nothing.** Entering Russia East (Asia) from Russia West
+   gives +2 for Asia at once, even though Russia is not complete.
 
 ## Project setup
 
