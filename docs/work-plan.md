@@ -32,7 +32,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | 5 | This work plan | high | 1 | 1 | ✅ done |
 | 6 | Android shell and APK build (early) | medium | 1 | 2 | ✅ done |
 | 7 | Planes, ships, tickets, airline quiz | **high** | 1 | 2 | ✅ done |
-| C | Facts: about 12 per area (5 batches, in parallel) | medium | 1.5 | 3–8 | 🟡 batches 1–3 written, owner checking; 4–5 next |
+| C | Facts: about 12 per area (5 batches, in parallel) | medium | 1.5 | 3–8 | 🟡 batches 1–3 written and checked by the owner; 4–5 next |
 | 8 | Visas and citizenship (exam) | **high** | 2 | 4–5 | |
 | 9 | Businesses | **high** | 1.5 | 6 | |
 | 10 | Profile bonuses, save and resume | medium | 1 | 7 | |
