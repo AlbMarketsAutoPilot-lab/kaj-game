@@ -43,6 +43,7 @@ select option { color: #000; }
 .player.active { box-shadow: 0 0 0 3px var(--accent); }
 .points { font-size: 1.3rem; font-weight: 700; color: var(--accent); }
 .small { font-size: 0.85rem; color: var(--muted); margin: 0; }
+.small.error { color: #ffb4a8; font-weight: 600; }
 .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; vertical-align: middle; border: 1px solid #fff8; }
 .dot.big { width: 16px; height: 16px; border: 2px solid #fff; }
 .dot.faint { opacity: 0.45; }

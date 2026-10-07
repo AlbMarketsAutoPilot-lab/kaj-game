@@ -1,10 +1,13 @@
 import {
   BUSINESS_PRICE,
+  CONTINENT_BONUS,
   EXAM_QUESTIONS,
   GO_HOME_TURNS,
   MAX_ROBOTS,
   MAX_SEATS,
   MIN_SEATS,
+  NOMAD_MIN_CONTINENTS,
+  NOMAD_PENALTY,
   POINTS_BIG_COUNTRY_AREA,
   POINTS_BUSINESS_CITIZENSHIP,
   POINTS_NEW_AREA,
@@ -415,9 +418,20 @@ export function businessValue(state: GameState, seat: number): number {
   return state.businesses.filter((b) => b.owner === seat).reduce((sum, b) => sum + BUSINESS_PRICE[b.kind], 0);
 }
 
-// Final score: points plus the price of every business owned (owner's rule, task 9).
+// The Digital Nomad's end penalty (0 for everyone else, and for a Nomad with 3 continents).
+export function nomadPenalty(p: Player): number {
+  return p.profile === 'nomad' && p.visitedContinents.length < NOMAD_MIN_CONTINENTS ? NOMAD_PENALTY : 0;
+}
+
+// Final score: points plus the price of every business owned (owner's rule, task 9),
+// minus the Nomad penalty, never below 0.
 export function finalScore(state: GameState, p: Player): number {
-  return p.points + businessValue(state, p.seat);
+  return scoreWith(state.businesses, p);
+}
+
+function scoreWith(businesses: Business[], p: Player): number {
+  const value = businesses.filter((b) => b.owner === p.seat).reduce((sum, b) => sum + BUSINESS_PRICE[b.kind], 0);
+  return addPoints(p.points + value, -nomadPenalty(p));
 }
 
 // The player standing in an area may buy its business if nobody owns it and they can pay.
@@ -586,6 +600,8 @@ function arrive(state: GameState, map: GameMap, me: Player, area: Area, ask: boo
   if (!me.visitedContinents.includes(area.continent)) {
     me.visitedContinents.push(area.continent);
     me.points = addPoints(me.points, POINTS_NEW_CONTINENT);
+    const bonus = me.profile ? CONTINENT_BONUS[me.profile] : undefined;
+    if (bonus && me.visitedContinents.length === bonus.continents) me.points = addPoints(me.points, bonus.points);
   }
   if (asking) submitCitizenship(state, map, me, area.id);
 }
@@ -647,11 +663,9 @@ function endTurn(state: GameState, map: GameMap): void {
   startTurn(state, map);
 }
 
-// Most points (plus the price of the businesses owned) wins; ties go to more continents,
-// then more areas.
+// The best final score (see finalScore) wins; ties go to more continents, then more areas.
 export function rank(players: Player[], businesses: Business[] = []): GameResult {
-  const value = (p: Player) => businesses.filter((b) => b.owner === p.seat).reduce((sum, b) => sum + BUSINESS_PRICE[b.kind], 0);
-  const key = (p: Player) => [p.points + value(p), p.visitedContinents.length, p.visitedAreas.length];
+  const key = (p: Player) => [scoreWith(businesses, p), p.visitedContinents.length, p.visitedAreas.length];
   const compare = (a: Player, b: Player) => {
     const ka = key(a);
     const kb = key(b);

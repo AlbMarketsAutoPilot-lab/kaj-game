@@ -1,11 +1,12 @@
 // First playable screen (task 3): a plain test board on top of the engine.
 // No final art yet. Robots pick random legal moves.
 
-import { BUSINESS_PRICE, GO_HOME_TURNS, POINTS_BUSINESS_CITIZENSHIP, TICKET_PRICE, TOUR_FEE, TRAVEL_TURNS, VISA_PRICE } from '../engine/constants.ts';
+import { BUSINESS_PRICE, CONTINENT_BONUS, GO_HOME_TURNS, NOMAD_MIN_CONTINENTS, NOMAD_PENALTY, NOMAD_WARNING_ROUND, POINTS_BUSINESS_CITIZENSHIP, TICKET_PRICE, TOUR_FEE, TRAVEL_TURNS, VISA_PRICE } from '../engine/constants.ts';
 import {
-  apply, blockedByMoney, businessAt, businessValue, createGame, currentPlayer, entryFees, feeTotal, finalScore, homeFor, legalActions,
+  apply, blockedByMoney, businessAt, businessValue, createGame, currentPlayer, entryFees, feeTotal, finalScore, homeFor, legalActions, nomadPenalty,
 } from '../engine/engine.ts';
 import { randomRobotAction } from '../engine/robot.ts';
+import { loadGame, saveGame } from '../engine/save.ts';
 import type { Action, Area, BusinessKind, GameState, Payment, Player, Profile, RouteKind, SeatKind } from '../engine/types.ts';
 import { map30 } from '../maps/map30.ts';
 
@@ -18,6 +19,7 @@ const PROFILE_LABEL: Record<Profile, string> = {
   nomad: '💻 Digital Nomad',
 };
 const ROBOT_DELAY_MS = 600;
+const SAVE_KEY = 'kaj-save';
 const QUIZ_SECONDS = 15;
 // Citizenship test: 15 seconds for each question (owner's choice, task 8).
 const EXAM_SECONDS = 15;
@@ -103,6 +105,11 @@ function renderSetup(): void {
   const counts = el('div', { className: 'row' }, 'Players: ',
     ...[2, 3, 4].map((n) => button(String(n), () => { count = n; draw(); })));
 
+  const saved = readSave();
+  const resume = saved && 'state' in saved
+    ? button(`Continue game (round ${saved.state.round} / ${saved.state.totalRounds})`, () => { state = saved.state; render(); })
+    : null;
+  if (resume) resume.className = 'primary';
   const start = button('Start journey', () => {
     try {
       const seed = Math.floor(Math.random() * 2 ** 31);
@@ -120,8 +127,34 @@ function renderSetup(): void {
     el('section', { className: 'card setup' },
       el('h1', { textContent: "Kris Ann's Journey" }),
       el('p', { textContent: 'Test board — 30 rounds on the 30-turn map. Walking, planes and ships.' }),
-      counts, rows, start, error),
+      resume ?? '',
+      saved && 'error' in saved ? el('p', { className: 'small', textContent: `${saved.error} It can't be continued; start a new journey.` }) : '',
+      counts, rows, start,
+      resume ? el('p', { className: 'small', textContent: 'Starting a new journey replaces the saved game.' }) : '',
+      error),
   );
+}
+
+// ---------- automatic save (task 10) ----------
+
+// Browser storage can be missing or blocked; the game then simply isn't saved.
+function readSave(): ReturnType<typeof loadGame> | null {
+  try {
+    const text = localStorage.getItem(SAVE_KEY);
+    return text === null ? null : loadGame(text);
+  } catch {
+    return null;
+  }
+}
+
+// Saved after every move; a finished game is removed, so "Continue" never shows it.
+function writeSave(s: GameState): void {
+  try {
+    if (s.phase === 'finished') localStorage.removeItem(SAVE_KEY);
+    else localStorage.setItem(SAVE_KEY, saveGame(s));
+  } catch {
+    // not saved
+  }
 }
 
 // ---------- game screen ----------
@@ -144,6 +177,10 @@ function act(action: Action): void {
     lines.push(after.exam.stage === 'submitted'
       ? `💎 ${name}: your citizenship request for ${where} is accepted. Citizenship will be granted next turn!`
       : `🛂 ${name}: your citizenship request for ${where} has been approved! Next turn: the citizenship test, ${after.exam.questions.length} questions, ${EXAM_SECONDS} seconds each. No looking things up!`);
+  }
+  const bonus = mover.profile ? CONTINENT_BONUS[mover.profile] : undefined;
+  if (bonus && mover.visitedContinents.length < bonus.continents && after.visitedContinents.length >= bonus.continents) {
+    lines.push(`${PROFILE_LABEL[mover.profile!]} bonus: ${name} has visited ${bonus.continents} continents, +${bonus.points}!`);
   }
   if (home) lines.push(`🏠 ${name} ran out of money, so the trip ends here: ${name} goes home to ${areaById.get(home)!.name}, free of any fees.`);
   lines.push(...state.payments.map(paymentNote).filter((t) => t !== ''));
@@ -208,6 +245,7 @@ function render(): void {
   // During a sale offer the buyer answers, on the seller's turn.
   const actor = s.offer ? s.players[s.offer.to] : me;
   const isRobot = s.phase !== 'finished' && actor.kind === 'robot';
+  writeSave(s);
 
   app.replaceChildren(
     el('header', {},
@@ -243,17 +281,35 @@ function renderPlayers(s: GameState): HTMLElement {
       const card = el('div', { className: 'player' + (p === me && s.phase !== 'finished' ? ' active' : '') },
         el('div', {}, dot(seat), ` ${COLOUR_NAMES[seat]} ${p.kind === 'robot' ? '🤖' : '🙂'}`),
         el('div', { className: 'small', textContent: p.profile ? PROFILE_LABEL[p.profile] : 'no profile yet' }),
-        el('div', { className: 'points', textContent: `${p.points} points${businessValue(s, seat) ? ` + 🏢 ${businessValue(s, seat)}` : ''}` }),
+        el('div', { className: 'points', textContent: s.phase === 'finished'
+          ? `${finalScore(s, p)} points`
+          : `${p.points} points${businessValue(s, seat) ? ` + 🏢 ${businessValue(s, seat)}` : ''}` }),
         el('div', { className: 'small', textContent: `📍 ${area}` }),
         el('div', { className: 'small', textContent: p.citizenship
           ? `🛂 Citizen of ${citizenshipName(p.citizenship)}`
           : p.exam ? `🛂 Asking for citizenship in ${areaById.get(p.exam.area)!.name}` : '' }),
         el('div', { className: 'small', textContent: `${plural(p.visitedContinents.length, 'continent')} · ${plural(p.visitedAreas.length, 'area')}` }),
+        continentBar(s, p),
         el('div', { className: 'small', textContent: s.businesses.filter((b) => b.owner === seat)
           .map((b) => `${BUSINESS_ICON[b.kind]} ${areaById.get(b.area)!.name}`).join(' · ') }));
       card.style.borderColor = COLOURS[seat];
       return card;
     }));
+}
+
+// "Continents 2/3" for the profiles with a continent bonus or penalty (rulebook section 14).
+function continentBar(s: GameState, p: Player): HTMLElement | string {
+  const n = p.visitedContinents.length;
+  const bonus = p.profile ? CONTINENT_BONUS[p.profile] : undefined;
+  const goal = bonus?.continents ?? (p.profile === 'nomad' ? NOMAD_MIN_CONTINENTS : 0);
+  if (!goal) return '';
+  const bar = `Continents ${'▰'.repeat(Math.min(n, goal))}${'▱'.repeat(Math.max(0, goal - n))} ${Math.min(n, goal)}/${goal}`;
+  if (bonus) return el('div', { className: 'small', textContent: n >= goal ? `${bar} ✅ +${bonus.points} earned` : `${bar} (+${bonus.points} at ${goal})` });
+  if (n >= goal) return el('div', { className: 'small', textContent: `${bar} ✅ no penalty` });
+  const warn = s.round >= NOMAD_WARNING_ROUND && s.phase === 'play';
+  return el('div', { className: warn ? 'small error' : 'small', textContent: warn
+    ? `${bar} ⚠️ −${NOMAD_PENALTY} at the end unless you reach a ${goal}rd continent`
+    : `${bar} (−${NOMAD_PENALTY} at the end below ${goal})` });
 }
 
 function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElement {
@@ -269,7 +325,11 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
       el('ol', {}, ...r.ranking.map((seat) => {
         const p = s.players[seat];
         const value = businessValue(s, seat);
-        return el('li', {}, dot(seat), ` ${COLOUR_NAMES[seat]}: ${finalScore(s, p)} points${value ? ` (${p.points} + 🏢 ${value} for businesses)` : ''}, ${p.visitedContinents.length} continents, ${p.visitedAreas.length} areas`);
+        const penalty = nomadPenalty(p);
+        // One total in points: travel points + assets (businesses at their price) − Nomad penalty.
+        const detail = [`${p.points} travel`, `${value} assets`]
+          .join(' + ') + (penalty ? ` − ${penalty} Nomad penalty` : '');
+        return el('li', {}, dot(seat), ` ${COLOUR_NAMES[seat]}: ${finalScore(s, p)} points (${detail}), ${p.visitedContinents.length} continents, ${p.visitedAreas.length} areas`);
       })),
       button('Play again', renderSetup));
     return box;
@@ -302,6 +362,9 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
   } else if (s.phase === 'chooseStart') {
     box.append(el('h2', {}, who, ', choose where your journey starts'),
       el('p', { className: 'small', textContent: 'Each player starts on a different continent. Welcome bonus: Europe, Asia, Africa +3 · Americas +4 · Oceania +5.' }),
+      me.profile === 'backpacker'
+        ? el('p', { className: 'small', textContent: '🎒 Tip: from Europe, Asia or Africa you can walk to 3 continents (+3 Backpacker bonus).' })
+        : '',
       el('p', { className: 'small', textContent: 'Tap a green area on the map below.' }));
   } else if (s.quiz) {
     renderQuiz(box, s, who);

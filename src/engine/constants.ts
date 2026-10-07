@@ -82,3 +82,16 @@ export const TOUR_FEE = 1;
 
 // Blocked by lack of money this many turns in a row: the player is sent home (task 9).
 export const GO_HOME_TURNS = 3;
+
+// Profile bonuses (rulebook section 12). The start continent counts. The bonus is given once,
+// on the move that reaches that many continents.
+export const CONTINENT_BONUS: Readonly<Partial<Record<Profile, { continents: number; points: number }>>> = {
+  backpacker: { continents: 3, points: 3 },
+  luxury: { continents: 5, points: 5 },
+};
+
+// Digital Nomad: −5 off the final score (never below 0) with fewer than 3 continents.
+export const NOMAD_MIN_CONTINENTS = 3;
+export const NOMAD_PENALTY = 5;
+// From this round the Nomad's continent bar warns about the penalty.
+export const NOMAD_WARNING_ROUND = 25;

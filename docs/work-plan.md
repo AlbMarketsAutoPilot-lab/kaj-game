@@ -36,7 +36,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | 8 | Visas and citizenship (exam) | **high** | 2 | 4–5 | ✅ done |
 | 9 | Businesses, strict fees, go home | **high** | 1 | 6 | ✅ done |
 | 9b | Selling, 2 areas with airport and port | **high** | 1 | 6 | ✅ done |
-| 10 | Profile bonuses, save and resume | medium | 1 | 7 | |
+| 10 | Profile bonuses, save and resume | medium | 1 | 7 | ✅ done |
 | 11 | Event cards | medium | 1 | 7–8 | |
 | 12 | Challenges (6 types from open data) | medium | 1.5 | 8–9 | |
 | 13 | Normal robot | medium | 1 | 10 | |
@@ -133,6 +133,8 @@ on day 14 it could miss the deadline.
 - Backpacker +3 for 3 continents; Luxury +5 for 5 continents; Nomad −5 at the end with fewer
   than 3 continents (and the "Continents 2/3" bar); Backpacker tip for the Americas/Oceania.
 - Automatic save after every move; "Continue game" on the start screen.
+- Done: rules and the 9 owner-approved choices in `docs/engine.md` (task 10); `src/engine/save.ts`;
+  continent bars, the Nomad warning from round 25, the tip, and the end-screen penalty line.
 
 ### 11. Event cards — days 7–8
 
@@ -159,6 +161,12 @@ on day 14 it could miss the deadline.
   end screen. Style of the owner's poster and backgrounds. Sounds from the owner.
 - Phone first: portrait and landscape.
 - Open question: how the world map looks (simple drawn map of the 50 areas, or a list view).
+- **Guided help for human players (owner's request, task 10; planned here so it covers every
+  feature):** each turn a short guide box explains what the player can do now and what it costs
+  or earns (e.g. "You can ask for citizenship here: a test next turn, then every other player
+  pays you 2 points to enter. You can also fly from here: 1 turn, ticket 1 point…"). Every guide
+  box has a tick box "Turn off guided help"; once ticked, no guide boxes show (a setting that is
+  kept on the device). The exact texts and when each shows are decided with the owner in task 14.
 - Owner notes from the phone test (task 6):
   - The background (portrait and landscape) is stretched past the screen; the poster's borders
     must stay inside the screen.
