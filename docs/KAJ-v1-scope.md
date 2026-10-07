@@ -30,7 +30,7 @@ Target: a complete, playable v1 within about 15 days of work.
 
 ## 4. Map
 
-- **Only the 30-turn map:** 50 areas, 7 wonders, **7 airports** and **4 ports** with **9 two-way connections**. An airport or port has **1 to 3 fixed destinations**; the traveller chooses one when boarding. Luxury can choose any airport or port. (Changed in task 2b, owner-approved: 6 airports + 4 ports with one destination each could not pass the map check.)
+- **Only the 30-turn map:** 50 areas, 7 wonders, **7 airports** and **4 ports** with **9 two-way connections**. (Task 9b, owner-approved: UK & Ireland gets an airport and Japan a port, so 2 areas have both.) An airport or port has **1 to 3 fixed destinations**; the traveller chooses one when boarding. Luxury can choose any airport or port. (Changed in task 2b, owner-approved: 6 airports + 4 ports with one destination each could not pass the map check.)
 - **Starting continents: 6 choices**, all different between players: Europe, Asia, Africa, **North America**, **South America**, Oceania.
 - **Welcome bonus:** Europe, Asia, Africa +3 · North America +4 · South America +4 · Oceania +5.
 - Big countries: a country split into N parts gives +N when all parts are visited (e.g. USA East + USA West = +2).
@@ -96,7 +96,9 @@ Target: a complete, playable v1 within about 15 days of work.
 | 5 starting continents (Americas as one) | **6** (North and South America separate) |
 | Keep cards (hold up to 2) | **Not in v1** |
 | Mini missions | **Not in v1** |
-| Selling a business to another player | **Not in v1** (buying and income stay) |
+| Selling a business to another player | **In v1 from task 9b** (owner-approved in task 9; at the bought price) |
+| Fees when a player can't pay (not settled) | **Strict:** no money, no entry (visa and tour fee); "go home" after 3 turns blocked by money (task 9) |
+| Businesses at the end of the game (not settled) | **Count their price** in the final score (task 9) |
 | Mini-games: flag, bigger country, memory | **6 data-made challenges** (section 6); no memory game |
 | Landmark drawings in the airline quiz | **Text questions** |
 | 27–30 facts per country | **About 12 per area** |
@@ -105,7 +107,7 @@ Target: a complete, playable v1 within about 15 days of work.
 
 ## 10. Deferred (after v1, only with the owner's agreement)
 
-The 50-turn map (first candidate), easy and hard robots, keep cards, mini missions, selling businesses, the memory game, landmark drawings, the full 27–30 facts, the passport screen, balance simulator reports, and online play.
+The 50-turn map (first candidate), easy and hard robots, keep cards, mini missions, the memory game, landmark drawings, the full 27–30 facts, the passport screen, balance simulator reports, and online play.
 
 8 profiles are **not planned**.
 

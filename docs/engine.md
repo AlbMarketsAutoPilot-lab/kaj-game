@@ -102,7 +102,44 @@ Task 8: visas and citizenship (`tests/citizenship.test.ts`).
 - 1,000 random-robot games on the 30-turn map: about 2,200 citizenships and 1,400 visas, never
   two citizens in one area, longest "blocked" streak 4 turns, nobody stuck in the air.
 
-Not yet: businesses, event cards, challenges.
+Task 9: businesses, strict fees and "go home" (`tests/business.test.ts`).
+
+- **Businesses:** 🏛️ guided tours at each wonder (2), ✈️ airline at each airport (3), ⛴️ ferry
+  agency at each port (2): 18 on the 30-turn map.
+- **Buying:** the player standing in the area may buy, on any turn they begin there (a start area
+  counts), if nobody owns it and they have the price. It is an option on the move panel and does
+  not end the turn. Two players are never in one area, so the first to arrive has the first
+  chance (⭐ "first here" on the test board); whoever arrives next may buy if they didn't.
+  No limit per player. No selling yet (task 9b).
+- **Tour fee:** 1 point to the owner each time another player enters the wonder area (walking or
+  landing). The owner enters free.
+- **Tickets:** a paid ticket goes to the owner of the departure airline or ferry agency (also the
+  forced payment after the 3rd wrong quiz answer). The owner pays their own ticket to themselves
+  (they still need it in hand). The free quiz ticket and Backpacker trips pay nobody. No owner:
+  the ticket goes to nobody.
+- **Strict fees (owner's rule):** no money, no entry. A visa (2) and a tour fee (1) must both be
+  in hand to enter (3 if both); boarding needs the ticket plus the fees, the quiz needs the fees.
+  Fees for a trip are paid on landing. Exception: a citizenship granted or tours bought while the
+  player is travelling cost nothing on landing.
+- **End score:** points plus the price of every business owned (owner's rule). Ties as before.
+- **Go home (owner's rule):** a player whose only move is "blocked" and who has at least one way
+  out closed by money (not only by players in the way) gets a warning: on the 1st and 2nd such
+  turn in a row "Out of money… in N turns you go home"; on the 3rd the move is "go home". The
+  player goes to their starting area (if someone stands there: the nearest free area), free of
+  any fees, with the normal arrival points (usually 0). Any other move ends the count. Everyone
+  plays to the end (no elimination). Event cards (task 11) and selling (task 9b) will be the ways
+  to get money back during the countdown.
+- The engine lists the payments of the last move (`state.payments`), so the screens say who was
+  paid. The test board warns before a move with fees (visa and tour fee in one box), shows the
+  ticket owner on the "Pay" buttons and in the quiz, and the businesses on the map and players.
+- 1,000 random-robot games on the 30-turn map: about 3,700 businesses bought (1,700 tours,
+  1,400 airlines, 700 ferry agencies), 580 points of tour fees and 780 points of tickets paid to
+  other players, about 1,400 visas, longest "blocked" streak 4 turns, nobody stuck. Random robots
+  were never blocked by money, so nobody went home; "go home" is checked by the rule tests.
+- The stuck-state checker needs no change: every single area is already checked as a closed
+  area, which covers a tour area as well as a visa area; going home covers the rest.
+
+Not yet: selling, areas with both an airport and a port (task 9b), event cards, challenges.
 
 ## Choices made in task 1 (approved by the owner)
 
@@ -151,6 +188,19 @@ These points are not spelled out in the rulebook or the v1 scope.
 7. **On the tiny test map** (no airports or ports) the random robots never ask for
    citizenship, so its "blocked" check tests walking only; citizenship and visas are checked
    on the real map, with the full check, and by the rule tests.
+
+## Choices made in task 9 (approved by the owner)
+
+1. **Who may buy:** the player standing in the area, on any turn they begin there; buying does
+   not end the turn.
+2. **Tickets** go to the departure airline or ferry agency; the owner pays themselves; quiz and
+   Backpacker tickets pay nobody.
+3. **Strict fees, no exceptions** except a citizenship or tours that appeared during a trip.
+4. **Businesses count their price at the end**; buying in the last round is allowed; no limit.
+5. **Go home** after 3 turns in a row blocked by money, for every profile (no Nomad exception),
+   free of fees; nobody is eliminated.
+6. **Next (task 9b):** selling at the bought price to another player (who answers yes or no), and
+   UK & Ireland gets an airport (to the Arabian Peninsula), Japan a port (to USA West).
 
 ## Project setup
 

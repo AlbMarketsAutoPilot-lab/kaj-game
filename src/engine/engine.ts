@@ -1,5 +1,7 @@
 import {
+  BUSINESS_PRICE,
   EXAM_QUESTIONS,
+  GO_HOME_TURNS,
   MAX_ROBOTS,
   MAX_SEATS,
   MIN_SEATS,
@@ -14,6 +16,7 @@ import {
   START_CONTINENTS,
   TICKET_PRICE,
   TOTAL_ROUNDS,
+  TOUR_FEE,
   TRAVEL_TURNS,
   VISA_PRICE,
   WELCOME_BONUS,
@@ -24,11 +27,14 @@ import { randomInt } from './rng.ts';
 import type {
   Action,
   Area,
+  Business,
+  BusinessKind,
   Exam,
   GameConfig,
   GameMap,
   GameResult,
   GameState,
+  Payment,
   Player,
   Profile,
   RouteKind,
@@ -73,6 +79,8 @@ export function createGame(config: GameConfig, map: GameMap): GameState {
     askedCitizenship: false,
     citizenship: null,
     exam: null,
+    home: null,
+    broke: 0,
   }));
 
   return {
@@ -85,6 +93,8 @@ export function createGame(config: GameConfig, map: GameMap): GameState {
     round: 0,
     totalRounds: TOTAL_ROUNDS,
     quiz: null,
+    businesses: mapBusinesses(map),
+    payments: [],
     result: null,
   };
 }
@@ -125,12 +135,19 @@ export function legalActions(state: GameState, map: GameMap): Action[] {
       const moves: Action[] = [];
       for (const to of areaById(map, me.area!).neighbours) {
         if (occupied.has(to)) continue;
-        // No money, no visa: an area whose visa the player can't pay can't be entered.
-        if (visaOwner(state, me, me.area, to) && me.points < VISA_PRICE) continue;
+        // Strict fees (owner's rule, task 9): no money, no entry. A visa or tour fee
+        // the player can't pay closes the area.
+        if (me.points < feeTotal(entryFees(state, me, me.area, to))) continue;
         moves.push(...withCitizenship(state, map, me, to, { type: 'walk', to }));
       }
       moves.push(...tripActions(state, me, map));
-      return moves.length > 0 ? moves : [{ type: 'blocked' }];
+      if (moves.length === 0) {
+        // Blocked by lack of money for the 3rd turn in a row: go home.
+        const home = me.broke >= GO_HOME_TURNS - 1 && blockedByMoney(state, map, me);
+        moves.push(home ? { type: 'goHome' } : { type: 'blocked' });
+      }
+      // Buying never ends the turn, so it comes with the moves.
+      return [...moves, ...buyActions(state, me)];
     }
     case 'finished':
       return [];
@@ -142,9 +159,12 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
     throw new Error(`Illegal action: ${JSON.stringify(action)}`);
   }
   const next = structuredClone(state);
+  next.payments = [];
   const me = currentPlayer(next);
   // The "citizenship granted" turn: the request is over once the player moves on.
   if (me.exam && examOver(me.exam)) me.exam = null;
+  // Any move except waiting (or buying, which doesn't end the turn) ends a "no money" streak.
+  if (action.type !== 'blocked' && action.type !== 'buy') me.broke = 0;
 
   switch (action.type) {
     case 'chooseProfile': {
@@ -164,6 +184,7 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
       me.area = area.id;
       // The starting area counts as visited but earns no area point;
       // the welcome bonus replaces it (see docs/engine.md).
+      me.home = area.id;
       me.visitedAreas.push(area.id);
       me.visitedContinents.push(area.continent);
       me.points = addPoints(me.points, WELCOME_BONUS[area.continent]);
@@ -172,8 +193,7 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
     }
     case 'walk': {
       me.quizWrong = 0;
-      const owner = visaOwner(next, me, me.area, action.to);
-      if (owner) payVisa(me, owner);
+      payFees(next, me, entryFees(next, me, me.area, action.to), action.to);
       arrive(next, map, me, areaById(map, action.to), action.citizenship === true);
       endTurn(next, map);
       return next;
@@ -197,11 +217,11 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
         depart(next, map, me, quiz.kind, quiz.to, 0, ask); // free ticket
       } else {
         me.quizWrong += 1;
-        // After the 3rd wrong answer a player who can pay (ticket and any visa) must pay
+        // After the 3rd wrong answer a player who can pay (ticket and any fees) must pay
         // and board now. A player who can't pay may keep trying on later turns, or walk away.
         const price = TICKET_PRICE[me.profile!];
-        const visa = visaOwner(next, me, me.area, quiz.to) ? VISA_PRICE : 0;
-        if (price !== null && me.quizWrong >= QUIZ_TRIES && me.points >= price + visa) {
+        const fees = feeTotal(entryFees(next, me, me.area, quiz.to));
+        if (price !== null && me.quizWrong >= QUIZ_TRIES && me.points >= price + fees) {
           depart(next, map, me, quiz.kind, quiz.to, price, ask);
         }
       }
@@ -231,7 +251,20 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
       endTurn(next, map);
       return next;
     }
+    case 'buy': {
+      const business = businessAt(next, me.area!, action.business)!;
+      business.owner = me.seat;
+      me.points = addPoints(me.points, -BUSINESS_PRICE[business.kind]);
+      next.payments.push({ reason: 'buy', from: me.seat, to: null, amount: BUSINESS_PRICE[business.kind], area: business.area, business: business.kind });
+      return next; // the turn goes on
+    }
     case 'blocked':
+      // Count the turns in a row blocked by lack of money (not by players in the way).
+      me.broke = blockedByMoney(next, map, me) ? me.broke + 1 : 0;
+      endTurn(next, map);
+      return next;
+    case 'goHome':
+      goHome(next, map, me);
       endTurn(next, map);
       return next;
   }
@@ -252,17 +285,18 @@ export function destinations(map: GameMap, from: string, kind: RouteKind, profil
 
 // Boarding options in the player's area: pay the ticket (if they can) or try the quiz.
 // Every profile may always try the quiz, so a trip is always possible from an airport or port,
-// except to a visa area the player can't pay: the visa needs 2 points even with a free ticket.
+// except to an area whose fees (visa, tour fee) the player can't pay: the fees are due even
+// with a free ticket.
 function tripActions(state: GameState, me: Player, map: GameMap): Action[] {
   const out: Action[] = [];
   const price = TICKET_PRICE[me.profile!];
   for (const kind of ['airport', 'port'] as const) {
     for (const to of destinations(map, me.area!, kind, me.profile!)) {
-      const visa = visaOwner(state, me, me.area, to) ? VISA_PRICE : 0;
-      if (price !== null && me.points >= price + visa) {
+      const fees = feeTotal(entryFees(state, me, me.area, to));
+      if (price !== null && me.points >= price + fees) {
         out.push(...withCitizenship(state, map, me, to, { type: 'board', kind, to }));
       }
-      if (me.points >= visa) out.push(...withCitizenship(state, map, me, to, { type: 'quiz', kind, to }));
+      if (me.points >= fees) out.push(...withCitizenship(state, map, me, to, { type: 'quiz', kind, to }));
     }
   }
   return out;
@@ -276,13 +310,22 @@ function withCitizenship<A extends Action & { to: string }>(state: GameState, ma
 function depart(
   state: GameState, map: GameMap, me: Player, kind: RouteKind, to: string, ticket: number, ask: boolean,
 ): void {
-  // Task 9: the ticket goes to the owner of the departure airport or port.
-  // Until there are owners it goes to nobody (there is no bank).
-  me.points = addPoints(me.points, -ticket);
-  const visa = visaOwner(state, me, me.area, to) !== null;
+  // The ticket goes to the owner of the departure airline or ferry agency (the owner pays
+  // their own ticket to themselves); with no owner it goes to nobody (there is no bank).
+  // A free quiz ticket pays nobody.
+  if (ticket > 0) {
+    const business: BusinessKind = kind === 'airport' ? 'airline' : 'ferry';
+    const owner = businessAt(state, me.area!, business)?.owner ?? null;
+    me.points = addPoints(me.points, -ticket);
+    if (owner !== null) state.players[owner].points = addPoints(state.players[owner].points, ticket);
+    state.payments.push({ reason: 'ticket', from: me.seat, to: owner, amount: ticket, area: me.area!, business });
+  }
+  // The fees due now are paid on landing; anything new during the trip is free.
+  const fees = entryFees(state, me, me.area, to);
   me.travel = {
     kind, from: me.area!, to, turnsLeft: TRAVEL_TURNS[me.profile!][kind],
-    ...(visa ? { visa: true as const } : {}),
+    ...(fees.some((f) => f.reason === 'visa') ? { visa: true as const } : {}),
+    ...(fees.some((f) => f.reason === 'tour') ? { tours: true as const } : {}),
     ...(ask ? { citizenship: true as const } : {}),
   };
   me.area = null;
@@ -292,15 +335,16 @@ function depart(
 
 // Two players are never in one area: if the destination is taken, the plane or ship
 // waits and tries again at the end of the next travel turn.
-// The visa is paid on landing, only if it was due when the player boarded (boarding needed
-// the ticket plus the visa). Points can't drop in the air yet; if they ever do (challenges,
-// task 12), the plane waits rather than enter unpaid.
+// The visa and tour fee are paid on landing, only if they were due when the player boarded
+// (boarding needed the ticket plus the fees). Points can't drop in the air yet; if they ever
+// do (challenges, task 12), the plane waits rather than enter unpaid.
 function land(state: GameState, map: GameMap, me: Player): void {
   const trip = me.travel!;
   if (occupiedAreas(state, me.seat).has(trip.to)) return;
-  const owner = trip.visa ? visaOwner(state, me, trip.from, trip.to) : null;
-  if (owner && me.points < VISA_PRICE) return;
-  if (owner) payVisa(me, owner);
+  const fees = entryFees(state, me, trip.from, trip.to)
+    .filter((f) => (f.reason === 'visa' ? trip.visa : trip.tours));
+  if (me.points < feeTotal(fees)) return;
+  payFees(state, me, fees, trip.to);
   me.travel = null;
   arrive(state, map, me, areaById(map, trip.to), trip.citizenship === true);
 }
@@ -321,9 +365,112 @@ export function visaOwner(state: GameState, me: Player, from: string | null, to:
   return owner;
 }
 
-function payVisa(me: Player, owner: Player): void {
-  me.points = addPoints(me.points, -VISA_PRICE);
-  owner.points = addPoints(owner.points, VISA_PRICE);
+// ---------- businesses, fees and "go home" (rulebook section 6, docs/engine.md task 9) ----------
+
+// One business per wonder (guided tours), airport (airline) and port (ferry agency).
+export function mapBusinesses(map: GameMap): Business[] {
+  const routes = map.routes ?? [];
+  const has = (id: string, kind: 'airport' | 'port') => routes.some((r) => r.kind === kind && (r.a === id || r.b === id));
+  return map.areas.flatMap((a): Business[] => [
+    ...(a.wonder ? [{ kind: 'tours' as const, area: a.id, owner: null }] : []),
+    ...(has(a.id, 'airport') ? [{ kind: 'airline' as const, area: a.id, owner: null }] : []),
+    ...(has(a.id, 'port') ? [{ kind: 'ferry' as const, area: a.id, owner: null }] : []),
+  ]);
+}
+
+export function businessAt(state: GameState, area: string, kind: BusinessKind): Business | undefined {
+  return state.businesses.find((b) => b.area === area && b.kind === kind);
+}
+
+// What a player's businesses are worth: the price of each (counted in the final score).
+export function businessValue(state: GameState, seat: number): number {
+  return state.businesses.filter((b) => b.owner === seat).reduce((sum, b) => sum + BUSINESS_PRICE[b.kind], 0);
+}
+
+// Final score: points plus the price of every business owned (owner's rule, task 9).
+export function finalScore(state: GameState, p: Player): number {
+  return p.points + businessValue(state, p.seat);
+}
+
+// The player standing in an area may buy its business if nobody owns it and they can pay.
+// Two players are never in one area, so the first to arrive has the first chance (⭐ right to
+// buy at a wonder); if they leave without buying, whoever arrives next may buy.
+function buyActions(state: GameState, me: Player): Action[] {
+  return state.businesses
+    .filter((b) => b.area === me.area && b.owner === null && me.points >= BUSINESS_PRICE[b.kind])
+    .map((b) => ({ type: 'buy', business: b.kind }));
+}
+
+export interface Fee {
+  reason: 'visa' | 'tour';
+  to: Player;
+  amount: number;
+}
+
+// What `me` must pay to enter `to` from `from` (null: from nowhere): the visa to the citizen,
+// and the tour fee to the owner of the guided tours. Fees are strict: no money, no entry.
+export function entryFees(state: GameState, me: Player, from: string | null, to: string): Fee[] {
+  const fees: Fee[] = [];
+  const citizen = visaOwner(state, me, from, to);
+  if (citizen) fees.push({ reason: 'visa', to: citizen, amount: VISA_PRICE });
+  const tours = businessAt(state, to, 'tours');
+  if (tours && tours.owner !== null && tours.owner !== me.seat) {
+    fees.push({ reason: 'tour', to: state.players[tours.owner], amount: TOUR_FEE });
+  }
+  return fees;
+}
+
+export function feeTotal(fees: Fee[]): number {
+  return fees.reduce((sum, f) => sum + f.amount, 0);
+}
+
+function payFees(state: GameState, me: Player, fees: Fee[], area: string): void {
+  for (const f of fees) {
+    me.points = addPoints(me.points, -f.amount);
+    f.to.points = addPoints(f.to.points, f.amount);
+    const payment: Payment = { reason: f.reason, from: me.seat, to: f.to.seat, amount: f.amount, area };
+    state.payments.push(payment);
+  }
+}
+
+// The player has no move, and at least one way out is closed only by money (a visa, tour fee
+// or ticket they can't pay), not just by other players standing in the way.
+export function blockedByMoney(state: GameState, map: GameMap, me: Player): boolean {
+  if (me.area === null) return false;
+  const occupied = occupiedAreas(state, me.seat);
+  const tooDear = (to: string) => me.points < feeTotal(entryFees(state, me, me.area, to));
+  if (areaById(map, me.area).neighbours.some((to) => !occupied.has(to) && tooDear(to))) return true;
+  return (['airport', 'port'] as const).some((kind) => destinations(map, me.area!, kind, me.profile!).some(tooDear));
+}
+
+// Where "go home" sends a player: the starting area, or if someone stands there, the nearest
+// free area to it (walking, planes and ships), never the area the player is leaving.
+export function homeFor(state: GameState, map: GameMap, me: Player): string {
+  const occupied = occupiedAreas(state, me.seat);
+  const home = me.home!;
+  if (!occupied.has(home)) return home;
+  const links = (id: string) => [
+    ...areaById(map, id).neighbours,
+    ...(map.routes ?? []).flatMap((r) => (r.a === id ? [r.b] : r.b === id ? [r.a] : [])),
+  ];
+  const seen = new Set([home]);
+  for (let queue = [home], i = 0; i < queue.length; i++) {
+    for (const n of links(queue[i])) {
+      if (seen.has(n)) continue;
+      if (!occupied.has(n) && n !== me.area) return n;
+      seen.add(n);
+      queue.push(n);
+    }
+  }
+  return me.area!;
+}
+
+// Go home: free (no visa, no tour fee: the game moves the player), with the normal arrival
+// points (usually 0, as home is already visited).
+function goHome(state: GameState, map: GameMap, me: Player): void {
+  const to = homeFor(state, map, me);
+  me.quizWrong = 0;
+  if (to !== me.area) arrive(state, map, me, areaById(map, to), false);
 }
 
 // Citizenship can be asked on arrival in a new area, once per game, never by the Nomad,
@@ -452,16 +599,18 @@ function endTurn(state: GameState, map: GameMap): void {
     if (state.round > state.totalRounds) {
       state.round = state.totalRounds;
       state.phase = 'finished';
-      state.result = rank(state.players);
+      state.result = rank(state.players, state.businesses);
       return;
     }
   }
   startTurn(state, map);
 }
 
-// Most points wins; ties go to more continents, then more areas.
-export function rank(players: Player[]): GameResult {
-  const key = (p: Player) => [p.points, p.visitedContinents.length, p.visitedAreas.length];
+// Most points (plus the price of the businesses owned) wins; ties go to more continents,
+// then more areas.
+export function rank(players: Player[], businesses: Business[] = []): GameResult {
+  const value = (p: Player) => businesses.filter((b) => b.owner === p.seat).reduce((sum, b) => sum + BUSINESS_PRICE[b.kind], 0);
+  const key = (p: Player) => [p.points + value(p), p.visitedContinents.length, p.visitedAreas.length];
   const compare = (a: Player, b: Player) => {
     const ka = key(a);
     const kb = key(b);

@@ -1,10 +1,12 @@
 // First playable screen (task 3): a plain test board on top of the engine.
 // No final art yet. Robots pick random legal moves.
 
-import { POINTS_BUSINESS_CITIZENSHIP, TICKET_PRICE, TRAVEL_TURNS, VISA_PRICE } from '../engine/constants.ts';
-import { apply, createGame, currentPlayer, legalActions, visaOwner } from '../engine/engine.ts';
+import { BUSINESS_PRICE, GO_HOME_TURNS, POINTS_BUSINESS_CITIZENSHIP, TICKET_PRICE, TOUR_FEE, TRAVEL_TURNS, VISA_PRICE } from '../engine/constants.ts';
+import {
+  apply, blockedByMoney, businessAt, businessValue, createGame, currentPlayer, entryFees, feeTotal, finalScore, homeFor, legalActions,
+} from '../engine/engine.ts';
 import { randomRobotAction } from '../engine/robot.ts';
-import type { Action, Area, GameState, Player, Profile, RouteKind, SeatKind } from '../engine/types.ts';
+import type { Action, Area, BusinessKind, GameState, Payment, Player, Profile, RouteKind, SeatKind } from '../engine/types.ts';
 import { map30 } from '../maps/map30.ts';
 
 const COLOURS = ['#e4572e', '#2e86de', '#29a36a', '#e0a100'];
@@ -20,6 +22,13 @@ const QUIZ_SECONDS = 15;
 // Citizenship test: 15 seconds for each question (owner's choice, task 8).
 const EXAM_SECONDS = 15;
 const VEHICLE: Record<RouteKind, string> = { airport: '✈️', port: '⛴️' };
+const BUSINESS_ICON: Record<BusinessKind, string> = { tours: '🏛️', airline: '✈️', ferry: '⛴️' };
+const BUSINESS_NAME: Record<BusinessKind, string> = { tours: 'guided tours', airline: 'airline', ferry: 'ferry agency' };
+const BUSINESS_EARNS: Record<BusinessKind, string> = {
+  tours: `every other player pays you ${TOUR_FEE} point to enter`,
+  airline: 'every paid plane ticket from here goes to you',
+  ferry: 'every paid ship ticket from here goes to you',
+};
 
 const app = document.getElementById('app')!;
 const areaById = new Map(map30.areas.map((a) => [a.id, a]));
@@ -33,8 +42,8 @@ let quizTimer = 0;
 let askCitizenship = false;
 // A short message about the last move (e.g. "request approved"), shown on the next screen.
 let note = '';
-// A move into a visa area, waiting for the player to confirm the 2-point visa.
-let pendingVisa: Action | null = null;
+// A move into an area with fees (visa, tour fee), waiting for the player to confirm.
+let pendingFees: Action | null = null;
 
 // ---------- small DOM helpers ----------
 
@@ -120,32 +129,51 @@ function act(action: Action): void {
   const mover = currentPlayer(state);
   const name = COLOUR_NAMES[mover.seat];
   const examBefore = mover.exam;
-  const trip = mover.travel;
-  const owner = action.type === 'walk' ? visaOwner(state, mover, mover.area, action.to) : null;
+  const home = action.type === 'goHome' ? homeFor(state, map30, mover) : null;
   state = apply(state, map30, action);
   const after = state.players[mover.seat];
-  const landed = trip?.visa && !after.travel ? state.players.find((p) => p.seat !== mover.seat && p.citizenship?.includes(trip.to)) : null;
-  const paidTo = owner ?? landed ?? null;
+  const lines: string[] = [];
   if (!examBefore && after.exam) {
     const where = areaById.get(after.exam.area)!.name;
-    note = after.exam.stage === 'submitted'
+    lines.push(after.exam.stage === 'submitted'
       ? `💎 ${name}: your citizenship request for ${where} is accepted. Citizenship will be granted next turn!`
-      : `🛂 ${name}: your citizenship request for ${where} has been approved! Next turn: the citizenship test, ${after.exam.questions.length} questions, ${EXAM_SECONDS} seconds each. No looking things up!`;
-  } else if (paidTo) {
-    note = `🛂 ${name} paid a ${VISA_PRICE}-point visa to ${COLOUR_NAMES[paidTo.seat]} to enter ${areaById.get(after.area!)!.name}.`;
-  } else {
-    note = '';
+      : `🛂 ${name}: your citizenship request for ${where} has been approved! Next turn: the citizenship test, ${after.exam.questions.length} questions, ${EXAM_SECONDS} seconds each. No looking things up!`);
   }
+  if (home) lines.push(`🏠 ${name} ran out of money, so the trip ends here: ${name} goes home to ${areaById.get(home)!.name}, free of any fees.`);
+  lines.push(...state.payments.map(paymentNote).filter((t) => t !== ''));
+  note = lines.join(' ');
   askCitizenship = false;
-  pendingVisa = null;
+  pendingFees = null;
   render();
 }
 
-// Moves into a visa area ask first: "entering costs a 2-point visa".
+// "Who was paid", after a move.
+function paymentNote(p: Payment): string {
+  const from = COLOUR_NAMES[p.from];
+  const to = p.to === null ? '' : COLOUR_NAMES[p.to];
+  const where = areaById.get(p.area)!.name;
+  switch (p.reason) {
+    case 'visa':
+      return `🛂 ${from} paid a ${p.amount}-point visa to ${to} to enter ${where}.`;
+    case 'tour':
+      return `🏛️ ${from} paid a ${p.amount}-point tour fee to ${to}, owner of the guided tours in ${where}.`;
+    case 'ticket': {
+      const business = `${BUSINESS_ICON[p.business!]} ${BUSINESS_NAME[p.business!]} in ${where}`;
+      if (p.to === null) return '';
+      return p.to === p.from
+        ? `${from}'s ${p.amount}-point ticket went to ${from}'s own ${business}.`
+        : `${from}'s ${p.amount}-point ticket went to ${to}, owner of the ${business}.`;
+    }
+    case 'buy':
+      return `${BUSINESS_ICON[p.business!]} ${from} bought the ${BUSINESS_NAME[p.business!]} in ${where} for ${p.amount} points: ${BUSINESS_EARNS[p.business!].replace('you', from)}. It counts ${p.amount} points at the end.`;
+  }
+}
+
+// Moves into an area with fees ask first: "entering costs a 2-point visa / 1-point tour fee".
 function go(action: Action): void {
   const s = state!;
-  if ('to' in action && visaOwner(s, currentPlayer(s), currentPlayer(s).area, action.to)) {
-    pendingVisa = action;
+  if ('to' in action && entryFees(s, currentPlayer(s), currentPlayer(s).area, action.to).length > 0) {
+    pendingFees = action;
     render();
   } else {
     act(action);
@@ -201,12 +229,14 @@ function renderPlayers(s: GameState): HTMLElement {
       const card = el('div', { className: 'player' + (p === me && s.phase !== 'finished' ? ' active' : '') },
         el('div', {}, dot(seat), ` ${COLOUR_NAMES[seat]} ${p.kind === 'robot' ? '🤖' : '🙂'}`),
         el('div', { className: 'small', textContent: p.profile ? PROFILE_LABEL[p.profile] : 'no profile yet' }),
-        el('div', { className: 'points', textContent: `${p.points} points` }),
+        el('div', { className: 'points', textContent: `${p.points} points${businessValue(s, seat) ? ` + 🏢 ${businessValue(s, seat)}` : ''}` }),
         el('div', { className: 'small', textContent: `📍 ${area}` }),
         el('div', { className: 'small', textContent: p.citizenship
           ? `🛂 Citizen of ${citizenshipName(p.citizenship)}`
           : p.exam ? `🛂 Asking for citizenship in ${areaById.get(p.exam.area)!.name}` : '' }),
-        el('div', { className: 'small', textContent: `${plural(p.visitedContinents.length, 'continent')} · ${plural(p.visitedAreas.length, 'area')}` }));
+        el('div', { className: 'small', textContent: `${plural(p.visitedContinents.length, 'continent')} · ${plural(p.visitedAreas.length, 'area')}` }),
+        el('div', { className: 'small', textContent: s.businesses.filter((b) => b.owner === seat)
+          .map((b) => `${BUSINESS_ICON[b.kind]} ${areaById.get(b.area)!.name}`).join(' · ') }));
       card.style.borderColor = COLOURS[seat];
       return card;
     }));
@@ -224,7 +254,8 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
       el('h2', { textContent: r.winners.length > 1 ? `It's a draw: ${names}! 🎉` : `${names} wins! 🎉` }),
       el('ol', {}, ...r.ranking.map((seat) => {
         const p = s.players[seat];
-        return el('li', {}, dot(seat), ` ${COLOUR_NAMES[seat]}: ${p.points} points, ${p.visitedContinents.length} continents, ${p.visitedAreas.length} areas`);
+        const value = businessValue(s, seat);
+        return el('li', {}, dot(seat), ` ${COLOUR_NAMES[seat]}: ${finalScore(s, p)} points${value ? ` (${p.points} + 🏢 ${value} for businesses)` : ''}, ${p.visitedContinents.length} continents, ${p.visitedAreas.length} areas`);
       })),
       button('Play again', renderSetup));
     return box;
@@ -260,16 +291,18 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
       el('div', { className: 'row' }, button('Continue the journey', () => act({ type: 'travel' }))));
   } else {
     const here = areaById.get(me.area!)!;
-    if (pendingVisa && 'to' in pendingVisa) {
-      const a = pendingVisa;
-      const owner = visaOwner(s, me, me.area, a.to)!;
+    if (pendingFees && 'to' in pendingFees) {
+      const a = pendingFees;
+      const fees = entryFees(s, me, me.area, a.to);
       const where = areaById.get(a.to)!.name;
-      const when = a.type === 'walk' ? 'Entering it costs' : 'You will pay on landing';
-      box.append(el('h2', {}, who, `: ${where} needs a visa 🛂`),
-        el('p', { textContent: `${where} is ${COLOUR_NAMES[owner.seat]}'s citizenship. ${when} a ${VISA_PRICE}-point visa, paid to ${COLOUR_NAMES[owner.seat]}.` }),
+      box.append(el('h2', {}, who, `: entering ${where} costs ${plural(feeTotal(fees), 'point')}`),
+        el('ul', {}, ...fees.map((f) => el('li', { textContent: f.reason === 'visa'
+          ? `🛂 Visa: ${f.amount} points to ${COLOUR_NAMES[f.to.seat]} (${where} is ${COLOUR_NAMES[f.to.seat]}'s citizenship)`
+          : `🏛️ Tour fee: ${f.amount} point to ${COLOUR_NAMES[f.to.seat]} (owner of the guided tours in ${where})` }))),
+        el('p', { className: 'small', textContent: a.type === 'walk' ? 'You pay when you enter.' : 'You pay when you land.' }),
         el('div', { className: 'row' },
-          button(a.type === 'walk' ? `Pay ${VISA_PRICE} and enter` : 'Go anyway', () => act(a)),
-          button('Cancel', () => { pendingVisa = null; render(); })));
+          button(a.type === 'walk' ? `Pay ${feeTotal(fees)} and enter` : 'Go anyway', () => act(a)),
+          button('Cancel', () => { pendingFees = null; render(); })));
       return box;
     }
     if (me.exam?.stage === 'granted') {
@@ -285,6 +318,18 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
         el('p', { textContent: `🎉 Your citizenship of ${citizenshipName(me.citizenship!)} is now granted! You may travel on.${me.profile === 'business' ? ` 💼 +${POINTS_BUSINESS_CITIZENSHIP} points.` : ''}` })));
     }
     box.append(el('h2', {}, who, `, you are in ${here.name}`), el('p', { className: 'small', textContent: travelNote(me) }));
+    const businessesHere = s.businesses.filter((b) => b.area === here.id);
+    if (businessesHere.length > 0) {
+      box.append(el('p', { className: 'small', textContent: businessesHere.map((b) => `${BUSINESS_ICON[b.kind]} ${capital(BUSINESS_NAME[b.kind])} here: ${
+        b.owner === null ? `for sale, ${BUSINESS_PRICE[b.kind]} points (${BUSINESS_EARNS[b.kind]})` : b.owner === me.seat ? 'yours' : `owned by ${COLOUR_NAMES[b.owner]}`}`).join(' · ') }));
+    }
+    if (actions.some((a) => a.type === 'blocked' || a.type === 'goHome') && blockedByMoney(s, map30, me)) {
+      const homeName = areaById.get(homeFor(s, map30, me))!.name;
+      const left = GO_HOME_TURNS - 1 - me.broke;
+      box.append(el('p', { className: 'note', textContent: left <= 0
+        ? `🏠 Your money has run out, and your trip ends here. You go home to ${homeName}, free of any fees.`
+        : `💸 Out of money! You can't pay to enter any area or to board. Wait for luck. ${left === 1 ? 'Next turn' : `In ${left} turns`}, if you still can't pay, your trip ends and you go home to ${homeName}.` }));
+    }
     const offered = asksOffered(actions);
     if (offered.length > 0) {
       const tick = el('input', { type: 'checkbox', checked: askCitizenship });
@@ -299,35 +344,54 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
       const mark = canAsk(a) ? ' 🛂' : '';
       if (a.type === 'walk') {
         const to = areaById.get(a.to)!;
-        row.append(button(`🚶 ${to.name}${gainLabel(s, a, to)}${visaLabel(s, a.to)}${mark}`, () => go(pick(actions, a))));
+        row.append(button(`🚶 ${to.name}${gainLabel(s, a, to)}${feeLabel(s, a.to)}${mark}`, () => go(pick(actions, a))));
       } else if (a.type === 'board') {
-        row.append(button(`${VEHICLE[a.kind]} Pay ${TICKET_PRICE[me.profile!]} → ${areaById.get(a.to)!.name}${visaLabel(s, a.to)}${mark}`, () => go(pick(actions, a))));
+        row.append(button(`${VEHICLE[a.kind]} Pay ${TICKET_PRICE[me.profile!]}${ticketTo(s, a.kind)} → ${areaById.get(a.to)!.name}${feeLabel(s, a.to)}${mark}`, () => go(pick(actions, a))));
       } else if (a.type === 'quiz') {
-        row.append(button(`${VEHICLE[a.kind]} Quiz for a free ticket → ${areaById.get(a.to)!.name}${visaLabel(s, a.to)}${mark}`, () => go(pick(actions, a))));
+        row.append(button(`${VEHICLE[a.kind]} Quiz for a free ticket → ${areaById.get(a.to)!.name}${feeLabel(s, a.to)}${mark}`, () => go(pick(actions, a))));
       } else if (a.type === 'blocked') {
         row.append(button('⛔ No area you can enter — wait this turn', () => act(a)));
+      } else if (a.type === 'goHome') {
+        row.append(button(`🏠 Go home to ${areaById.get(homeFor(s, map30, me))!.name}`, () => act(a)));
+      } else if (a.type === 'buy') {
+        const first = !s.players.some((p) => p.seat !== me.seat && p.visitedAreas.includes(here.id));
+        row.append(button(`${BUSINESS_ICON[a.business]} Buy the ${BUSINESS_NAME[a.business]} here −${BUSINESS_PRICE[a.business]}${first ? ' ⭐ first here' : ''}`, () => act(a)));
       }
     }
     box.append(row,
       el('p', { className: 'small', textContent: 'New area +1 · new continent +2 · ⭐ wonder +1 more · 🧩 big country: 0 until every part is visited, then +1 + number of parts.' }),
+      el('p', { className: 'small', textContent: `Businesses: buying doesn't end your turn, and each one counts its price at the end. Fees are strict: no money, no entry. Can't pay for ${GO_HOME_TURNS} turns in a row? You go home.` }),
       renderBigCountries(me));
   }
   return box;
 }
 
-// Points this move would give, found by trying it on a copy of the state (visa not included).
+// Points this move would give, found by trying it on a copy of the state (fees not included).
 function gainLabel(s: GameState, action: Action, to: Area): string {
   const before = currentPlayer(s).points;
   const after = apply(s, map30, action).players[currentPlayer(s).seat].points;
-  const gain = after - before + (visaOwner(s, currentPlayer(s), currentPlayer(s).area, to.id) ? VISA_PRICE : 0);
+  const gain = after - before + feeTotal(entryFees(s, currentPlayer(s), currentPlayer(s).area, to.id));
   if (gain > 0) return ` ✨ +${gain}`;
   const me = currentPlayer(s);
   return to.bigCountry && !me.visitedAreas.includes(to.id) ? ' 🧩' : '';
 }
 
-function visaLabel(s: GameState, to: string): string {
-  const owner = visaOwner(s, currentPlayer(s), currentPlayer(s).area, to);
-  return owner ? ` 🛂 visa −${VISA_PRICE} to ${COLOUR_NAMES[owner.seat]}` : '';
+function feeLabel(s: GameState, to: string): string {
+  return entryFees(s, currentPlayer(s), currentPlayer(s).area, to).map((f) => f.reason === 'visa'
+    ? ` 🛂 visa −${f.amount} to ${COLOUR_NAMES[f.to.seat]}`
+    : ` 🏛️ tour −${f.amount} to ${COLOUR_NAMES[f.to.seat]}`).join('');
+}
+
+// Who gets the ticket from this airport or port: " (to Blue's airline)".
+function ticketTo(s: GameState, kind: RouteKind): string {
+  const me = currentPlayer(s);
+  const business = businessAt(s, me.area!, kind === 'airport' ? 'airline' : 'ferry');
+  if (business?.owner === undefined || business.owner === null) return '';
+  return business.owner === me.seat ? ' (to yourself)' : ` (to ${COLOUR_NAMES[business.owner]})`;
+}
+
+function capital(text: string): string {
+  return text[0].toUpperCase() + text.slice(1);
 }
 
 function citizenshipName(areas: string[]): string {
@@ -390,7 +454,7 @@ function renderQuiz(box: HTMLElement, s: GameState, who: HTMLElement): void {
     el('p', { textContent: question.text }),
     el('div', { className: 'row' }, ...question.options.map((o, i) => button(o, () => act({ type: 'answer', choice: i as 0 | 1 })))),
     clock,
-    el('p', { className: 'small', textContent: `Wrong answers here so far: ${currentPlayer(s).quizWrong}. A wrong answer uses this turn.` }));
+    el('p', { className: 'small', textContent: `Wrong answers here so far: ${currentPlayer(s).quizWrong}. A wrong answer uses this turn.${forcedPayNote(s, kind)}` }));
   quizTimer = window.setInterval(() => {
     if (state !== s) return clearInterval(quizTimer);
     left -= 1;
@@ -400,6 +464,14 @@ function renderQuiz(box: HTMLElement, s: GameState, who: HTMLElement): void {
       act({ type: 'answer', choice: (1 - question.correct) as 0 | 1 });
     }
   }, 1000);
+}
+
+// After the 3rd wrong answer a player who can pay must pay: say who gets the ticket.
+function forcedPayNote(s: GameState, kind: RouteKind): string {
+  const price = TICKET_PRICE[currentPlayer(s).profile!];
+  if (price === null) return '';
+  const to = ticketTo(s, kind);
+  return ` After 3 wrong answers here you must pay the ${price}-point ticket and go, if you can${to ? ` (the ticket goes ${to.slice(2, -1)})` : ''}.`;
 }
 
 function travelNote(me: Player): string {
@@ -433,8 +505,10 @@ function renderMap(s: GameState): HTMLElement {
           const canGo = humanTurn && legal.has(a.id);
           const tags = `${a.wonder ? '⭐' : ''}${a.bigCountry ? '🧩' : ''}${(map30.routes ?? []).some((r) => r.kind === 'airport' && (r.a === a.id || r.b === a.id)) ? '✈️' : ''}${(map30.routes ?? []).some((r) => r.kind === 'port' && (r.a === a.id || r.b === a.id)) ? '⛴️' : ''}`;
           const citizen = s.players.find((p) => p.citizenship?.includes(a.id));
+          const owned = s.businesses.filter((b) => b.area === a.id && b.owner !== null)
+            .flatMap((b) => [` ${BUSINESS_ICON[b.kind]}`, dot(b.owner!)]);
           const tile = el('div', { className: 'area' + (canGo ? ' legal' : '') + (here ? ' occupied' : ''), title: (a.countries ?? []).join(', ') },
-            el('div', { className: 'name' }, `${a.name} ${tags}`, ...(citizen ? [' 🛂', dot(citizen.seat)] : [])),
+            el('div', { className: 'name' }, `${a.name} ${tags}`, ...(citizen ? [' 🛂', dot(citizen.seat)] : []), ...owned),
             el('div', { className: 'marks' }, ...visitedBy.map((p) => {
               const m = dot(p.seat);
               m.classList.add(p.area === a.id ? 'big' : 'faint');

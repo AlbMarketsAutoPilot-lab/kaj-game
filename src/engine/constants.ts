@@ -1,4 +1,4 @@
-import type { Continent, Profile, RouteKind } from './types.ts';
+import type { BusinessKind, Continent, Profile, RouteKind } from './types.ts';
 
 // v1 has only the 30-turn map (KAJ-v1-scope.md section 4).
 export const TOTAL_ROUNDS = 30;
@@ -69,3 +69,16 @@ export const POINTS_BUSINESS_CITIZENSHIP = 3;
 
 // Citizenship test: 3 a/b questions (v1 scope, changed by the owner in task 8: no study step).
 export const EXAM_QUESTIONS = 3;
+
+// Businesses (rulebook section 6). At the end of the game each one counts for its price.
+export const BUSINESS_PRICE: Readonly<Record<BusinessKind, number>> = {
+  tours: 2,
+  airline: 3,
+  ferry: 2,
+};
+
+// Guided tours: 1 point to the owner each time another player enters the wonder area.
+export const TOUR_FEE = 1;
+
+// Blocked by lack of money this many turns in a row: the player is sent home (task 9).
+export const GO_HOME_TURNS = 3;

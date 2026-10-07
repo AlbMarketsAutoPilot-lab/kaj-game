@@ -61,6 +61,8 @@ test(`random robots play ${GAMES} games on the 30-turn map with planes and ships
   let quizzes = 0;
   let citizens = 0;
   let visas = 0;
+  let purchases = 0;
+  let income = 0;
   let longestTrip = 0;
   let longestBlock = 0;
   for (let g = 0; g < GAMES; g++) {
@@ -77,15 +79,17 @@ test(`random robots play ${GAMES} games on the 30-turn map with planes and ships
       const [action, next] = randomRobotAction(s, map30, robotSeed);
       robotSeed = next;
       if (action.type === 'quiz') quizzes++;
-      if (s.phase === 'play' && !s.quiz) {
+      if (s.phase === 'play' && !s.quiz && action.type !== 'buy') {
         blockedInARow[seat] = action.type === 'blocked' ? blockedInARow[seat] + 1 : 0;
         longestBlock = Math.max(longestBlock, blockedInARow[seat]);
       }
-      const owed = s.players.map((q) => q.points);
       s = apply(s, map30, action);
       checkInvariants(s);
-      // A visa: another player gets exactly 2 points from this move.
-      if (action.type !== 'exam') visas += s.players.filter((q, i) => q.seat !== seat && q.points - owed[i] === 2).length;
+      for (const pay of s.payments) {
+        if (pay.reason === 'visa') visas++;
+        if (pay.reason === 'buy') purchases++;
+        if ((pay.reason === 'tour' || pay.reason === 'ticket') && pay.to !== null && pay.to !== pay.from) income += pay.amount;
+      }
       const p = s.players[seat];
       if (p.travel) {
         if (inTransit[seat] === 0) trips++;
@@ -109,6 +113,8 @@ test(`random robots play ${GAMES} games on the 30-turn map with planes and ships
   assert.ok(citizens > GAMES, `only ${citizens} citizenships`);
   assert.ok(visas > GAMES / 2, `only ${visas} visas`);
   assert.ok(quizzes > GAMES, `only ${quizzes} quizzes`);
+  assert.ok(purchases > GAMES, `only ${purchases} businesses bought`);
+  assert.ok(income > GAMES, `only ${income} points of business income`);
   // A ship takes at most 3 travel turns; a taken destination adds a few waiting turns.
   assert.ok(longestTrip <= 8, `a trip lasted ${longestTrip} turns`);
   assert.ok(longestBlock <= 5, `a player was blocked ${longestBlock} turns in a row`);
