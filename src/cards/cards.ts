@@ -1,7 +1,8 @@
 // Event cards (rulebook section 10, docs/engine.md task 11). Reviewed by the owner on
-// docs/cards.md (made by `node scripts/cards-review.ts`).
+// docs/cards.md (made by `node scripts/cards-review.ts`). Since task 12 there are no cards on
+// trips (the plane and ship decks are gone): a travel turn may have a challenge instead.
 // - points: the change in points (never below 0 in the game);
-// - loseTurn: in an area the turn is lost; on a trip the plane or ship is one turn late;
+// - loseTurn: the turn is lost;
 // - area: a country card that is only drawn in that area.
 import type { EventCard } from '../engine/types.ts';
 
@@ -33,31 +34,6 @@ export const CARDS: readonly EventCard[] = [
   { id: 'a10', deck: 'country', area: 'brazil-north', points: -1, text: 'Mosquitoes in the Amazon! You buy a net and some cream.' },
   { id: 'a11', deck: 'country', area: 'scandinavia', points: 2, text: 'You see the northern lights dance across the sky.' },
   { id: 'a12', deck: 'country', area: 'china-east', points: 1, text: 'You walk along the Great Wall on a clear day.' },
-
-  // ---------- plane cards ----------
-  { id: 'p1', deck: 'plane', points: 1, text: 'The pilot invites you to see the cockpit.' },
-  { id: 'p2', deck: 'plane', points: 1, text: 'You get a window seat and a great view of the clouds.' },
-  { id: 'p3', deck: 'plane', points: 1, text: 'Your neighbour on the plane tells you the best places to visit.' },
-  { id: 'p4', deck: 'plane', points: 1, text: 'You get a free meal upgrade.' },
-  { id: 'p5', deck: 'plane', points: -1, text: 'Bumpy air! You spill juice on your map and buy a new one.' },
-  { id: 'p6', deck: 'plane', points: -1, text: 'Your headphones break during the flight.' },
-  { id: 'p7', deck: 'plane', points: -1, text: 'You pay extra for a bag that is too heavy.' },
-  { id: 'p8', deck: 'plane', points: 2, text: 'The airline gives you bonus miles for flying with them.' },
-  { id: 'p9', deck: 'plane', points: -2, text: 'Your suitcase goes to the wrong city. You buy new clothes.' },
-  { id: 'p10', deck: 'plane', points: 0, loseTurn: true, text: 'Thick fog at the airport. Your flight lands one turn late.' },
-
-  // ---------- ship cards ----------
-  { id: 's1', deck: 'ship', points: 1, text: 'Dolphins swim next to the ship.' },
-  { id: 's2', deck: 'ship', points: 1, text: 'The captain teaches you how to tie sailor knots.' },
-  { id: 's3', deck: 'ship', points: 1, text: 'You see a whale jump out of the water.' },
-  { id: 's4', deck: 'ship', points: -1, text: 'Big waves! You feel seasick and buy medicine.' },
-  { id: 's5', deck: 'ship', points: -1, text: 'Your hat flies into the sea.' },
-  { id: 's6', deck: 'ship', points: -1, text: 'You pay for a cabin with a window after a noisy night.' },
-  { id: 's7', deck: 'ship', points: 2, text: 'You help the crew in a storm. The captain thanks you.' },
-  { id: 's8', deck: 'ship', points: -2, text: 'Seagulls steal your lunch, and the ship café is expensive.' },
-  { id: 's9', deck: 'ship', points: 0, loseTurn: true, text: 'Strong winds! The ship arrives one turn late.' },
-  { id: 's10', deck: 'ship', points: 0, loseTurn: true, text: 'The engine needs repairs. The ship waits one turn at sea.' },
-  { id: 's11', deck: 'ship', points: -5, text: 'Pirates! They take part of your money before the navy chases them away.' },
 
   // ---------- Backpacker cards (helpers, only for the Backpacker, in an area) ----------
   { id: 'b1', deck: 'backpacker', points: 2, text: 'A truck driver takes you further down the road for free.' },

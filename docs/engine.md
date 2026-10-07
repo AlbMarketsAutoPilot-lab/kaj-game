@@ -185,7 +185,7 @@ Task 11: event cards (`src/cards/cards.ts`, review page [`cards.md`](cards.md), 
   plane 10, ship 11, Backpacker 8 (all helpful, drawn only by the Backpacker, with the country
   cards). Mostly ±1, some ±2 or "lose a turn", rare ±5. A random card each time (the same card can
   come again), with the game's dice.
-- **When:** at the start of every player's turn in rounds 3, 6 … 27 (9 cards; none in the last
+- **When** (changed in task 12: each player's 3rd, 6th … land turn, and no cards on trips): at the start of every player's turn in rounds 3, 6 … 27 (9 cards; none in the last
   round), standing in an area; and on every travel turn (a plane or ship card). One card per turn
   at most: a traveller draws only the travel card. No scheduled card during a citizenship request
   (the exam is the event); it is skipped, not moved.
@@ -208,7 +208,33 @@ Task 11: event cards (`src/cards/cards.ts`, review page [`cards.md`](cards.md), 
   owner-approved), longest
   "blocked" streak 2, nobody stuck.
 
-Not yet: challenges.
+Task 12: challenges (`src/challenges/challenges.ts`, review page [`challenges.md`](challenges.md),
+`tests/challenges.test.ts`).
+
+- **995 questions of 6 types** (flag 174, bigger 174, capital 164, continent 166, neighbours 147,
+  currency 170), made by `node scripts/challenges-make.ts` from `data/countries.json` (an extract of
+  mledoze/countries, ODbL 1.0) and our map's continents; flags from flag-icons (MIT) in
+  `assets/flags/`. The start screen shows the credits. Only the 174 independent countries on the map
+  (not Greenland, Western Sahara, Palestine, Kosovo).
+- **On a trip there are no event cards** (the plane and ship decks are gone; 32 cards left). Each
+  travel turn the player may play one challenge, or say no and travel on (nothing happens). Never
+  obligatory, and **not offered with 0 points**. The game picks a type, then a question, with a
+  hidden random draw (no dice shown). The answer is the next move, in the same turn: right +1,
+  wrong −1 (never below 0), 15 seconds, time out = wrong. The trip goes on either way (Nomad +1),
+  and on the last travel turn the player lands first, then the ±1 counts.
+- **Event cards count land turns** (owner's rule): each player counts their own turns begun in an
+  area (also lost, blocked and citizenship turns); trip turns don't count. A card on the 3rd, 6th,
+  9th … land turn; none during a citizenship request (skipped) and none in the last round. The
+  test board shows "🃏 Event card: in N turns on land".
+- The engine keeps the question (`state.challenge`) and the result of the last move
+  (`state.challenged`), so the screens say what happened. The test board shows the choice on the
+  travel panel ("Play the challenge (+1 / −1)" or "Continue the journey (no challenge)"), the
+  question with the flag and a 15-second timer, and the result line.
+- **Saves:** version 3. A version-2 save can't be continued.
+- 1,000 random-robot games on the 30-turn map: 9,364 travel turns (278 with 0 points, so no
+  challenge), 4,498 challenges played, 2,262 right; 2,262 points won and 2,236 lost; 22,857
+  scheduled cards, 1,770 lost turns; longest trip 8 turns (was 9), longest "blocked" streak 3,
+  nobody stuck. The dist/kaj.html file is now about 2.2 MB (flags about 1.2 MB).
 
 ## Choices made in task 1 (approved by the owner)
 
@@ -298,10 +324,10 @@ These points are not spelled out in the rulebook or the v1 scope.
 
 ## Choices made in task 11 (approved by the owner)
 
-1. **Scheduled cards in rounds 3, 6 … 27** (9 per player; none in the last round).
+1. **Scheduled cards in rounds 3, 6 … 27** (9 per player; none in the last round). Task 12: every 3rd land turn instead.
 2. **At the start of the turn**, shown before the move; no question to the player.
 3. **No card during a citizenship request**; skipped, not moved to a later turn.
-4. **One card per turn**: a traveller in a card round draws only the plane or ship card.
+4. **One card per turn**: a traveller in a card round draws only the plane or ship card. Task 12: no cards on trips.
 5. **"Lose a turn" in an area:** this turn is lost.
 6. **"Lose a turn" on a trip:** one turn late, no Nomad +1 for that turn.
 7. **A lost turn leaves the "out of money" count as it is.**
@@ -310,6 +336,22 @@ These points are not spelled out in the rulebook or the v1 scope.
 10. **Warnings:** "Next event card: round N" and the travel button note before; the card box after.
 11. **Visa and tour fee paid at boarding**, with the ticket (also with a free quiz ticket), to the
     citizen or owner of that moment; anything new during the trip is free.
+
+## Choices made in task 12 (approved by the owner)
+
+1. **No event cards on trips; only challenges**, and a challenge is never obligatory.
+2. **No challenge with 0 points** (rather than a lost turn: no loop, matches "no money, no entry").
+3. **Hidden random draw:** a random type, then a random question; the same one can come again.
+4. **Event cards count each player's land turns** (trip turns don't count); lost, blocked and
+   citizenship turns count.
+5. **Data:** mledoze/countries (ODbL 1.0) and flag-icons (MIT), with credits on the start screen.
+6. **Only the map's independent countries**; countries on two continents (Russia, Turkey,
+   Kazakhstan, Egypt, the Caucasus) and Papua New Guinea not in the continent questions; Bolivia and
+   countries with several capitals or currencies skipped for those questions.
+7. **Fair answers:** "bigger" pairs differ at least 1.5×; wrong capital, neighbour and currency from
+   the same continent; flags that look alike never asked together; land borders only.
+8. **Robots** pick a challenge or not at random and answer at random (task 13 makes them smarter).
+9. **The train** (France ↔ Russia West, France ↔ Turkey) is deferred: maybe later, if time allows.
 
 ## Project setup
 

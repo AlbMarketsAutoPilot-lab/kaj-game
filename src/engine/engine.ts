@@ -1,7 +1,7 @@
 import {
   BUSINESS_PRICE,
   CARD_EVERY,
-  CARD_LAST_ROUND,
+  CHALLENGE_POINTS,
   CONTINENT_BONUS,
   EXAM_QUESTIONS,
   GO_HOME_TURNS,
@@ -27,6 +27,7 @@ import {
   WELCOME_BONUS,
 } from './constants.ts';
 import { CARDS } from '../cards/cards.ts';
+import { CHALLENGES } from '../challenges/challenges.ts';
 import { areaById, validateMap } from './map.ts';
 import { makeExam, makeQuestion } from './quiz.ts';
 import { randomInt } from './rng.ts';
@@ -35,6 +36,8 @@ import type {
   Area,
   Business,
   BusinessKind,
+  Challenge,
+  ChallengeType,
   Deck,
   DrawnCard,
   EventCard,
@@ -91,6 +94,7 @@ export function createGame(config: GameConfig, map: GameMap): GameState {
     home: null,
     broke: 0,
     loseTurn: false,
+    landTurns: 0,
   }));
 
   return {
@@ -110,6 +114,8 @@ export function createGame(config: GameConfig, map: GameMap): GameState {
     eventCards: config.eventCards !== false,
     card: null,
     drawn: [],
+    challenge: null,
+    challenged: null,
     result: null,
   };
 }
@@ -139,6 +145,7 @@ export function legalActions(state: GameState, map: GameMap): Action[] {
     }
     case 'play': {
       if (state.quiz) return [{ type: 'answer', choice: 0 }, { type: 'answer', choice: 1 }];
+      if (state.challenge) return [{ type: 'challengeAnswer', choice: 0 }, { type: 'challengeAnswer', choice: 1 }];
       if (state.offer) {
         const buyer = state.players[state.offer.to];
         return [
@@ -153,7 +160,10 @@ export function legalActions(state: GameState, map: GameMap): Action[] {
           : [{ type: 'exam' }];
       }
       if (me.loseTurn) return [{ type: 'lostTurn' }];
-      if (me.travel) return [{ type: 'travel' }];
+      // A challenge is never obligatory, and not offered with 0 points (owner's rule, task 12).
+      if (me.travel) {
+        return me.points >= CHALLENGE_POINTS ? [{ type: 'travel' }, { type: 'travel', challenge: true }] : [{ type: 'travel' }];
+      }
       const occupied = occupiedAreas(state, me.seat);
       const moves: Action[] = [];
       for (const to of areaById(map, me.area!).neighbours) {
@@ -184,6 +194,7 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
   const next = structuredClone(state);
   next.payments = [];
   next.drawn = [];
+  next.challenged = null;
   const me = currentPlayer(next);
   // A card drawn at the start of this turn stays on show for the whole turn; any other card
   // (the last player's) is cleared by the next move.
@@ -273,17 +284,25 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
       return next;
     }
     case 'travel': {
-      // Every travel turn draws a plane or ship card (task 12 adds the challenge instead).
-      // "Lose a turn" makes the trip one turn late, with no Nomad point for that turn.
-      const trip = me.travel!;
-      const card = next.eventCards ? pickCard(next, trip.kind === 'airport' ? ['plane'] : ['ship'], null) : null;
-      if (!card?.loseTurn) {
-        if (me.profile === 'nomad') me.points = addPoints(me.points, POINTS_NOMAD_TRAVEL_TURN);
-        if (trip.turnsLeft > 0) trip.turnsLeft -= 1;
-        if (trip.turnsLeft === 0) land(next, map, me);
+      // No event cards on trips (owner's rule, task 12). A challenge, if the player wants one,
+      // is drawn now and answered with the next move; the trip goes on after the answer.
+      if (action.challenge) {
+        next.challenge = pickChallenge(next);
+        return next;
       }
+      travelOn(next, map, me);
+      endTurn(next, map);
+      return next;
+    }
+    case 'challengeAnswer': {
+      const challenge = next.challenge!;
+      next.challenge = null;
+      travelOn(next, map, me);
       // After landing, so the arrival points are never lost to the "never below 0" floor.
-      if (card) applyCard(next, me, card);
+      const right = action.choice === challenge.correct;
+      const before = me.points;
+      me.points = addPoints(me.points, right ? CHALLENGE_POINTS : -CHALLENGE_POINTS);
+      next.challenged = { seat: me.seat, challenge, choice: action.choice, right, change: me.points - before };
       endTurn(next, map);
       return next;
     }
@@ -587,11 +606,9 @@ function grantCitizenship(map: GameMap, me: Player): void {
 // (Luxury), turn 3 (all answers right) or turn 4 (after the learning turn).
 function startTurn(state: GameState, map: GameMap): void {
   const me = currentPlayer(state);
+  countLandTurn(state, me);
   const exam = me.exam;
-  if (!exam) {
-    scheduledCard(state, me);
-    return;
-  }
+  if (!exam) return;
   if (exam.stage === 'submitted' || (exam.stage === 'result' && passed(exam))) {
     grantCitizenship(map, me);
     exam.stage = 'granted';
@@ -628,23 +645,48 @@ function arrive(state: GameState, map: GameMap, me: Player, area: Area, ask: boo
   if (asking) submitCitizenship(state, map, me, area.id);
 }
 
-// ---------- event cards (rulebook section 10, docs/engine.md task 11) ----------
-
-// The rounds with a card at the start of every player's turn: 3, 6 … 27 (none in the last round).
-export function isCardRound(round: number): boolean {
-  return round % CARD_EVERY === 0 && round <= CARD_LAST_ROUND;
+// One travel turn: Nomad +1, and the player lands at the end of the last one.
+function travelOn(state: GameState, map: GameMap, me: Player): void {
+  const trip = me.travel!;
+  if (me.profile === 'nomad') me.points = addPoints(me.points, POINTS_NOMAD_TRAVEL_TURN);
+  if (trip.turnsLeft > 0) trip.turnsLeft -= 1;
+  if (trip.turnsLeft === 0) land(state, map, me);
 }
 
-// The next round with a scheduled card, or null when no card is left.
-export function nextCardRound(round: number): number | null {
-  for (let r = round; r <= CARD_LAST_ROUND; r++) if (isCardRound(r)) return r;
-  return null;
+// ---------- travel-turn challenges (docs/engine.md task 12) ----------
+
+export const CHALLENGE_TYPES: ChallengeType[] = ['flag', 'bigger', 'capital', 'continent', 'neighbour', 'currency'];
+
+// A random type, then a random question of that type (the same question can come again).
+// The random draw is hidden: no dice are shown.
+function pickChallenge(state: GameState): Challenge {
+  const [t, rng1] = randomInt(state.rng, CHALLENGE_TYPES.length);
+  const list = CHALLENGES.filter((c) => c.type === CHALLENGE_TYPES[t]);
+  const [i, rng2] = randomInt(rng1, list.length);
+  state.rng = rng2;
+  return list[i];
 }
 
-// Start of a turn in a card round, standing in an area with no citizenship request going on
-// (the exam is the event). A player on a trip draws on the travel move instead.
+// ---------- event cards (rulebook section 10, docs/engine.md tasks 11 and 12) ----------
+
+// Turns begun in an area are counted per player; every 3rd one has a card (none in the last
+// round). The number of land turns to go before the next card (0: this turn is a card turn).
+export function landTurnsToCard(me: Player): number {
+  return (CARD_EVERY - (me.landTurns % CARD_EVERY)) % CARD_EVERY;
+}
+
+// Start of a turn: a turn begun in an area counts (also a lost or blocked turn, and a
+// citizenship turn); a trip turn doesn't. Every 3rd one draws a card, except during a citizenship
+// request (the exam is the event; the card is skipped, not moved) and in the last round.
+function countLandTurn(state: GameState, me: Player): void {
+  if (state.phase !== 'play' || me.travel || me.area === null) return;
+  me.landTurns += 1;
+  if (me.exam || landTurnsToCard(me) !== 0 || state.round >= state.totalRounds) return;
+  scheduledCard(state, me);
+}
+
 function scheduledCard(state: GameState, me: Player): void {
-  if (!state.eventCards || state.phase !== 'play' || !isCardRound(state.round) || me.travel || me.area === null) return;
+  if (!state.eventCards) return;
   const decks: Deck[] = me.profile === 'backpacker' ? ['country', 'backpacker'] : ['country'];
   const card = pickCard(state, decks, me.area);
   state.card = applyCard(state, me, card);
@@ -710,6 +752,7 @@ function advanceSetup(state: GameState): void {
   } else {
     state.phase = 'play';
     state.round = 1;
+    countLandTurn(state, currentPlayer(state)); // the first player's first turn
   }
 }
 

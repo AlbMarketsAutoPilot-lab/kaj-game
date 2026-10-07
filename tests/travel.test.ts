@@ -70,7 +70,8 @@ test('Nomad plane: pay 1, 1 travel turn (+1), then land', () => {
   assert.equal(seatOf(s, 0).area, null);
   assert.equal(seatOf(s, 0).points, 3 - 1);
   s = walk(s, 'af-south');
-  assert.deepEqual(legalActions(s, travelMap), [{ type: 'travel' }]);
+  // A challenge is offered too (task 12); saying no is the plain travel turn.
+  assert.deepEqual(legalActions(s, travelMap), [{ type: 'travel' }, { type: 'travel', challenge: true }]);
   s = travel(s);
   assert.equal(seatOf(s, 0).area, 'as-east');
   assert.equal(seatOf(s, 0).points, 3 - 1 + 1 + 1 + 2);

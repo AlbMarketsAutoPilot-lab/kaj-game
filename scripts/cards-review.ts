@@ -9,8 +9,6 @@ const effect = (points: number, loseTurn?: true) => (loseTurn ? 'lose a turn' : 
 const groups = [
   { title: 'Country cards: anywhere', cards: CARDS.filter((c) => c.deck === 'country' && !c.area) },
   { title: 'Country cards: one area only', cards: CARDS.filter((c) => c.deck === 'country' && c.area) },
-  { title: 'Plane cards (a travel turn on a plane)', cards: CARDS.filter((c) => c.deck === 'plane') },
-  { title: 'Ship cards (a travel turn on a ship; "lose a turn" = one turn late)', cards: CARDS.filter((c) => c.deck === 'ship') },
   { title: 'Backpacker cards (only the Backpacker, drawn with the country cards)', cards: CARDS.filter((c) => c.deck === 'backpacker') },
 ];
 const count = (f: (p: number, l?: true) => boolean) => CARDS.filter((c) => f(c.points, c.loseTurn)).length;
@@ -20,8 +18,9 @@ const lines = [
   `${CARDS.length} cards. Source: \`src/cards/cards.ts\`. ` +
     `±1: ${count((p) => Math.abs(p) === 1)} · ±2: ${count((p) => Math.abs(p) === 2)} · lose a turn: ${count((_, l) => l === true)} · ±5: ${count((p) => Math.abs(p) === 5)}.`,
   '',
-  'When: at the start of every turn in rounds 3, 6 … 27 (not during a citizenship request, not on a trip),',
-  'and on every travel turn. Points never go below 0.',
+  "When: at the start of each player's 3rd, 6th, 9th … turn that begins in an area (trip turns don't count;",
+  'not during a citizenship request; none in the last round). No cards on trips since task 12 (challenges instead).',
+  'Points never go below 0.',
   '',
   'To report a problem, give the id (for example "c7: too harsh").',
 ];
