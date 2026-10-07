@@ -25,3 +25,5 @@ jobs:
         run: npm run typecheck
       - name: Tests (rules + 1,000 random-robot games)
         run: npm test
+      - name: Build the test board (dist/kaj.html)
+        run: npm run build
