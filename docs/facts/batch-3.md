@@ -46,14 +46,14 @@ The right answer is in **bold**.
 | 1 | Genghis Khan founded the Mongol Empire in 1206. It became the largest connected land empire in history. | Who founded the Mongol Empire? | **Genghis Khan** / Alexander the Great |
 | 2 | Many Mongolians still live in gers: round tents made of felt that can be moved. | A ger is a… | **round felt tent** / horse saddle |
 | 3 | In the 1920s, explorers found the first known dinosaur eggs in the Gobi Desert. | The Gobi Desert is famous for the discovery of… | **dinosaur eggs** / gold mines |
-| 4 | Mongolia is the country with the fewest people for its size in the world. | For its size, Mongolia has the… | **fewest people of any country** / most people of any country |
+| 4 | Mongolia is the country with the fewest people for its size in the world. | For its size, Mongolia has the… | **fewest people per square kilometre** / most people per square kilometre |
 | 5 | The Naadam festival has three games: wrestling, horse racing and archery. | Naadam includes wrestling, horse racing and… | **archery** / swimming |
 | 6 | In Mongolian throat singing, one singer can make two notes at the same time. | In throat singing, one person sings… | **two notes at once** / without making a sound |
 | 7 | In the horse races of the Naadam festival, the riders are children. | In Naadam horse races, the riders are… | **children** / grandparents |
 | 8 | Ulaanbaatar, in Mongolia, is the coldest capital city in the world. | Ulaanbaatar is the world's coldest… | **capital city** / desert |
 | 9 | Mongolia has no coast. It lies between Russia and China. | Mongolia lies between Russia and… | **China** / India |
 | 10 | Bactrian camels, which live in the Gobi Desert, have two humps. | Bactrian camels have… | **two humps** / one hump |
-| 11 | Przewalski's horse, called the takhi in Mongolia, is a truly wild horse. It was brought back to Mongolia's grasslands. | The takhi is a wild… | **horse** / goat |
+| 11 | Przewalski's horse, called the takhi in Mongolia, is a rare wild horse. It was brought back to Mongolia's grasslands. | The takhi is a wild… | **horse** / goat |
 | 12 | The first Velociraptor fossils were found in Mongolia in the 1920s. | The first Velociraptor fossils were found in… | **Mongolia** / Canada |
 
 ## Korea
@@ -118,7 +118,7 @@ The right answer is in **bold**.
 | 5 | The rafflesia of Indonesia's rainforests is the largest single flower in the world, and it smells like rotting meat. | The rafflesia flower smells like… | **rotting meat** / roses |
 | 6 | Wild orangutans live only on the islands of Borneo and Sumatra. | Wild orangutans live only on Borneo and… | **Sumatra** / Madagascar |
 | 7 | The Philippines is made of more than 7,000 islands. | How many islands does the Philippines have? | **More than 7,000** / About 70 |
-| 8 | The Banaue Rice Terraces in the Philippines were carved into the mountains about 2,000 years ago. | The Banaue terraces are used to grow… | **rice** / grapes |
+| 8 | The Banaue Rice Terraces in the Philippines were carved into the mountains by hand by the Ifugao people, and farmers still grow rice on them today. | The Banaue terraces are used to grow… | **rice** / grapes |
 | 9 | The Chocolate Hills on Bohol, in the Philippines, are more than 1,000 hills that turn brown in the dry season. | The Chocolate Hills turn brown in the… | **dry season** / winter snow |
 | 10 | Papua New Guinea has more than 800 languages, more than any other country. | About how many languages are spoken in Papua New Guinea? | **More than 800** / About 8 |
 | 11 | Timor-Leste became independent in 2002, one of the newest countries in the world. | Timor-Leste became independent in… | **2002** / 1802 |
@@ -170,7 +170,7 @@ The right answer is in **bold**.
 | 6 | The Niger River flows in a big curve through Mali and Niger. | Which river flows through Mali and Niger? | **The Niger** / The Congo |
 | 7 | Thousands of years ago the Sahara was green. Rock paintings in Chad show cattle and giraffes. | Old rock paintings show that the Sahara was once… | **green** / covered in ice |
 | 8 | The Richat Structure in Mauritania is a giant set of rock rings, 40 km wide, called the "Eye of the Sahara". | The Richat Structure is called the Eye of the… | **Sahara** / Ocean |
-| 9 | Mauritania's iron ore trains are among the longest trains in the world, about 2 km long. | Mauritania's iron ore trains are about… | **2 km long** / 20 metres long |
+| 9 | Mauritania's iron ore trains are among the longest in the world, about 2.5 km long. | Mauritania's iron ore trains are about… | **2.5 km long** / 20 metres long |
 | 10 | Burkina Faso hosts FESPACO, the biggest film festival in Africa. | FESPACO is a… | **film festival** / football cup |
 | 11 | The last West African giraffes live in the wild only in Niger. | The last wild West African giraffes live in… | **Niger** / Morocco |
 | 12 | Baobab trees store water in their huge trunks to survive the dry season. | Baobab trees store water in their… | **trunks** / leaves |

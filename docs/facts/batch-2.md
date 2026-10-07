@@ -35,7 +35,7 @@ The right answer is in **bold**.
 | 7 | In 1961, Yuri Gagarin of the Soviet Union became the first person to travel into space. | Who was the first person in space? | **Yuri Gagarin** / Neil Armstrong |
 | 8 | The Trans-Siberian Railway, from Moscow to Vladivostok, is the longest railway line in the world. | The Trans-Siberian Railway goes from Moscow to… | **Vladivostok** / Paris |
 | 9 | The Russian composer Pyotr Tchaikovsky wrote the ballets Swan Lake and The Nutcracker. | Who wrote the music for Swan Lake? | **Tchaikovsky** / Beethoven |
-| 10 | Mount Elbrus, in the Caucasus mountains of Russia, is the highest mountain in Europe. | Which is the highest mountain in Europe? | **Mount Elbrus** / Mont Blanc |
+| 10 | Mount Elbrus, in the Caucasus mountains of Russia, is the highest mountain in Europe. | Which is the highest mountain in Europe? | **Mount Elbrus** / Mount Olympus |
 | 11 | In June, Saint Petersburg has "white nights", when the sky never gets fully dark. | Saint Petersburg's "white nights" happen in… | **summer** / winter |
 | 12 | The Caspian Sea, on Russia's southern edge, is really the largest lake in the world. | Which is the largest lake in the world? | **The Caspian Sea** / Lake Baikal |
 
@@ -64,7 +64,7 @@ The right answer is in **bold**.
 | 2 | Hagia Sophia in Istanbul was built in 537 as a church, with a giant dome. | Hagia Sophia is in which city? | **Istanbul** / Athens |
 | 3 | Cappadocia in Turkey has rock towers called "fairy chimneys", and hundreds of hot-air balloons fly over them. | Cappadocia is famous for rides in… | **hot-air balloons** / submarines |
 | 4 | Mount Ararat in eastern Turkey is where Noah's Ark is said to have landed. | Noah's Ark is said to have landed on… | **Mount Ararat** / Mount Olympus |
-| 5 | People in Georgia have been making wine for about 8,000 years. | People in Georgia have made wine for about… | **8,000 years** / 200 years |
+| 5 | People in the country of Georgia have been making wine for about 8,000 years. | People in the country of Georgia have made wine for about… | **8,000 years** / 200 years |
 | 6 | The Georgian language is written in its own alphabet, used nowhere else. | Georgian is written with… | **its own alphabet** / Chinese characters |
 | 7 | In the year 301, Armenia became the first country to make Christianity its official religion. | Which was the first country with Christianity as its official religion? | **Armenia** / Spain |
 | 8 | Azerbaijan is called the "Land of Fire". At Yanar Dag, gas from the ground burns all the time. | Azerbaijan is called the Land of… | **Fire** / Ice |
@@ -132,7 +132,7 @@ The right answer is in **bold**.
 | 2 | The Aral Sea, between Kazakhstan and Uzbekistan, shrank a lot after its rivers were used to water cotton fields. | The Aral Sea has… | **shrunk** / grown |
 | 3 | The Baikonur Cosmodrome in Kazakhstan launched the first satellite, Sputnik, in 1957. | Baikonur is a… | **space launch site** / ski resort |
 | 4 | Kazakhstan is the largest country in the world without a coast on the open ocean. | Which is the largest landlocked country? | **Kazakhstan** / Mongolia |
-| 5 | The Darvaza gas crater in Turkmenistan, called the "Door to Hell", has been burning since 1971. | The Darvaza crater is full of… | **fire** / water |
+| 5 | The Darvaza gas crater in Turkmenistan, called the "Door to Hell", was set on fire in 1971 and has burned for more than 50 years, but its flames are now fading. | The Darvaza crater is famous for its… | **fire** / water |
 | 6 | The wild ancestors of today's apples still grow in the mountains of Kazakhstan. | Wild apples first grew in… | **Kazakhstan** / Brazil |
 | 7 | Many Kyrgyz herders spend the summer in yurts: round tents made of felt. | A yurt is a… | **round tent** / boat |
 | 8 | The Pamir Mountains in Tajikistan are called the "Roof of the World". | The Pamir Mountains are nicknamed… | **the Roof of the World** / the Land of Lakes |
@@ -166,7 +166,7 @@ The right answer is in **bold**.
 | 2 | Mount Everest, the highest mountain on Earth, stands on the border of Nepal and China. | Mount Everest is on the border of Nepal and… | **China** / India |
 | 3 | Chess developed from chaturanga, an ancient game from India. | Chess developed from which Indian game? | **Chaturanga** / Kabaddi |
 | 4 | Using zero as a number was developed by mathematicians in ancient India. | Zero as a number was developed in… | **India** / Greece |
-| 5 | The Bengal tiger is the national animal of India. | What is India's national animal? | **The Bengal tiger** / The elephant |
+| 5 | The Bengal tiger is the national animal of India. | What is India's national animal? | **The Bengal tiger** / The panda |
 | 6 | The Sundarbans, shared by India and Bangladesh, is the largest mangrove forest in the world. | The Sundarbans is a… | **mangrove forest** / desert |
 | 7 | Sri Lanka was once called Ceylon, and "Ceylon tea" is still famous around the world. | Ceylon is an old name for… | **Sri Lanka** / Nepal |
 | 8 | Bhutan measures how well its country is doing with "Gross National Happiness". | Bhutan measures its people's… | **happiness** / height |
