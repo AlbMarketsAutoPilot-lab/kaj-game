@@ -46,7 +46,7 @@ The right answer is in **bold**.
 | 1 | Genghis Khan founded the Mongol Empire in 1206. It became the largest connected land empire in history. | Who founded the Mongol Empire? | **Genghis Khan** / Alexander the Great |
 | 2 | Many Mongolians still live in gers: round tents made of felt that can be moved. | A ger is a… | **round felt tent** / horse saddle |
 | 3 | In the 1920s, explorers found the first known dinosaur eggs in the Gobi Desert. | The Gobi Desert is famous for the discovery of… | **dinosaur eggs** / gold mines |
-| 4 | Mongolia is the country with the fewest people for its size in the world. | For its size, Mongolia has the… | **fewest people of any country** / most people of any country |
+| 4 | Mongolia is the country with the fewest people for its size in the world. | For its size, Mongolia has the… | **fewest people per square kilometre** / most people per square kilometre |
 | 5 | The Naadam festival has three games: wrestling, horse racing and archery. | Naadam includes wrestling, horse racing and… | **archery** / swimming |
 | 6 | In Mongolian throat singing, one singer can make two notes at the same time. | In throat singing, one person sings… | **two notes at once** / without making a sound |
 | 7 | In the horse races of the Naadam festival, the riders are children. | In Naadam horse races, the riders are… | **children** / grandparents |
@@ -170,7 +170,7 @@ The right answer is in **bold**.
 | 6 | The Niger River flows in a big curve through Mali and Niger. | Which river flows through Mali and Niger? | **The Niger** / The Congo |
 | 7 | Thousands of years ago the Sahara was green. Rock paintings in Chad show cattle and giraffes. | Old rock paintings show that the Sahara was once… | **green** / covered in ice |
 | 8 | The Richat Structure in Mauritania is a giant set of rock rings, 40 km wide, called the "Eye of the Sahara". | The Richat Structure is called the Eye of the… | **Sahara** / Ocean |
-| 9 | Mauritania's iron ore trains are among the longest trains in the world, about 2 km long. | Mauritania's iron ore trains are about… | **2 km long** / 20 metres long |
+| 9 | Mauritania's iron ore trains are among the longest in the world, about 2.5 km long. | Mauritania's iron ore trains are about… | **2.5 km long** / 20 metres long |
 | 10 | Burkina Faso hosts FESPACO, the biggest film festival in Africa. | FESPACO is a… | **film festival** / football cup |
 | 11 | The last West African giraffes live in the wild only in Niger. | The last wild West African giraffes live in… | **Niger** / Morocco |
 | 12 | Baobab trees store water in their huge trunks to survive the dry season. | Baobab trees store water in their… | **trunks** / leaves |
