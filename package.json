@@ -8,7 +8,8 @@
     "typecheck": "tsc --noEmit",
     "test": "node --test \"tests/**/*.test.ts\"",
     "map:doc": "node scripts/map-table.ts",
-    "build": "node scripts/build-web.ts"
+    "build": "node scripts/build-web.ts",
+    "android:assets": "npm run build && node -e \"require('fs').mkdirSync('android/app/src/main/assets',{recursive:true});require('fs').copyFileSync('dist/kaj.html','android/app/src/main/assets/index.html')\""
   },
   "license": "UNLICENSED",
   "engines": {

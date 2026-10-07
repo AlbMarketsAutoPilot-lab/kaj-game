@@ -30,7 +30,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | 3 | First playable screen (test board) | medium | — | 1 | ✅ done |
 | 4 | Wonder and big-country scoring | high | — | 1 | ✅ done |
 | 5 | This work plan | high | 1 | 1 | ✅ done |
-| 6 | Android shell and APK build (early) | medium | 1 | 2 | |
+| 6 | Android shell and APK build (early) | medium | 1 | 2 | in review |
 | 7 | Planes, ships, tickets, airline quiz | **high** | 2 | 2–3 | |
 | C | Facts: about 12 per area (5 batches, in parallel) | medium | 1.5 | 3–8 | |
 | 8 | Visas and citizenship (exam) | **high** | 2 | 4–5 | |
@@ -57,7 +57,9 @@ on day 14 it could miss the deadline.
   version on a phone.
 - Checks on a real phone: the test board works, saving works, the back button behaves.
 - Owner steps: install the APK on a phone; later (task 15) create the signing key.
-- Open question: lowest Android version to support.
+- Lowest Android version: **7.0** (owner-approved).
+- Done: `android/` (one WebView screen, Java), `npm run android:assets` copies the game file in,
+  `.github/workflows/android.yml` builds `app-debug.apk` (download it from the run page).
 
 ### 7. Planes, ships, tickets, airline quiz — days 2–3 (high)
 
