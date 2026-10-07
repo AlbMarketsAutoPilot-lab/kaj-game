@@ -13,6 +13,10 @@ test('each batch has 10 real areas, and no area is in two batches', () => {
   assert.equal(new Set(seen).size, seen.length);
 });
 
+test('every area of the map has facts', () => {
+  assert.deepEqual(all.map(([id]) => id), map30.areas.map((a) => a.id));
+});
+
 test('every area in a batch has 12 facts', () => {
   for (const [id, facts] of all) assert.equal(facts.length, 12, id);
 });
