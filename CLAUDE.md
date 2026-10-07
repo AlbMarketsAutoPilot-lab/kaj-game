@@ -26,4 +26,5 @@ These rules apply to every session and every task in this repository.
 
 - `docs/KAJ-v1-scope.md`: what v1 contains. **It wins over the rulebook for v1.**
 - `docs/KAJ-rules-v7.md`: the full frozen rulebook.
+- `docs/work-plan.md`: the 15-day work plan and task status. **Read it at the start of every session** to find the next task, and update its status table when a task is done.
 - The owner sets the effort level, not Claude. Before starting a task on that high-effort list, Claude tells the owner to switch from medium to high, and to switch back to medium when it is done.
