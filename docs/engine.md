@@ -46,8 +46,29 @@ Task 4: wonder and big-country scoring (`tests/scoring.test.ts`).
 - The test board shows the points each move gives (✨ +N), 🧩 on big-country parts, and each
   player's big-country progress (e.g. "Canada 1/2").
 
-Not yet (movement by plane and ship comes with tickets): planes and ships, quizzes, visas, citizenship, businesses,
-event cards, challenges, Android app.
+Task 7: planes, ships, tickets and the airline quiz (`tests/travel.test.ts`).
+
+- In an area with an airport or port, a player may walk on, **pay and board**, or **try the
+  airline quiz**, for one of the destinations. Arriving there uses the turn, so boarding is
+  always on a later turn (a start area counts as arrived: boarding on the first turn is fine).
+- Destinations: the fixed routes. Luxury: any other airport by plane, any other port by ship
+  (never a plane to a port).
+- Ticket: Nomad 1, Business 2, Luxury 3. The Backpacker never pays (quiz only).
+  "Pay" is offered only with enough points. Ticket money goes to nobody until task 9 (owners).
+- Travel turns: plane 1, ship 3; Business and Luxury plane 0, ship 1. With 0 turns the player
+  lands at the end of the boarding turn. Otherwise each travel turn is a `travel` move, and the
+  player lands at the end of the last one, with the normal arrival points. Nomad +1 per travel
+  turn. While travelling the player is in no area.
+- Quiz: one a/b question about the destination (placeholder questions from the map data,
+  `src/engine/quiz.ts`, until the facts are ready). The answer comes in the same turn.
+  Right: free ticket, board now. Wrong: the turn ends. The 3rd wrong answer (or later) in the
+  same area: pay and board now, if the player can pay; if not, keep trying on later turns or
+  walk away. Leaving the area starts the count again. The Backpacker has no limit.
+- The test board has a 15-second quiz timer; time out = wrong answer.
+- 1,000 random-robot games on the 30-turn map: nobody stuck, about 6,000 paid trips and
+  10,700 quiz tries, longest time in transit 6 turns.
+
+Not yet: visas, citizenship, businesses, event cards, challenges.
 
 ## Choices made in task 1 (approved by the owner)
 
@@ -70,6 +91,16 @@ These points are not spelled out in the rulebook or the v1 scope.
    walking to USA West gives the full +1 +2.
 3. **The new-continent +2 is not all or nothing.** Entering Russia East (Asia) from Russia West
    gives +2 for Asia at once, even though Russia is not complete.
+
+## Choices made in task 7 (approved by the owner)
+
+1. **A right quiz answer boards at once** (same turn).
+2. **The 3rd wrong answer pays and boards at once**, if the player can pay. Otherwise the
+   player may keep trying on later turns or walk away; the count starts again on leaving.
+3. **Destination taken at landing:** the plane or ship waits one more travel turn (Nomad +1)
+   and tries again. Any destination can be chosen when boarding.
+4. **Luxury "any":** plane to any airport, ship to any port.
+5. **Boarding on the first turn** from a starting airport or port is allowed.
 
 ## Project setup
 

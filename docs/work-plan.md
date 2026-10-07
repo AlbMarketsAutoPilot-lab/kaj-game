@@ -31,7 +31,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | 4 | Wonder and big-country scoring | high | — | 1 | ✅ done |
 | 5 | This work plan | high | 1 | 1 | ✅ done |
 | 6 | Android shell and APK build (early) | medium | 1 | 2 | ✅ done |
-| 7 | Planes, ships, tickets, airline quiz | **high** | 2 | 2–3 | |
+| 7 | Planes, ships, tickets, airline quiz | **high** | 1 | 2 | ✅ done |
 | C | Facts: about 12 per area (5 batches, in parallel) | medium | 1.5 | 3–8 | |
 | 8 | Visas and citizenship (exam) | **high** | 2 | 4–5 | |
 | 9 | Businesses | **high** | 1.5 | 6 | |
@@ -74,6 +74,8 @@ on day 14 it could miss the deadline.
 - Ticket money goes to the owner of the departure airport/port (owners come in task 9).
 - Quiz questions: placeholder questions from the map data until the facts are ready.
 - Random robot (1,000 games) and stuck-state checker updated.
+- Done: rules in `docs/engine.md` (task 7 and its 5 owner-approved choices), quiz questions in
+  `src/engine/quiz.ts`, tests in `tests/travel.test.ts`, 1,000 games on the 30-turn map.
 
 ### C. Facts — days 3–8, in parallel with the engine tasks
 
