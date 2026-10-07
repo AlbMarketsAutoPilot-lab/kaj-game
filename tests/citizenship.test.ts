@@ -191,7 +191,7 @@ test('the citizen enters their own area for free', () => {
   assert.equal(me(s).points, before);
 });
 
-test('plane to a visa area: boarding needs the ticket + 2 (the quiz needs 2); paid on landing', () => {
+test('plane to a visa area: boarding needs the ticket + 2 (the quiz needs 2); paid at boarding', () => {
   // Luxury holds Bigland (as-west + as-east); Business flies eu-west → as-east.
   let s = game(['af-north', 'eu-west'], 'luxury', 'business');
   s = go(s, { type: 'walk', to: 'as-west', citizenship: true });

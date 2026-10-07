@@ -1,5 +1,7 @@
 import {
   BUSINESS_PRICE,
+  CARD_EVERY,
+  CARD_LAST_ROUND,
   CONTINENT_BONUS,
   EXAM_QUESTIONS,
   GO_HOME_TURNS,
@@ -24,6 +26,7 @@ import {
   VISA_PRICE,
   WELCOME_BONUS,
 } from './constants.ts';
+import { CARDS } from '../cards/cards.ts';
 import { areaById, validateMap } from './map.ts';
 import { makeExam, makeQuestion } from './quiz.ts';
 import { randomInt } from './rng.ts';
@@ -32,6 +35,9 @@ import type {
   Area,
   Business,
   BusinessKind,
+  Deck,
+  DrawnCard,
+  EventCard,
   Exam,
   GameConfig,
   GameMap,
@@ -84,6 +90,7 @@ export function createGame(config: GameConfig, map: GameMap): GameState {
     exam: null,
     home: null,
     broke: 0,
+    loseTurn: false,
   }));
 
   return {
@@ -100,6 +107,9 @@ export function createGame(config: GameConfig, map: GameMap): GameState {
     payments: [],
     offer: null,
     offeredThisTurn: false,
+    eventCards: config.eventCards !== false,
+    card: null,
+    drawn: [],
     result: null,
   };
 }
@@ -142,6 +152,7 @@ export function legalActions(state: GameState, map: GameMap): Action[] {
           ? [{ type: 'examAnswer', choice: 0 }, { type: 'examAnswer', choice: 1 }]
           : [{ type: 'exam' }];
       }
+      if (me.loseTurn) return [{ type: 'lostTurn' }];
       if (me.travel) return [{ type: 'travel' }];
       const occupied = occupiedAreas(state, me.seat);
       const moves: Action[] = [];
@@ -172,12 +183,17 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
   }
   const next = structuredClone(state);
   next.payments = [];
+  next.drawn = [];
   const me = currentPlayer(next);
+  // A card drawn at the start of this turn stays on show for the whole turn; any other card
+  // (the last player's) is cleared by the next move.
+  if (next.card && (next.card.seat !== me.seat || next.card.round !== next.round)) next.card = null;
   // The "citizenship granted" turn: the request is over once the player moves on.
   if (me.exam && examOver(me.exam)) me.exam = null;
   // Any move except waiting (or buying and selling, which don't end the turn) ends a
   // "no money" streak.
-  if (!['blocked', 'buy', 'sell', 'sellAnswer'].includes(action.type)) me.broke = 0;
+  // A turn lost to an event card leaves the count as it is.
+  if (!['blocked', 'buy', 'sell', 'sellAnswer', 'lostTurn'].includes(action.type)) me.broke = 0;
 
   switch (action.type) {
     case 'chooseProfile': {
@@ -257,13 +273,24 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
       return next;
     }
     case 'travel': {
+      // Every travel turn draws a plane or ship card (task 12 adds the challenge instead).
+      // "Lose a turn" makes the trip one turn late, with no Nomad point for that turn.
       const trip = me.travel!;
-      if (me.profile === 'nomad') me.points = addPoints(me.points, POINTS_NOMAD_TRAVEL_TURN);
-      if (trip.turnsLeft > 0) trip.turnsLeft -= 1;
-      if (trip.turnsLeft === 0) land(next, map, me);
+      const card = next.eventCards ? pickCard(next, trip.kind === 'airport' ? ['plane'] : ['ship'], null) : null;
+      if (!card?.loseTurn) {
+        if (me.profile === 'nomad') me.points = addPoints(me.points, POINTS_NOMAD_TRAVEL_TURN);
+        if (trip.turnsLeft > 0) trip.turnsLeft -= 1;
+        if (trip.turnsLeft === 0) land(next, map, me);
+      }
+      // After landing, so the arrival points are never lost to the "never below 0" floor.
+      if (card) applyCard(next, me, card);
       endTurn(next, map);
       return next;
     }
+    case 'lostTurn':
+      me.loseTurn = false;
+      endTurn(next, map);
+      return next;
     case 'buy': {
       const business = businessAt(next, me.area!, action.business)!;
       business.owner = me.seat;
@@ -351,12 +378,11 @@ function depart(
     if (owner !== null) state.players[owner].points = addPoints(state.players[owner].points, ticket);
     state.payments.push({ reason: 'ticket', from: me.seat, to: owner, amount: ticket, area: me.area!, business });
   }
-  // The fees due now are paid on landing; anything new during the trip is free.
-  const fees = entryFees(state, me, me.area, to);
+  // The visa and tour fee due now are paid at boarding, with the ticket (owner's rule, task 11),
+  // so nothing is owed on landing; a citizenship or tours that appear during the trip are free.
+  payFees(state, me, entryFees(state, me, me.area, to), to);
   me.travel = {
     kind, from: me.area!, to, turnsLeft: TRAVEL_TURNS[me.profile!][kind],
-    ...(fees.some((f) => f.reason === 'visa') ? { visa: true as const } : {}),
-    ...(fees.some((f) => f.reason === 'tour') ? { tours: true as const } : {}),
     ...(ask ? { citizenship: true as const } : {}),
   };
   me.area = null;
@@ -365,17 +391,10 @@ function depart(
 }
 
 // Two players are never in one area: if the destination is taken, the plane or ship
-// waits and tries again at the end of the next travel turn.
-// The visa and tour fee are paid on landing, only if they were due when the player boarded
-// (boarding needed the ticket plus the fees). Points can't drop in the air yet; if they ever
-// do (challenges, task 12), the plane waits rather than enter unpaid.
+// waits and tries again at the end of the next travel turn. The fees were paid at boarding.
 function land(state: GameState, map: GameMap, me: Player): void {
   const trip = me.travel!;
   if (occupiedAreas(state, me.seat).has(trip.to)) return;
-  const fees = entryFees(state, me, trip.from, trip.to)
-    .filter((f) => (f.reason === 'visa' ? trip.visa : trip.tours));
-  if (me.points < feeTotal(fees)) return;
-  payFees(state, me, fees, trip.to);
   me.travel = null;
   arrive(state, map, me, areaById(map, trip.to), trip.citizenship === true);
 }
@@ -445,7 +464,7 @@ function buyActions(state: GameState, me: Player): Action[] {
 
 // Sale offers: any business the player owns, to any other player who can pay its price,
 // once per turn (rulebook section 6; owner-approved in tasks 9 and 9b). Never to a player in
-// the air or at sea: they may owe a visa or tour fee on landing (owner's choice, task 9b).
+// the air or at sea: owner's choice, task 9b (made when fees were still paid on landing).
 function sellActions(state: GameState, me: Player): Action[] {
   if (state.offeredThisTurn) return [];
   return state.businesses
@@ -569,7 +588,10 @@ function grantCitizenship(map: GameMap, me: Player): void {
 function startTurn(state: GameState, map: GameMap): void {
   const me = currentPlayer(state);
   const exam = me.exam;
-  if (!exam) return;
+  if (!exam) {
+    scheduledCard(state, me);
+    return;
+  }
   if (exam.stage === 'submitted' || (exam.stage === 'result' && passed(exam))) {
     grantCitizenship(map, me);
     exam.stage = 'granted';
@@ -604,6 +626,50 @@ function arrive(state: GameState, map: GameMap, me: Player, area: Area, ask: boo
     if (bonus && me.visitedContinents.length === bonus.continents) me.points = addPoints(me.points, bonus.points);
   }
   if (asking) submitCitizenship(state, map, me, area.id);
+}
+
+// ---------- event cards (rulebook section 10, docs/engine.md task 11) ----------
+
+// The rounds with a card at the start of every player's turn: 3, 6 … 27 (none in the last round).
+export function isCardRound(round: number): boolean {
+  return round % CARD_EVERY === 0 && round <= CARD_LAST_ROUND;
+}
+
+// The next round with a scheduled card, or null when no card is left.
+export function nextCardRound(round: number): number | null {
+  for (let r = round; r <= CARD_LAST_ROUND; r++) if (isCardRound(r)) return r;
+  return null;
+}
+
+// Start of a turn in a card round, standing in an area with no citizenship request going on
+// (the exam is the event). A player on a trip draws on the travel move instead.
+function scheduledCard(state: GameState, me: Player): void {
+  if (!state.eventCards || state.phase !== 'play' || !isCardRound(state.round) || me.travel || me.area === null) return;
+  const decks: Deck[] = me.profile === 'backpacker' ? ['country', 'backpacker'] : ['country'];
+  const card = pickCard(state, decks, me.area);
+  state.card = applyCard(state, me, card);
+  if (card.loseTurn) me.loseTurn = true;
+}
+
+// The cards that can be drawn: the decks' cards, with area cards only in their own area.
+export function eligibleCards(decks: Deck[], area: string | null): EventCard[] {
+  return CARDS.filter((c) => decks.includes(c.deck) && (c.area === undefined || c.area === area));
+}
+
+// A random card (the same card can come again), with the game's dice.
+function pickCard(state: GameState, decks: Deck[], area: string | null): EventCard {
+  const cards = eligibleCards(decks, area);
+  const [i, rng] = randomInt(state.rng, cards.length);
+  state.rng = rng;
+  return cards[i];
+}
+
+function applyCard(state: GameState, me: Player, card: EventCard): DrawnCard {
+  const before = me.points;
+  me.points = addPoints(me.points, card.points);
+  const drawn = { seat: me.seat, round: state.round, card, change: me.points - before };
+  state.drawn.push(drawn);
+  return drawn;
 }
 
 export function bigCountryParts(map: GameMap, country: string): string[] {

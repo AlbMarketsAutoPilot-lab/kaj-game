@@ -3,11 +3,11 @@
 
 import { BUSINESS_PRICE, CONTINENT_BONUS, GO_HOME_TURNS, NOMAD_MIN_CONTINENTS, NOMAD_PENALTY, NOMAD_WARNING_ROUND, POINTS_BUSINESS_CITIZENSHIP, TICKET_PRICE, TOUR_FEE, TRAVEL_TURNS, VISA_PRICE } from '../engine/constants.ts';
 import {
-  apply, blockedByMoney, businessAt, businessValue, createGame, currentPlayer, entryFees, feeTotal, finalScore, homeFor, legalActions, nomadPenalty,
+  apply, blockedByMoney, nextCardRound, businessAt, businessValue, createGame, currentPlayer, entryFees, feeTotal, finalScore, homeFor, legalActions, nomadPenalty,
 } from '../engine/engine.ts';
 import { randomRobotAction } from '../engine/robot.ts';
 import { loadGame, saveGame } from '../engine/save.ts';
-import type { Action, Area, BusinessKind, GameState, Payment, Player, Profile, RouteKind, SeatKind } from '../engine/types.ts';
+import type { Action, Area, BusinessKind, Deck, DrawnCard, GameState, Payment, Player, Profile, RouteKind, SeatKind } from '../engine/types.ts';
 import { map30 } from '../maps/map30.ts';
 
 const COLOURS = ['#e4572e', '#2e86de', '#29a36a', '#e0a100'];
@@ -184,11 +184,40 @@ function act(action: Action): void {
   }
   if (home) lines.push(`🏠 ${name} ran out of money, so the trip ends here: ${name} goes home to ${areaById.get(home)!.name}, free of any fees.`);
   lines.push(...state.payments.map(paymentNote).filter((t) => t !== ''));
+  // Event cards drawn by this move; a human's own start-of-turn card has its own box instead.
+  const next = currentPlayer(state);
+  lines.push(...state.drawn.filter((c) => !(c === state!.card && next.kind === 'human' && c.seat === next.seat)).map(cardNote));
   note = lines.join(' ');
   askCitizenship = false;
   pendingFees = null;
   selling = false;
   render();
+}
+
+// ---------- event cards (task 11) ----------
+
+const DECK_ICON: Record<Deck, string> = { country: '🗺️', plane: '✈️', ship: '⛴️', backpacker: '🎒' };
+
+// What the card did: the points really won or lost, or the lost turn.
+function cardEffect(c: DrawnCard, travelling: boolean): string {
+  const { points, loseTurn } = c.card;
+  if (loseTurn) return travelling ? '⏸️ One turn late.' : '⏸️ This turn is lost.';
+  if (points > 0) return `+${plural(points, 'point')}.`;
+  if (c.change === 0) return `−${plural(-points, 'point')}, but there were no points to lose.`;
+  if (c.change !== points) return `−${plural(-points, 'point')}: only ${-c.change} to lose, so ${-c.change} lost.`;
+  return `−${plural(-points, 'point')}.`;
+}
+
+function cardNote(c: DrawnCard): string {
+  const travelling = c.card.deck === 'plane' || c.card.deck === 'ship';
+  return `🃏 ${COLOUR_NAMES[c.seat]}'s ${c.card.deck} card ${DECK_ICON[c.card.deck]}: “${c.card.text}” ${cardEffect(c, travelling)}`;
+}
+
+function renderCard(c: DrawnCard): HTMLElement {
+  return el('div', { className: 'note' },
+    el('strong', { textContent: `🃏 Event card · ${DECK_ICON[c.card.deck]} ${c.card.deck} card` }),
+    el('p', { textContent: `“${c.card.text}”` }),
+    el('p', { textContent: cardEffect(c, false) }));
 }
 
 // "Who was paid", after a move.
@@ -290,11 +319,20 @@ function renderPlayers(s: GameState): HTMLElement {
           : p.exam ? `🛂 Asking for citizenship in ${areaById.get(p.exam.area)!.name}` : '' }),
         el('div', { className: 'small', textContent: `${plural(p.visitedContinents.length, 'continent')} · ${plural(p.visitedAreas.length, 'area')}` }),
         continentBar(s, p),
+        el('div', { className: 'small', textContent: s.phase === 'play' ? nextCardText(s, p) : '' }),
         el('div', { className: 'small', textContent: s.businesses.filter((b) => b.owner === seat)
           .map((b) => `${BUSINESS_ICON[b.kind]} ${areaById.get(b.area)!.name}`).join(' · ') }));
       card.style.borderColor = COLOURS[seat];
       return card;
     }));
+}
+
+// When the player's next scheduled event card comes (none during a citizenship request).
+function nextCardText(s: GameState, p: Player): string {
+  const done = s.turnOrder.indexOf(p.seat) < s.current; // already played this round
+  const round = nextCardRound(done ? s.round + 1 : s.round);
+  if (round === null) return '🃏 No more event cards';
+  return round === s.round && !done ? '🃏 Event card this turn' : `🃏 Next event card: round ${round}`;
 }
 
 // "Continents 2/3" for the profiles with a continent bonus or penalty (rulebook section 14).
@@ -370,6 +408,10 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
     renderQuiz(box, s, who);
   } else if (me.exam && (me.exam.stage === 'test' || me.exam.stage === 'result')) {
     renderCitizenship(box, s, who);
+  } else if (me.loseTurn) {
+    if (s.card?.seat === me.seat) box.append(renderCard(s.card));
+    box.append(el('h2', {}, who, ', you lose this turn'),
+      el('div', { className: 'row' }, button('⏸️ Lose this turn', () => act({ type: 'lostTurn' }))));
   } else if (me.travel) {
     const trip = me.travel;
     const to = areaById.get(trip.to)!.name;
@@ -378,8 +420,8 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
       el('p', { className: 'small', textContent: trip.turnsLeft > 0
         ? `${plural(trip.turnsLeft, 'travel turn')} left; you land at the end of the last one.`
         : `${to} is taken, so you wait one more turn and try to land again.` }),
-      el('p', { className: 'small', textContent: me.profile === 'nomad' ? '💻 Digital Nomad: +1 for this travel turn.' : 'Challenges and event cards come later.' }),
-      el('div', { className: 'row' }, button('Continue the journey', () => act({ type: 'travel' }))));
+      el('p', { className: 'small', textContent: `🃏 Every travel turn draws a ${trip.kind === 'airport' ? 'plane' : 'ship'} card: mostly ±1, sometimes ±2 or one turn late, rarely ±5.${me.profile === 'nomad' ? ' 💻 Digital Nomad: +1 for this travel turn (not if the card makes you late).' : ''} Challenges come later.` }),
+      el('div', { className: 'row' }, button('Continue the journey (draws an event card)', () => act({ type: 'travel' }))));
   } else {
     const here = areaById.get(me.area!)!;
     if (pendingFees && (pendingFees.type === 'walk' || pendingFees.type === 'board' || pendingFees.type === 'quiz')) {
@@ -390,7 +432,9 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
         el('ul', {}, ...fees.map((f) => el('li', { textContent: f.reason === 'visa'
           ? `🛂 Visa: ${f.amount} points to ${COLOUR_NAMES[f.to.seat]} (${where} is ${COLOUR_NAMES[f.to.seat]}'s citizenship)`
           : `🏛️ Tour fee: ${f.amount} point to ${COLOUR_NAMES[f.to.seat]} (owner of the guided tours in ${where})` }))),
-        el('p', { className: 'small', textContent: a.type === 'walk' ? 'You pay when you enter.' : 'You pay when you land.' }),
+        el('p', { className: 'small', textContent: a.type === 'walk' ? 'You pay when you enter.'
+          : a.type === 'board' ? 'You pay now, with the ticket. Nothing more to pay when you land.'
+          : 'You pay when you board (a right answer, or the ticket after the 3rd wrong one).' }),
         el('div', { className: 'row' },
           button(a.type === 'walk' ? `Pay ${feeTotal(fees)} and enter` : 'Go anyway', () => act(a)),
           button('Cancel', () => { pendingFees = null; render(); })));
@@ -408,6 +452,7 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
         })),
         el('p', { textContent: `🎉 Your citizenship of ${citizenshipName(me.citizenship!)} is now granted! You may travel on.${me.profile === 'business' ? ` 💼 +${POINTS_BUSINESS_CITIZENSHIP} points.` : ''}` })));
     }
+    if (s.card?.seat === me.seat) box.append(renderCard(s.card));
     box.append(el('h2', {}, who, `, you are in ${here.name}`), el('p', { className: 'small', textContent: travelNote(me) }));
     const businessesHere = s.businesses.filter((b) => b.area === here.id);
     if (businessesHere.length > 0) {

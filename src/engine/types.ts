@@ -24,6 +24,8 @@ export interface SeatConfig {
 export interface GameConfig {
   seats: SeatConfig[];
   seed: number;
+  // Event cards on (default). Off only in rule tests that count exact points.
+  eventCards?: boolean;
 }
 
 export interface Area {
@@ -83,6 +85,8 @@ export interface Player {
   // Turns in a row blocked because the player can't pay (a visa, tour fee or ticket).
   // At GO_HOME_TURNS the player is sent home (docs/engine.md, task 9).
   broke: number;
+  // An event card took this turn: the only move is "lostTurn" (task 11).
+  loseTurn: boolean;
 }
 
 // Businesses (rulebook section 6): guided tours at a wonder, an airline at an airport,
@@ -144,13 +148,6 @@ export interface Travel {
   to: string;
   // Travel turns still to come. At 0 the player lands, or waits if the destination is taken.
   turnsLeft: number;
-  // The destination needed a visa when the player boarded. A citizenship granted during
-  // the trip costs nothing on landing: a player is never charged for a rule that did not
-  // exist when they left (owner's choice, task 8).
-  visa?: true;
-  // The destination's guided tours had another owner when the player boarded: the tour fee
-  // is paid on landing. Tours bought during the trip cost nothing (same rule as the visa).
-  tours?: true;
   // Ask for citizenship on landing, if the area can still take one.
   citizenship?: true;
 }
@@ -194,7 +191,37 @@ export interface GameState {
   offer: SaleOffer | null;
   // The current player has already made a sale offer this turn (one per turn).
   offeredThisTurn: boolean;
+  // Event cards on (see GameConfig).
+  eventCards: boolean;
+  // The card drawn at the start of the current player's turn, on show for the whole turn.
+  card: DrawnCard | null;
+  // The cards drawn by the last move (a travel card, and the next player's start-of-turn card),
+  // so the screens can say what happened. Cleared by every move, like `payments`.
+  drawn: DrawnCard[];
   result: GameResult | null;
+}
+
+// Event cards (rulebook section 10, docs/engine.md task 11). The cards: src/cards/cards.ts.
+export type Deck = 'country' | 'plane' | 'ship' | 'backpacker';
+
+export interface EventCard {
+  id: string;
+  deck: Deck;
+  text: string;
+  // The change in points (points never go below 0).
+  points: number;
+  // In an area: this turn is lost. On a trip: the plane or ship is one turn late.
+  loseTurn?: true;
+  // A country card drawn only in this area.
+  area?: string;
+}
+
+export interface DrawnCard {
+  seat: number;
+  round: number;
+  card: EventCard;
+  // The points really won or lost (less than the card says when the player had too few).
+  change: number;
 }
 
 export interface GameResult {
@@ -219,7 +246,7 @@ export type Action =
   | { type: 'exam' }
   // One answer in the citizenship test (turn 2); the turn ends after the 3rd.
   | { type: 'examAnswer'; choice: 0 | 1 }
-  // A turn in the air or at sea (challenges and event cards come in tasks 11–12).
+  // A turn in the air or at sea: an event card is drawn (challenges come in task 12).
   | { type: 'travel' }
   // Buy the business in the player's area. The turn goes on: the player still moves.
   | { type: 'buy'; business: BusinessKind }
@@ -233,4 +260,6 @@ export type Action =
   | { type: 'goHome' }
   // Only legal when no neighbouring area can be entered and there is no trip. Not in the
   // rulebook; it stops the engine from freezing (see docs/engine.md).
-  | { type: 'blocked' };
+  | { type: 'blocked' }
+  // An event card took this turn.
+  | { type: 'lostTurn' };

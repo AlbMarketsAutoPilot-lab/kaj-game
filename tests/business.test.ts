@@ -162,7 +162,7 @@ test('the Backpacker never pays a ticket, so an owner earns nothing from its tri
   assert.deepEqual(s.payments, []);
 });
 
-test('by ship: the ferry owner gets the ticket; the tour fee is paid on landing', () => {
+test('by ship: the ferry owner gets the ticket; the tour fee is paid at boarding', () => {
   let s = game(['eu-north', 'as-east'], ['nomad', 'luxury']); // Nomad: ticket 1, ship 3 turns
   own(s, 'eu-north', 'ferry', p2(s));
   own(s, 'na-one', 'tours', p2(s));
@@ -171,19 +171,20 @@ test('by ship: the ferry owner gets the ticket; the tour fee is paid on landing'
   assert.ok(!legalActions(s, map).some((a) => (a.type === 'board' || a.type === 'quiz') && a.to === 'na-one'));
   p1(s).points = 2; // ticket 1 + tour fee 1
   s = go(s, { type: 'board', kind: 'port', to: 'na-one' });
-  assert.equal(p1(s).travel!.tours, true);
-  assert.deepEqual(s.payments, [{ reason: 'ticket', from: p1(s).seat, to: p2(s).seat, amount: 1, area: 'eu-north', business: 'ferry' }]);
+  assert.deepEqual(s.payments, [
+    { reason: 'ticket', from: p1(s).seat, to: p2(s).seat, amount: 1, area: 'eu-north', business: 'ferry' },
+    { reason: 'tour', from: p1(s).seat, to: p2(s).seat, amount: 1, area: 'na-one' },
+  ]);
   s = pass(s);
   let landing = s;
   for (let i = 0; i < 3; i++) s = pass((landing = go(s, { type: 'travel' })));
   assert.equal(p1(s).area, 'na-one');
-  assert.deepEqual(landing.payments, [{ reason: 'tour', from: p1(s).seat, to: p2(s).seat, amount: 1, area: 'na-one' }]);
+  assert.deepEqual(landing.payments, []); // nothing is owed on landing
 });
 
 test('tours bought while the player is at sea cost nothing on landing', () => {
   let s = game(['eu-north', 'as-east'], ['nomad', 'luxury']);
   s = go(s, { type: 'board', kind: 'port', to: 'na-one' });
-  assert.equal(p1(s).travel!.tours, undefined);
   own(s, 'na-one', 'tours', p2(s));
   s = pass(s);
   let landing = s;
