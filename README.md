@@ -8,4 +8,5 @@ KAJ — Kris Ann's Journey: a kid-friendly geography board game for Android
 npm ci
 npm run typecheck
 npm test
+npm run build   # dist/kaj.html: the test board, opens straight from disk
 ```
