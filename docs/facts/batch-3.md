@@ -53,7 +53,7 @@ The right answer is in **bold**.
 | 8 | Ulaanbaatar, in Mongolia, is the coldest capital city in the world. | Ulaanbaatar is the world's coldest… | **capital city** / desert |
 | 9 | Mongolia has no coast. It lies between Russia and China. | Mongolia lies between Russia and… | **China** / India |
 | 10 | Bactrian camels, which live in the Gobi Desert, have two humps. | Bactrian camels have… | **two humps** / one hump |
-| 11 | Przewalski's horse, called the takhi in Mongolia, is a truly wild horse. It was brought back to Mongolia's grasslands. | The takhi is a wild… | **horse** / goat |
+| 11 | Przewalski's horse, called the takhi in Mongolia, is a rare wild horse. It was brought back to Mongolia's grasslands. | The takhi is a wild… | **horse** / goat |
 | 12 | The first Velociraptor fossils were found in Mongolia in the 1920s. | The first Velociraptor fossils were found in… | **Mongolia** / Canada |
 
 ## Korea
@@ -118,7 +118,7 @@ The right answer is in **bold**.
 | 5 | The rafflesia of Indonesia's rainforests is the largest single flower in the world, and it smells like rotting meat. | The rafflesia flower smells like… | **rotting meat** / roses |
 | 6 | Wild orangutans live only on the islands of Borneo and Sumatra. | Wild orangutans live only on Borneo and… | **Sumatra** / Madagascar |
 | 7 | The Philippines is made of more than 7,000 islands. | How many islands does the Philippines have? | **More than 7,000** / About 70 |
-| 8 | The Banaue Rice Terraces in the Philippines were carved into the mountains about 2,000 years ago. | The Banaue terraces are used to grow… | **rice** / grapes |
+| 8 | The Banaue Rice Terraces in the Philippines were carved into the mountains by hand by the Ifugao people, and farmers still grow rice on them today. | The Banaue terraces are used to grow… | **rice** / grapes |
 | 9 | The Chocolate Hills on Bohol, in the Philippines, are more than 1,000 hills that turn brown in the dry season. | The Chocolate Hills turn brown in the… | **dry season** / winter snow |
 | 10 | Papua New Guinea has more than 800 languages, more than any other country. | About how many languages are spoken in Papua New Guinea? | **More than 800** / About 8 |
 | 11 | Timor-Leste became independent in 2002, one of the newest countries in the world. | Timor-Leste became independent in… | **2002** / 1802 |

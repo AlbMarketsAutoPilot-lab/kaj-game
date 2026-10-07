@@ -43,7 +43,7 @@ export const batch3: FactBatch = {
     f('Ulaanbaatar, in Mongolia, is the coldest capital city in the world.', 'Ulaanbaatar is the world\'s coldest…', 'capital city', 'desert'),
     f('Mongolia has no coast. It lies between Russia and China.', 'Mongolia lies between Russia and…', 'China', 'India'),
     f('Bactrian camels, which live in the Gobi Desert, have two humps.', 'Bactrian camels have…', 'two humps', 'one hump'),
-    f('Przewalski\'s horse, called the takhi in Mongolia, is a truly wild horse. It was brought back to Mongolia\'s grasslands.', 'The takhi is a wild…', 'horse', 'goat'),
+    f('Przewalski\'s horse, called the takhi in Mongolia, is a rare wild horse. It was brought back to Mongolia\'s grasslands.', 'The takhi is a wild…', 'horse', 'goat'),
     f('The first Velociraptor fossils were found in Mongolia in the 1920s.', 'The first Velociraptor fossils were found in…', 'Mongolia', 'Canada'),
   ],
   korea: [
@@ -96,7 +96,7 @@ export const batch3: FactBatch = {
     f('The rafflesia of Indonesia\'s rainforests is the largest single flower in the world, and it smells like rotting meat.', 'The rafflesia flower smells like…', 'rotting meat', 'roses'),
     f('Wild orangutans live only on the islands of Borneo and Sumatra.', 'Wild orangutans live only on Borneo and…', 'Sumatra', 'Madagascar'),
     f('The Philippines is made of more than 7,000 islands.', 'How many islands does the Philippines have?', 'More than 7,000', 'About 70'),
-    f('The Banaue Rice Terraces in the Philippines were carved into the mountains about 2,000 years ago.', 'The Banaue terraces are used to grow…', 'rice', 'grapes'),
+    f('The Banaue Rice Terraces in the Philippines were carved into the mountains by hand by the Ifugao people, and farmers still grow rice on them today.', 'The Banaue terraces are used to grow…', 'rice', 'grapes'),
     f('The Chocolate Hills on Bohol, in the Philippines, are more than 1,000 hills that turn brown in the dry season.', 'The Chocolate Hills turn brown in the…', 'dry season', 'winter snow'),
     f('Papua New Guinea has more than 800 languages, more than any other country.', 'About how many languages are spoken in Papua New Guinea?', 'More than 800', 'About 8'),
     f('Timor-Leste became independent in 2002, one of the newest countries in the world.', 'Timor-Leste became independent in…', '2002', '1802'),
