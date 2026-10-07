@@ -95,7 +95,7 @@ Task 8: visas and citizenship (`tests/citizenship.test.ts`).
   The test board warns before a move into a visa area ("entering costs a 2-point visa, paid
   to …", Pay and enter / Cancel) and says afterwards who was paid.
 - **By plane or ship:** boarding to a visa area needs the ticket plus 2 (the quiz: 2); the visa
-  is paid on landing. A citizenship granted while the player is travelling costs nothing on
+  is paid on landing (since task 11: at boarding). A citizenship granted while the player is travelling costs nothing on
   landing.
 - **Blocked:** if no neighbour can be entered (taken, or a visa the player can't pay) and
   there is no trip, the player gets the "blocked" turn.
@@ -121,7 +121,7 @@ Task 9: businesses, strict fees and "go home" (`tests/business.test.ts`).
   the ticket goes to nobody.
 - **Strict fees (owner's rule):** no money, no entry. A visa (2) and a tour fee (1) must both be
   in hand to enter (3 if both); boarding needs the ticket plus the fees, the quiz needs the fees.
-  Fees for a trip are paid on landing. Exception: a citizenship granted or tours bought while the
+  Fees for a trip are paid on landing (since task 11: at boarding). Exception: a citizenship granted or tours bought while the
   player is travelling cost nothing on landing.
 - **End score:** points plus the price of every business owned (owner's rule). Ties as before.
 - **Go home (owner's rule):** a player whose only move is "blocked" and who has at least one way
@@ -179,7 +179,36 @@ Task 10: profile bonuses, save and resume (`tests/profiles.test.ts`, `tests/save
   764 Nomads (in about 105 games it cost the Nomad first place). A game resumed after every move
   ends exactly like one never saved (20 games).
 
-Not yet: event cards, challenges.
+Task 11: event cards (`src/cards/cards.ts`, review page [`cards.md`](cards.md), `tests/cards.test.ts`).
+
+- **53 cards** in 4 decks: country (12 anywhere + 12 that belong to one area, drawn only there),
+  plane 10, ship 11, Backpacker 8 (all helpful, drawn only by the Backpacker, with the country
+  cards). Mostly ±1, some ±2 or "lose a turn", rare ±5. A random card each time (the same card can
+  come again), with the game's dice.
+- **When:** at the start of every player's turn in rounds 3, 6 … 27 (9 cards; none in the last
+  round), standing in an area; and on every travel turn (a plane or ship card). One card per turn
+  at most: a traveller draws only the travel card. No scheduled card during a citizenship request
+  (the exam is the event); it is skipped, not moved.
+- **Effects:** points (never below 0; the card says what was really lost), or "lose a turn". In an
+  area the turn is lost (the only move is "lostTurn"; it leaves the "out of money" count as it is).
+  On a trip the plane or ship is one turn late, with no Nomad +1 for that turn.
+- **Fees at boarding (owner's rule, task 11):** the visa and tour fee are paid when boarding,
+  together with the ticket (a right quiz answer: the fees only), to the citizen and tour owner of
+  that moment. Nothing is owed on landing, so a card at sea can never stop a landing. A
+  citizenship or tours that appear during the trip still cost nothing.
+- The engine keeps the card of the current turn (`state.card`, on show for the whole turn) and the
+  cards drawn by the last move (`state.drawn`), so the screens say what happened. The test board
+  shows a card box, "🃏 Next event card: round N" on each player, "draws an event card" on the
+  travel button, and a "Lose this turn" button. Rule tests that count exact points switch the cards
+  off (`eventCards: false`); every real game has them.
+- **Saves:** version 2. A version-1 save can't be continued.
+- 1,000 random-robot games on the 30-turn map: 22,100 scheduled cards and 10,300 travel cards,
+  1,600 lost turns and 1,650 late trips; 26,700 points won and 22,900 lost (about 4 points per
+  player per game in each direction); longest trip 9 turns (1 trip in 6,000; was 7; the test limit was raised from 8 to 10,
+  owner-approved), longest
+  "blocked" streak 2, nobody stuck.
+
+Not yet: challenges.
 
 ## Choices made in task 1 (approved by the owner)
 
@@ -249,6 +278,7 @@ These points are not spelled out in the rulebook or the v1 scope.
 2. **No offers to a player in the air or at sea** (they may owe a visa or tour fee on landing).
 3. **Robot buyers** accept whenever they can pay (random robots in the tests: at random).
 4. A fee due when a player boarded goes to whoever owns the business when they land.
+   (Replaced in task 11: fees are paid at boarding, to the owner of that moment.)
 5. **The "every connection is needed" test** runs on the original 9-connection map.
 
 ## Choices made in task 10 (approved by the owner)
@@ -265,6 +295,21 @@ These points are not spelled out in the rulebook or the v1 scope.
 8. **Saves carry a version**; a save from another version can't be continued, so no game is
    scored by rules that did not exist when its moves were made.
 9. **Robots carry on by themselves** after a resume.
+
+## Choices made in task 11 (approved by the owner)
+
+1. **Scheduled cards in rounds 3, 6 … 27** (9 per player; none in the last round).
+2. **At the start of the turn**, shown before the move; no question to the player.
+3. **No card during a citizenship request**; skipped, not moved to a later turn.
+4. **One card per turn**: a traveller in a card round draws only the plane or ship card.
+5. **"Lose a turn" in an area:** this turn is lost.
+6. **"Lose a turn" on a trip:** one turn late, no Nomad +1 for that turn.
+7. **A lost turn leaves the "out of money" count as it is.**
+8. **Backpacker cards** are all helpful (+1 or +2), drawn with the country cards; no moving cards.
+9. **Random draw** from the cards that fit; the same card can come again.
+10. **Warnings:** "Next event card: round N" and the travel button note before; the card box after.
+11. **Visa and tour fee paid at boarding**, with the ticket (also with a free quiz ticket), to the
+    citizen or owner of that moment; anything new during the trip is free.
 
 ## Project setup
 

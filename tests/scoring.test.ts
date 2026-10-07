@@ -8,7 +8,7 @@ import { seatOf, seats } from './helpers.ts';
 // Wonders and big countries (rulebook section 3), on the real 30-turn map.
 
 function started(starts: string[]): GameState {
-  let s = createGame({ seats: seats(starts.length), seed: 1 }, map30);
+  let s = createGame({ seats: seats(starts.length), seed: 1, eventCards: false }, map30);
   const profiles: Profile[] = ['backpacker', 'business', 'luxury', 'nomad'];
   while (s.phase === 'chooseProfile') {
     const taken = new Set(s.players.map((p) => p.profile));

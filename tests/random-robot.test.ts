@@ -71,6 +71,7 @@ test(`random robots play ${GAMES} games on the 30-turn map with planes and ships
   const bonuses = { backpacker: 0, luxury: 0, nomadPenalty: 0, nomadPenaltyLostWin: 0 };
   const profiles: Record<string, number> = {};
   let resumes = 0;
+  const cards = { scheduled: 0, travel: 0, lostTurns: 0, lateTrips: 0, won: 0, lost: 0 };
   for (let g = 0; g < GAMES; g++) {
     const n = 2 + (g % 3);
     let s = createGame({ seats: seats(n, n - 1), seed: g * 7919 + 13 }, map30);
@@ -99,6 +100,14 @@ test(`random robots play ${GAMES} games on the 30-turn map with planes and ships
         resumes++;
       }
       checkInvariants(s);
+      // Event cards (task 11).
+      for (const c of s.drawn) {
+        const travel = action.type === 'travel' && c.seat === seat;
+        cards[travel ? 'travel' : 'scheduled']++;
+        if (c.card.loseTurn) cards[travel ? 'lateTrips' : 'lostTurns']++;
+        if (c.change > 0) cards.won += c.change;
+        else cards.lost -= c.change;
+      }
       for (const pay of s.payments) {
         if (pay.reason === 'visa') visas++;
         if (pay.reason === 'buy') purchases++;
@@ -134,15 +143,18 @@ test(`random robots play ${GAMES} games on the 30-turn map with planes and ships
       }
     }
   }
+  console.log(`task 11: cards ${JSON.stringify(cards)}, longest trip ${longestTrip}, longest blocked ${longestBlock}`);
   console.log(`task 10: ${JSON.stringify(bonuses)} of ${JSON.stringify(profiles)}, ${resumes} save/resume round trips`);
   assert.ok(trips > GAMES, `only ${trips} trips`);
+  assert.ok(cards.scheduled > GAMES && cards.travel > GAMES, `only ${cards.scheduled} + ${cards.travel} cards`);
   assert.ok(citizens > GAMES, `only ${citizens} citizenships`);
   assert.ok(visas > GAMES / 2, `only ${visas} visas`);
   assert.ok(quizzes > GAMES, `only ${quizzes} quizzes`);
   assert.ok(purchases > GAMES, `only ${purchases} businesses bought`);
   assert.ok(income > GAMES, `only ${income} points of business income`);
   assert.ok(offers > GAMES && sales > GAMES / 2, `only ${offers} sale offers, ${sales} sales`);
-  // A ship takes at most 3 travel turns; a taken destination adds a few waiting turns.
-  assert.ok(longestTrip <= 8, `a trip lasted ${longestTrip} turns`);
+  // A ship takes at most 3 travel turns; a taken destination and "late" cards (task 11) add a few.
+  // Limit raised from 8 to 10 in task 11 (owner-approved).
+  assert.ok(longestTrip <= 10, `a trip lasted ${longestTrip} turns`);
   assert.ok(longestBlock <= 5, `a player was blocked ${longestBlock} turns in a row`);
 });

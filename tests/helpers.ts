@@ -18,8 +18,10 @@ export function startedGame(
   seed = 1,
   map: GameMap = testMap,
   profiles: Profile[] = ['backpacker', 'business', 'luxury', 'nomad'],
+  eventCards = false,
 ): GameState {
-  let s = createGame({ seats: seats(starts.length), seed }, map);
+  // Event cards are off by default here, so rule tests can count exact points.
+  let s = createGame({ seats: seats(starts.length), seed, eventCards }, map);
   while (s.phase === 'chooseProfile') {
     const taken = new Set(s.players.map((p) => p.profile));
     s = apply(s, map, { type: 'chooseProfile', profile: profiles.find((p) => !taken.has(p))! });
