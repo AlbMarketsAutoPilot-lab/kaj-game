@@ -95,6 +95,8 @@ export function createGame(config: GameConfig, map: GameMap): GameState {
     quiz: null,
     businesses: mapBusinesses(map),
     payments: [],
+    offer: null,
+    offeredThisTurn: false,
     result: null,
   };
 }
@@ -124,6 +126,13 @@ export function legalActions(state: GameState, map: GameMap): Action[] {
     }
     case 'play': {
       if (state.quiz) return [{ type: 'answer', choice: 0 }, { type: 'answer', choice: 1 }];
+      if (state.offer) {
+        const buyer = state.players[state.offer.to];
+        return [
+          ...(buyer.points >= state.offer.price ? [{ type: 'sellAnswer' as const, accept: true }] : []),
+          { type: 'sellAnswer', accept: false },
+        ];
+      }
       // During a citizenship request the player stays, until it is granted.
       if (me.exam && !examOver(me.exam)) {
         return me.exam.stage === 'test'
@@ -146,8 +155,8 @@ export function legalActions(state: GameState, map: GameMap): Action[] {
         const home = me.broke >= GO_HOME_TURNS - 1 && blockedByMoney(state, map, me);
         moves.push(home ? { type: 'goHome' } : { type: 'blocked' });
       }
-      // Buying never ends the turn, so it comes with the moves.
-      return [...moves, ...buyActions(state, me)];
+      // Buying and selling never end the turn, so they come with the moves.
+      return [...moves, ...buyActions(state, me), ...sellActions(state, me)];
     }
     case 'finished':
       return [];
@@ -163,8 +172,9 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
   const me = currentPlayer(next);
   // The "citizenship granted" turn: the request is over once the player moves on.
   if (me.exam && examOver(me.exam)) me.exam = null;
-  // Any move except waiting (or buying, which doesn't end the turn) ends a "no money" streak.
-  if (action.type !== 'blocked' && action.type !== 'buy') me.broke = 0;
+  // Any move except waiting (or buying and selling, which don't end the turn) ends a
+  // "no money" streak.
+  if (!['blocked', 'buy', 'sell', 'sellAnswer'].includes(action.type)) me.broke = 0;
 
   switch (action.type) {
     case 'chooseProfile': {
@@ -257,6 +267,24 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
       me.points = addPoints(me.points, -BUSINESS_PRICE[business.kind]);
       next.payments.push({ reason: 'buy', from: me.seat, to: null, amount: BUSINESS_PRICE[business.kind], area: business.area, business: business.kind });
       return next; // the turn goes on
+    }
+    case 'sell': {
+      const business = businessAt(next, action.area, action.business)!;
+      next.offer = { business: business.kind, area: business.area, from: me.seat, to: action.to, price: BUSINESS_PRICE[business.kind] };
+      next.offeredThisTurn = true;
+      return next; // the buyer answers next; the seller's turn goes on
+    }
+    case 'sellAnswer': {
+      const offer = next.offer!;
+      next.offer = null;
+      if (action.accept) {
+        const buyer = next.players[offer.to];
+        buyer.points = addPoints(buyer.points, -offer.price);
+        me.points = addPoints(me.points, offer.price);
+        businessAt(next, offer.area, offer.business)!.owner = buyer.seat;
+        next.payments.push({ reason: 'sale', from: buyer.seat, to: me.seat, amount: offer.price, area: offer.area, business: offer.business });
+      }
+      return next;
     }
     case 'blocked':
       // Count the turns in a row blocked by lack of money (not by players in the way).
@@ -399,6 +427,17 @@ function buyActions(state: GameState, me: Player): Action[] {
   return state.businesses
     .filter((b) => b.area === me.area && b.owner === null && me.points >= BUSINESS_PRICE[b.kind])
     .map((b) => ({ type: 'buy', business: b.kind }));
+}
+
+// Sale offers: any business the player owns, to any other player who can pay its price,
+// once per turn (rulebook section 6; owner-approved in tasks 9 and 9b).
+function sellActions(state: GameState, me: Player): Action[] {
+  if (state.offeredThisTurn) return [];
+  return state.businesses
+    .filter((b) => b.owner === me.seat)
+    .flatMap((b) => state.players
+      .filter((p) => p.seat !== me.seat && p.points >= BUSINESS_PRICE[b.kind])
+      .map((p): Action => ({ type: 'sell', business: b.kind, area: b.area, to: p.seat })));
 }
 
 export interface Fee {
@@ -592,6 +631,7 @@ function advanceSetup(state: GameState): void {
 }
 
 function endTurn(state: GameState, map: GameMap): void {
+  state.offeredThisTurn = false;
   state.current += 1;
   if (state.current >= state.players.length) {
     state.current = 0;
