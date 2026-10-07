@@ -256,3 +256,77 @@ test('final score: points plus the price of every business owned', () => {
   assert.deepEqual(rank(s.players, s.businesses).winners, [p2(s).seat]);
   assert.deepEqual(rank(s.players).winners, [p1(s).seat]);
 });
+
+// ---------- selling (task 9b) ----------
+
+const sells = (s: GameState) => legalActions(s, map).filter((a) => a.type === 'sell');
+
+test('selling: any business the player owns, to a player who can pay, at the price it was bought for', () => {
+  let s = game(['eu-west', 'af-south']); // p1 Business, p2 Luxury
+  own(s, 'eu-west', 'airline', p1(s));
+  own(s, 'na-one', 'tours', p1(s)); // far away: can still be sold
+  p2(s).points = 2;
+  // p2 can pay the tours (2) but not the airline (3).
+  assert.deepEqual(sells(s), [{ type: 'sell', business: 'tours', area: 'na-one', to: p2(s).seat }]);
+  p2(s).points = 5;
+  assert.equal(sells(s).length, 2);
+  const mine = p1(s).points;
+  s = go(s, { type: 'sell', business: 'airline', area: 'eu-west', to: p2(s).seat });
+  assert.deepEqual(s.offer, { business: 'airline', area: 'eu-west', from: p1(s).seat, to: p2(s).seat, price: 3 });
+  assert.deepEqual(legalActions(s, map), [{ type: 'sellAnswer', accept: true }, { type: 'sellAnswer', accept: false }]);
+  s = go(s, { type: 'sellAnswer', accept: true });
+  assert.equal(owner(s, 'eu-west', 'airline'), p2(s).seat);
+  assert.equal(p1(s).points, mine + 3);
+  assert.equal(p2(s).points, 2);
+  assert.deepEqual(s.payments, [{ reason: 'sale', from: p2(s).seat, to: p1(s).seat, amount: 3, area: 'eu-west', business: 'airline' }]);
+  // Still p1's turn; one offer per turn, so no more selling now.
+  assert.equal(s.turnOrder[s.current], p1(s).seat);
+  assert.deepEqual(sells(s), []);
+  assert.ok(legalActions(s, map).some((a) => a.type === 'walk'));
+});
+
+test('a refused offer changes nothing, and uses the one offer of the turn', () => {
+  let s = game(['eu-west', 'af-south']);
+  own(s, 'na-one', 'tours', p1(s));
+  s = go(s, { type: 'sell', business: 'tours', area: 'na-one', to: p2(s).seat });
+  s = go(s, { type: 'sellAnswer', accept: false });
+  assert.equal(owner(s, 'na-one', 'tours'), p1(s).seat);
+  assert.deepEqual(s.payments, []);
+  assert.deepEqual(sells(s), []);
+  // Next turn: p1 may offer again.
+  s = pass(pass(s));
+  assert.equal(sells(s).length, 1);
+});
+
+test('no sale offers to a player in the air or at sea', () => {
+  let s = game(['eu-north', 'as-east'], ['luxury', 'nomad']);
+  own(s, 'na-one', 'tours', p1(s));
+  s = go(s, { type: 'walk', to: 'eu-west' });
+  s = go(s, { type: 'quiz', kind: 'airport', to: 'af-south' });
+  s = go(s, { type: 'answer', choice: s.quiz!.question.correct }); // Nomad: 1 travel turn
+  assert.notEqual(p2(s).travel, null);
+  p2(s).points = 10;
+  assert.deepEqual(sells(s), []);
+});
+
+test('out of money: selling gives the points to move on in the same turn', () => {
+  let s = brokeGame();
+  own(s, 'na-one', 'tours', p1(s));
+  s = pass(go(s, { type: 'blocked' }));
+  assert.equal(p1(s).broke, 1);
+  s = go(s, { type: 'sell', business: 'tours', area: 'na-one', to: p2(s).seat });
+  s = go(s, { type: 'sellAnswer', accept: true });
+  assert.equal(p1(s).points, 3);
+  s = go(s, { type: 'walk', to: 'af-north' }); // the 2-point visa
+  assert.equal(p1(s).area, 'af-north');
+  assert.equal(p1(s).broke, 0);
+});
+
+test('a sold business counts for its new owner at the end', () => {
+  let s = game(['eu-west', 'af-south']);
+  own(s, 'eu-west', 'airline', p1(s));
+  s = go(s, { type: 'sell', business: 'airline', area: 'eu-west', to: p2(s).seat });
+  s = go(s, { type: 'sellAnswer', accept: true });
+  assert.equal(finalScore(s, p2(s)), p2(s).points + 3);
+  assert.equal(finalScore(s, p1(s)), p1(s).points);
+});

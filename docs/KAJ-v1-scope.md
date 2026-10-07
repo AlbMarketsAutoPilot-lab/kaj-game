@@ -30,7 +30,7 @@ Target: a complete, playable v1 within about 15 days of work.
 
 ## 4. Map
 
-- **Only the 30-turn map:** 50 areas, 7 wonders, **7 airports** and **4 ports** with **9 two-way connections**. (Task 9b, owner-approved: UK & Ireland gets an airport and Japan a port, so 2 areas have both.) An airport or port has **1 to 3 fixed destinations**; the traveller chooses one when boarding. Luxury can choose any airport or port. (Changed in task 2b, owner-approved: 6 airports + 4 ports with one destination each could not pass the map check.)
+- **Only the 30-turn map:** 50 areas, 7 wonders, **8 airports** and **6 ports** with **11 two-way connections**. (Task 9b, owner-approved: UK & Ireland gets an airport to the Arabian Peninsula and Japan a port to USA West, so UK & Ireland and Japan have both.) An airport or port has **1 to 3 fixed destinations**; the traveller chooses one when boarding. Luxury can choose any airport or port. (Changed in task 2b, owner-approved: 6 airports + 4 ports with one destination each could not pass the map check.)
 - **Starting continents: 6 choices**, all different between players: Europe, Asia, Africa, **North America**, **South America**, Oceania.
 - **Welcome bonus:** Europe, Asia, Africa +3 · North America +4 · South America +4 · Oceania +5.
 - Big countries: a country split into N parts gives +N when all parts are visited (e.g. USA East + USA West = +2).

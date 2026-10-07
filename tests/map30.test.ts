@@ -67,12 +67,12 @@ test('a game can start on the 30-turn map with 4 seats', () => {
   assert.doesNotThrow(() => createGame({ seats: seats(4), seed: 3 }, map30));
 });
 
-test('30-turn map: 8 airports, 5 ports, 11 connections, at most 3 destinations each', () => {
+test('30-turn map: 8 airports, 6 ports, 11 connections, at most 3 destinations each', () => {
   const routes = map30.routes ?? [];
   const at = (kind: string) => new Set(routes.filter((r) => r.kind === kind).flatMap((r) => [r.a, r.b])).size;
   assert.equal(routes.length, 11);
   assert.equal(at('airport'), 8);
-  assert.equal(at('port'), 5);
+  assert.equal(at('port'), 6);
   // UK & Ireland and Japan have both an airport and a port (task 9b).
   const both = (id: string) => ['airport', 'port'].every((k) => routes.some((r) => r.kind === k && (r.a === id || r.b === id)));
   assert.deepEqual(map30.areas.filter((a) => both(a.id)).map((a) => a.id), ['uk-ireland', 'japan']);
@@ -82,16 +82,16 @@ test('30-turn map: every area reachable and no single visa area traps anyone', (
   assert.deepEqual(stuckProblems(map30), []);
 });
 
-// The 2 connections added in task 9b are extra by design; the original 9 are each needed
-// (owner-approved).
+// The 2 connections added in task 9b are extra by design. The original 9-connection map is
+// still checked: there, each of the 9 is needed (owner-approved).
 const ADDED_IN_9B = ['uk-ireland arabia', 'japan usa-west'];
 
-test('30-turn map: every one of the original 9 connections is needed', () => {
-  const routes = map30.routes ?? [];
-  const original = routes.filter((r) => !ADDED_IN_9B.includes(`${r.a} ${r.b}`));
+test('original 9-connection map: every connection is needed', () => {
+  const original = (map30.routes ?? []).filter((r) => !ADDED_IN_9B.includes(`${r.a} ${r.b}`));
   assert.equal(original.length, 9);
+  assert.deepEqual(stuckProblems({ ...map30, routes: original }), []);
   for (const r of original) {
-    const without = { ...map30, routes: routes.filter((x) => x !== r) };
+    const without = { ...map30, routes: original.filter((x) => x !== r) };
     assert.ok(stuckProblems(without).length > 0, `${r.a} – ${r.b} is not needed`);
   }
 });

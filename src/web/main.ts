@@ -44,6 +44,8 @@ let askCitizenship = false;
 let note = '';
 // A move into an area with fees (visa, tour fee), waiting for the player to confirm.
 let pendingFees: Action | null = null;
+// The "sell a business" list is open on the move panel.
+let selling = false;
 
 // ---------- small DOM helpers ----------
 
@@ -130,9 +132,13 @@ function act(action: Action): void {
   const name = COLOUR_NAMES[mover.seat];
   const examBefore = mover.exam;
   const home = action.type === 'goHome' ? homeFor(state, map30, mover) : null;
+  const offer = state.offer;
   state = apply(state, map30, action);
   const after = state.players[mover.seat];
   const lines: string[] = [];
+  if (offer && action.type === 'sellAnswer' && !action.accept) {
+    lines.push(`🙅 ${COLOUR_NAMES[offer.to]} said no to ${name}'s ${BUSINESS_NAME[offer.business]} in ${areaById.get(offer.area)!.name}.`);
+  }
   if (!examBefore && after.exam) {
     const where = areaById.get(after.exam.area)!.name;
     lines.push(after.exam.stage === 'submitted'
@@ -144,6 +150,7 @@ function act(action: Action): void {
   note = lines.join(' ');
   askCitizenship = false;
   pendingFees = null;
+  selling = false;
   render();
 }
 
@@ -164,6 +171,8 @@ function paymentNote(p: Payment): string {
         ? `${from}'s ${p.amount}-point ticket went to ${from}'s own ${business}.`
         : `${from}'s ${p.amount}-point ticket went to ${to}, owner of the ${business}.`;
     }
+    case 'sale':
+      return `🤝 ${from} bought ${to}'s ${BUSINESS_ICON[p.business!]} ${BUSINESS_NAME[p.business!]} in ${where} for ${p.amount} points. It now earns for ${from}, and counts ${p.amount} points at the end.`;
     case 'buy':
       return `${BUSINESS_ICON[p.business!]} ${from} bought the ${BUSINESS_NAME[p.business!]} in ${where} for ${p.amount} points: ${BUSINESS_EARNS[p.business!].replace('you', from)}. It counts ${p.amount} points at the end.`;
   }
@@ -172,7 +181,8 @@ function paymentNote(p: Payment): string {
 // Moves into an area with fees ask first: "entering costs a 2-point visa / 1-point tour fee".
 function go(action: Action): void {
   const s = state!;
-  if ('to' in action && entryFees(s, currentPlayer(s), currentPlayer(s).area, action.to).length > 0) {
+  if ((action.type === 'walk' || action.type === 'board' || action.type === 'quiz')
+    && entryFees(s, currentPlayer(s), currentPlayer(s).area, action.to).length > 0) {
     pendingFees = action;
     render();
   } else {
@@ -195,7 +205,9 @@ function render(): void {
   const s = state;
   const me = currentPlayer(s);
   const actions = legalActions(s, map30);
-  const isRobot = s.phase !== 'finished' && me.kind === 'robot';
+  // During a sale offer the buyer answers, on the seller's turn.
+  const actor = s.offer ? s.players[s.offer.to] : me;
+  const isRobot = s.phase !== 'finished' && actor.kind === 'robot';
 
   app.replaceChildren(
     el('header', {},
@@ -212,6 +224,8 @@ function render(): void {
   if (isRobot) {
     robotTimer = window.setTimeout(() => {
       if (state !== s) return;
+      // A robot buyer accepts an offer whenever it can pay (owner's choice, task 9b).
+      if (s.offer) return act(actions.find((a) => a.type === 'sellAnswer' && a.accept) ?? { type: 'sellAnswer', accept: false });
       const [action, next] = randomRobotAction(s, map30, robotSeed);
       robotSeed = next;
       act(action);
@@ -262,6 +276,20 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
   }
 
   if (note) box.append(el('p', { className: 'note', textContent: note }));
+  if (s.offer) {
+    const o = s.offer;
+    const buyer = el('span', {}, dot(o.to), ` ${COLOUR_NAMES[o.to]}`);
+    const what = `the ${BUSINESS_ICON[o.business]} ${BUSINESS_NAME[o.business]} in ${areaById.get(o.area)!.name}`;
+    if (isRobot) {
+      box.append(el('h2', {}, buyer, ` is thinking about ${COLOUR_NAMES[o.from]}'s offer… 🤖`));
+      return box;
+    }
+    box.append(el('h2', {}, buyer, `: ${COLOUR_NAMES[o.from]} offers you ${what} for ${o.price} points`),
+      el('p', { textContent: `If you buy it, ${BUSINESS_EARNS[o.business]}, and it counts ${o.price} points for you at the end. You have ${s.players[o.to].points} points.` }),
+      el('div', { className: 'row' }, ...actions.map((a) => a.type === 'sellAnswer'
+        ? button(a.accept ? `Yes, buy it (−${o.price})` : 'No, thanks', () => act(a)) : '')));
+    return box;
+  }
   if (isRobot) {
     box.append(el('h2', {}, who, ' is thinking… 🤖'));
     return box;
@@ -291,7 +319,7 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
       el('div', { className: 'row' }, button('Continue the journey', () => act({ type: 'travel' }))));
   } else {
     const here = areaById.get(me.area!)!;
-    if (pendingFees && 'to' in pendingFees) {
+    if (pendingFees && (pendingFees.type === 'walk' || pendingFees.type === 'board' || pendingFees.type === 'quiz')) {
       const a = pendingFees;
       const fees = entryFees(s, me, me.area, a.to);
       const where = areaById.get(a.to)!.name;
@@ -328,7 +356,7 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
       const left = GO_HOME_TURNS - 1 - me.broke;
       box.append(el('p', { className: 'note', textContent: left <= 0
         ? `🏠 Your money has run out, and your trip ends here. You go home to ${homeName}, free of any fees.`
-        : `💸 Out of money! You can't pay to enter any area or to board. Wait for luck. ${left === 1 ? 'Next turn' : `In ${left} turns`}, if you still can't pay, your trip ends and you go home to ${homeName}.` }));
+        : `💸 Out of money! You can't pay to enter any area or to board. ${s.businesses.some((b) => b.owner === me.seat) ? 'Sell a business to another player (💰 below), or wait for luck.' : 'Wait for luck.'} ${left === 1 ? 'Next turn' : `In ${left} turns`}, if you still can't pay, your trip ends and you go home to ${homeName}.` }));
     }
     const offered = asksOffered(actions);
     if (offered.length > 0) {
@@ -358,7 +386,16 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
         row.append(button(`${BUSINESS_ICON[a.business]} Buy the ${BUSINESS_NAME[a.business]} here −${BUSINESS_PRICE[a.business]}${first ? ' ⭐ first here' : ''}`, () => act(a)));
       }
     }
-    box.append(row,
+    const sales = actions.filter((a) => a.type === 'sell');
+    if (sales.length > 0 && !selling) row.append(button('💰 Sell a business…', () => { selling = true; render(); }));
+    box.append(row);
+    if (selling) {
+      box.append(el('p', { className: 'small', textContent: 'Sell at the price it was bought for. The buyer says yes or no; your turn goes on. One offer per turn.' }),
+        el('div', { className: 'row' }, ...sales.map((a) => a.type === 'sell'
+          ? button(`Sell ${BUSINESS_ICON[a.business]} ${BUSINESS_NAME[a.business]} in ${areaById.get(a.area)!.name} to ${COLOUR_NAMES[a.to]} for ${BUSINESS_PRICE[a.business]}`, () => act(a)) : ''),
+        button('Cancel', () => { selling = false; render(); })));
+    }
+    box.append(
       el('p', { className: 'small', textContent: 'New area +1 · new continent +2 · ⭐ wonder +1 more · 🧩 big country: 0 until every part is visited, then +1 + number of parts.' }),
       el('p', { className: 'small', textContent: `Businesses: buying doesn't end your turn, and each one counts its price at the end. Fees are strict: no money, no entry. Can't pay for ${GO_HOME_TURNS} turns in a row? You go home.` }),
       renderBigCountries(me));

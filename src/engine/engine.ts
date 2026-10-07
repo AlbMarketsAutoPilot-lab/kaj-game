@@ -430,13 +430,14 @@ function buyActions(state: GameState, me: Player): Action[] {
 }
 
 // Sale offers: any business the player owns, to any other player who can pay its price,
-// once per turn (rulebook section 6; owner-approved in tasks 9 and 9b).
+// once per turn (rulebook section 6; owner-approved in tasks 9 and 9b). Never to a player in
+// the air or at sea: they may owe a visa or tour fee on landing (owner's choice, task 9b).
 function sellActions(state: GameState, me: Player): Action[] {
   if (state.offeredThisTurn) return [];
   return state.businesses
     .filter((b) => b.owner === me.seat)
     .flatMap((b) => state.players
-      .filter((p) => p.seat !== me.seat && p.points >= BUSINESS_PRICE[b.kind])
+      .filter((p) => p.seat !== me.seat && p.travel === null && p.points >= BUSINESS_PRICE[b.kind])
       .map((p): Action => ({ type: 'sell', business: b.kind, area: b.area, to: p.seat })));
 }
 
