@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import { apply, destinations, legalActions } from '../src/engine/engine.ts';
 import type { Action, GameMap, GameState, Profile } from '../src/engine/types.ts';
 import { PROFILES } from '../src/engine/constants.ts';
-import { makeQuestion } from '../src/engine/quiz.ts';
+import { placeholderQuestion } from '../src/engine/quiz.ts';
 import { map30 } from '../src/maps/map30.ts';
 import { travelMap } from './fixtures/test-map.ts';
 import { currentPlayer, seatOf, startedGame } from './helpers.ts';
@@ -26,7 +26,7 @@ function answer(s: GameState, right: boolean): GameState {
 
 const trips = (s: GameState) =>
   legalActions(s, travelMap)
-    .filter((a) => a.type === 'board' || a.type === 'quiz')
+    .filter((a) => (a.type === 'board' || a.type === 'quiz') && !a.citizenship)
     .map((a) => `${a.type} ${'to' in a ? a.to : ''}`)
     .sort();
 
@@ -180,7 +180,7 @@ test('placeholder quiz questions: two different options, and the marked one is r
   for (const to of ends) {
     const area = map30.areas.find((a) => a.id === to)!;
     for (let i = 0; i < 20; i++) {
-      const [q, next] = makeQuestion(map30, to, seed);
+      const [q, next] = placeholderQuestion(map30, to, seed);
       seed = next;
       assert.notEqual(q.options[0], q.options[1], q.text);
       const right = q.options[q.correct];

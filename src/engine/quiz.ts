@@ -1,9 +1,10 @@
 import { areaById } from './map.ts';
 import { randomInt } from './rng.ts';
+import type { Fact } from '../facts/types.ts';
 import type { Area, GameMap, QuizQuestion } from './types.ts';
 
-// Placeholder airline-quiz questions made from the map data (task 7).
-// They will be replaced by questions from the facts file (task C).
+// Questions for the airline quiz and the citizenship test: from the area's facts (task C),
+// or, for an area without facts (the test maps), placeholder questions made from the map data.
 
 interface Draft {
   text: string;
@@ -39,7 +40,40 @@ function countryDraft(map: GameMap, area: Area): Draft | null {
   return { text: `Which country is part of ${area.name}?`, right: own, wrong };
 }
 
+// Airline quiz: one question about the destination.
 export function makeQuestion(map: GameMap, to: string, seed: number): [QuizQuestion, number] {
+  const facts = map.facts?.[to] ?? [];
+  if (facts.length === 0) return placeholderQuestion(map, to, seed);
+  const [fact, rng] = pick(seed, facts);
+  return factQuestion(fact, rng);
+}
+
+// Citizenship test: `count` questions about the area, from different facts.
+export function makeExam(map: GameMap, areaId: string, count: number, seed: number): [QuizQuestion[], number] {
+  const facts = [...(map.facts?.[areaId] ?? [])];
+  const questions: QuizQuestion[] = [];
+  let rng = seed;
+  for (let k = 0; k < count; k++) {
+    let q: QuizQuestion;
+    if (facts.length > 0) {
+      let i: number;
+      [i, rng] = randomInt(rng, facts.length);
+      [q, rng] = factQuestion(facts.splice(i, 1)[0], rng);
+    } else {
+      [q, rng] = placeholderQuestion(map, areaId, rng);
+    }
+    questions.push(q);
+  }
+  return [questions, rng];
+}
+
+function factQuestion(fact: Fact, seed: number): [QuizQuestion, number] {
+  const [correct, rng] = randomInt(seed, 2);
+  const options: [string, string] = correct === 0 ? [fact.right, fact.wrong] : [fact.wrong, fact.right];
+  return [{ text: fact.question, options, correct: correct as 0 | 1 }, rng];
+}
+
+export function placeholderQuestion(map: GameMap, to: string, seed: number): [QuizQuestion, number] {
   const area = areaById(map, to);
   const drafts = [continentDraft, neighbourDraft, countryDraft]
     .map((make) => make(map, area))

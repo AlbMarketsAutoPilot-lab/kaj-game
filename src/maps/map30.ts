@@ -1,4 +1,5 @@
 import type { Area, Continent, GameMap, Route } from '../engine/types.ts';
+import { FACT_BATCHES } from '../facts/index.ts';
 
 // The 30-turn map: 50 areas, 7 airports and 4 ports (9 connections).
 // Each walking link is written once in BORDERS below; neighbours are built from it.
@@ -233,7 +234,7 @@ function build(): GameMap {
     from.neighbours.push(b);
     to.neighbours.push(a);
   }
-  return { id: 'map30', areas, routes: ROUTES };
+  return { id: 'map30', areas, routes: ROUTES, facts: Object.assign({}, ...FACT_BATCHES) };
 }
 
 export const map30: GameMap = build();
