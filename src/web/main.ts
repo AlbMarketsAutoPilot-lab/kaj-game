@@ -75,6 +75,8 @@ let answered: { ok: boolean; title: string; lines: string[] } | null = null;
 const seenCards = new Set<string>();
 // What a person's last arrival earned, for the guide on their next turn.
 const arrivals = new Map<number, { area: string; lines: string[] }>();
+// The "Ask for citizenship" popup is open (owner's request: a button and a popup, not a tick box).
+let citizenPopup = false;
 // One countdown per question, kept across redraws.
 let countdown: { key: string; deadline: number } | null = null;
 // Guided help can be turned off; kept on the device (task 10 request, task 14 B2).
@@ -302,6 +304,7 @@ function act(action: Action): void {
   askCitizenship = false;
   pendingFees = null;
   selling = false;
+  citizenPopup = false;
   zoom = null;
   pickedStart = null;
   popup = null;
@@ -545,22 +548,12 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
   } else if (s.phase === 'chooseStart') {
     box.append(el('h2', {}, who, ', choose your home country'),
       el('p', { className: 'small', textContent: zoom
-        ? `Tap a green area in ${zoom}.`
+        ? `Tap an area in ${zoom} to choose it as your home country.`
         : 'Tap a continent on the map. Each player starts on a different continent. Welcome bonus: Europe, Asia, Africa +3 · Americas +4 · Oceania +5.' }),
+      zoom ? el('p', { className: 'small', textContent: `⭐ Areas with a star have a wonder: your first visit there gives +${plural(POINTS_WONDER, 'point')} more. Each wonder has Guided Tours that one player can buy for ${plural(BUSINESS_PRICE.tours, 'point')}; after that, every other player who visits pays the owner a ${TOUR_FEE}-point tour fee.` }) : '',
       me.profile === 'backpacker'
         ? el('p', { className: 'small', textContent: '🎒 Tip: from Europe, Asia or Africa you can walk to 3 continents (+3 Backpacker bonus).' })
         : '');
-    // The home area is stressed before it is confirmed (owner's request, task 14 A2):
-    // it is not a citizenship, and "go home" always comes back here.
-    if (pickedStart) {
-      const chosen = { type: 'chooseStart' as const, area: pickedStart };
-      const start = button(`🏠 Start in ${areaById.get(pickedStart)!.name}`, () => { detailArea = null; act(chosen); });
-      start.className = 'primary';
-      box.append(el('div', { className: 'note home' },
-        el('strong', { textContent: `🏠 ${areaById.get(pickedStart)!.name} will be your home country for the whole game.` }),
-        el('p', { textContent: 'Your home country is not a citizenship. If you are ever sent home (for example when your money runs out), you come back here.' }),
-        el('div', { className: 'row' }, start, button('Choose again', () => { pickedStart = null; render(); }))));
-    }
   } else if (s.quiz) {
     renderQuiz(box, s, who);
   } else if (s.challenge) {
@@ -601,21 +594,8 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
           button('Cancel', () => { pendingFees = null; render(); })));
       return box;
     }
-    if (me.exam?.stage === 'granted') {
-      box.append(el('p', { className: 'note', textContent: `🎉 Citizenship granted! Welcome, citizen of ${citizenshipName(me.citizenship!)}! Every other player now pays you a ${VISA_PRICE}-point visa to enter.${me.profile === 'business' ? ` 💼 Business Traveler: +${POINTS_BUSINESS_CITIZENSHIP} points.` : ''} You may travel on.` }));
-    } else if (me.exam?.stage === 'learning') {
-      const exam = me.exam;
-      box.append(el('div', { className: 'note' },
-        el('p', { textContent: 'These are the right answers. Learn them! 📖' }),
-        el('ol', {}, ...exam.questions.map((q, i) => {
-          const mine = exam.answers[i];
-          return el('li', {}, `${q.text} ✅ ${q.options[q.correct]}`, mine === q.correct ? '' : ` (you said: ${q.options[mine]})`);
-        })),
-        el('p', { textContent: `🎉 Your citizenship of ${citizenshipName(me.citizenship!)} is now granted! You may travel on.${me.profile === 'business' ? ` 💼 +${plural(POINTS_BUSINESS_CITIZENSHIP, 'point')}.` : ''}` })));
-    }
-    box.append(el('h2', {}, who, `, you are in ${here.name}`),
-      guideOff ? el('p', { className: 'small', textContent: 'Tap a green area to walk there. Tap the plane, ship or monument on your area for travel and tours. Tap any area for its details.' }) : '',
-      renderGuide(s, actions));
+    // Title, then the action buttons, then the guide (owner's order, task 14 B2).
+    box.append(el('h2', {}, who, `, you are in ${here.name}`));
     if (actions.some((a) => a.type === 'blocked' || a.type === 'goHome') && blockedByMoney(s, map30, me)) {
       const homeName = areaById.get(homeFor(s, map30, me))!.name;
       const left = GO_HOME_TURNS - 1 - me.broke;
@@ -623,18 +603,16 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
         ? `🏠 Your money has run out, and your trip ends here. You go home to ${homeName}, free of any fees.`
         : `💸 Out of money! You can't pay to enter any area or to board. ${s.businesses.some((b) => b.owner === me.seat) ? 'Sell a business to another player (💰 below), or wait for luck.' : 'Wait for luck.'} ${left === 1 ? 'Next turn' : `In ${left} turns`}, if you still can't pay, your trip ends and you go home to ${homeName}.` }));
     }
-    const offered = asksOffered(actions);
-    if (offered.length > 0) {
-      const tick = el('input', { type: 'checkbox', checked: askCitizenship });
-      tick.addEventListener('change', () => { askCitizenship = tick.checked; render(); });
-      box.append(el('label', { className: 'ask' }, tick,
-        ' 🛂 Ask for citizenship where I arrive — you can ask only once per game.'));
-    }
     const waiting = waitingNote(s);
     if (waiting) box.append(el('p', { className: 'small', textContent: waiting }));
     const warning = lastTryWarning(s, plainActions(actions));
     if (warning) box.append(el('p', { className: 'note', textContent: warning }));
     const row = el('div', { className: 'row' });
+    if (asksOffered(actions).length > 0) {
+      row.append(askCitizenship
+        ? button('🛂 Citizenship request ready ✕ cancel', () => { askCitizenship = false; render(); })
+        : button('🛂 Ask for citizenship…', () => { citizenPopup = true; render(); }));
+    }
     // Walking, planes, ships and buying are on the map (owner's choice, task 14 B1).
     for (const a of plainActions(actions)) {
       if (a.type === 'blocked') {
@@ -652,7 +630,11 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
           ? button(`Sell ${BUSINESS_ICON[a.business]} ${BUSINESS_NAME[a.business]} in ${areaById.get(a.area)!.name} to ${COLOUR_NAMES[a.to]} for ${BUSINESS_PRICE[a.business]}`, () => act(a)) : ''),
         button('Cancel', () => { selling = false; render(); })));
     }
-    box.append(renderBigCountries(me));
+    if (askCitizenship) box.append(el('p', { className: 'note', textContent: '🛂 Your citizenship request goes with your next move: walk, fly or sail to the area you want, and you ask for citizenship there.' }));
+    box.append(
+      guideOff ? el('p', { className: 'small', textContent: 'Tap a green area to walk there. Tap the plane, ship or monument on your area for travel and tours. Tap any area for its details.' }) : '',
+      renderGuide(s, actions),
+      renderBigCountries(me));
   }
   return box;
 }
@@ -1003,6 +985,18 @@ function renderGuide(s: GameState, actions: Action[]): HTMLElement | string {
     el('label', { className: 'small off' }, off, ' Turn off guided help'));
 }
 
+// Why a destination can't be chosen now (owner's report, task 14 B2: say it, don't just hide it).
+function closedReason(s: GameState, to: string): string {
+  const me = currentPlayer(s);
+  const there = s.players.find((p) => p.area === to);
+  if (there) return `⛔ ${COLOUR_NAMES[there.seat]} is there now`;
+  const booked = bookedBy(s, to);
+  if (booked && booked.seat !== me.seat) return `⏳ booked by ${COLOUR_NAMES[booked.seat]}`;
+  const fees = feeTotal(entryFees(s, me, me.area, to));
+  if (fees > me.points) return `💸 you can't pay the ${plural(fees, 'point')} fee`;
+  return '⛔ not now';
+}
+
 // The popup over the board: an answer, what happened, an event card, or the current main event
 // (quiz, test, challenge, entry fees, an offer). `turn` = the turn panel itself is in the popup.
 function renderModal(s: GameState, actions: Action[], isRobot: boolean): { node: HTMLElement; turn: boolean } | null {
@@ -1030,8 +1024,51 @@ function renderModal(s: GameState, actions: Action[], isRobot: boolean): { node:
   if (s.phase === 'play' && me.kind === 'human' && s.card?.seat === me.seat && !seenCards.has(key)) {
     return { turn: false, node: wrap(el('div', {}, renderCard(s.card), ok(() => { seenCards.add(key); render(); })), 'event') };
   }
+  // Choosing the home country: stressed before it is confirmed (owner's request, task 14 A2).
+  if (s.phase === 'chooseStart' && !isRobot && pickedStart) {
+    const chosen = { type: 'chooseStart' as const, area: pickedStart };
+    const name = areaById.get(pickedStart)!.name;
+    const start = button(`🏠 Start in ${name}`, () => { detailArea = null; act(chosen); });
+    start.className = 'primary';
+    return { turn: false, node: wrap(el('div', {},
+      el('h2', { textContent: `🏠 ${name} will be your home country for the whole game.` }),
+      el('p', { textContent: 'Your home country is not a citizenship. If you are ever sent home (for example when your money runs out), you come back here.' }),
+      el('div', { className: 'row' }, start, button('Choose again', () => { pickedStart = null; detailArea = null; render(); })))) };
+  }
+  // Citizenship steps, each in a popup (owner's request).
+  if (citizenPopup && !isRobot && s.phase === 'play') {
+    const yes = button('🛂 Yes, ask where I arrive next', () => { askCitizenship = true; citizenPopup = false; render(); });
+    yes.className = 'primary';
+    return { turn: false, node: wrap(el('div', {},
+      el('h2', { textContent: '🛂 Ask for citizenship' }),
+      el('p', { textContent: me.profile === 'luxury'
+        ? 'Choose where to go next (walk, plane or ship). When you arrive, your request is accepted and citizenship is granted on your next turn, with no test (Luxury Traveler).'
+        : `Choose where to go next (walk, plane or ship). When you arrive, you stay there: next turn a short test (${EXAM_SECONDS} seconds a question), and then citizenship is yours.` }),
+      el('p', { textContent: `As a citizen, every other player pays you a ${VISA_PRICE}-point visa each time they enter that area${me.profile === 'business' ? `, and you get +${plural(POINTS_BUSINESS_CITIZENSHIP, 'point')} (Business Traveler)` : ''}. You can ask only once per game.` }),
+      el('div', { className: 'row' }, yes, button('Not now', () => { citizenPopup = false; render(); })))) };
+  }
+  if (s.phase === 'play' && me.kind === 'human' && me.exam && (me.exam.stage === 'granted' || me.exam.stage === 'learning')) {
+    const ek = `exam-${me.seat}-${me.exam.area}-${me.exam.stage}`;
+    if (!seenCards.has(ek)) {
+      const exam = me.exam;
+      const bonus = me.profile === 'business' ? ` 💼 Business Traveler: +${plural(POINTS_BUSINESS_CITIZENSHIP, 'point')}.` : '';
+      return { turn: false, node: wrap(el('div', {},
+        el('h2', { textContent: `🎉 Citizenship granted: ${citizenshipName(me.citizenship!)}!` }),
+        exam.stage === 'learning' ? el('p', { textContent: 'You learned the right answers 📖:' }) : '',
+        exam.stage === 'learning' ? el('ol', {}, ...exam.questions.map((q, i) => {
+          const mine = exam.answers[i];
+          return el('li', {}, `${q.text} ✅ ${q.options[q.correct]}`, mine === q.correct ? '' : ` (you said: ${q.options[mine]})`);
+        })) : '',
+        el('p', { textContent: `Every other player now pays you a ${VISA_PRICE}-point visa to enter.${bonus} You may travel on.` }),
+        ok(() => { seenCards.add(ek); render(); })), 'right') };
+    }
+  }
+  // Every call to action is a popup (owner's request): quiz, test, challenge, fees, an offer,
+  // the travel turn (play a challenge?), a lost turn, and being stuck or sent home.
   const main = !isRobot && s.phase === 'play'
-    && (s.offer || s.quiz || s.challenge || pendingFees || (me.exam && (me.exam.stage === 'test' || me.exam.stage === 'result')));
+    && (s.offer || s.quiz || s.challenge || pendingFees || me.travel || me.loseTurn
+      || actions.some((a) => a.type === 'blocked' || a.type === 'goHome')
+      || (me.exam && (me.exam.stage === 'test' || me.exam.stage === 'result')));
   if (main) return { turn: true, node: wrap(renderTurn(s, actions, isRobot)) };
   return null;
 }
@@ -1205,14 +1242,14 @@ function renderAreaView(s: GameState, isRobot: boolean): HTMLElement {
     }
     if (!inView(d, x, cy)) continue;
     const icons = areaIcons(s, id);
-    if (icons) label(d, x, cy - fs * 0.9, icons, 'icons', 0.95);
+    if (icons) label(d, x, cy - fs * 1.4, icons, 'icons', 0.95);
     if (walk) {
       const fees = feeTotal(entryFees(s, me, me.area, id));
-      label(d, x, cy + fs * 0.6, `🚶${gainLabel(s, walk, areaById.get(id)!) || ' +0'}${fees ? ` 💰−${fees}` : ''}`, 'go', 0.9, walkTo(id));
+      label(d, x, cy, `🚶${gainLabel(s, walk, areaById.get(id)!) || ' +0'}${fees ? ` 💰−${fees}` : ''}`, 'go', 0.9, walkTo(id));
     } else if (bookedBy(s, id)) {
-      label(d, x, cy + fs * 0.6, '⏳', 'icons', 0.9);
+      label(d, x, cy + fs * 1.4, '⏳', 'icons', 0.9);
     }
-    visitedDots(d, s, id, x, cy + fs * 1.8, fs * 0.28);
+    visitedDots(d, s, id, x, cy + fs * 1.5, fs * 0.28);
   }
 
   // The drawn props on the current area (owner-approved icons).
@@ -1224,19 +1261,20 @@ function renderAreaView(s: GameState, isRobot: boolean): HTMLElement {
     const b = businessAt(s, focus, kind);
     return b?.owner !== undefined && b.owner !== null ? COLOURS[b.owner] : undefined;
   };
-  if (here.wonder) d.labels.append(place(monument(owner('tours')), hx, hy - P * 0.85, P, `Wonder: ${WONDER_NAME[focus] ?? here.name}`, open('wonder')));
-  if (hasRoute(focus, 'airport')) d.labels.append(place(airport(owner('airline')), hx - P * 1.15, hy + P * 0.15, P, 'Airport', open('airport')));
-  if (hasRoute(focus, 'port')) d.labels.append(place(port(owner('ferry')), hx + P * 1.15, hy + P * 0.15, P, 'Port', open('port')));
+  // The pawn stands in the middle of the area; the props sit around it.
+  if (here.wonder) d.labels.append(place(monument(owner('tours')), hx, hy - P * 0.95, P, `Wonder: ${WONDER_NAME[focus] ?? here.name}`, open('wonder')));
+  if (hasRoute(focus, 'airport')) d.labels.append(place(airport(owner('airline')), hx - P * 1.2, hy, P, 'Airport', open('airport')));
+  if (hasRoute(focus, 'port')) d.labels.append(place(port(owner('ferry')), hx + P * 1.2, hy, P, 'Port', open('port')));
   const citizen = s.players.find((p) => p.citizenship?.includes(focus));
-  if (citizen) d.labels.append(place(citizenFlag(COLOURS[citizen.seat]), hx + P * 1.1, hy - P * 0.85, P * 0.9, `${COLOUR_NAMES[citizen.seat]}'s citizenship`, open('citizen')));
-  visitedDots(d, s, focus, hx, hy + P * 1.15, fs * 0.32);
+  if (citizen) d.labels.append(place(citizenFlag(COLOURS[citizen.seat]), hx + P * 1.1, hy - P * 0.95, P * 0.9, `${COLOUR_NAMES[citizen.seat]}'s citizenship`, open('citizen')));
+  visitedDots(d, s, focus, hx, hy + P * 0.75, fs * 0.32);
 
   // Pawns: every player standing in a drawn area.
   for (const p of s.players) {
     if (!p.area || !d.paths.has(p.area)) continue;
     const [cx, cy] = geo.get(p.area)!.centre;
     const x = p.area === focus ? hx : cx * k;
-    const y = p.area === focus ? hy + P * 0.6 : cy + fs * 0.6;
+    const y = p.area === focus ? hy : cy;
     if (!inView(d, x, y)) continue;
     d.labels.append(place(pawn(COLOURS[p.seat], p === me), x, y, p.area === focus ? fs * 2.8 : fs * 2.2, COLOUR_NAMES[p.seat]));
   }
@@ -1302,9 +1340,9 @@ function renderPopup(s: GameState, p: { kind: PopupKind; area: string }, myTurn:
     el('div', { className: 'row' }, buyButton(kind === 'airport' ? 'airline' : 'ferry')));
   const offered = asksOffered(actions);
   if (offered.some((a) => (a.type === 'board' || a.type === 'quiz') && a.kind === kind)) {
-    const tick = el('input', { type: 'checkbox', checked: askCitizenship });
-    tick.addEventListener('change', () => { askCitizenship = tick.checked; render(); });
-    box.append(el('label', { className: 'ask' }, tick, ' 🛂 Ask for citizenship where I arrive (once per game)'));
+    box.append(el('div', { className: 'row' }, askCitizenship
+      ? button('🛂 Citizenship request goes with this trip ✕ cancel', () => { askCitizenship = false; render(); })
+      : button('🛂 Ask for citizenship where I land…', () => { citizenPopup = true; render(); })));
   }
   const warning = lastTryWarning(s, plainActions(actions));
   if (warning) box.append(el('p', { className: 'note', textContent: warning }));
@@ -1323,7 +1361,7 @@ function renderPopup(s: GameState, p: { kind: PopupKind; area: string }, myTurn:
       el('span', { className: 'row' },
         board ? button(`Pay ${price}`, () => go(pick(actions, board))) : '',
         quiz ? button('Quiz (free)', () => go(pick(actions, quiz))) : '',
-        !board && !quiz ? el('span', { className: 'small', textContent: booked && booked.seat !== me.seat ? `⏳ booked by ${COLOUR_NAMES[booked.seat]}` : '' }) : '')));
+        !board && !quiz && me.area === p.area ? el('span', { className: 'small', textContent: closedReason(s, to) }) : '')));
   }
   box.append(list);
   return box;
