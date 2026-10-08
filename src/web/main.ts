@@ -437,10 +437,10 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
       el('p', { className: 'small', textContent: trip.turnsLeft > 0
         ? `${plural(trip.turnsLeft, 'travel turn')} left; you land at the end of the last one.`
         : `${to} is taken, so you wait one more turn and try to land again.` }),
-      el('p', { className: 'small', textContent: `🎲 Another passenger would like to play a geography challenge with you: one question, ${CHALLENGE_SECONDS} seconds. Right +${CHALLENGE_POINTS}, wrong −${CHALLENGE_POINTS}. You don't have to play.${me.profile === 'nomad' ? ' 💻 Digital Nomad: +1 for this travel turn either way.' : ''}` }),
+      el('p', { className: 'small', textContent: `🧠 Another passenger would like to play a geography challenge with you: one question, ${CHALLENGE_SECONDS} seconds. Right +${CHALLENGE_POINTS}, wrong −${CHALLENGE_POINTS}. You don't have to play.${me.profile === 'nomad' ? ' 💻 Digital Nomad: +1 for this travel turn either way.' : ''}` }),
       me.points < CHALLENGE_POINTS ? el('p', { className: 'small', textContent: `A challenge needs at least ${CHALLENGE_POINTS} point, so there is none this turn.` }) : '',
       el('div', { className: 'row' },
-        ...(actions.some((a) => a.type === 'travel' && a.challenge) ? [button(`🎲 Play the challenge (+${CHALLENGE_POINTS} / −${CHALLENGE_POINTS})`, () => act({ type: 'travel', challenge: true }))] : []),
+        ...(actions.some((a) => a.type === 'travel' && a.challenge) ? [button(`🧠 Play the challenge (+${CHALLENGE_POINTS} / −${CHALLENGE_POINTS})`, () => act({ type: 'travel', challenge: true }))] : []),
         button('Continue the journey (no challenge)', () => act({ type: 'travel' }))));
   } else {
     const here = areaById.get(me.area!)!;
@@ -656,9 +656,9 @@ function renderChallenge(box: HTMLElement, s: GameState, who: HTMLElement): void
 
 function challengeNote(r: ChallengeResult): string {
   const name = COLOUR_NAMES[r.seat];
-  if (r.right) return `🎲 ${name}'s challenge: right, it is ${r.challenge.options[r.challenge.correct]}! +${r.change} point.`;
+  if (r.right) return `🧠 ${name}'s challenge: right, it is ${r.challenge.options[r.challenge.correct]}! +${r.change} point.`;
   const lost = r.change === 0 ? 'No points to lose' : `−${-r.change} point`;
-  return `🎲 ${name}'s challenge: wrong, the answer was ${r.challenge.options[r.challenge.correct]}. ${lost}.`;
+  return `🧠 ${name}'s challenge: wrong, the answer was ${r.challenge.options[r.challenge.correct]}. ${lost}.`;
 }
 
 // After the 3rd wrong answer a player who can pay must pay: say who gets the ticket.
