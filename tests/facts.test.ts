@@ -6,8 +6,8 @@ import { map30 } from '../src/maps/map30.ts';
 const ids = new Set(map30.areas.map((a) => a.id));
 const all = FACT_BATCHES.flatMap((b) => Object.entries(b));
 
-test('each batch has 10 real areas, and no area is in two batches', () => {
-  for (const batch of FACT_BATCHES) assert.equal(Object.keys(batch).length, 10);
+test('each batch has 10 real areas (11 in batches 2 and 4 since task 14a), and no area is in two batches', () => {
+  assert.deepEqual(FACT_BATCHES.map((b) => Object.keys(b).length), [10, 11, 10, 11, 10]);
   const seen = all.map(([id]) => id);
   for (const id of seen) assert.ok(ids.has(id), `unknown area ${id}`);
   assert.equal(new Set(seen).size, seen.length);

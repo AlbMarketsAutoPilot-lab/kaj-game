@@ -544,7 +544,7 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
         button('Cancel', () => { selling = false; render(); })));
     }
     box.append(
-      el('p', { className: 'small', textContent: 'New area +1 · new continent +2 · ⭐ wonder +1 more · 🧩 big country: 0 until every part is visited, then +1 + number of parts.' }),
+      el('p', { className: 'small', textContent: 'New area +1 · new continent +2 · ⭐ wonder +1 more · 🧩 big country: 0 until every part is visited, then +1 + number of parts (Canada and Russia, 3 parts: +5).' }),
       el('p', { className: 'small', textContent: `Businesses: buying doesn't end your turn, and each one counts its price at the end. Fees are strict: no money, no entry. Can't pay for ${GO_HOME_TURNS} turns in a row? You go home.` }),
       renderBigCountries(me));
   }

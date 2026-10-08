@@ -301,6 +301,27 @@ Task 13: the robot, with three levels (`src/engine/normal-robot.ts`, `tests/norm
   | hard vs normal | 63% – 37% |
   | hard vs easy | 74% – 26% |
 
+Task 14a: Canada and Russia in 3 parts (owner's change; `tests/scoring.test.ts`, `tests/map30.test.ts`).
+
+- **Map: 52 areas.** Canada West (British Columbia, Alberta, Yukon), Canada Central (Saskatchewan,
+  Manitoba, Northwest Territories, Nunavut), Canada East (as before). Russia West (as before), Siberia
+  (the area id stays `russia-east`: the Urals and Siberia up to Chita), Russia Far East (Yakutia to
+  Chukotka, Sakhalin and Primorye). New walking links: Canada West – Canada Central – Canada East,
+  Canada Central – USA West and USA East (Canada West keeps USA West only); Siberia – Russia Far East,
+  Russia Far East – China East and Korea (Siberia keeps China East, through Chita). The drawn shapes
+  touch exactly these links (only Tibet – Myanmar touches with no link, owner-approved).
+- **Scoring:** completing a 3-part big country gives **+5** (`POINTS_BIG_COUNTRY_3_PARTS`); 2 parts
+  still +1 +2. All or nothing as before. The robot values the +5 the same way.
+- **Facts:** the 2 new areas have 12 facts each. Siberia kept 7 of its facts and Russia Far East got
+  the other 5 (Oymyakon, Amur tiger, Kamchatka, Vladivostok, Yakutia); Canada Central got 2 of Canada
+  West's (prairie wheat, longest coastline). 24 new facts for the owner to check (batches 2 and 4,
+  which now have 11 areas).
+- **Saves:** version 5. A version-4 save can't be continued.
+- 1,000 games per level, before → after (+5): average score easy 42.0 → 41.0, normal 45.9 → 45.0,
+  hard 48.5 → 47.5. Players completing Canada about 20% → 10%, Russia about 42% → 14%; with +4 the
+  robots play almost the same (they don't plan several turns ahead). Two visa areas at once still
+  trap someone in 21 of 946 pairs; nobody stuck.
+
 ## Choices made in task 1 (approved by the owner)
 
 These points are not spelled out in the rulebook or the v1 scope.

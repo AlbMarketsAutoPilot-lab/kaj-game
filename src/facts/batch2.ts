@@ -1,6 +1,6 @@
 import { f, type FactBatch } from './types.ts';
 
-// Batch 2: map areas 11–20 (Greece, Russia, western and southern Asia).
+// Batch 2: map areas 11–21 (Greece, Russia, western and southern Asia; task 14a added Russia Far East).
 // Drafted by Claude, to be checked by the owner.
 
 export const batch2: FactBatch = {
@@ -36,15 +36,29 @@ export const batch2: FactBatch = {
     f('Lake Baikal in Siberia is the deepest lake in the world, more than 1,600 metres deep.', 'Which is the deepest lake in the world?', 'Lake Baikal', 'Lake Victoria'),
     f('Lake Baikal holds about one fifth of all the fresh water in the world\'s lakes and rivers.', 'Lake Baikal holds about one fifth of the world\'s…', 'fresh surface water', 'sea water'),
     f('The nerpa, or Baikal seal, is one of the very few seals that live only in fresh water.', 'The nerpa of Lake Baikal is a freshwater…', 'seal', 'shark'),
-    f('The Siberian village of Oymyakon is one of the coldest places where people live: it has reached −67.7 °C.', 'Oymyakon is famous for being very…', 'cold', 'hot'),
-    f('The Amur tiger, also called the Siberian tiger, lives in the forests of Russia\'s Far East.', 'Which big cat lives in Russia\'s Far East?', 'The Amur tiger', 'The lion'),
-    f('The Kamchatka Peninsula has many volcanoes, and about 30 of them are active.', 'Kamchatka is famous for its…', 'volcanoes', 'deserts'),
     f('Siberia covers about three quarters of Russia\'s land.', 'About how much of Russia\'s land is Siberia?', 'Three quarters', 'One tenth'),
     f('In much of Siberia the ground stays frozen all year round. This is called permafrost.', 'Ground that stays frozen all year is called…', 'permafrost', 'quicksand'),
     f('Woolly mammoths from the Ice Age have been found frozen in the Siberian ground.', 'Which Ice Age animal has been found frozen in Siberia?', 'The woolly mammoth', 'Tyrannosaurus rex'),
     f('In 1908, a huge explosion at Tunguska in Siberia flattened millions of trees. It was probably caused by a space rock.', 'The Tunguska explosion was probably caused by…', 'a space rock', 'a volcano'),
+    f('Novosibirsk is the biggest city in Siberia and the third-largest city in Russia.', 'Which is the biggest city in Siberia?', 'Novosibirsk', 'Vladivostok'),
+    f('The great rivers of Siberia, such as the Ob and the Yenisei, flow north into the Arctic Ocean.', 'The big rivers of Siberia flow into the…', 'Arctic Ocean', 'Indian Ocean'),
+    f('The taiga, a huge forest of pine, spruce and larch trees, covers much of Siberia.', 'The huge forest of Siberia is called the…', 'taiga', 'jungle'),
+    f('The Ural Mountains are often seen as the border between Europe and Asia.', 'The Ural Mountains are often seen as the border between Europe and…', 'Asia', 'Africa'),
+    f('The Altai Mountains of southern Siberia lie near the borders of China, Mongolia and Kazakhstan.', 'The Altai Mountains are in…', 'southern Siberia', 'northern Italy'),
+  ],
+  'russia-far-east': [
+    f('The Siberian village of Oymyakon is one of the coldest places where people live: it has reached −67.7 °C.', 'Oymyakon is famous for being very…', 'cold', 'hot'),
+    f('The Amur tiger, also called the Siberian tiger, lives in the forests of Russia\'s Far East.', 'Which big cat lives in Russia\'s Far East?', 'The Amur tiger', 'The lion'),
+    f('The Kamchatka Peninsula has many volcanoes, and about 30 of them are active.', 'Kamchatka is famous for its…', 'volcanoes', 'deserts'),
     f('Vladivostok, on the Pacific Ocean, is at the eastern end of the Trans-Siberian Railway.', 'Vladivostok lies on which ocean?', 'The Pacific', 'The Atlantic'),
     f('Yakutia, in eastern Siberia, is the largest region of Russia.', 'Yakutia is Russia\'s largest…', 'region', 'city'),
+    f('The Valley of Geysers in Kamchatka is one of the largest groups of geysers in the world.', 'The Valley of Geysers is in…', 'Kamchatka', 'Egypt'),
+    f('Sakhalin is the largest island of Russia.', 'Which is the largest island of Russia?', 'Sakhalin', 'Sicily'),
+    f('In Kamchatka, brown bears gather along the rivers to catch salmon.', 'Kamchatka\'s brown bears catch…', 'salmon', 'bananas'),
+    f('Only the Bering Strait, about 82 km wide, separates Chukotka in Russia from Alaska in the United States.', 'The Bering Strait separates Russia from…', 'Alaska', 'Japan'),
+    f('Yakutia is famous for its diamond mines, such as the huge Mir mine.', 'Yakutia is famous for its…', 'diamond mines', 'banana farms'),
+    f('The Amur River forms a long part of the border between Russia and China.', 'The Amur River forms part of the border between Russia and…', 'China', 'Finland'),
+    f('The Lena Pillars are tall rock towers along the Lena River in Yakutia.', 'The Lena Pillars are tall towers of…', 'rock', 'ice'),
   ],
   'turkey-caucasus': [
     f('Istanbul, in Turkey, lies on two continents: Europe and Asia.', 'Istanbul lies in Europe and…', 'Asia', 'Africa'),

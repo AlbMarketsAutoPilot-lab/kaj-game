@@ -1,7 +1,8 @@
 import type { Area, Continent, GameMap, Route } from '../engine/types.ts';
 import { FACT_BATCHES } from '../facts/index.ts';
 
-// The 30-turn map: 50 areas, 7 airports and 4 ports (9 connections).
+// The 30-turn map: 52 areas, 7 airports and 4 ports (9 connections).
+// Task 14a (owner-approved): Canada and Russia in 3 parts (50 → 52 areas).
 // Each walking link is written once in BORDERS below; neighbours are built from it.
 
 interface AreaInfo {
@@ -40,8 +41,9 @@ const AREAS: AreaInfo[] = [
   { id: 'greece', name: 'Greece', continent: 'Europe', countries: ['Greece'] },
   { id: 'russia-west', name: 'Russia West', continent: 'Europe', countries: ['Russia'], bigCountry: 'Russia' },
 
-  // Asia (15)
-  { id: 'russia-east', name: 'Russia East (Siberia)', continent: 'Asia', countries: ['Russia'], bigCountry: 'Russia' },
+  // Asia (16)
+  { id: 'russia-east', name: 'Siberia', continent: 'Asia', countries: ['Russia'], bigCountry: 'Russia' },
+  { id: 'russia-far-east', name: 'Russia Far East', continent: 'Asia', countries: ['Russia'], bigCountry: 'Russia' },
   { id: 'turkey-caucasus', name: 'Turkey & Caucasus', continent: 'Asia', countries: ['Turkey', 'Georgia', 'Armenia', 'Azerbaijan'] },
   {
     id: 'middle-east', name: 'Middle East', continent: 'Asia',
@@ -100,8 +102,9 @@ const AREAS: AreaInfo[] = [
     countries: ['Angola', 'Zambia', 'Malawi', 'Mozambique', 'Zimbabwe', 'Botswana', 'Namibia', 'South Africa', 'Lesotho', 'Eswatini'],
   },
 
-  // North America (6)
+  // North America (7)
   { id: 'canada-west', name: 'Canada West', continent: 'North America', countries: ['Canada'], bigCountry: 'Canada' },
+  { id: 'canada-central', name: 'Canada Central', continent: 'North America', countries: ['Canada'], bigCountry: 'Canada' },
   { id: 'canada-east', name: 'Canada East', continent: 'North America', countries: ['Canada'], bigCountry: 'Canada' },
   { id: 'usa-west', name: 'USA West', continent: 'North America', countries: ['United States'], bigCountry: 'United States' },
   { id: 'usa-east', name: 'USA East', continent: 'North America', countries: ['United States'], bigCountry: 'United States' },
@@ -156,7 +159,9 @@ const BORDERS: [string, string][] = [
   ['russia-east', 'mongolia'],
   ['russia-east', 'china-west'],
   ['russia-east', 'china-east'],
-  ['russia-east', 'korea'],
+  ['russia-east', 'russia-far-east'],
+  ['russia-far-east', 'china-east'],
+  ['russia-far-east', 'korea'],
   ['turkey-caucasus', 'middle-east'],
   ['turkey-caucasus', 'iran'],
   ['middle-east', 'iran'],
@@ -189,9 +194,11 @@ const BORDERS: [string, string][] = [
   ['central-africa', 'east-africa'],
   ['central-africa', 'southern-africa'],
   ['east-africa', 'southern-africa'],
-  ['canada-west', 'canada-east'],
+  ['canada-west', 'canada-central'],
   ['canada-west', 'usa-west'],
-  ['canada-west', 'usa-east'],
+  ['canada-central', 'canada-east'],
+  ['canada-central', 'usa-west'],
+  ['canada-central', 'usa-east'],
   ['canada-east', 'usa-east'],
   ['usa-west', 'usa-east'],
   ['usa-west', 'mexico'],

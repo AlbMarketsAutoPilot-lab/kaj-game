@@ -1,6 +1,6 @@
 import { f, type FactBatch } from './types.ts';
 
-// Batch 4: map areas 31–40 (southern Africa and North America).
+// Batch 4: map areas 32–42 (southern Africa and North America; task 14a added Canada Central).
 // Drafted by Claude, to be checked by the owner.
 
 export const batch4: FactBatch = {
@@ -82,11 +82,25 @@ export const batch4: FactBatch = {
     f('First Nations peoples of the Pacific coast carve tall totem poles from cedar wood.', 'Totem poles are carved from…', 'wood', 'ice'),
     f('Drumheller, in Alberta, is famous for its dinosaur fossils and its big dinosaur museum.', 'Drumheller in Alberta is famous for…', 'dinosaur fossils', 'tea'),
     f('Orcas, also called killer whales, swim along the coast of British Columbia.', 'An orca is also called a…', 'killer whale', 'sea cow'),
-    f('The prairies of western Canada grow huge amounts of wheat.', 'The Canadian prairies are famous for growing…', 'wheat', 'bananas'),
-    f('Canada has the longest coastline of any country in the world.', 'Which country has the longest coastline?', 'Canada', 'Chile'),
     f('In 1885, the last spike of Canada\'s first railway across the country was hammered in, in British Columbia.', 'The last spike of Canada\'s first cross-country railway was hammered in…', '1885', '1985'),
     f('Mount Logan, in Yukon, is the highest mountain in Canada.', 'Which is the highest mountain in Canada?', 'Mount Logan', 'Mount Fuji'),
     f('Canada is the second-largest country in the world by area.', 'By area, Canada is the world\'s…', 'second-largest country', 'tenth-largest country'),
+    f('Vancouver, in British Columbia, is the biggest city on Canada\'s Pacific coast.', 'Vancouver lies on which ocean?', 'The Pacific', 'The Atlantic'),
+    f('In 2010, the Winter Olympics were held in Vancouver, with ski races at Whistler.', 'In 2010, the Winter Olympics were held in…', 'Vancouver', 'Toronto'),
+  ],
+  'canada-central': [
+    f('The prairies of western Canada grow huge amounts of wheat.', 'The Canadian prairies are famous for growing…', 'wheat', 'bananas'),
+    f('Canada has the longest coastline of any country in the world.', 'Which country has the longest coastline?', 'Canada', 'Chile'),
+    f('Churchill, in Manitoba, is called the polar bear capital of the world: polar bears pass through every autumn.', 'Churchill in Manitoba is famous for…', 'polar bears', 'camels'),
+    f('Nunavut is Canada\'s largest and newest territory. It was created in 1999.', 'Nunavut became a territory of Canada in…', '1999', '1867'),
+    f('Most people in Nunavut are Inuit, and Inuktitut is one of its official languages.', 'Most people in Nunavut are…', 'Inuit', 'Maori'),
+    f('Wood Buffalo, on the border of Alberta and the Northwest Territories, is the largest national park in Canada.', 'The largest national park in Canada is…', 'Wood Buffalo', 'Yellowstone'),
+    f('Great Bear Lake, in the Northwest Territories, is the largest lake entirely inside Canada.', 'The largest lake entirely inside Canada is…', 'Great Bear Lake', 'Lake Baikal'),
+    f('The Mackenzie River, in the Northwest Territories, is the longest river in Canada.', 'The longest river in Canada is the…', 'Mackenzie', 'Mississippi'),
+    f('An inukshuk is a figure of piled stones, built by the Inuit to show the way across the Arctic.', 'An inukshuk is made of…', 'stones', 'snow'),
+    f('Manitoba is known as the land of 100,000 lakes.', 'Manitoba is known as the land of 100,000…', 'lakes', 'volcanoes'),
+    f('Saskatchewan is the only Canadian province whose borders are all straight lines, with no rivers or coasts.', 'Saskatchewan\'s borders are all…', 'straight lines', 'rivers'),
+    f('Alert, on Ellesmere Island in Nunavut, is the most northern place on Earth where people live all year.', 'Alert, the most northern place where people live all year, is in…', 'Canada', 'Iceland'),
   ],
   'canada-east': [
     f('Niagara Falls lies on the border between Canada and the United States.', 'Niagara Falls is on the border of Canada and…', 'the United States', 'Mexico'),

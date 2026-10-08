@@ -1,6 +1,6 @@
 import { f, type FactBatch } from './types.ts';
 
-// Batch 3: map areas 21–30 (eastern Asia and northern Africa).
+// Batch 3: map areas 22–31 (eastern Asia and northern Africa).
 // Drafted by Claude, to be checked by the owner.
 
 export const batch3: FactBatch = {

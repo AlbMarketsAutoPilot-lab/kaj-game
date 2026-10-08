@@ -43,17 +43,19 @@ test('big country: all or nothing, continue where you stopped, bonus only once',
   s = walk(s, 'usa-west'); // USA 1 of 2: 0
   assert.equal(seatOf(s, 0).points, 4);
   s = walk(s, 'egypt');
-  s = walk(s, 'canada-west'); // left the USA halfway; Canada 1 of 2: 0
+  s = walk(s, 'canada-west'); // left the USA halfway; Canada 1 of 3: 0
+  s = walk(s, 'north-africa');
+  s = walk(s, 'canada-central'); // Canada 2 of 3: 0
   assert.equal(seatOf(s, 0).points, 4);
-  s = walk(s, 'north-africa');
-  s = walk(s, 'usa-east'); // USA complete: +1 +2
-  assert.equal(seatOf(s, 0).points, 4 + 3);
   s = walk(s, 'egypt');
-  s = walk(s, 'canada-east'); // Canada complete: +1 +2
-  assert.equal(seatOf(s, 0).points, 4 + 3 + 3);
+  s = walk(s, 'usa-east'); // left Canada; USA complete: +1 +2
+  assert.equal(seatOf(s, 0).points, 4 + 3);
   s = walk(s, 'north-africa');
+  s = walk(s, 'canada-east'); // Canada complete, 3 parts: +5 (task 14a)
+  assert.equal(seatOf(s, 0).points, 4 + 3 + 5);
+  s = walk(s, 'egypt');
   s = walk(s, 'usa-east'); // never again
-  assert.equal(seatOf(s, 0).points, 4 + 3 + 3);
+  assert.equal(seatOf(s, 0).points, 4 + 3 + 5);
 });
 
 test('big country: the starting part counts toward the country', () => {
@@ -62,8 +64,11 @@ test('big country: the starting part counts toward the country', () => {
   assert.equal(seatOf(s, 0).points, 4 + 3);
 });
 
-test('big country across two continents: +1 +2 for Russia, +2 for the new continent', () => {
+test('big country across two continents: +2 for the new continent at once, +5 when Russia is complete', () => {
   let s = started(['russia-west', 'egypt']);
-  s = walk(s, 'russia-east');
-  assert.equal(seatOf(s, 0).points, 3 + 3 + 2);
+  s = walk(s, 'russia-east'); // Siberia: Russia 2 of 3: 0, Asia +2
+  assert.equal(seatOf(s, 0).points, 3 + 2);
+  s = walk(s, 'north-africa');
+  s = walk(s, 'russia-far-east'); // Russia complete, 3 parts: +5 (task 14a)
+  assert.equal(seatOf(s, 0).points, 3 + 2 + 5);
 });

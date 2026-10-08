@@ -5,14 +5,22 @@ Made by `node scripts/map-shapes.ts --from <file>` from Natural Earth 1:10m stat
 
 ## Big countries: which states or provinces make each part
 
-| Part | States or provinces | Other part |
-|---|---|---|
-| USA West | Alaska, Arizona, California, Colorado, Hawaii, Idaho, Montana, Nevada, New Mexico, Oregon, Utah, Washington, Wyoming | USA East: all the others |
-| Canada West | Alberta, British Columbia, Manitoba, Northwest Territories, Nunavut, Saskatchewan, Yukon | Canada East: all the others |
-| China West | Gansu, Qinghai, Xinjiang, Xizang | China East: all the others |
-| Russia East (Siberia) | Altay, Amur, Buryat, Chelyabinsk, Chita, Chukchi Autonomous Okrug, Gorno-Altay, Irkutsk, Kamchatka, Kemerovo, Khabarovsk, Khakass, Khanty-Mansiy, Krasnoyarsk, Kurgan, Maga Buryatdan, Novosibirsk, Omsk, Primor'ye, Sakha (Yakutia), Sakhalin, Sverdlovsk, Tomsk, Tuva, Tyumen', Yamal-Nenets, Yevrey | Russia West: all the others |
-| Brazil North | Acre, Alagoas, Amapá, Amazonas, Bahia, Ceará, Maranhão, Paraíba, Pará, Pernambuco, Piauí, Rio Grande do Norte, Rondônia, Roraima, Sergipe, Tocantins | Brazil South: all the others |
-| Australia West | Northern Territory, South Australia, Western Australia | Australia East: all the others |
+| Part | States or provinces |
+|---|---|
+| USA West | Alaska, Arizona, California, Colorado, Hawaii, Idaho, Montana, Nevada, New Mexico, Oregon, Utah, Washington, Wyoming |
+| Canada West | Alberta, British Columbia, Yukon |
+| Canada Central | Manitoba, Northwest Territories, Nunavut, Saskatchewan |
+| China West | Gansu, Qinghai, Xinjiang, Xizang |
+| Siberia | Altay, Buryat, Chelyabinsk, Chita, Gorno-Altay, Irkutsk, Kemerovo, Khakass, Khanty-Mansiy, Krasnoyarsk, Kurgan, Novosibirsk, Omsk, Sverdlovsk, Tomsk, Tuva, Tyumen', Yamal-Nenets |
+| Russia Far East | Amur, Chukchi Autonomous Okrug, Kamchatka, Khabarovsk, Maga Buryatdan, Primor'ye, Sakha (Yakutia), Sakhalin, Yevrey |
+| Brazil North | Acre, Alagoas, Amapá, Amazonas, Bahia, Ceará, Maranhão, Paraíba, Pará, Pernambuco, Piauí, Rio Grande do Norte, Rondônia, Roraima, Sergipe, Tocantins |
+| Australia West | Northern Territory, South Australia, Western Australia |
+| USA East | all the others |
+| Canada East | all the others |
+| China East | all the others |
+| Russia West | all the others |
+| Brazil South | all the others |
+| Australia East | all the others |
 
 ## Drawn with an area, although not a country in the map data
 

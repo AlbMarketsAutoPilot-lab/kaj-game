@@ -1,4 +1,4 @@
-// Draws the 50 areas of the 30-turn map from real borders (task 14): node scripts/map-shapes.ts
+// Draws the 52 areas of the 30-turn map from real borders (task 14): node scripts/map-shapes.ts
 //
 // Merged areas (Scandinavia, Balkans, ...) are joined from their countries; the 6 big countries
 // are split along their states or provinces (the lists below, checked by the owner).
@@ -20,23 +20,25 @@ const fromIndex = process.argv.indexOf('--from');
 if (fromIndex < 0) throw new Error('Usage: node scripts/map-shapes.ts --from <ne_10m_admin_1_states_provinces.geojson>');
 const source = JSON.parse(readFileSync(process.argv[fromIndex + 1], 'utf8'));
 
-// Big countries: which states or provinces make each part (owner checks this list).
+// Big countries: which states or provinces make each part (owner-approved).
+// The last part of each country (REST) gets every state or province not listed.
 export const PARTS: Record<string, string[]> = {
   'usa-west': ['AK', 'HI', 'WA', 'OR', 'CA', 'NV', 'ID', 'MT', 'WY', 'UT', 'CO', 'AZ', 'NM'].map((c) => `US-${c}`),
-  'canada-west': ['YT', 'NT', 'NU', 'BC', 'AB', 'SK', 'MB'].map((c) => `CA-${c}`),
+  // Task 14a: Canada and Russia in 3 parts.
+  'canada-west': ['YT', 'BC', 'AB'].map((c) => `CA-${c}`),
+  'canada-central': ['NT', 'NU', 'SK', 'MB'].map((c) => `CA-${c}`),
   'china-west': ['XJ', 'XZ', 'QH', 'GS'].map((c) => `CN-${c}`),
   'russia-east': [
     'KGN', 'SVE', 'TYU', 'KHM', 'YAN', 'CHE', // Urals
     'AL', 'ALT', 'KEM', 'IRK', 'KYA', 'KK', 'NVS', 'OMS', 'TOM', 'TY', 'BU', 'ZAB', // Siberia
-    'AMU', 'KAM', 'KHA', 'MAG', 'PRI', 'SA', 'SAK', 'YEV', 'CHU', // Far East
   ].map((c) => `RU-${c}`),
+  'russia-far-east': ['SA', 'AMU', 'YEV', 'KHA', 'PRI', 'MAG', 'CHU', 'KAM', 'SAK'].map((c) => `RU-${c}`),
   'brazil-north': ['AC', 'AM', 'RR', 'RO', 'PA', 'AP', 'TO', 'MA', 'PI', 'CE', 'RN', 'PB', 'PE', 'AL', 'SE', 'BA'].map((c) => `BR-${c}`),
   'australia-west': ['WA', 'NT', 'SA'].map((c) => `AU-${c}`),
 };
-// The other part of each big country gets every remaining state or province.
-const OTHER_PART: Record<string, string> = {
-  'usa-west': 'usa-east', 'canada-west': 'canada-east', 'china-west': 'china-east',
-  'russia-east': 'russia-west', 'brazil-north': 'brazil-south', 'australia-west': 'australia-east',
+const REST: Record<string, string> = {
+  'United States': 'usa-east', Canada: 'canada-east', China: 'china-east',
+  Russia: 'russia-west', Brazil: 'brazil-south', Australia: 'australia-east',
 };
 
 // Natural Earth names that differ from the map's country names.
@@ -67,29 +69,24 @@ const BY_CODE: Record<string, string | null> = {
 
 const areaOfCountry = new Map<string, string>();
 for (const a of map30.areas) for (const c of a.countries ?? []) if (!a.bigCountry) areaOfCountry.set(c, a.id);
-const bigCountryParts = new Map<string, string>(); // country -> first part id
-for (const [part, other] of Object.entries(OTHER_PART)) {
-  const country = map30.areas.find((a) => a.id === part)!.countries![0];
-  bigCountryParts.set(country, part);
-  void other;
-}
-
 function areaOf(p: { admin: string; iso_3166_2: string }): string | null {
   if (p.iso_3166_2 in BY_CODE) return BY_CODE[p.iso_3166_2];
   if (EXTRA[p.admin]) return EXTRA[p.admin];
   const country = ALIASES[p.admin] ?? p.admin;
-  const part = bigCountryParts.get(country);
-  if (part) return PARTS[part].includes(p.iso_3166_2) ? part : OTHER_PART[part];
+  if (REST[country]) {
+    const part = Object.keys(PARTS).find((id) => PARTS[id].includes(p.iso_3166_2));
+    return part ?? REST[country];
+  }
   return areaOfCountry.get(country) ?? null;
 }
 
-// Keeps a shape in one piece across the date line: Russia East and the Chukchi peninsula,
+// Keeps a shape in one piece across the date line: Russia Far East and the Chukchi peninsula,
 // USA West and the Aleutian Islands.
 function shift(coords: any, by: (lon: number) => number): any {
   return typeof coords[0] === 'number' ? [by(coords[0]), coords[1]] : coords.map((c: any) => shift(c, by));
 }
 const SHIFT: Record<string, (lon: number) => number> = {
-  'russia-east': (lon) => (lon < -100 ? lon + 360 : lon),
+  'russia-far-east': (lon) => (lon < -100 ? lon + 360 : lon),
   'usa-west': (lon) => (lon > 100 ? lon - 360 : lon),
 };
 
@@ -195,12 +192,13 @@ const lines = [
   '',
   '## Big countries: which states or provinces make each part',
   '',
-  '| Part | States or provinces | Other part |',
-  '|---|---|---|',
+  '| Part | States or provinces |',
+  '|---|---|',
   ...Object.entries(PARTS).map(([part, codes]) => {
     const names = source.features.filter((f: any) => codes.includes(f.properties.iso_3166_2)).map((f: any) => f.properties.name);
-    return `| ${nameOf(part)} | ${[...new Set(names)].sort().join(', ')} | ${nameOf(OTHER_PART[part])}: all the others |`;
+    return `| ${nameOf(part)} | ${[...new Set(names)].sort().join(', ')} |`;
   }),
+  ...Object.values(REST).map((part) => `| ${nameOf(part)} | all the others |`),
   '',
   '## Drawn with an area, although not a country in the map data',
   '',
