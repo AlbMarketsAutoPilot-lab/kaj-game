@@ -2,13 +2,13 @@
 // landscape board (left: the current area drawn; right: the world map and the turn panel).
 // Robots play with simple rules, at the level chosen for each seat (task 13).
 
-import { BUSINESS_PRICE, CHALLENGE_POINTS, CONTINENT_BONUS, GO_HOME_TURNS, NOMAD_MIN_CONTINENTS, NOMAD_PENALTY, NOMAD_WARNING_ROUND, POINTS_BUSINESS_CITIZENSHIP, QUIZ_TRIES, TICKET_PRICE, TOUR_FEE, TRAVEL_TURNS, VISA_PRICE } from '../engine/constants.ts';
+import { BUSINESS_PRICE, CHALLENGE_POINTS, CONTINENT_BONUS, POINTS_NEW_AREA, POINTS_NEW_CONTINENT, POINTS_WONDER, GO_HOME_TURNS, NOMAD_MIN_CONTINENTS, NOMAD_PENALTY, NOMAD_WARNING_ROUND, POINTS_BUSINESS_CITIZENSHIP, QUIZ_TRIES, TICKET_PRICE, TOUR_FEE, TRAVEL_TURNS, VISA_PRICE } from '../engine/constants.ts';
 import {
   apply, blockedByMoney, bookedBy, businessAt, canPayAfterQuiz, destinations, businessValue, createGame, currentPlayer, entryFees, feeTotal, finalScore, homeFor, landTurnsToCard, legalActions, nomadPenalty,
 } from '../engine/engine.ts';
 import { robotAction } from '../engine/normal-robot.ts';
 import { loadGame, saveGame } from '../engine/save.ts';
-import type { Action, Area, BusinessKind, ChallengeResult, ChallengeType, Continent, Deck, DrawnCard, GameState, Payment, Player, Profile, RobotLevel, RouteKind, SeatKind } from '../engine/types.ts';
+import type { Action, Area, BusinessKind, Challenge, ChallengeResult, ChallengeType, Continent, Deck, DrawnCard, GameState, Payment, Player, Profile, RobotLevel, RouteKind, SeatKind } from '../engine/types.ts';
 import { map30 } from '../maps/map30.ts';
 import { shapes30 } from '../maps/shapes30.ts';
 import { countryCapital, countryFlag, WONDER_NAME } from './countries.ts';
@@ -64,8 +64,22 @@ let robotTimer = 0;
 let quizTimer = 0;
 // "Ask for citizenship where I arrive" (the tick box on the move panel).
 let askCitizenship = false;
-// A short message about the last move (e.g. "request approved"), shown on the next screen.
-let note = '';
+// What happened (other players' moves, payments, cards), shown in one popup (task 14 B2):
+// on a person's turn, or straight after a person's own move (`newsNow`).
+let news: string[] = [];
+let newsNow = false;
+// The popup after a person answers a quiz, test or challenge question: right or wrong, the
+// right answer and the fact behind it (owner's request).
+let answered: { ok: boolean; title: string; lines: string[] } | null = null;
+// Event cards already shown in a popup (round, seat, card).
+const seenCards = new Set<string>();
+// What a person's last arrival earned, for the guide on their next turn.
+const arrivals = new Map<number, { area: string; lines: string[] }>();
+// One countdown per question, kept across redraws.
+let countdown: { key: string; deadline: number } | null = null;
+// Guided help can be turned off; kept on the device (task 10 request, task 14 B2).
+const GUIDE_KEY = 'kaj-guide-off';
+let guideOff = (() => { try { return localStorage.getItem(GUIDE_KEY) === '1'; } catch { return false; } })();
 // A move into an area with fees (visa, tour fee), waiting for the player to confirm.
 let pendingFees: Action | null = null;
 // The "sell a business" list is open on the move panel.
@@ -192,12 +206,22 @@ function renderSetup(): void {
       title(),
       el('p', { textContent: '30 rounds around the world: walk, fly and sail.' }),
       saved && 'error' in saved ? el('p', { className: 'small', textContent: `${saved.error} It can't be continued; start a new journey.` }) : '',
-      counts, rows, start,
+      counts, rows, guideBox(), start,
       saved && 'state' in saved ? el('p', { className: 'small', textContent: 'Starting a new journey replaces the saved game.' }) : '',
       error,
       el('div', { className: 'row' }, button('← Back', renderStart)),
       el('p', { className: 'small', textContent: CREDITS })),
   );
+}
+
+// "Guided help" on the setup screen: turns the guide back on after "Turn off guided help".
+function guideBox(): HTMLElement {
+  const tick = el('input', { type: 'checkbox', checked: !guideOff });
+  tick.addEventListener('change', () => {
+    guideOff = !tick.checked;
+    try { localStorage.setItem(GUIDE_KEY, guideOff ? '1' : '0'); } catch { /* not kept */ }
+  });
+  return el('label', { className: 'small' }, tick, ' 🧭 Guided help for people (what you can do each turn)');
 }
 
 // ---------- automatic save (task 10) ----------
@@ -235,9 +259,16 @@ function act(action: Action): void {
   const lastTry = action.type === 'answer' && quiz && action.choice !== quiz.question.correct && mover.quizWrong >= QUIZ_TRIES - 1
     ? { pays: canPayAfterQuiz(state, mover, quiz.to), home: homeFor(state, map30, mover) } : null;
   const offer = state.offer;
+  const before = state;
   state = apply(state, map30, action);
   const after = state.players[mover.seat];
   const lines: string[] = [];
+  if (mover.kind === 'human') {
+    answered = answerResult(before, state, action);
+    // The start area gives the welcome bonus, not visit points: no arrival lines for it.
+    const arrival = action.type === 'chooseStart' ? null : arrivalLines(mover, after);
+    if (arrival) arrivals.set(mover.seat, arrival);
+  }
   if (offer && action.type === 'sellAnswer' && !action.accept) {
     lines.push(`🙅 ${COLOUR_NAMES[offer.to]} said no to ${name}'s ${BUSINESS_NAME[offer.business]} in ${areaById.get(offer.area)!.name}.`);
   }
@@ -252,17 +283,22 @@ function act(action: Action): void {
     lines.push(`${PROFILE_LABEL[mover.profile!]} bonus: ${name} has visited ${bonus.continents} continents, +${bonus.points}!`);
   }
   if (home) lines.push(`🏠 ${name} ran out of money, so the trip ends here: ${name} goes home to ${areaById.get(home)!.name}, free of any fees.`);
-  if (lastTry) {
+  if (lastTry && answered) {
+    answered.lines.push(lastTry.pays
+      ? `${QUIZ_TRIES} wrong answers here, so you pay the ticket and travel.`
+      : `${QUIZ_TRIES} wrong answers here and no money for the ticket, so the trip ends here: you go home to ${areaById.get(lastTry.home)!.name}, free of any fees.`);
+  } else if (lastTry) {
     lines.push(lastTry.pays
       ? `❌ ${name}: ${QUIZ_TRIES} wrong answers here, so ${name} pays the ticket and travels.`
       : `❌ ${name}: ${QUIZ_TRIES} wrong answers here and no money for the ticket, so the trip ends here: ${name} goes home to ${areaById.get(lastTry.home)!.name}, free of any fees.`);
   }
-  if (state.challenged) lines.push(challengeNote(state.challenged));
+  if (state.challenged && !answered) lines.push(challengeNote(state.challenged));
   lines.push(...state.payments.map(paymentNote).filter((t) => t !== ''));
   // Event cards drawn by this move; a human's own start-of-turn card has its own box instead.
   const next = currentPlayer(state);
   lines.push(...state.drawn.filter((c) => !(c === state!.card && next.kind === 'human' && c.seat === next.seat)).map(cardNote));
-  note = lines.join(' ');
+  news.push(...lines);
+  if (mover.kind === 'human' && lines.length > 0) newsNow = true;
   askCitizenship = false;
   pendingFees = null;
   selling = false;
@@ -353,7 +389,11 @@ function render(): void {
   const actor = s.offer ? s.players[s.offer.to] : me;
   const isRobot = s.phase !== 'finished' && actor.kind === 'robot';
   writeSave(s);
+  clearTimeout(robotTimer);
+  clearInterval(quizTimer);
 
+  // The popup over the board (task 14 B2): main events show here, the right side is for info.
+  const modal = renderModal(s, actions, isRobot);
   if (s.phase === 'chooseProfile') {
     app.replaceChildren(el('section', { className: 'card setup' }, title(), renderTurn(s, actions, isRobot)));
   } else {
@@ -366,16 +406,20 @@ function render(): void {
     if (s.phase !== 'chooseStart') side.append(renderWorld(s));
     if (detailArea) side.append(renderAreaDetails(s, detailArea));
     if (shownPlayer !== null) side.append(playerCard(s, shownPlayer));
-    side.append(renderTurn(s, actions, isRobot));
+    if (modal?.turn) {
+      side.append(el('section', { className: 'card turn' }, el('h2', {}, dot(actor.seat), ` ${COLOUR_NAMES[actor.seat]}'s turn`)));
+    } else {
+      side.append(renderTurn(s, actions, isRobot));
+    }
     app.replaceChildren(el('div', { className: 'game' }, header,
       el('div', { className: 'board' },
         el('div', { className: 'left' }, s.phase === 'chooseStart' ? renderStartMap(s, isRobot) : renderAreaView(s, isRobot)),
-        side)));
+        side)),
+      modal ? modal.node : '');
   }
 
-  clearTimeout(robotTimer);
-  clearInterval(quizTimer);
-  if (isRobot) {
+  // Robots wait while a popup is open, so nothing is missed.
+  if (isRobot && !modal) {
     robotTimer = window.setTimeout(() => {
       if (state !== s) return;
       // A robot buyer accepts an offer whenever it can pay (owner's choice, task 9b).
@@ -475,7 +519,6 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
     return box;
   }
 
-  if (note) box.append(el('p', { className: 'note', textContent: note }));
   if (s.offer) {
     const o = s.offer;
     const buyer = el('span', {}, dot(o.to), ` ${COLOUR_NAMES[o.to]}`);
@@ -525,7 +568,6 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
   } else if (me.exam && (me.exam.stage === 'test' || me.exam.stage === 'result')) {
     renderCitizenship(box, s, who);
   } else if (me.loseTurn) {
-    if (s.card?.seat === me.seat) box.append(renderCard(s.card));
     box.append(el('h2', {}, who, ', you lose this turn'),
       el('div', { className: 'row' }, button('⏸️ Lose this turn', () => act({ type: 'lostTurn' }))));
   } else if (me.travel) {
@@ -571,9 +613,9 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
         })),
         el('p', { textContent: `🎉 Your citizenship of ${citizenshipName(me.citizenship!)} is now granted! You may travel on.${me.profile === 'business' ? ` 💼 +${plural(POINTS_BUSINESS_CITIZENSHIP, 'point')}.` : ''}` })));
     }
-    if (s.card?.seat === me.seat) box.append(renderCard(s.card));
     box.append(el('h2', {}, who, `, you are in ${here.name}`),
-      el('p', { className: 'small', textContent: 'Tap a green area on the map to walk there. Tap the airport ✈️, port ⛴️ or wonder ⭐ for planes, ships and tours. Tap any area for its details.' }));
+      guideOff ? el('p', { className: 'small', textContent: 'Tap a green area to walk there. Tap the plane, ship or monument on your area for travel and tours. Tap any area for its details.' }) : '',
+      renderGuide(s, actions));
     if (actions.some((a) => a.type === 'blocked' || a.type === 'goHome') && blockedByMoney(s, map30, me)) {
       const homeName = areaById.get(homeFor(s, map30, me))!.name;
       const left = GO_HOME_TURNS - 1 - me.broke;
@@ -667,21 +709,13 @@ function renderExamQuestion(box: HTMLElement, s: GameState, who: HTMLElement): v
   const exam = currentPlayer(s).exam!;
   const n = exam.answers.length;
   const q = exam.questions[n];
-  let left = EXAM_SECONDS;
-  const clock = el('p', { className: 'small', textContent: `⏱️ ${left} s` });
+  const left = EXAM_SECONDS;
+  const clock = el('div', { className: 'clock' }, el('span', { className: 'secs', textContent: `⏱️ ${left} s` }), el('div', { className: 'timebar' }, el('span')));
   box.append(el('h2', {}, who, `: citizenship test for ${areaById.get(exam.area)!.name} — question ${n + 1} of ${exam.questions.length}`),
     el('p', { textContent: q.text }),
     el('div', { className: 'row' }, ...q.options.map((o, i) => button(o, () => act({ type: 'examAnswer', choice: i as 0 | 1 })))),
     clock);
-  quizTimer = window.setInterval(() => {
-    if (state !== s) return clearInterval(quizTimer);
-    left -= 1;
-    clock.textContent = `⏱️ ${left} s`;
-    if (left <= 0) {
-      clearInterval(quizTimer);
-      act({ type: 'examAnswer', choice: (1 - q.correct) as 0 | 1 });
-    }
-  }, 1000);
+  startCountdown(`examAnswer-${s.round}-${currentPlayer(s).seat}-${q.text}-${n}`, left, clock, () => act({ type: 'examAnswer', choice: (1 - q.correct) as 0 | 1 }));
 }
 
 function renderBigCountries(me: GameState['players'][number]): HTMLElement {
@@ -697,29 +731,21 @@ function renderBigCountries(me: GameState['players'][number]): HTMLElement {
 // Airline quiz: one a/b question about the destination, 15 seconds. Time out = wrong answer.
 function renderQuiz(box: HTMLElement, s: GameState, who: HTMLElement): void {
   const { question, to, kind } = s.quiz!;
-  let left = QUIZ_SECONDS;
-  const clock = el('p', { className: 'small', textContent: `⏱️ ${left} s` });
+  const left = QUIZ_SECONDS;
+  const clock = el('div', { className: 'clock' }, el('span', { className: 'secs', textContent: `⏱️ ${left} s` }), el('div', { className: 'timebar' }, el('span')));
   box.append(el('h2', {}, who, `: Airline promotion — answer correctly and ${kind === 'airport' ? 'fly' : 'sail'} free to ${areaById.get(to)!.name}!`),
     el('p', { textContent: question.text }),
     el('div', { className: 'row' }, ...question.options.map((o, i) => button(o, () => act({ type: 'answer', choice: i as 0 | 1 })))),
     clock,
     el('p', { className: 'small', textContent: `Wrong answers here so far: ${currentPlayer(s).quizWrong}. A wrong answer uses this turn.${forcedPayNote(s, kind, to)}` }));
-  quizTimer = window.setInterval(() => {
-    if (state !== s) return clearInterval(quizTimer);
-    left -= 1;
-    clock.textContent = `⏱️ ${left} s`;
-    if (left <= 0) {
-      clearInterval(quizTimer);
-      act({ type: 'answer', choice: (1 - question.correct) as 0 | 1 });
-    }
-  }, 1000);
+  startCountdown(`answer-${s.round}-${currentPlayer(s).seat}-${question.text}-${currentPlayer(s).quizWrong}`, left, clock, () => act({ type: 'answer', choice: (1 - question.correct) as 0 | 1 }));
 }
 
 // Travel-turn challenge: one a/b question, 15 seconds. Time out = wrong answer.
 function renderChallenge(box: HTMLElement, s: GameState, who: HTMLElement): void {
   const c = s.challenge!;
-  let left = CHALLENGE_SECONDS;
-  const clock = el('p', { className: 'small', textContent: `⏱️ ${left} s` });
+  const left = CHALLENGE_SECONDS;
+  const clock = el('div', { className: 'clock' }, el('span', { className: 'secs', textContent: `⏱️ ${left} s` }), el('div', { className: 'timebar' }, el('span')));
   const flag = c.flag && FLAGS[c.flag] ? el('img', { className: 'flag', src: FLAGS[c.flag], alt: 'A flag' }) : '';
   box.append(el('h2', {}, who, `: challenge! ${CHALLENGE_NAME[c.type]}`),
     flag,
@@ -727,15 +753,7 @@ function renderChallenge(box: HTMLElement, s: GameState, who: HTMLElement): void
     el('div', { className: 'row' }, ...c.options.map((o, i) => button(o, () => act({ type: 'challengeAnswer', choice: i as 0 | 1 })))),
     clock,
     el('p', { className: 'small', textContent: `Right +${CHALLENGE_POINTS}, wrong −${CHALLENGE_POINTS}. The journey goes on either way.` }));
-  quizTimer = window.setInterval(() => {
-    if (state !== s) return clearInterval(quizTimer);
-    left -= 1;
-    clock.textContent = `⏱️ ${left} s`;
-    if (left <= 0) {
-      clearInterval(quizTimer);
-      act({ type: 'challengeAnswer', choice: (1 - c.correct) as 0 | 1 });
-    }
-  }, 1000);
+  startCountdown(`challengeAnswer-${s.round}-${currentPlayer(s).seat}-${c.id}-${0}`, left, clock, () => act({ type: 'challengeAnswer', choice: (1 - c.correct) as 0 | 1 }));
 }
 
 function challengeNote(r: ChallengeResult): string {
@@ -797,6 +815,225 @@ function travelNote(me: Player): string {
     ? 'The quiz is free; a wrong answer uses the turn, and you may try again on later turns.'
     : 'The quiz is free; a wrong answer uses the turn, and after 3 wrong answers you pay and go (if you can).';
   return notes.length ? `${notes.join(' · ')}. ${quiz}` : '';
+}
+
+// ---------- popups, answers and the guide (task 14 B2) ----------
+
+// One countdown per question (a redraw doesn't restart it). Time out = wrong answer.
+function startCountdown(key: string, seconds: number, clock: HTMLElement, onTimeout: () => void): void {
+  if (countdown?.key !== key) countdown = { key, deadline: Date.now() + seconds * 1000 };
+  const { deadline } = countdown;
+  const secs = clock.querySelector<HTMLElement>('.secs')!;
+  const bar = clock.querySelector<HTMLElement>('.timebar span')!;
+  const tick = () => {
+    const left = Math.max(0, deadline - Date.now());
+    secs.textContent = `⏱️ ${Math.ceil(left / 1000)} s`;
+    bar.style.width = `${(left / (seconds * 1000)) * 100}%`;
+    clock.classList.toggle('hurry', left <= 5000);
+    if (left <= 0) {
+      clearInterval(quizTimer);
+      onTimeout();
+    }
+  };
+  tick();
+  quizTimer = window.setInterval(tick, 250);
+}
+
+// The study line behind a quiz or test question (every fact has one).
+function factFor(area: string, question: string): string {
+  return map30.facts?.[area]?.find((f) => f.question === question)?.text ?? '';
+}
+
+// A line that teaches something after a challenge answer.
+function challengeFact(c: Challenge): string {
+  const right = c.options[c.correct];
+  const cap = countryCapital(right);
+  if (c.type === 'flag') return `This is the flag of ${right}.${cap ? ` Its capital is ${cap}.` : ''}`;
+  if (c.type === 'capital') {
+    const m = /capital of (?:the )?(.+)\?$/.exec(c.question);
+    return m ? `${right} is the capital of ${m[1]}.` : '';
+  }
+  return cap ? `${right}: its capital is ${cap}.` : '';
+}
+
+// Right or wrong, the right answer and its fact, after a person's answer (owner's request).
+function answerResult(before: GameState, after: GameState, action: Action): typeof answered {
+  const me = currentPlayer(before);
+  if (action.type === 'answer' && before.quiz) {
+    const { question, to, kind } = before.quiz;
+    const ok = action.choice === question.correct;
+    const turns = me.profile ? TRAVEL_TURNS[me.profile][kind] : 0;
+    return {
+      ok,
+      title: ok ? '✅ Right!' : '❌ Wrong answer',
+      lines: [
+        `${question.text} The answer is: ${question.options[question.correct]}.`,
+        factFor(to, question.text),
+        ok
+          ? `${VEHICLE[kind]} Free ticket! You ${kind === 'airport' ? 'fly' : 'sail'} to ${areaById.get(to)!.name}${turns ? `: ${plural(turns, 'travel turn')}` : ' right away'}.`
+          : `You lose this turn. Wrong answers here: ${after.players[me.seat].quizWrong || QUIZ_TRIES} of ${QUIZ_TRIES}.`,
+      ].filter((t) => t !== ''),
+    };
+  }
+  if (action.type === 'examAnswer' && me.exam) {
+    const n = me.exam.answers.length;
+    const q = me.exam.questions[n];
+    const ok = action.choice === q.correct;
+    return {
+      ok,
+      title: `${ok ? '✅ Right!' : '❌ Wrong answer'} (question ${n + 1} of ${me.exam.questions.length})`,
+      lines: [`${q.text} The answer is: ${q.options[q.correct]}.`, factFor(me.exam.area, q.text)].filter((t) => t !== ''),
+    };
+  }
+  if (action.type === 'challengeAnswer' && before.challenge) {
+    const c = before.challenge;
+    const ok = action.choice === c.correct;
+    const change = after.challenged?.change ?? 0;
+    return {
+      ok,
+      title: ok ? `✅ Right! +${plural(change, 'point')}` : `❌ Wrong answer${change ? ` −${plural(-change, 'point')}` : ''}`,
+      lines: [`${c.question} The answer is: ${c.options[c.correct]}.`, challengeFact(c), 'The journey goes on.'].filter((t) => t !== ''),
+    };
+  }
+  return null;
+}
+
+// What an arrival earned, for the guide on the next turn ("You got +1 for visiting Greece…").
+function arrivalLines(before: Player, after: Player): { area: string; lines: string[] } | null {
+  const id = after.area;
+  if (!id || id === before.area) return null;
+  const a = areaById.get(id)!;
+  const lines: string[] = [];
+  if (before.visitedAreas.includes(id)) {
+    lines.push(`You had been here before, so visiting gives no points this time.`);
+  } else {
+    lines.push(`+${POINTS_NEW_AREA} for visiting a new area.`);
+    if (a.wonder) lines.push(`+${POINTS_WONDER} more for visiting ${WONDER_NAME[id] ?? 'its wonder'}.`);
+    if (!before.visitedContinents.includes(a.continent)) lines.push(`+${POINTS_NEW_CONTINENT} for a new continent: ${a.continent} (your ${plural(after.visitedContinents.length, 'continent')} so far).`);
+    if (a.bigCountry) {
+      const parts = map30.areas.filter((x) => x.bigCountry === a.bigCountry);
+      const done = parts.filter((x) => after.visitedAreas.includes(x.id)).length;
+      lines[0] = done === parts.length
+        ? `🧩 ${a.bigCountry} is complete: all ${parts.length} parts visited!`
+        : `🧩 ${a.bigCountry}: ${done} of ${parts.length} parts visited. Its points come when you have visited every part.`;
+    }
+  }
+  const delta = after.points - before.points;
+  lines.push(`In all: ${delta >= 0 ? '+' : '−'}${plural(Math.abs(delta), 'point')} (fees included). You have ${plural(after.points, 'point')}.`);
+  return { area: id, lines: [`📍 You arrived in ${a.name}.`, ...lines] };
+}
+
+// Points a move would give, found by trying it on a copy of the state (fees not included).
+function gainOf(s: GameState, action: Action, to: string): number {
+  const me = currentPlayer(s);
+  return apply(s, map30, action).players[me.seat].points - me.points + feeTotal(entryFees(s, me, me.area, to));
+}
+
+// The guide for the area the player is in (owner's request; texts approved in task 14).
+function renderGuide(s: GameState, actions: Action[]): HTMLElement | string {
+  const me = currentPlayer(s);
+  if (guideOff || me.kind !== 'human' || s.phase !== 'play' || !me.area) return '';
+  const here = areaById.get(me.area)!;
+  const lines: string[] = [];
+  const arrival = arrivals.get(me.seat);
+  if (arrival && arrival.area === me.area) lines.push(...arrival.lines);
+
+  for (const a of actions) {
+    if (a.type !== 'buy') continue;
+    const price = plural(BUSINESS_PRICE[a.business], 'point');
+    lines.push(a.business === 'tours'
+      ? `⭐ You can buy the Guided Tours of ${WONDER_NAME[here.id] ?? 'the wonder'}: it costs ${price}, and every other player who visits pays you ${plural(TOUR_FEE, 'point')}. Tap the monument.`
+      : `${BUSINESS_ICON[a.business]} You can buy the ${BUSINESS_NAME[a.business]} here for ${price}: every paid ${a.business === 'airline' ? 'plane' : 'ship'} ticket from here goes to you. Tap the ${a.business === 'airline' ? 'plane' : 'ship'}.`);
+  }
+
+  const walks = plainActions(actions).flatMap((a) => (a.type === 'walk' ? [a] : []));
+  if (walks.length > 0) {
+    const list = walks.map((w) => {
+      const g = gainOf(s, w, w.to);
+      const fee = feeTotal(entryFees(s, me, me.area, w.to));
+      return `${areaById.get(w.to)!.name} (${g > 0 ? `+${g}` : me.visitedAreas.includes(w.to) ? 'been there, +0' : '+0'}${fee ? `, fee ${fee}` : ''})`;
+    });
+    lines.push(`🚶 From ${here.name} you can walk to: ${list.join(', ')}. Tap a green area.`);
+  }
+  const closed = here.neighbours.flatMap((n) => {
+    if (walks.some((w) => w.to === n)) return [];
+    const there = s.players.find((p) => p.area === n);
+    const booked = bookedBy(s, n);
+    const name = areaById.get(n)!.name;
+    if (there) return [`${name} (${COLOUR_NAMES[there.seat]} is there)`];
+    if (booked) return [`${name} (booked by ${COLOUR_NAMES[booked.seat]})`];
+    return [`${name} (you can't pay the fee)`];
+  });
+  if (closed.length > 0) lines.push(`⛔ Closed now: ${closed.join(', ')}.`);
+  if (here.neighbours.length === 0) lines.push(`🏝️ You can't walk from here: take the plane or ship.`);
+
+  const bonus = me.profile ? CONTINENT_BONUS[me.profile] : undefined;
+  for (const w of walks) {
+    const c = areaById.get(w.to)!.continent;
+    if (me.visitedContinents.includes(c)) continue;
+    const n = me.visitedContinents.length + 1;
+    const more = bonus ? bonus.continents - n : 0;
+    lines.push(`🌍 Going to ${areaById.get(w.to)!.name} takes you to your continent number ${n}: ${c} (+${POINTS_NEW_CONTINENT}).${
+      bonus && more === 0 ? ` That also gives your +${bonus.points} ${PROFILE_LABEL[me.profile!]} bonus!`
+      : bonus && more > 0 ? ` Then ${more} more for your +${bonus.points} bonus.` : ''}`);
+    break;
+  }
+
+  for (const kind of ['airport', 'port'] as const) {
+    if (!hasRoute(here.id, kind)) continue;
+    const to = destinations(map30, here.id, kind, me.profile!).map((t) => areaById.get(t)!.name);
+    const price = TICKET_PRICE[me.profile!];
+    const turns = TRAVEL_TURNS[me.profile!][kind];
+    lines.push(`${VEHICLE[kind]} There is ${kind === 'airport' ? 'an airport' : 'a port'} here: ${kind === 'airport' ? 'fly' : 'sail'} to ${to.join(', ')}. ${
+      price === null ? 'Backpacker: only with the free quiz.' : `Ticket ${plural(price, 'point')}, or try the free quiz.`} ${turns ? plural(turns, 'travel turn') : 'You arrive right away'}. Tap the ${kind === 'airport' ? 'plane' : 'ship'}.`);
+  }
+  if (asksOffered(actions).length > 0) {
+    lines.push(`🛂 You can ask for citizenship in the area you go to next (tick the box below). After a short test there, every other player pays you ${plural(VISA_PRICE, 'point')} to enter it.`);
+  }
+
+  const off = el('input', { type: 'checkbox' });
+  off.addEventListener('change', () => {
+    guideOff = true;
+    try { localStorage.setItem(GUIDE_KEY, '1'); } catch { /* not kept */ }
+    render();
+  });
+  return el('div', { className: 'guide' },
+    el('h3', { textContent: '🧭 Guide' }),
+    ...lines.map((t) => el('p', { className: 'small', textContent: t })),
+    el('label', { className: 'small off' }, off, ' Turn off guided help'));
+}
+
+// The popup over the board: an answer, what happened, an event card, or the current main event
+// (quiz, test, challenge, entry fees, an offer). `turn` = the turn panel itself is in the popup.
+function renderModal(s: GameState, actions: Action[], isRobot: boolean): { node: HTMLElement; turn: boolean } | null {
+  const me = currentPlayer(s);
+  const wrap = (content: HTMLElement, cls = '') => el('div', { className: 'modal-back' }, el('div', { className: `modal card ${cls}` }, content));
+  const ok = (onClick: () => void, text = 'OK') => {
+    const b = button(text, onClick);
+    b.className = 'primary';
+    return el('div', { className: 'row' }, b);
+  };
+  if (answered) {
+    const r = answered;
+    return { turn: false, node: wrap(el('div', {},
+      el('h2', { textContent: r.title }),
+      ...r.lines.map((t) => el('p', { textContent: t })),
+      ok(() => { answered = null; render(); })), r.ok ? 'right' : 'wrong') };
+  }
+  if (news.length > 0 && (newsNow || !isRobot || s.phase === 'finished')) {
+    return { turn: false, node: wrap(el('div', {},
+      el('h2', { textContent: '📣 What happened' }),
+      el('ul', {}, ...news.map((t) => el('li', { textContent: t }))),
+      ok(() => { news = []; newsNow = false; render(); }))) };
+  }
+  const key = s.card ? `${s.card.round}-${s.card.seat}-${s.card.card.text}` : '';
+  if (s.phase === 'play' && me.kind === 'human' && s.card?.seat === me.seat && !seenCards.has(key)) {
+    return { turn: false, node: wrap(el('div', {}, renderCard(s.card), ok(() => { seenCards.add(key); render(); })), 'event') };
+  }
+  const main = !isRobot && s.phase === 'play'
+    && (s.offer || s.quiz || s.challenge || pendingFees || (me.exam && (me.exam.stage === 'test' || me.exam.stage === 'result')));
+  if (main) return { turn: true, node: wrap(renderTurn(s, actions, isRobot)) };
+  return null;
 }
 
 // ---------- drawn maps (task 14 A2, B1) ----------
