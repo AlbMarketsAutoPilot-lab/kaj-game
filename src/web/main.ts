@@ -1,13 +1,13 @@
 // First playable screen (task 3): a plain test board on top of the engine.
-// No final art yet. Robots pick random legal moves.
+// No final art yet. Robots play with simple rules, at the level chosen for each seat (task 13).
 
 import { BUSINESS_PRICE, CHALLENGE_POINTS, CONTINENT_BONUS, GO_HOME_TURNS, NOMAD_MIN_CONTINENTS, NOMAD_PENALTY, NOMAD_WARNING_ROUND, POINTS_BUSINESS_CITIZENSHIP, TICKET_PRICE, TOUR_FEE, TRAVEL_TURNS, VISA_PRICE } from '../engine/constants.ts';
 import {
   apply, blockedByMoney, businessAt, businessValue, createGame, currentPlayer, entryFees, feeTotal, finalScore, homeFor, landTurnsToCard, legalActions, nomadPenalty,
 } from '../engine/engine.ts';
-import { randomRobotAction } from '../engine/robot.ts';
+import { robotAction } from '../engine/normal-robot.ts';
 import { loadGame, saveGame } from '../engine/save.ts';
-import type { Action, Area, BusinessKind, ChallengeResult, ChallengeType, Deck, DrawnCard, GameState, Payment, Player, Profile, RouteKind, SeatKind } from '../engine/types.ts';
+import type { Action, Area, BusinessKind, ChallengeResult, ChallengeType, Deck, DrawnCard, GameState, Payment, Player, Profile, RobotLevel, RouteKind, SeatKind } from '../engine/types.ts';
 import { map30 } from '../maps/map30.ts';
 
 const COLOURS = ['#e4572e', '#2e86de', '#29a36a', '#e0a100'];
@@ -19,6 +19,7 @@ const PROFILE_LABEL: Record<Profile, string> = {
   nomad: '💻 Digital Nomad',
 };
 const ROBOT_DELAY_MS = 600;
+const LEVEL_LABEL: Record<RobotLevel, string> = { easy: 'Easy', normal: 'Normal', hard: 'Hard' };
 const SAVE_KEY = 'kaj-save';
 const QUIZ_SECONDS = 15;
 // Travel-turn challenges: 15 seconds, time out = wrong answer (v1 scope, section 6).
@@ -94,6 +95,7 @@ function renderSetup(): void {
   clearInterval(quizTimer);
   state = null;
   const kinds: SeatKind[] = ['human', 'robot', 'robot', 'robot'];
+  const levels: RobotLevel[] = ['normal', 'normal', 'normal', 'normal'];
   let count = 2;
 
   const rows = el('div', { className: 'seats' });
@@ -105,8 +107,14 @@ function renderSetup(): void {
         for (const k of ['human', 'robot'] as const) {
           select.append(el('option', { value: k, textContent: k === 'human' ? '🙂 Person' : '🤖 Robot', selected: k === kind }));
         }
-        select.addEventListener('change', () => (kinds[i] = select.value as SeatKind));
-        return el('div', { className: 'seat' }, dot(i), ` ${COLOUR_NAMES[i]} `, select);
+        select.addEventListener('change', () => { kinds[i] = select.value as SeatKind; draw(); });
+        // Each robot seat has a level (owner's change, task 13).
+        const level = el('select', { title: 'Robot level' });
+        for (const l of ['easy', 'normal', 'hard'] as const) {
+          level.append(el('option', { value: l, textContent: LEVEL_LABEL[l], selected: l === levels[i] }));
+        }
+        level.addEventListener('change', () => (levels[i] = level.value as RobotLevel));
+        return el('div', { className: 'seat' }, dot(i), ` ${COLOUR_NAMES[i]} `, select, kind === 'robot' ? level : '');
       }),
     );
   };
@@ -124,7 +132,7 @@ function renderSetup(): void {
     try {
       const seed = Math.floor(Math.random() * 2 ** 31);
       robotSeed = seed ^ 0x5bd1e995;
-      const seats = kinds.slice(0, count).map((kind, i) => ({ kind, colour: COLOUR_NAMES[i] }));
+      const seats = kinds.slice(0, count).map((kind, i) => ({ kind, colour: COLOUR_NAMES[i], ...(kind === 'robot' ? { level: levels[i] } : {}) }));
       state = createGame({ seats, seed }, map30);
       render();
     } catch (e) {
@@ -303,8 +311,7 @@ function render(): void {
     robotTimer = window.setTimeout(() => {
       if (state !== s) return;
       // A robot buyer accepts an offer whenever it can pay (owner's choice, task 9b).
-      if (s.offer) return act(actions.find((a) => a.type === 'sellAnswer' && a.accept) ?? { type: 'sellAnswer', accept: false });
-      const [action, next] = randomRobotAction(s, map30, robotSeed);
+      const [action, next] = robotAction(s, map30, robotSeed, actor.level ?? 'normal');
       robotSeed = next;
       act(action);
     }, ROBOT_DELAY_MS);
@@ -319,7 +326,7 @@ function renderPlayers(s: GameState): HTMLElement {
       const area = p.area ? areaById.get(p.area)!.name
         : p.travel ? `${VEHICLE[p.travel.kind]} to ${areaById.get(p.travel.to)!.name}` : '—';
       const card = el('div', { className: 'player' + (p === me && s.phase !== 'finished' ? ' active' : '') },
-        el('div', {}, dot(seat), ` ${COLOUR_NAMES[seat]} ${p.kind === 'robot' ? '🤖' : '🙂'}`),
+        el('div', {}, dot(seat), ` ${COLOUR_NAMES[seat]} ${p.kind === 'robot' ? `🤖 ${LEVEL_LABEL[p.level ?? 'normal']}` : '🙂'}`),
         el('div', { className: 'small', textContent: p.profile ? PROFILE_LABEL[p.profile] : 'no profile yet' }),
         el('div', { className: 'points', textContent: s.phase === 'finished'
           ? `${finalScore(s, p)} points`

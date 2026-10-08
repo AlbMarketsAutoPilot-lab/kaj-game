@@ -80,6 +80,7 @@ export function createGame(config: GameConfig, map: GameMap): GameState {
     seat,
     kind: s.kind,
     colour: s.colour,
+    level: s.kind === 'robot' ? s.level ?? 'normal' : null,
     profile: null,
     startContinent: null,
     area: null,

@@ -16,9 +16,14 @@ export type Profile = 'backpacker' | 'business' | 'luxury' | 'nomad';
 
 export type SeatKind = 'human' | 'robot';
 
+// Robot levels (owner's change, task 13): one robot, three settings.
+export type RobotLevel = 'easy' | 'normal' | 'hard';
+
 export interface SeatConfig {
   kind: SeatKind;
   colour: string;
+  // Robot seats only; default 'normal'.
+  level?: RobotLevel;
 }
 
 export interface GameConfig {
@@ -64,6 +69,8 @@ export interface Player {
   seat: number;
   kind: SeatKind;
   colour: string;
+  // The robot's level (null for a human seat).
+  level: RobotLevel | null;
   profile: Profile | null;
   startContinent: Continent | null;
   area: string | null;
