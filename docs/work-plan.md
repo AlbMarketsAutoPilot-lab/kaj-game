@@ -42,7 +42,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | 13 | Robot: easy, normal and hard | medium | 1 | 10 | ✅ done |
 | 14 | Real screens, art and sounds | medium | 5 (A1, A2, B1, B2, C) | 11–14 | A1 ✅ A2 ✅ B1 ✅ B2 ✅ |
 | 14a | Canada and Russia in 3 parts (+5 bonus) | **high** | 1 | 11 | ✅ done (24 new facts checked by the owner) |
-| 14b | Ship Australia East ↔ New Zealand; Alaska as a 3rd USA part (+5) | **high** | 1 | 12 | approved by the owner, not started |
+| 14b | Ships Australia East ↔ New Zealand and USA West ↔ Alaska; Alaska as a 3rd USA part (+5) | **high** | 1 | 12 | ✅ done (12 facts to check) |
 | 15 | Android release build (signed APK) | medium | 1 | 14 | |
 | 16 | Full-game tests, bug fixes, buffer | medium | 1–2 | 15 | |
 
@@ -261,6 +261,14 @@ Owner-approved rule change (task 14, A1). The map grows from 50 to 52 areas.
 - Done: rules and numbers in `docs/engine.md` (task 14a). No event cards are tied to Russia or Canada.
   The owner checked and approved the 24 new facts (`docs/facts/batch-2.md` Siberia and Russia Far East,
   `docs/facts/batch-4.md` Canada West and Canada Central).
+
+### 14b. Alaska and two ships — day 12 (high)
+
+Owner-approved rule change (after the phone test of task 14 A2). Done: rules and numbers in
+`docs/engine.md` (task 14b). Alaska is a 3rd part of the USA (+5 for the whole USA), walking from
+Canada West; ships Australia East ↔ New Zealand and USA West ↔ Alaska (the owner chose the ferry so
+a Canadian citizenship can't trap Alaska). Saves version 6. 12 new facts for the owner to check
+(`docs/facts/batch-4.md`: Alaska 3–12, USA West 8–9).
 
 ### 15. Android release build — day 14
 

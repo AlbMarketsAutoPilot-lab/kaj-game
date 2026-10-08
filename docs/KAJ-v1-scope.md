@@ -30,7 +30,7 @@ Target: a complete, playable v1 within about 15 days of work.
 
 ## 4. Map
 
-- **Only the 30-turn map:** 52 areas (50 until task 14a), 7 wonders, **8 airports** and **6 ports** with **11 two-way connections**. (Task 9b, owner-approved: UK & Ireland gets an airport to the Arabian Peninsula and Japan a port to USA West, so UK & Ireland and Japan have both.) An airport or port has **1 to 3 fixed destinations**; the traveller chooses one when boarding. Luxury can choose any airport or port. (Changed in task 2b, owner-approved: 6 airports + 4 ports with one destination each could not pass the map check.)
+- **Only the 30-turn map:** 53 areas (50 until task 14a, 52 until task 14b), 7 wonders, **8 airports** and **9 ports** with **13 two-way connections**. (Task 14b, owner-approved: ships Australia East ↔ New Zealand and USA West ↔ Alaska.) (Task 9b, owner-approved: UK & Ireland gets an airport to the Arabian Peninsula and Japan a port to USA West, so UK & Ireland and Japan have both.) An airport or port has **1 to 3 fixed destinations**; the traveller chooses one when boarding. Luxury can choose any airport or port. (Changed in task 2b, owner-approved: 6 airports + 4 ports with one destination each could not pass the map check.)
 - **Starting continents: 6 choices**, all different between players: Europe, Asia, Africa, **North America**, **South America**, Oceania.
 - **Welcome bonus:** Europe, Asia, Africa +3 · North America +4 · South America +4 · Oceania +5.
 - Big countries: a country split into N parts gives +N when all parts are visited (e.g. USA East + USA West = +2).
@@ -106,7 +106,7 @@ Target: a complete, playable v1 within about 15 days of work.
 | Passport screen with stamps | **Not in v1** |
 | Online play, exam timers online | **No online play**; the timers in section 6 apply offline |
 | One robot level in v1 (this scope's first version) | **Easy, normal and hard** (owner's change, task 13) |
-| 30-turn map: every big country in 2 parts | **Canada and Russia in 3 parts, +5 when complete** (owner's change, task 14a); 52 areas |
+| 30-turn map: every big country in 2 parts | **Canada, Russia and the USA (with Alaska) in 3 parts, +5 when complete** (owner's changes, tasks 14a and 14b); 53 areas |
 
 ## 10. Deferred (after v1, only with the owner's agreement)
 

@@ -40,27 +40,35 @@ test('starting in a wonder gives only the welcome bonus', () => {
 
 test('big country: all or nothing, continue where you stopped, bonus only once', () => {
   let s = started(['mexico', 'north-africa']);
-  s = walk(s, 'usa-west'); // USA 1 of 2: 0
+  s = walk(s, 'usa-west'); // USA 1 of 3 (with Alaska, task 14b): 0
   assert.equal(seatOf(s, 0).points, 4);
   s = walk(s, 'egypt');
-  s = walk(s, 'canada-west'); // left the USA halfway; Canada 1 of 3: 0
+  s = walk(s, 'canada-west'); // left the USA; Canada 1 of 3: 0
   s = walk(s, 'north-africa');
   s = walk(s, 'canada-central'); // Canada 2 of 3: 0
-  assert.equal(seatOf(s, 0).points, 4);
   s = walk(s, 'egypt');
-  s = walk(s, 'usa-east'); // left Canada; USA complete: +1 +2
-  assert.equal(seatOf(s, 0).points, 4 + 3);
+  s = walk(s, 'usa-east'); // left Canada; USA 2 of 3: 0
+  assert.equal(seatOf(s, 0).points, 4);
   s = walk(s, 'north-africa');
   s = walk(s, 'canada-east'); // Canada complete, 3 parts: +5 (task 14a)
-  assert.equal(seatOf(s, 0).points, 4 + 3 + 5);
+  assert.equal(seatOf(s, 0).points, 4 + 5);
   s = walk(s, 'egypt');
-  s = walk(s, 'usa-east'); // never again
-  assert.equal(seatOf(s, 0).points, 4 + 3 + 5);
+  s = walk(s, 'canada-central');
+  s = walk(s, 'north-africa');
+  s = walk(s, 'canada-west');
+  s = walk(s, 'egypt');
+  s = walk(s, 'alaska'); // USA complete, 3 parts: +5 (task 14b)
+  assert.equal(seatOf(s, 0).points, 4 + 5 + 5);
+  s = walk(s, 'north-africa');
+  s = walk(s, 'canada-west');
+  s = walk(s, 'egypt');
+  s = walk(s, 'usa-west'); // never again
+  assert.equal(seatOf(s, 0).points, 4 + 5 + 5);
 });
 
 test('big country: the starting part counts toward the country', () => {
-  let s = started(['usa-east', 'egypt']);
-  s = walk(s, 'usa-west');
+  let s = started(['brazil-south', 'egypt']);
+  s = walk(s, 'brazil-north'); // Brazil, 2 parts: +1 +2
   assert.equal(seatOf(s, 0).points, 4 + 3);
 });
 

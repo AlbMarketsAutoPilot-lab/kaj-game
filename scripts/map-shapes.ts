@@ -1,4 +1,4 @@
-// Draws the 52 areas of the 30-turn map from real borders (task 14): node scripts/map-shapes.ts
+// Draws the 53 areas of the 30-turn map from real borders (task 14): node scripts/map-shapes.ts
 //
 // Merged areas (Scandinavia, Balkans, ...) are joined from their countries; the 6 big countries
 // are split along their states or provinces (the lists below, checked by the owner).
@@ -23,7 +23,9 @@ const source = JSON.parse(readFileSync(process.argv[fromIndex + 1], 'utf8'));
 // Big countries: which states or provinces make each part (owner-approved).
 // The last part of each country (REST) gets every state or province not listed.
 export const PARTS: Record<string, string[]> = {
-  'usa-west': ['AK', 'HI', 'WA', 'OR', 'CA', 'NV', 'ID', 'MT', 'WY', 'UT', 'CO', 'AZ', 'NM'].map((c) => `US-${c}`),
+  'usa-west': ['HI', 'WA', 'OR', 'CA', 'NV', 'ID', 'MT', 'WY', 'UT', 'CO', 'AZ', 'NM'].map((c) => `US-${c}`),
+  // Task 14b: Alaska is a 3rd part of the USA.
+  alaska: ['US-AK'],
   // Task 14a: Canada and Russia in 3 parts.
   'canada-west': ['YT', 'BC', 'AB'].map((c) => `CA-${c}`),
   'canada-central': ['NT', 'NU', 'SK', 'MB'].map((c) => `CA-${c}`),
@@ -81,13 +83,13 @@ function areaOf(p: { admin: string; iso_3166_2: string }): string | null {
 }
 
 // Keeps a shape in one piece across the date line: Russia Far East and the Chukchi peninsula,
-// USA West and the Aleutian Islands.
+// Alaska and the Aleutian Islands.
 function shift(coords: any, by: (lon: number) => number): any {
   return typeof coords[0] === 'number' ? [by(coords[0]), coords[1]] : coords.map((c: any) => shift(c, by));
 }
 const SHIFT: Record<string, (lon: number) => number> = {
   'russia-far-east': (lon) => (lon < -100 ? lon + 360 : lon),
-  'usa-west': (lon) => (lon > 100 ? lon - 360 : lon),
+  alaska: (lon) => (lon > 100 ? lon - 360 : lon),
 };
 
 const byArea = new Map<string, any[]>();

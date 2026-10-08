@@ -1,6 +1,7 @@
 import { f, type FactBatch } from './types.ts';
 
-// Batch 4: map areas 32–42 (southern Africa and North America; task 14a added Canada Central).
+// Batch 4: map areas 32–43 (southern Africa and North America; task 14a added Canada Central,
+// task 14b Alaska).
 // Drafted by Claude, to be checked by the owner.
 
 export const batch4: FactBatch = {
@@ -124,11 +125,26 @@ export const batch4: FactBatch = {
     f('Death Valley in California is one of the hottest places on Earth.', 'Death Valley is famous for being very…', 'hot', 'cold'),
     f('The Golden Gate Bridge in San Francisco opened in 1937.', 'The Golden Gate Bridge is in which city?', 'San Francisco', 'Chicago'),
     f('The islands of Hawaii, in the Pacific Ocean, were made by volcanoes.', 'The islands of Hawaii were made by…', 'volcanoes', 'glaciers'),
-    f('Alaska, the largest US state, was bought from Russia in 1867.', 'The United States bought Alaska from…', 'Russia', 'Canada'),
-    f('Denali, in Alaska, is the highest mountain in North America.', 'Which is the highest mountain in North America?', 'Denali', 'Mount Logan'),
+    f('Las Vegas, in the desert of Nevada, is famous for its bright lights and big shows.', 'Las Vegas is in the desert of which state?', 'Nevada', 'Oregon'),
+    f('Crater Lake in Oregon, in the crater of an old volcano, is the deepest lake in the United States.', 'Crater Lake, the deepest lake in the USA, is in…', 'Oregon', 'Texas'),
     f('Giant sequoias in California are the largest trees on Earth by volume.', 'Giant sequoias are huge…', 'trees', 'cacti'),
     f('Silicon Valley, in California, is home to many famous computer and technology companies.', 'Silicon Valley is famous for…', 'technology companies', 'cattle ranches'),
     f('Surfing was developed by the ancient people of Hawaii.', 'Surfing was developed by the ancient people of…', 'Hawaii', 'Rome'),
+  ],
+  // Task 14b: Alaska became a 3rd part of the USA (2 facts moved from USA West, 10 new).
+  alaska: [
+    f('Alaska, the largest US state, was bought from Russia in 1867.', 'The United States bought Alaska from…', 'Russia', 'Canada'),
+    f('Denali, in Alaska, is the highest mountain in North America.', 'Which is the highest mountain in North America?', 'Denali', 'Mount Logan'),
+    f('Juneau, the capital of Alaska, has no road to the rest of North America: people arrive by plane or boat.', 'Juneau, the capital of Alaska, can\'t be reached by…', 'road', 'plane'),
+    f('The Iditarod is a famous sled-dog race of about 1,600 km across Alaska, held every March.', 'The Iditarod is a race with…', 'sled dogs', 'camels'),
+    f('In Utqiagvik, the northernmost town in the United States, the sun does not set for more than two months in summer.', 'In summer in Utqiagvik, Alaska, the sun…', 'does not set for weeks', 'does not rise for weeks'),
+    f('Alaska has more than 3 million lakes.', 'Alaska has more than 3 million…', 'lakes', 'deserts'),
+    f('The Trans-Alaska Pipeline carries oil about 1,300 km across Alaska, from the Arctic coast to the port of Valdez.', 'The Trans-Alaska Pipeline carries…', 'oil', 'milk'),
+    f('Alaska became the 49th state of the United States in 1959.', 'Alaska became a US state in…', '1959', '1859'),
+    f('The Inupiat and the Yupik are Native peoples who have lived in Alaska for thousands of years.', 'The Inupiat and the Yupik are Native peoples of…', 'Alaska', 'Brazil'),
+    f('Alaska has a longer coastline than all the other US states together.', 'Which US state has the longest coastline?', 'Alaska', 'Florida'),
+    f('Alaska is more than twice as big as Texas.', 'Alaska is more than twice as big as…', 'Texas', 'Russia'),
+    f('In Glacier Bay, in Alaska, huge glaciers flow down from the mountains into the sea.', 'Glacier Bay in Alaska is famous for its…', 'glaciers', 'coral reefs'),
   ],
   'usa-east': [
     f('Central Park is a huge park in the middle of New York City.', 'Central Park is in which city?', 'New York City', 'Boston'),

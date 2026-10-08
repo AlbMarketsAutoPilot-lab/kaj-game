@@ -322,6 +322,23 @@ Task 14a: Canada and Russia in 3 parts (owner's change; `tests/scoring.test.ts`,
   robots play almost the same (they don't plan several turns ahead). Two visa areas at once still
   trap someone in 21 of 946 pairs; nobody stuck.
 
+Task 14b: Alaska and two ships (owner's change; `tests/map30.test.ts`, `tests/scoring.test.ts`).
+
+- **Map: 53 areas.** Alaska (US-AK, with the Aleutians) is a 3rd part of the USA; USA West keeps
+  Hawaii and the other western states. Alaska's only walking link is Canada West (the drawn shapes
+  touch exactly this link). Completing the USA now needs 3 parts: **+5**, like Canada and Russia.
+- **Ships:** Australia East ⛴️ New Zealand, and USA West ⛴️ Alaska (Alaska's ferry). Without the
+  ferry a Canadian citizenship (all 3 parts of Canada) trapped Alaska; the owner chose the ferry.
+  8 airports, 9 ports, 13 connections; New Zealand has an airport and a port.
+- **Big countries:** parts must be linked by walking or by their own ship (Alaska–USA West).
+- **Facts:** Alaska has 12 (2 moved from USA West: bought from Russia, Denali; 10 new); USA West got
+  2 new ones (Las Vegas, Crater Lake). 12 facts for the owner to check (batch 4, now 12 areas).
+- **Placeholder quiz:** a big-country part never gets its own country as the wrong answer.
+- **Saves:** version 6. A version-5 save can't be continued.
+- 1,000 games per level, before → after: average score easy 41.0 → 39.6, normal 45.0 → 44.2, hard
+  47.5 → 47.2. With normal robots (300 games): the USA completed by 53% → 22% of players, New Zealand
+  visited by 44% → 63%. Two citizenships at once trap someone in 21 → 19 of 946 pairs; nobody stuck.
+
 ## Choices made in task 1 (approved by the owner)
 
 These points are not spelled out in the rulebook or the v1 scope.
