@@ -40,7 +40,8 @@ Every task also adds its part to the test board, so there is **always a playable
 | 11 | Event cards | medium | 1 | 7–8 | ✅ done |
 | 12 | Challenges (6 types from open data) | medium | 1.5 | 8–9 | ✅ done |
 | 13 | Robot: easy, normal and hard | medium | 1 | 10 | ✅ done |
-| 14 | Real screens, art and sounds | medium | 3 | 11–13 | |
+| 14 | Real screens, art and sounds | medium | 4 (A1, A2, B, C) | 11–13 | A1 ✅ done (map shapes) |
+| 14a | Canada and Russia in 3 parts (+5 bonus) | **high** | 1 | 11–12 | |
 | 15 | Android release build (signed APK) | medium | 1 | 14 | |
 | 16 | Full-game tests, bug fixes, buffer | medium | 1–2 | 15 | |
 
@@ -188,6 +189,37 @@ on day 14 it could miss the deadline.
     must stay inside the screen.
   - Show the poster at the start of the game.
   - Write "Kris Ann's Journey" like on the poster, and use that design in the whole game.
+
+- **Owner decisions (task 14, session A1):**
+  - The view (rulebook section 2): a world view with the 6 continents (no Antarctica), then a zoom
+    into the chosen continent, where the player taps their starting area ("home country"); after
+    that, one area at a time, never zoomed out.
+  - **Landscape only** (Android locked to landscape; a browser held upright shows "Please turn your
+    phone"). Left half: the current area drawn with its airport, port and wonder, and its
+    neighbours as tappable connections at the edges. Right half: a small world map with every
+    player's position, trips on their route, booked areas and visited areas; tapping an area there
+    shows its details (for planning, no moving).
+  - **Real shapes, never labelled tiles**: `node scripts/map-shapes.ts --from <file>` builds
+    `src/maps/shapes30.ts` from Natural Earth (public domain); review page `docs/map-shapes.md`.
+    Big-country splits approved. The data is not changed (e.g. Crimea stays as Natural Earth
+    draws it). Tibet (China West) touches Myanmar (Mainland Southeast Asia) on the map with no
+    walking link: the rules stay as they are.
+  - Sessions: A1 map shapes ✅; A2 poster, background, lettering, setup, area view with the world
+    map, landscape lock, "1 point"; B quiz, exam, challenge, event card, sale, go home, end screen;
+    C guided help, sounds, polish.
+
+### 14a. Canada and Russia in 3 parts — before session A2 (high)
+
+Owner-approved rule change (task 14, A1). The map grows from 50 to 52 areas.
+
+- Canada West (British Columbia, Alberta, Yukon), Canada Central (Saskatchewan, Manitoba, Northwest
+  Territories, Nunavut), Canada East (Ontario, Québec, Atlantic provinces).
+- Russia West (as now), Siberia (Urals and Siberia, up to Lake Baikal and Chita), Russia Far East
+  (Yakutia, Amur, Khabarovsk, Primorye, Magadan, Kamchatka, Chukotka, Sakhalin).
+- Completing Canada or Russia: **+5** (instead of +1 +N); other big countries +3 as now. Check with
+  the 1,000-game robot runs (the owner also accepts +4 after the calculations).
+- 2 new areas need about 12 facts each (owner checks); event cards tied to Russia or Canada;
+  robot, stuck-state check, tests, shapes, scope document (52 areas). Saves version 5.
 
 ### 15. Android release build — day 14
 

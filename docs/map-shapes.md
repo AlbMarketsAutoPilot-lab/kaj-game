@@ -30,7 +30,6 @@ Made by `node scripts/map-shapes.ts --from <file>` from Natural Earth 1:10m stat
 - Isle of Man → UK & Ireland
 - Jersey → UK & Ireland
 - Guernsey → UK & Ireland
-- Crimea and Sevastopol → Baltics, Belarus & Ukraine
 - French Guiana → Colombia, Venezuela & Guianas
 
 ## Left out (not drawn)

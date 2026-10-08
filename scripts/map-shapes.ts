@@ -60,7 +60,6 @@ const EXTRA: Record<string, string> = {
 };
 // Single states or provinces that belong elsewhere, or are left out (null).
 const BY_CODE: Record<string, string | null> = {
-  'UA-40': 'eastern-europe', 'UA-43': 'eastern-europe', // Sevastopol and Crimea: Ukraine
   'FR-GF': 'northern-andes', // French Guiana, in "Venezuela & Guianas"
   'FR-GP': null, 'FR-MQ': null, 'FR-RE': null, 'FR-YT': null, // other French overseas islands
   'NO-X01~': null, 'AU-X03~': null, 'CN-X01~': null, // Bouvet, Macquarie, Paracel Islands
@@ -206,7 +205,6 @@ const lines = [
   '## Drawn with an area, although not a country in the map data',
   '',
   ...Object.entries(EXTRA).map(([place, id]) => `- ${place} → ${nameOf(id)}`),
-  '- Crimea and Sevastopol → Baltics, Belarus & Ukraine',
   '- French Guiana → Colombia, Venezuela & Guianas',
   '',
   '## Left out (not drawn)',
