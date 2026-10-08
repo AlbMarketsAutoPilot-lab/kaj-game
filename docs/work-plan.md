@@ -40,7 +40,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | 11 | Event cards | medium | 1 | 7–8 | ✅ done |
 | 12 | Challenges (6 types from open data) | medium | 1.5 | 8–9 | ✅ done |
 | 13 | Robot: easy, normal and hard | medium | 1 | 10 | ✅ done |
-| 14 | Real screens, art and sounds | medium | 5 (A1, A2, B1, B2, C) | 11–14 | A1 ✅ A2 ✅ B1 ✅ B2 ✅ · C (sounds) next |
+| 14 | Real screens, art and sounds | medium | 5 (A1, A2, B1, B2, C) | 11–14 | A1 ✅ A2 ✅ B1 ✅ B2 ✅ C ✅ (sounds: 13 Pixabay files, music, 🔊 button) |
 | 14a | Canada and Russia in 3 parts (+5 bonus) | **high** | 1 | 11 | ✅ done (24 new facts checked by the owner) |
 | 14b | Ships Australia East ↔ New Zealand and USA West ↔ Alaska; Alaska as a 3rd USA part (+5) | **high** | 1 | 12 | ✅ done (12 facts to check) |
 | 14d | Citizenship asked in the area you stand in (button) | **high** | 1 | 12 | ✅ done |

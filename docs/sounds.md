@@ -13,12 +13,17 @@ them to the game with a 🔊 on/off button (kept on the device).
 | 4 | `ship.mp3` | Boarding a ship (horn or waves) | ≤ 2 s |
 | 5 | `right.mp3` | A right answer (quiz, test, challenge) | ≤ 1 s |
 | 6 | `wrong.mp3` | A wrong answer | ≤ 1 s |
-| 7 | `card.mp3` | An event card appears | ≤ 2 s |
-| 8 | `coins.mp3` | Money for you (visa, tour fee, ticket) and buying a business | ≤ 1 s |
+| 7 | `card-good.mp3` / `card-bad.mp3` | An event card appears (good: points won; bad: points or a turn lost) | ≤ 3 s |
+| 8 | `coins.mp3` | Money for you (visa, tour fee, ticket) and buying a business | ≤ 1.5 s |
 | 9 | `citizenship.mp3` | Citizenship granted | ≤ 2 s |
 | 10 | `milestone.mp3` | "Halfway there" and "The last five turns" | ≤ 2 s |
 | 11 | `win.mp3` | The winner popup at the end (fanfare) | ≤ 4 s |
-| 12 | `music.mp3` *(optional)* | Quiet background music, looping | ≤ 60 s, ≤ 600 KB |
+| 12 | `timer.mp3` | Under each 15-second question (quiz, test, challenge); stops on the answer | 16 s |
+| 13 | `music.mp3` | Background music, looping the whole game: normal on the start screen, quiet in the game | 117 s, ≈ 700 KB |
+
+**Done (task 14C, 2026-10-08):** all files above are in `assets/sounds/`, from Pixabay, checked,
+trimmed, made mono and set to the same loudness. `right.mp3` and `win.mp3` were replaced by cleaner
+ones. The music is ≈ 700 KB (owner's approval). Credits: `assets/sounds/CREDITS.txt`.
 
 ## Rules for the files
 
