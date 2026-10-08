@@ -41,7 +41,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | 12 | Challenges (6 types from open data) | medium | 1.5 | 8–9 | ✅ done |
 | 13 | Robot: easy, normal and hard | medium | 1 | 10 | ✅ done |
 | 14 | Real screens, art and sounds | medium | 4 (A1, A2, B, C) | 11–13 | A1 ✅ done (map shapes) |
-| 14a | Canada and Russia in 3 parts (+5 bonus) | **high** | 1 | 11 | ✅ done (24 new facts to check) |
+| 14a | Canada and Russia in 3 parts (+5 bonus) | **high** | 1 | 11 | ✅ done (24 new facts checked by the owner) |
 | 15 | Android release build (signed APK) | medium | 1 | 14 | |
 | 16 | Full-game tests, bug fixes, buffer | medium | 1–2 | 15 | |
 
@@ -221,7 +221,7 @@ Owner-approved rule change (task 14, A1). The map grows from 50 to 52 areas.
 - 2 new areas need about 12 facts each (owner checks); event cards tied to Russia or Canada;
   robot, stuck-state check, tests, shapes, scope document (52 areas). Saves version 5.
 - Done: rules and numbers in `docs/engine.md` (task 14a). No event cards are tied to Russia or Canada.
-  The owner still checks the 24 new facts (`docs/facts/batch-2.md` Siberia and Russia Far East,
+  The owner checked and approved the 24 new facts (`docs/facts/batch-2.md` Siberia and Russia Far East,
   `docs/facts/batch-4.md` Canada West and Canada Central).
 
 ### 15. Android release build — day 14
