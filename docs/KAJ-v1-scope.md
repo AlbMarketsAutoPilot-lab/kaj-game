@@ -38,7 +38,7 @@ Target: a complete, playable v1 within about 15 days of work.
 
 ## 5. Rules with 2–4 players
 
-- All rulebook rules apply to every player: two players are never in the same area; visas, tour fees and tickets go to **the player who owns** that citizenship or business; the first player to reach a wonder gets the right to buy its tours.
+- All rulebook rules apply to every player: two players are never in the same area, and an area someone is travelling to by plane or ship is **booked** (nobody else may go there until they land; task 13); visas, tour fees and tickets go to **the player who owns** that citizenship or business; the first player to reach a wonder gets the right to buy its tours.
 - Everything else follows `KAJ-rules-v7.md`, except the changes in section 9.
 
 ## 6. Quizzes and challenges

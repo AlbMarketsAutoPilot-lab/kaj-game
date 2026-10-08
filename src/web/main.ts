@@ -3,7 +3,7 @@
 
 import { BUSINESS_PRICE, CHALLENGE_POINTS, CONTINENT_BONUS, GO_HOME_TURNS, NOMAD_MIN_CONTINENTS, NOMAD_PENALTY, NOMAD_WARNING_ROUND, POINTS_BUSINESS_CITIZENSHIP, QUIZ_TRIES, TICKET_PRICE, TOUR_FEE, TRAVEL_TURNS, VISA_PRICE } from '../engine/constants.ts';
 import {
-  apply, blockedByMoney, businessAt, canPayAfterQuiz, businessValue, createGame, currentPlayer, entryFees, feeTotal, finalScore, homeFor, landTurnsToCard, legalActions, nomadPenalty,
+  apply, blockedByMoney, bookedBy, businessAt, canPayAfterQuiz, destinations, businessValue, createGame, currentPlayer, entryFees, feeTotal, finalScore, homeFor, landTurnsToCard, legalActions, nomadPenalty,
 } from '../engine/engine.ts';
 import { robotAction } from '../engine/normal-robot.ts';
 import { loadGame, saveGame } from '../engine/save.ts';
@@ -511,6 +511,8 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
     }
     const canAsk = (a: Action) => offered.some((o) => 'to' in o && 'to' in a && o.type === a.type && o.to === a.to
       && (!('kind' in a) || ('kind' in o && o.kind === a.kind)));
+    const waiting = waitingNote(s);
+    if (waiting) box.append(el('p', { className: 'small', textContent: waiting }));
     const warning = lastTryWarning(s, plainActions(actions));
     if (warning) box.append(el('p', { className: 'note', textContent: warning }));
     const row = el('div', { className: 'row' });
@@ -690,6 +692,20 @@ function forcedPayNote(s: GameState, kind: RouteKind, dest: string): string {
     : ` After ${QUIZ_TRIES} wrong answers here you must pay the ${price}-point ticket and go${to ? ` (the ticket goes ${to.slice(2, -1)})` : ''}; if you can't pay, you go home.`;
 }
 
+// Neighbours and destinations closed because someone is travelling there (owner's rule, task 13).
+function waitingNote(s: GameState): string {
+  const me = currentPlayer(s);
+  const near = new Set([
+    ...areaById.get(me.area!)!.neighbours,
+    ...(['airport', 'port'] as const).flatMap((kind) => destinations(map30, me.area!, kind, me.profile!)),
+  ]);
+  const lines = [...near].flatMap((id) => {
+    const p = bookedBy(s, id);
+    return p && p.seat !== me.seat ? [`${areaById.get(id)!.name} is waiting for ${COLOUR_NAMES[p.seat]} ${VEHICLE[p.travel!.kind]} (booked)`] : [];
+  });
+  return lines.length ? `⏳ ${lines.join(' · ')}: nobody else can go there until they land.` : '';
+}
+
 // Told before the 3rd quiz try in an area (owner's rule, task 13): what a wrong answer means.
 function lastTryText(s: GameState, dest: string): string {
   const me = currentPlayer(s);
@@ -736,10 +752,13 @@ function renderMap(s: GameState): HTMLElement {
           const canGo = humanTurn && legal.has(a.id);
           const tags = `${a.wonder ? '⭐' : ''}${a.bigCountry ? '🧩' : ''}${(map30.routes ?? []).some((r) => r.kind === 'airport' && (r.a === a.id || r.b === a.id)) ? '✈️' : ''}${(map30.routes ?? []).some((r) => r.kind === 'port' && (r.a === a.id || r.b === a.id)) ? '⛴️' : ''}`;
           const citizen = s.players.find((p) => p.citizenship?.includes(a.id));
+          // Booked (owner's rule, task 13): closed until the traveller lands.
+          const booked = bookedBy(s, a.id);
           const owned = s.businesses.filter((b) => b.area === a.id && b.owner !== null)
             .flatMap((b) => [` ${BUSINESS_ICON[b.kind]}`, dot(b.owner!)]);
           const tile = el('div', { className: 'area' + (canGo ? ' legal' : '') + (here ? ' occupied' : ''), title: (a.countries ?? []).join(', ') },
             el('div', { className: 'name' }, `${a.name} ${tags}`, ...(citizen ? [' 🛂', dot(citizen.seat)] : []), ...owned),
+            booked ? el('div', { className: 'small' }, '⏳ Waiting for ', dot(booked.seat), ` ${COLOUR_NAMES[booked.seat]} ${VEHICLE[booked.travel!.kind]}`) : '',
             el('div', { className: 'marks' }, ...visitedBy.map((p) => {
               const m = dot(p.seat);
               m.classList.add(p.area === a.id ? 'big' : 'faint');

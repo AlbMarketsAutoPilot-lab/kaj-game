@@ -167,7 +167,8 @@ on day 14 it could miss the deadline.
   answers about 50% / 75% / 90%; a level picker on each robot seat (default normal).
 - Done: `src/engine/normal-robot.ts`, rules and the owner-approved choices in `docs/engine.md`
   (task 13), tests in `tests/normal-robot.test.ts`, head-to-head report `node scripts/robot-report.ts`.
-  Saves are version 4.
+  Saves are version 4. Owner's rules added: 3 airline quiz tries for everyone (no money after the
+  3rd wrong answer: go home), and booked areas (nobody goes to an area someone is flying or sailing to).
 
 ### 14. Real screens, art and sounds — days 11–13
 

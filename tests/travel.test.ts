@@ -96,17 +96,39 @@ test('Nomad ship: 3 travel turns (+3); Business ship: 1 travel turn', () => {
   assert.equal(seatOf(b, 0).points, 3 - 2 + 1 + 2);
 });
 
-test('destination taken at landing: wait one more travel turn (Nomad +1), then land', () => {
+// Owner's rule (task 13): a booked area (someone is travelling there) is closed, as if the
+// traveller were already there; and nobody boards for an area where someone stands.
+test('booked: nobody walks into or boards for an area someone is travelling to', () => {
   let s = game(['eu-west', 'as-west'], 'nomad');
   s = board(s, 'as-east');
-  s = walk(s, 'as-east'); // player 2 takes the destination
-  s = travel(s);
-  assert.equal(seatOf(s, 0).area, null);
-  assert.equal(seatOf(s, 0).points, 3 - 1 + 1);
-  s = walk(s, 'na-one'); // player 2 leaves
+  assert.equal(seatOf(s, 0).travel?.to, 'as-east');
+  const moves = legalActions(s, travelMap);
+  assert.ok(!moves.some((a) => 'to' in a && a.to === 'as-east'), 'as-east is booked');
+  s = walk(s, 'eu-east');
   s = travel(s);
   assert.equal(seatOf(s, 0).area, 'as-east');
-  assert.equal(seatOf(s, 0).points, 3 - 1 + 1 + 1 + 1 + 2);
+});
+
+test("booked: no trip to an area where someone stands", () => {
+  let s = game(['eu-west', 'af-north'], 'business');
+  s = walk(s, 'eu-north');
+  s = walk(s, 'as-west');
+  s = walk(s, 'eu-west');
+  s = walk(s, 'as-east'); // player 2 stands at the hub
+  s = walk(s, 'eu-north');
+  assert.ok(!legalActions(s, travelMap).some((a) => (a.type === 'board' || a.type === 'quiz') && a.to === 'as-east'));
+});
+
+test('destination taken at landing (safety net): wait one more travel turn (Nomad +1), then land', () => {
+  let s = game(['eu-west', 'as-west'], 'nomad');
+  s = board(s, 'as-east');
+  s = walk(s, 'eu-east');
+  seatOf(s, 1).area = 'as-east'; // only possible by changing the state by hand
+  s = travel(s);
+  assert.equal(seatOf(s, 0).area, null);
+  s = walk(s, 'na-one');
+  s = travel(s);
+  assert.equal(seatOf(s, 0).area, 'as-east');
 });
 
 test('quiz: the answer comes in the same turn; right = free ticket, board now', () => {
