@@ -11,7 +11,9 @@ import { loadGame, saveGame } from '../engine/save.ts';
 import type { Action, Area, BusinessKind, ChallengeResult, ChallengeType, Continent, Deck, DrawnCard, GameState, Payment, Player, Profile, RobotLevel, RouteKind, SeatKind } from '../engine/types.ts';
 import { map30 } from '../maps/map30.ts';
 import { shapes30 } from '../maps/shapes30.ts';
-import { buildGeo, continentBox, pad, squeeze, svg, unionBox, type Box } from './maps.ts';
+import { countryCapital, countryFlag, WONDER_NAME } from './countries.ts';
+import { buildGeo, colourAreas, continentBox, pad, squeeze, svg, unionBox, type Box } from './maps.ts';
+import { airport, citizenFlag, monument, pawn, place, port } from './props.ts';
 
 const COLOURS = ['#e4572e', '#2e86de', '#29a36a', '#e0a100'];
 const COLOUR_NAMES = ['Red', 'Blue', 'Green', 'Yellow'];
@@ -53,6 +55,7 @@ const areaById = new Map(map30.areas.map((a) => [a.id, a]));
 const continents = [...new Set(map30.areas.map((a) => a.continent))];
 const geo = buildGeo(map30, shapes30);
 const worldBox = unionBox([...geo.values()].map((g) => g.box));
+const areaColour = colourAreas(map30, geo);
 const hasRoute = (id: string, kind: RouteKind) => (map30.routes ?? []).some((r) => r.kind === kind && (r.a === id || r.b === id));
 
 let state: GameState | null = null;
@@ -73,6 +76,10 @@ let pickedStart: string | null = null;
 // The area tapped on the world map (its details show in the side panel), and the player card opened.
 let detailArea: string | null = null;
 let shownPlayer: number | null = null;
+// The open popup menu of a drawn prop, and the zoomed view of the area map (kept while the
+// player's area stays the same).
+let popup: { kind: PopupKind; area: string } | null = null;
+let camera: { focus: string; box: Box } | null = null;
 
 // ---------- small DOM helpers ----------
 
@@ -261,6 +268,7 @@ function act(action: Action): void {
   selling = false;
   zoom = null;
   pickedStart = null;
+  popup = null;
   render();
 }
 
@@ -319,6 +327,7 @@ function go(action: Action): void {
   if ((action.type === 'walk' || action.type === 'board' || action.type === 'quiz')
     && entryFees(s, currentPlayer(s), currentPlayer(s).area, action.to).length > 0) {
     pendingFees = action;
+    popup = null;
     render();
   } else {
     act(action);
@@ -502,7 +511,7 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
     // it is not a citizenship, and "go home" always comes back here.
     if (pickedStart) {
       const chosen = { type: 'chooseStart' as const, area: pickedStart };
-      const start = button(`🏠 Start in ${areaById.get(pickedStart)!.name}`, () => act(chosen));
+      const start = button(`🏠 Start in ${areaById.get(pickedStart)!.name}`, () => { detailArea = null; act(chosen); });
       start.className = 'primary';
       box.append(el('div', { className: 'note home' },
         el('strong', { textContent: `🏠 ${areaById.get(pickedStart)!.name} will be your home country for the whole game.` }),
@@ -563,12 +572,8 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
         el('p', { textContent: `🎉 Your citizenship of ${citizenshipName(me.citizenship!)} is now granted! You may travel on.${me.profile === 'business' ? ` 💼 +${plural(POINTS_BUSINESS_CITIZENSHIP, 'point')}.` : ''}` })));
     }
     if (s.card?.seat === me.seat) box.append(renderCard(s.card));
-    box.append(el('h2', {}, who, `, you are in ${here.name}`), el('p', { className: 'small', textContent: travelNote(me) }));
-    const businessesHere = s.businesses.filter((b) => b.area === here.id);
-    if (businessesHere.length > 0) {
-      box.append(el('p', { className: 'small', textContent: businessesHere.map((b) => `${BUSINESS_ICON[b.kind]} ${capital(BUSINESS_NAME[b.kind])} here: ${
-        b.owner === null ? `for sale, ${plural(BUSINESS_PRICE[b.kind], 'point')} (${BUSINESS_EARNS[b.kind]})` : b.owner === me.seat ? 'yours' : `owned by ${COLOUR_NAMES[b.owner]}`}`).join(' · ') }));
-    }
+    box.append(el('h2', {}, who, `, you are in ${here.name}`),
+      el('p', { className: 'small', textContent: 'Tap a green area on the map to walk there. Tap the airport ✈️, port ⛴️ or wonder ⭐ for planes, ships and tours. Tap any area for its details.' }));
     if (actions.some((a) => a.type === 'blocked' || a.type === 'goHome') && blockedByMoney(s, map30, me)) {
       const homeName = areaById.get(homeFor(s, map30, me))!.name;
       const left = GO_HOME_TURNS - 1 - me.broke;
@@ -581,31 +586,19 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
       const tick = el('input', { type: 'checkbox', checked: askCitizenship });
       tick.addEventListener('change', () => { askCitizenship = tick.checked; render(); });
       box.append(el('label', { className: 'ask' }, tick,
-        ' 🛂 Ask for citizenship where I arrive — you can ask only once per game. Moves marked 🛂 allow it.'));
+        ' 🛂 Ask for citizenship where I arrive — you can ask only once per game.'));
     }
-    const canAsk = (a: Action) => offered.some((o) => 'to' in o && 'to' in a && o.type === a.type && o.to === a.to
-      && (!('kind' in a) || ('kind' in o && o.kind === a.kind)));
     const waiting = waitingNote(s);
     if (waiting) box.append(el('p', { className: 'small', textContent: waiting }));
     const warning = lastTryWarning(s, plainActions(actions));
     if (warning) box.append(el('p', { className: 'note', textContent: warning }));
     const row = el('div', { className: 'row' });
+    // Walking, planes, ships and buying are on the map (owner's choice, task 14 B1).
     for (const a of plainActions(actions)) {
-      const mark = canAsk(a) ? ' 🛂' : '';
-      if (a.type === 'walk') {
-        const to = areaById.get(a.to)!;
-        row.append(button(`🚶 ${to.name}${gainLabel(s, a, to)}${feeLabel(s, a.to)}${mark}`, () => go(pick(actions, a))));
-      } else if (a.type === 'board') {
-        row.append(button(`${VEHICLE[a.kind]} Pay ${TICKET_PRICE[me.profile!]}${ticketTo(s, a.kind)} → ${areaById.get(a.to)!.name}${feeLabel(s, a.to)}${mark}`, () => go(pick(actions, a))));
-      } else if (a.type === 'quiz') {
-        row.append(button(`${VEHICLE[a.kind]} Quiz for a free ticket → ${areaById.get(a.to)!.name}${feeLabel(s, a.to)}${mark}`, () => go(pick(actions, a))));
-      } else if (a.type === 'blocked') {
+      if (a.type === 'blocked') {
         row.append(button('⛔ No area you can enter — wait this turn', () => act(a)));
       } else if (a.type === 'goHome') {
         row.append(button(`🏠 Go home to ${areaById.get(homeFor(s, map30, me))!.name}`, () => act(a)));
-      } else if (a.type === 'buy') {
-        const first = !s.players.some((p) => p.seat !== me.seat && p.visitedAreas.includes(here.id));
-        row.append(button(`${BUSINESS_ICON[a.business]} Buy the ${BUSINESS_NAME[a.business]} here −${BUSINESS_PRICE[a.business]}${first ? ' ⭐ first here' : ''}`, () => act(a)));
       }
     }
     const sales = actions.filter((a) => a.type === 'sell');
@@ -617,10 +610,7 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
           ? button(`Sell ${BUSINESS_ICON[a.business]} ${BUSINESS_NAME[a.business]} in ${areaById.get(a.area)!.name} to ${COLOUR_NAMES[a.to]} for ${BUSINESS_PRICE[a.business]}`, () => act(a)) : ''),
         button('Cancel', () => { selling = false; render(); })));
     }
-    box.append(
-      el('p', { className: 'small', textContent: 'New area +1 · new continent +2 · ⭐ wonder +1 more · 🧩 big country: 0 until every part is visited, then +1 + number of parts (Canada and Russia, 3 parts: +5).' }),
-      el('p', { className: 'small', textContent: `Businesses: buying doesn't end your turn, and each one counts its price at the end. Fees are strict: no money, no entry. Can't pay for ${GO_HOME_TURNS} turns in a row? You go home.` }),
-      renderBigCountries(me));
+    box.append(renderBigCountries(me));
   }
   return box;
 }
@@ -809,16 +799,16 @@ function travelNote(me: Player): string {
   return notes.length ? `${notes.join(' · ')}. ${quiz}` : '';
 }
 
-// ---------- drawn maps (task 14 A2) ----------
+// ---------- drawn maps (task 14 A2, B1) ----------
 
 interface Drawn { root: SVGSVGElement; labels: SVGGElement; paths: Map<string, SVGPathElement>; vb: Box; k: number; fs: number }
 
 const overlaps = (a: Box, b: Box) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
-const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), Math.max(lo, hi));
 
-// Draws the areas that show in the view (world units), squeezed by k across.
-// Text is sized in screen pixels (px), from the size of the pane the map fills.
-function drawMap(view: Box, k: number, cls: (id: string) => string, onTap: (id: string) => (() => void) | null, pane: 'left' | 'world' = 'left', px = 13): Drawn {
+// Draws the areas that show in the view (world units), squeezed by k across. Areas are filled
+// with their own colour; no names on the map (owner's choice): tap an area for its details.
+// Text and icons are sized in screen pixels (px), from the size of the pane the map fills.
+function drawMap(view: Box, k: number, cls: (id: string) => string, onTap: (id: string) => (() => void) | null, pane: 'left' | 'world' = 'left', px = 15): Drawn {
   const vb = { x: view.x * k, y: view.y, w: view.w * k, h: view.h };
   const root = svg('svg', { viewBox: `${vb.x} ${vb.y} ${vb.w} ${vb.h}`, class: 'map-svg' });
   const shapes = svg('g', { transform: `scale(${k} 1)` });
@@ -827,6 +817,7 @@ function drawMap(view: Box, k: number, cls: (id: string) => string, onTap: (id: 
     const g = geo.get(a.id)!;
     if (!overlaps(g.box, view)) continue;
     const path = svg('path', { d: g.path, class: `land ${cls(a.id)}` });
+    path.style.fill = areaColour.get(a.id)!;
     const tap = onTap(a.id);
     if (tap) {
       path.classList.add('tap');
@@ -838,12 +829,12 @@ function drawMap(view: Box, k: number, cls: (id: string) => string, onTap: (id: 
   const labels = svg('g');
   root.append(shapes, labels);
   const w = window.innerWidth / 2 - 12;
-  const h = pane === 'left' ? window.innerHeight - 90 : w / 2.6;
+  const h = pane === 'left' ? window.innerHeight - 115 : w / 2.6;
   const scale = Math.min(w / vb.w, h / vb.h);
   return { root, labels, paths, vb, k, fs: px / scale };
 }
 
-// A label at (x, y) in view units; a tappable one gets a pill behind it.
+// Text at (x, y) in view units; a tappable one gets a pill behind it.
 function label(d: Drawn, x: number, y: number, text: string, cls: string, size = 1, onTap?: () => void): void {
   const fs = d.fs * size;
   const g = svg('g', { class: `label ${cls}` });
@@ -851,70 +842,254 @@ function label(d: Drawn, x: number, y: number, text: string, cls: string, size =
     const w = [...text].length * fs * 0.62 + fs;
     g.append(svg('rect', { x: x - w / 2, y: y - fs * 0.8, width: w, height: fs * 1.6, rx: fs * 0.8 }));
     g.classList.add('tap');
-    g.addEventListener('click', onTap);
+    g.addEventListener('click', (e) => { e.stopPropagation(); onTap(); });
   }
   g.append(svg('text', { x, y, 'font-size': fs, 'stroke-width': fs * 0.22, 'text-anchor': 'middle', 'dominant-baseline': 'central' }, text));
   d.labels.append(g);
 }
 
-// Players' pieces: one dot each, side by side in the middle of their area.
-function pieces(d: Drawn, s: GameState, r: number): void {
-  for (const p of s.players) {
-    if (!p.area) continue;
-    const [cx, cy] = geo.get(p.area)!.centre;
-    const x = cx * d.k + (p.seat - 1.5) * r * 2.3;
-    if (x < d.vb.x || x > d.vb.x + d.vb.w || cy < d.vb.y || cy > d.vb.y + d.vb.h) continue;
-    d.labels.append(svg('circle', { cx: x, cy: cy + r * 2.4, r, fill: COLOURS[p.seat], class: 'piece' }));
-  }
+const inView = (d: Drawn, x: number, y: number) => x >= d.vb.x && x <= d.vb.x + d.vb.w && y >= d.vb.y && y <= d.vb.y + d.vb.h;
+
+// Small icons on an area (neighbours and the world map): wonder, airport, port, citizenship.
+function areaIcons(s: GameState, id: string): string {
+  const a = areaById.get(id)!;
+  const citizen = s.players.some((p) => p.citizenship?.includes(id));
+  return `${a.wonder ? '⭐' : ''}${hasRoute(id, 'airport') ? '✈️' : ''}${hasRoute(id, 'port') ? '⛴️' : ''}${citizen ? '🛂' : ''}`;
 }
 
-// Left half: the current area, its neighbours around it (tap a green one to walk there).
+// Visited marks (owner's request): one small dot per player who has been there.
+function visitedDots(d: Drawn, s: GameState, id: string, x: number, y: number, r: number): void {
+  const who = s.players.filter((p) => p.visitedAreas.includes(id));
+  who.forEach((p, i) => {
+    d.labels.append(svg('circle', { cx: x + (i - (who.length - 1) / 2) * r * 2.6, cy: y, r, fill: COLOURS[p.seat], class: 'visit' }));
+  });
+}
+
+// Pinch to zoom and drag to move (owner's request, task 14 B1); a mouse wheel zooms too.
+// The view is kept in `camera` until the player's area changes.
+function attachZoom(root: SVGSVGElement, k: number): void {
+  const pts = new Map<number, { x: number; y: number }>();
+  let moved = false;
+  let start: { box: Box; dist: number; mid: { x: number; y: number }; x: number; y: number } | null = null;
+  const unit = () => {
+    const r = root.getBoundingClientRect();
+    return Math.max((camera!.box.w * k) / r.width, camera!.box.h / r.height);
+  };
+  const apply = (b: Box) => {
+    const w = Math.min(Math.max(b.w, 1.5), 200);
+    const h = (b.h * w) / b.w;
+    camera!.box = { x: b.x + (b.w - w) / 2, y: b.y + (b.h - h) / 2, w, h };
+    root.setAttribute('viewBox', `${camera!.box.x * k} ${camera!.box.y} ${camera!.box.w * k} ${camera!.box.h}`);
+  };
+  const begin = () => {
+    const p = [...pts.values()];
+    const mid = p.length > 1 ? { x: (p[0].x + p[1].x) / 2, y: (p[0].y + p[1].y) / 2 } : p[0];
+    const dist = p.length > 1 ? Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y) : 0;
+    start = { box: { ...camera!.box }, dist, mid, x: mid.x, y: mid.y };
+  };
+  root.addEventListener('pointerdown', (e) => {
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pts.size === 1) moved = false;
+    begin();
+  });
+  root.addEventListener('pointermove', (e) => {
+    if (!pts.has(e.pointerId) || !start) return;
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    const p = [...pts.values()];
+    const u = unit();
+    if (p.length > 1) {
+      const dist = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
+      const f = start.dist / Math.max(dist, 1);
+      const b = start.box;
+      apply({ x: b.x + (b.w - b.w * f) / 2, y: b.y + (b.h - b.h * f) / 2, w: b.w * f, h: b.h * f });
+      moved = true;
+    } else {
+      const dx = p[0].x - start.x;
+      const dy = p[0].y - start.y;
+      if (!moved && Math.hypot(dx, dy) < 8) return;
+      moved = true;
+      apply({ ...start.box, x: start.box.x - (dx * u) / k, y: start.box.y - dy * u });
+    }
+  });
+  const end = (e: PointerEvent) => {
+    pts.delete(e.pointerId);
+    if (pts.size > 0) begin();
+  };
+  root.addEventListener('pointerup', end);
+  root.addEventListener('pointercancel', end);
+  // A drag or pinch is not a tap.
+  root.addEventListener('click', (e) => {
+    if (moved) { e.stopPropagation(); e.preventDefault(); moved = false; }
+  }, true);
+  root.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const f = e.deltaY > 0 ? 1.15 : 1 / 1.15;
+    const b = camera!.box;
+    apply({ x: b.x + (b.w - b.w * f) / 2, y: b.y + (b.h - b.h * f) / 2, w: b.w * f, h: b.h * f });
+  }, { passive: false });
+}
+
+// Can the human act on the map now (walk, open the airport or port menu, buy)?
+function mapTurn(s: GameState, isRobot: boolean): boolean {
+  const me = currentPlayer(s);
+  return !isRobot && s.phase === 'play' && me.area !== null && !s.quiz && !s.challenge && !pendingFees && !s.offer
+    && !me.loseTurn && !(me.exam && (me.exam.stage === 'test' || me.exam.stage === 'result'));
+}
+
+// Left half: the current area, zoomed in, with its drawn airport, port, wonder and citizenship
+// flag; neighbours around it (tap a green one to walk there, any other for its details).
 function renderAreaView(s: GameState, isRobot: boolean): HTMLElement {
   const me = currentPlayer(s);
   const focus = me.area ?? me.travel?.to ?? me.home ?? map30.areas[0].id;
   const here = areaById.get(focus)!;
-  const view = pad(geo.get(focus)!.box, 0.5, 4);
-  const k = squeeze(view);
+  const base = pad(geo.get(focus)!.core, 0.25, 2.5);
+  const k = squeeze(base);
+  if (!camera || camera.focus !== focus) camera = { focus, box: base };
   const actions = legalActions(s, map30);
-  const canWalk = !isRobot && s.phase === 'play' && !s.quiz && !s.challenge && !pendingFees;
-  const walks = new Map(canWalk ? plainActions(actions).flatMap((a) => (a.type === 'walk' ? [[a.to, a] as const] : [])) : []);
+  const myTurn = mapTurn(s, isRobot);
+  const walks = new Map(myTurn ? plainActions(actions).flatMap((a) => (a.type === 'walk' ? [[a.to, a] as const] : [])) : []);
   const walkTo = (id: string) => () => go(pick(legalActions(s, map30), walks.get(id)!));
-  const d = drawMap(view, k,
-    (id) => (id === focus ? 'here' : walks.has(id) ? 'go' : here.neighbours.includes(id) ? 'near' : ''),
-    (id) => (walks.has(id) ? walkTo(id) : null));
+  const details = (id: string) => () => { detailArea = id; render(); };
+  const d = drawMap(camera.box, k,
+    (id) => (id === focus ? 'here' : walks.has(id) ? 'go' : here.neighbours.includes(id) ? 'near' : 'far'),
+    (id) => (walks.has(id) ? walkTo(id) : details(id)));
 
-  const { vb, fs } = d;
-  for (const n of here.neighbours) {
-    const area = areaById.get(n)!;
-    const [cx, cy] = geo.get(n)!.centre;
-    const name = area.name;
-    const w = ([...name].length * fs * 0.62 + fs * 3) / 2;
-    const x = clamp(cx * k, vb.x + w, vb.x + vb.w - w);
-    const y = clamp(cy, vb.y + fs, vb.y + vb.h - fs);
-    const walk = walks.get(n);
+  const { fs } = d;
+  for (const id of d.paths.keys()) {
+    if (id === focus) continue;
+    const walk = walks.get(id);
+    let [x, cy] = geo.get(id)!.centre;
+    x *= k;
     if (walk) {
-      const fees = feeTotal(entryFees(s, me, me.area, n));
-      label(d, x, y, `🚶 ${name}${gainLabel(s, walk, area)}${fees ? ` 💰−${fees}` : ''}`, 'go', 1, walkTo(n));
-    } else {
-      label(d, x, y, `${name}${bookedBy(s, n) ? ' ⏳' : ''}`, 'near', 0.85);
+      // A walkable neighbour always shows its badge: pulled in to the edge of the view.
+      const v = d.root.viewBox.baseVal;
+      x = Math.min(Math.max(x, v.x + fs * 3), v.x + v.width - fs * 3);
+      cy = Math.min(Math.max(cy, v.y + fs * 1.5), v.y + v.height - fs * 2.5);
     }
+    if (!inView(d, x, cy)) continue;
+    const icons = areaIcons(s, id);
+    if (icons) label(d, x, cy - fs * 0.9, icons, 'icons', 0.95);
+    if (walk) {
+      const fees = feeTotal(entryFees(s, me, me.area, id));
+      label(d, x, cy + fs * 0.6, `🚶${gainLabel(s, walk, areaById.get(id)!) || ' +0'}${fees ? ` 💰−${fees}` : ''}`, 'go', 0.9, walkTo(id));
+    } else if (bookedBy(s, id)) {
+      label(d, x, cy + fs * 0.6, '⏳', 'icons', 0.9);
+    }
+    visitedDots(d, s, id, x, cy + fs * 1.8, fs * 0.28);
   }
-  const [hx, hy] = geo.get(focus)!.centre;
-  const icons = `${here.wonder ? '⭐' : ''}${hasRoute(focus, 'airport') ? '✈️' : ''}${hasRoute(focus, 'port') ? '⛴️' : ''}${here.bigCountry ? '🧩' : ''}`;
-  label(d, hx * k, hy - fs * 1.1, here.name, 'here', 1.25);
-  if (icons) label(d, hx * k, hy + fs * 0.4, icons, 'here', 1.1);
-  pieces(d, s, fs * 0.45);
+
+  // The drawn props on the current area (owner-approved icons).
+  const [hx0, hy] = geo.get(focus)!.centre;
+  const hx = hx0 * k;
+  const P = fs * 4.2;
+  const open = (kind: PopupKind) => () => { popup = { kind, area: focus }; render(); };
+  const owner = (kind: BusinessKind) => {
+    const b = businessAt(s, focus, kind);
+    return b?.owner !== undefined && b.owner !== null ? COLOURS[b.owner] : undefined;
+  };
+  if (here.wonder) d.labels.append(place(monument(owner('tours')), hx, hy - P * 0.85, P, `Wonder: ${WONDER_NAME[focus] ?? here.name}`, open('wonder')));
+  if (hasRoute(focus, 'airport')) d.labels.append(place(airport(owner('airline')), hx - P * 1.15, hy + P * 0.15, P, 'Airport', open('airport')));
+  if (hasRoute(focus, 'port')) d.labels.append(place(port(owner('ferry')), hx + P * 1.15, hy + P * 0.15, P, 'Port', open('port')));
+  const citizen = s.players.find((p) => p.citizenship?.includes(focus));
+  if (citizen) d.labels.append(place(citizenFlag(COLOURS[citizen.seat]), hx + P * 1.1, hy - P * 0.85, P * 0.9, `${COLOUR_NAMES[citizen.seat]}'s citizenship`, open('citizen')));
+  visitedDots(d, s, focus, hx, hy + P * 1.15, fs * 0.32);
+
+  // Pawns: every player standing in a drawn area.
+  for (const p of s.players) {
+    if (!p.area || !d.paths.has(p.area)) continue;
+    const [cx, cy] = geo.get(p.area)!.centre;
+    const x = p.area === focus ? hx : cx * k;
+    const y = p.area === focus ? hy + P * 0.6 : cy + fs * 0.6;
+    if (!inView(d, x, y)) continue;
+    d.labels.append(place(pawn(COLOURS[p.seat], p === me), x, y, p.area === focus ? fs * 2.8 : fs * 2.2, COLOUR_NAMES[p.seat]));
+  }
+  attachZoom(d.root, k);
 
   const caption = me.travel
     ? `${VEHICLE[me.travel.kind]} ${COLOUR_NAMES[me.seat]} is on the way to ${here.name}`
-    : (['airport', 'port'] as const).flatMap((kind) => {
-      const to = me.profile ? destinations(map30, focus, kind, me.profile) : [];
-      return to.length ? [`${VEHICLE[kind]} ${kind === 'airport' ? 'Plane' : 'Ship'} to ${to.map((t) => areaById.get(t)!.name).join(', ')}`] : [];
-    }).join(' · ');
+    : 'Pinch or scroll to zoom · drag to move';
+  const reset = button('⤢', () => { camera = null; render(); });
+  reset.title = 'Back to the area';
   return el('div', { className: 'areaview' },
-    el('div', { className: 'where' }, dot(me.seat), ` ${here.name} · ${here.continent}`),
+    el('div', { className: 'where' }, dot(me.seat), ` ${here.name} · ${here.continent} `, reset),
     d.root,
-    caption ? el('div', { className: 'small caption', textContent: caption }) : '');
+    el('div', { className: 'small caption', textContent: caption }),
+    popup ? renderPopup(s, popup, myTurn) : '');
+}
+
+// The popup menus of the drawn props (planes, ships, wonder, citizenship).
+type PopupKind = 'airport' | 'port' | 'wonder' | 'citizen';
+
+function renderPopup(s: GameState, p: { kind: PopupKind; area: string }, myTurn: boolean): HTMLElement {
+  const me = currentPlayer(s);
+  const area = areaById.get(p.area)!;
+  const actions = myTurn && me.area === p.area ? legalActions(s, map30) : [];
+  const close = button('✕', () => { popup = null; render(); });
+  const box = el('div', { className: 'popup card' });
+  const buyButton = (kind: BusinessKind) => {
+    const buy = actions.find((a) => a.type === 'buy' && a.business === kind);
+    return buy ? button(`${BUSINESS_ICON[kind]} Buy for ${plural(BUSINESS_PRICE[kind], 'point')}`, () => act(buy)) : '';
+  };
+  const businessLine = (kind: BusinessKind) => {
+    const b = businessAt(s, p.area, kind);
+    if (!b) return '';
+    return el('p', { className: 'small', textContent: `${BUSINESS_ICON[kind]} ${capital(BUSINESS_NAME[kind])}: ${b.owner === null
+      ? `for sale, ${plural(BUSINESS_PRICE[kind], 'point')}; then ${BUSINESS_EARNS[kind]}.`
+      : b.owner === me.seat ? 'yours.' : `owned by ${COLOUR_NAMES[b.owner]}.`}` });
+  };
+
+  if (p.kind === 'wonder') {
+    box.append(el('div', { className: 'row spread' }, el('h3', { textContent: `⭐ ${capital(WONDER_NAME[p.area] ?? 'the wonder')}` }), close),
+      el('p', { className: 'small', textContent: `A wonder of ${area.name}: the first visit gives +1 point more.` }),
+      businessLine('tours'),
+      el('div', { className: 'row' }, buyButton('tours')));
+    return box;
+  }
+  if (p.kind === 'citizen') {
+    const c = s.players.find((x) => x.citizenship?.includes(p.area))!;
+    box.append(el('div', { className: 'row spread' }, el('h3', { textContent: `🛂 ${citizenshipName(c.citizenship!)}` }), close),
+      el('p', { className: 'small', textContent: c === me
+        ? `You are a citizen here: every other player pays you a ${VISA_PRICE}-point visa to enter.`
+        : `${COLOUR_NAMES[c.seat]} is a citizen here: to enter you pay ${COLOUR_NAMES[c.seat]} a ${VISA_PRICE}-point visa.` }));
+    return box;
+  }
+
+  const kind: RouteKind = p.kind;
+  const price = me.profile ? TICKET_PRICE[me.profile] : null;
+  const turns = me.profile ? TRAVEL_TURNS[me.profile][kind] : 0;
+  const dests = me.profile && me.area === p.area ? destinations(map30, p.area, kind, me.profile)
+    : (map30.routes ?? []).filter((r) => r.kind === kind && (r.a === p.area || r.b === p.area)).map((r) => (r.a === p.area ? r.b : r.a));
+  box.append(el('div', { className: 'row spread' }, el('h3', { textContent: `${VEHICLE[kind]} ${kind === 'airport' ? 'Airport' : 'Port'} of ${area.name}` }), close),
+    el('p', { className: 'small', textContent: `${price === null ? 'Backpacker: you travel only with the quiz.' : `Ticket ${plural(price, 'point')}${ticketTo(s, kind)}.`} ${plural(turns, 'travel turn')}. The quiz is free; a wrong answer uses the turn.` }),
+    businessLine(kind === 'airport' ? 'airline' : 'ferry'),
+    el('div', { className: 'row' }, buyButton(kind === 'airport' ? 'airline' : 'ferry')));
+  const offered = asksOffered(actions);
+  if (offered.some((a) => (a.type === 'board' || a.type === 'quiz') && a.kind === kind)) {
+    const tick = el('input', { type: 'checkbox', checked: askCitizenship });
+    tick.addEventListener('change', () => { askCitizenship = tick.checked; render(); });
+    box.append(el('label', { className: 'ask' }, tick, ' 🛂 Ask for citizenship where I arrive (once per game)'));
+  }
+  const warning = lastTryWarning(s, plainActions(actions));
+  if (warning) box.append(el('p', { className: 'note', textContent: warning }));
+  const list = el('div', { className: 'dests' });
+  for (const to of dests) {
+    const t = areaById.get(to)!;
+    const board = plainActions(actions).find((a) => a.type === 'board' && a.kind === kind && a.to === to);
+    const quiz = plainActions(actions).find((a) => a.type === 'quiz' && a.kind === kind && a.to === to);
+    const booked = bookedBy(s, to);
+    const gain = board ?? quiz;
+    const name = el('button', { className: 'link', textContent: `${t.name}${areaIcons(s, to) ? ` ${areaIcons(s, to)}` : ''}` });
+    name.addEventListener('click', () => { detailArea = to; render(); });
+    list.append(el('div', { className: 'dest' + (detailArea === to ? ' picked' : '') },
+      name,
+      el('span', { className: 'small', textContent: `${t.continent}${gain ? gainLabel(s, gain, t) : ''}${me.area === p.area ? feeLabel(s, to) : ''}` }),
+      el('span', { className: 'row' },
+        board ? button(`Pay ${price}`, () => go(pick(actions, board))) : '',
+        quiz ? button('Quiz (free)', () => go(pick(actions, quiz))) : '',
+        !board && !quiz ? el('span', { className: 'small', textContent: booked && booked.seat !== me.seat ? `⏳ booked by ${COLOUR_NAMES[booked.seat]}` : '' }) : '')));
+  }
+  box.append(list);
+  return box;
 }
 
 // Right half: the whole world. Players, trips, routes, booked and visited areas; tap for details.
@@ -923,15 +1098,16 @@ function renderWorld(s: GameState): HTMLElement {
   const d = drawMap(pad(worldBox, 0.01), 1,
     (id) => [
       id === me.area ? 'here' : '',
-      me.visitedAreas.includes(id) ? 'visited' : '',
       bookedBy(s, id) ? 'booked' : '',
       id === detailArea ? 'picked' : '',
     ].join(' '),
     (id) => () => { detailArea = detailArea === id ? null : id; render(); },
-    'world');
+    'world', 10);
   for (const [id, path] of d.paths) {
     const b = bookedBy(s, id);
     if (b) path.style.stroke = COLOURS[b.seat];
+    const [cx, cy] = geo.get(id)!.centre;
+    visitedDots(d, s, id, cx, cy + d.fs * 0.55, d.fs * 0.2);
   }
   const centre = (id: string) => geo.get(id)!.centre;
   for (const r of map30.routes ?? []) {
@@ -949,24 +1125,38 @@ function renderWorld(s: GameState): HTMLElement {
     const t = Math.min(1, Math.max(0, (total - p.travel.turnsLeft) / (total + 1)));
     const line = svg('line', { x1: ax, y1: ay, x2: bx, y2: by, class: 'trip' });
     line.style.stroke = COLOURS[p.seat];
-    d.labels.append(line, svg('circle', { cx: ax + (bx - ax) * t, cy: ay + (by - ay) * t, r: d.fs * 0.4, fill: COLOURS[p.seat], class: 'piece' }));
+    d.labels.append(line, svg('circle', { cx: ax + (bx - ax) * t, cy: ay + (by - ay) * t, r: d.fs * 0.45, fill: COLOURS[p.seat], class: 'piece' }));
   }
-  pieces(d, s, d.fs * 0.4);
+  for (const p of s.players) {
+    if (!p.area) continue;
+    const [cx, cy] = centre(p.area);
+    d.labels.append(svg('circle', { cx: cx + (p.seat - 1.5) * d.fs * 0.5, cy, r: d.fs * 0.45, fill: COLOURS[p.seat], class: 'piece' }));
+  }
   return el('div', { className: 'world' }, d.root);
 }
 
-// The details of an area tapped on the world map (for planning; nobody moves).
+// The details of a tapped area (for planning; nobody moves): name, flags, capitals, wonder,
+// businesses, routes, citizenship, visits.
 function renderAreaDetails(s: GameState, id: string): HTMLElement {
   const a = areaById.get(id)!;
+  const me = currentPlayer(s);
   const routes = (kind: RouteKind) => (map30.routes ?? []).filter((r) => r.kind === kind && (r.a === id || r.b === id))
     .map((r) => areaById.get(r.a === id ? r.b : r.a)!.name);
+  const countries = (a.countries ?? []).map((c) => {
+    const code = countryFlag(c);
+    const cap = countryCapital(c);
+    return el('div', { className: 'country' },
+      code && FLAGS[code] ? el('img', { className: 'mini-flag', src: FLAGS[code], alt: '' }) : '',
+      el('span', { textContent: `${c}${cap ? ` · capital ${cap}` : ''}` }));
+  });
+  const parts = a.bigCountry ? map30.areas.filter((x) => x.bigCountry === a.bigCountry) : [];
   const lines = [
-    `${a.continent} · ${(a.countries ?? []).join(', ')}`,
-    a.wonder ? '⭐ Wonder: +1 more the first time you visit' : '',
-    a.bigCountry ? `🧩 Part of ${a.bigCountry}` : '',
+    a.continent,
+    a.wonder ? `⭐ ${capital(WONDER_NAME[id] ?? 'a wonder')}: the first visit gives +1 point more` : '',
+    a.bigCountry ? `🧩 Part of ${a.bigCountry}: ${me.profile ? `you have visited ${parts.filter((x) => me.visitedAreas.includes(x.id)).length}/${parts.length} parts` : `${parts.length} parts`}` : '',
     routes('airport').length ? `✈️ Airport: flights to ${routes('airport').join(', ')}` : '',
     routes('port').length ? `⛴️ Port: ships to ${routes('port').join(', ')}` : '',
-    `🚶 Walk to: ${a.neighbours.map((n) => areaById.get(n)!.name).join(', ') || 'nowhere (island)'}`,
+    `🚶 Walk to: ${a.neighbours.map((n) => areaById.get(n)!.name).join(', ') || 'nowhere (plane or ship only)'}`,
     ...s.businesses.filter((b) => b.area === id).map((b) => `${BUSINESS_ICON[b.kind]} ${capital(BUSINESS_NAME[b.kind])}: ${b.owner === null ? `for sale, ${plural(BUSINESS_PRICE[b.kind], 'point')}` : `owned by ${COLOUR_NAMES[b.owner]}`}`),
     ...s.players.filter((p) => p.citizenship?.includes(id)).map((p) => `🛂 ${COLOUR_NAMES[p.seat]} is a citizen here: others pay a ${VISA_PRICE}-point visa`),
     ...s.players.filter((p) => p.area === id).map((p) => `📍 ${COLOUR_NAMES[p.seat]} is here`),
@@ -976,10 +1166,12 @@ function renderAreaDetails(s: GameState, id: string): HTMLElement {
   ].filter((t) => t !== '');
   return el('div', { className: 'card details' },
     el('div', { className: 'row spread' }, el('h3', { textContent: a.name }), button('✕', () => { detailArea = null; render(); })),
+    ...countries,
     ...lines.map((t) => el('p', { className: 'small', textContent: t })));
 }
 
-// Choosing the home country: the 6 continents first, then a zoom into one.
+// Choosing the home country: the 6 continents first, then a zoom into one (no names on the map:
+// the tapped area's name and details show on the right).
 function renderStartMap(s: GameState, isRobot: boolean): HTMLElement {
   const legal = new Set(isRobot ? [] : legalActions(s, map30).flatMap((a) => (a.type === 'chooseStart' ? [a.area] : [])));
   const homes = new Map(s.players.flatMap((p) => (p.area ? [[p.area, p] as const] : [])));
@@ -992,32 +1184,35 @@ function renderStartMap(s: GameState, isRobot: boolean): HTMLElement {
         return `c${continents.indexOf(c)}${homes.has(id) ? ' here' : open(c) ? '' : ' dim'}`;
       },
       (id) => (open(areaById.get(id)!.continent) ? () => { zoom = areaById.get(id)!.continent; render(); } : null));
+    for (const path of d.paths.values()) path.style.fill = '';
     for (const c of continents) {
       const ids = map30.areas.filter((a) => a.continent === c).map((a) => geo.get(a.id)!.centre);
-      // The middle of the continent's areas (Greenland would pull Europe's box far west).
       const x = ids.reduce((t, p) => t + p[0], 0) / ids.length;
       const y = ids.reduce((t, p) => t + p[1], 0) / ids.length;
       const taken = s.players.find((p) => p.startContinent === c);
       label(d, x, y, taken ? `${c}: ${COLOUR_NAMES[taken.seat]}` : c, open(c) ? 'go' : 'near', 1,
         open(c) ? () => { zoom = c; render(); } : undefined);
     }
-    pieces(d, s, d.fs * 0.4);
+    for (const p of s.players) {
+      if (!p.area) continue;
+      const [cx, cy] = geo.get(p.area)!.centre;
+      d.labels.append(svg('circle', { cx: cx + (p.seat - 1.5) * d.fs * 0.8, cy, r: d.fs * 0.4, fill: COLOURS[p.seat], class: 'piece' }));
+    }
     wrap.append(el('div', { className: 'where' }, 'The world: tap a continent'), d.root);
     return wrap;
   }
   const c = zoom;
-  const view = pad(continentBox(map30, geo, c), 0.06, 2);
+  const view = pad(continentBox(map30, geo, c), 0.04, 1.5);
   const k = squeeze(view);
+  const pickArea = (id: string) => () => { pickedStart = id; detailArea = id; render(); };
   const d = drawMap(view, k,
-    (id) => (id === pickedStart ? 'here' : legal.has(id) ? 'go' : areaById.get(id)!.continent === c ? '' : 'dim'),
-    (id) => (legal.has(id) ? () => { pickedStart = id; render(); } : null));
+    (id) => (id === pickedStart ? 'here' : legal.has(id) ? 'go' : areaById.get(id)!.continent === c ? 'far' : 'dim'),
+    (id) => (legal.has(id) ? pickArea(id) : null));
   for (const a of map30.areas.filter((x) => x.continent === c)) {
     const [x, y] = geo.get(a.id)!.centre;
-    label(d, x * k, y, `${a.name}${a.wonder ? ' ⭐' : ''}`, a.id === pickedStart ? 'here' : legal.has(a.id) ? 'go' : 'near', 0.85,
-      legal.has(a.id) ? () => { pickedStart = a.id; render(); } : undefined);
+    if (a.wonder) label(d, x * k, y, '⭐', 'icons', 1.1);
   }
-  pieces(d, s, d.fs * 0.4);
-  wrap.append(el('div', { className: 'where' }, button('← All continents', () => { zoom = null; pickedStart = null; render(); }), ` ${c}`), d.root);
+  wrap.append(el('div', { className: 'where' }, button('← All continents', () => { zoom = null; pickedStart = null; detailArea = null; render(); }), ` ${c}: tap an area`), d.root);
   return wrap;
 }
 
