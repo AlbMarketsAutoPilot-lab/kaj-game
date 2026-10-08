@@ -308,6 +308,7 @@ time (`CLAUDE.md` rule 1), medium effort:
      newest game is always at `https://albmarketsautopilot-lab.github.io/kaj-game/`. Owner step:
      GitHub → Settings → Pages → Source: "GitHub Actions" (one step at a time). Cost: one small
      workflow file. Risk: the page is public (anyone with the link can play it); the owner decides.
+     **Approved by the owner (2026-10-08, public repository):** `.github/workflows/pages.yml`.
 3. **Task 15: Android release build** (below). Owner steps one at a time: create the signing key,
    add it to GitHub secrets.
 
