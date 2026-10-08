@@ -40,7 +40,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | 11 | Event cards | medium | 1 | 7–8 | ✅ done |
 | 12 | Challenges (6 types from open data) | medium | 1.5 | 8–9 | ✅ done |
 | 13 | Robot: easy, normal and hard | medium | 1 | 10 | ✅ done |
-| 14 | Real screens, art and sounds | medium | 5 (A1, A2, B1, B2, C) | 11–14 | A1 ✅ A2 ✅ B1 ✅ B2 ✅ |
+| 14 | Real screens, art and sounds | medium | 5 (A1, A2, B1, B2, C) | 11–14 | A1 ✅ A2 ✅ B1 ✅ B2 ✅ · C (sounds) next |
 | 14a | Canada and Russia in 3 parts (+5 bonus) | **high** | 1 | 11 | ✅ done (24 new facts checked by the owner) |
 | 14b | Ships Australia East ↔ New Zealand and USA West ↔ Alaska; Alaska as a 3rd USA part (+5) | **high** | 1 | 12 | ✅ done (12 facts to check) |
 | 14d | Citizenship asked in the area you stand in (button) | **high** | 1 | 12 | ✅ done |
@@ -288,6 +288,31 @@ and round 26 ("the last five turns"); the winner popup with the trophy, ranking 
 "Great news, Red!" income popups when someone pays a person a visa, tour fee or ticket. Messages
 always cheer people (winners congratulated, others encouraged) and never cheer robots.
 Sounds: not in yet (they need the owner's sound files; see task 16).
+
+### Next session (prepared 2026-10-08): sounds, links to check, then task 15
+
+Everything before this is merged on `main` (pull requests 22–28). Work in this order, one step at a
+time (`CLAUDE.md` rule 1), medium effort:
+
+1. **Sounds (task 14C).** The owner uploads the files listed in `docs/sounds.md` to a new branch.
+   Claude: copy them to `assets/sounds/`, inline them in `dist/kaj.html` from `scripts/build-web.ts`
+   (as data URIs, like the poster and flags), play each one at its event (the table in
+   `docs/sounds.md`), add a 🔊 on/off button in the header (kept on the device, like "guided help";
+   default on), and add the sound credits to the start screen's credits line. Check the file size
+   stays small. Tests pass, build works, pull request.
+2. **Links for the owner to check.**
+   - **App:** the `kaj-debug-apk` artifact of the pull request's "Android" run (link format:
+     `https://github.com/AlbMarketsAutoPilot-lab/kaj-game/actions/runs/<run id>/artifacts/<artifact id>`).
+   - **Web:** there is no web link yet. Proposal for the owner to approve: a GitHub Pages site
+     built by GitHub Actions from `main` (`dist/kaj.html` published as `index.html`), so the
+     newest game is always at `https://albmarketsautopilot-lab.github.io/kaj-game/`. Owner step:
+     GitHub → Settings → Pages → Source: "GitHub Actions" (one step at a time). Cost: one small
+     workflow file. Risk: the page is public (anyone with the link can play it); the owner decides.
+3. **Task 15: Android release build** (below). Owner steps one at a time: create the signing key,
+   add it to GitHub secrets.
+
+Things the owner noted that are still open (for task 16 if not done earlier): the income popup
+("Great news, Red!") was checked by reading the code only, not seen in a test game.
 
 ### 15. Android release build — day 14
 
