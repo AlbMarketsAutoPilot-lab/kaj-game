@@ -198,7 +198,7 @@ Task 11: event cards (`src/cards/cards.ts`, review page [`cards.md`](cards.md), 
   citizenship or tours that appear during the trip still cost nothing.
 - The engine keeps the card of the current turn (`state.card`, on show for the whole turn) and the
   cards drawn by the last move (`state.drawn`), so the screens say what happened. The test board
-  shows a card box, "🃏 Next event card: round N" on each player, "draws an event card" on the
+  shows a card box, "🔔 Next event card: round N" on each player, "draws an event card" on the
   travel button, and a "Lose this turn" button. Rule tests that count exact points switch the cards
   off (`eventCards: false`); every real game has them.
 - **Saves:** version 2. A version-1 save can't be continued.
@@ -225,7 +225,7 @@ Task 12: challenges (`src/challenges/challenges.ts`, review page [`challenges.md
 - **Event cards count land turns** (owner's rule): each player counts their own turns begun in an
   area (also lost, blocked and citizenship turns); trip turns don't count. A card on the 3rd, 6th,
   9th … land turn; none during a citizenship request (skipped) and none in the last round. The
-  test board shows "🃏 Event card: in N turns on land".
+  test board shows "🔔 Event card: in N turns on land".
 - The engine keeps the question (`state.challenge`) and the result of the last move
   (`state.challenged`), so the screens say what happened. The test board shows the choice on the
   travel panel ("Play the challenge (+1 / −1)" or "Continue the journey (no challenge)"), the
