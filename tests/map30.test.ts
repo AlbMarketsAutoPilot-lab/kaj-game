@@ -14,8 +14,8 @@ test('30-turn map: valid, two-way links, no duplicate links', () => {
   for (const a of areas) assert.equal(new Set(a.neighbours).size, a.neighbours.length, a.id);
 });
 
-test('30-turn map: 52 areas (task 14a: Canada and Russia in 3 parts) and 6–7 wonders', () => {
-  assert.equal(areas.length, 52);
+test('30-turn map: 53 areas (task 14a: Canada and Russia in 3 parts; 14b: Alaska) and 6–7 wonders', () => {
+  assert.equal(areas.length, 53);
   const wonders = areas.filter((a) => a.wonder).length;
   assert.ok(wonders >= 6 && wonders <= 7, `${wonders} wonders`);
 });
@@ -25,7 +25,9 @@ test('every starting continent has areas; Antarctica is not on the map', () => {
   assert.ok(!areas.some((a) => a.continent === 'Antarctica'));
 });
 
-test('big countries are never wonders, have 2+ parts and the parts are walking-linked', () => {
+// Task 14b (owner-approved): Alaska joins the rest of the USA through Canada or by its ferry
+// to USA West, so a ship between two parts of the same country links them too.
+test('big countries are never wonders, have 2+ parts and the parts are linked (walking or their own ship)', () => {
   const big = new Map<string, string[]>();
   for (const a of areas.filter((x) => x.bigCountry)) {
     assert.ok(!a.wonder, `${a.id} is a big country and a wonder`);
@@ -34,7 +36,9 @@ test('big countries are never wonders, have 2+ parts and the parts are walking-l
   assert.deepEqual([...big.keys()].sort(), ['Australia', 'Brazil', 'Canada', 'China', 'Russia', 'United States']);
   for (const [country, parts] of big) {
     assert.ok(parts.length >= 2, country);
-    const inner = { id: country, areas: areas.filter((a) => parts.includes(a.id)).map((a) => ({ ...a, neighbours: a.neighbours.filter((n) => parts.includes(n)) })) };
+    const ships = (map30.routes ?? []).filter((r) => parts.includes(r.a) && parts.includes(r.b));
+    const linked = (id: string) => ships.flatMap((r) => (r.a === id ? [r.b] : r.b === id ? [r.a] : []));
+    const inner = { id: country, areas: areas.filter((a) => parts.includes(a.id)).map((a) => ({ ...a, neighbours: [...a.neighbours.filter((n) => parts.includes(n)), ...linked(a.id)] })) };
     assert.equal(walkingGroups(inner).length, 1, `${country} parts are not linked`);
   }
 });
@@ -60,38 +64,47 @@ test('walking groups: airports and ports join these 6 groups', () => {
   assert.equal(groups.length, 6);
   assert.deepEqual(small, ['australia-east,australia-west', 'iceland', 'japan', 'new-zealand']);
   const americas = groups.find((g) => g.includes('usa-east'))!;
-  assert.equal(americas.length, 13);
+  assert.equal(americas.length, 14); // with Alaska (task 14b)
 });
 
 test('a game can start on the 30-turn map with 4 seats', () => {
   assert.doesNotThrow(() => createGame({ seats: seats(4), seed: 3 }, map30));
 });
 
-test('30-turn map: 8 airports, 6 ports, 11 connections, at most 3 destinations each', () => {
+test('30-turn map: 8 airports, 9 ports, 13 connections, at most 3 destinations each', () => {
   const routes = map30.routes ?? [];
   const at = (kind: string) => new Set(routes.filter((r) => r.kind === kind).flatMap((r) => [r.a, r.b])).size;
-  assert.equal(routes.length, 11);
+  assert.equal(routes.length, 13);
   assert.equal(at('airport'), 8);
-  assert.equal(at('port'), 6);
-  // UK & Ireland and Japan have both an airport and a port (task 9b).
+  assert.equal(at('port'), 9);
+  for (const a of areas) {
+    for (const kind of ['airport', 'port']) {
+      const n = routes.filter((r) => r.kind === kind && (r.a === a.id || r.b === a.id)).length;
+      assert.ok(n <= 3, `${a.id} ${kind}: ${n} destinations`);
+    }
+  }
+  // UK & Ireland and Japan have both an airport and a port (task 9b), New Zealand too (task 14b).
   const both = (id: string) => ['airport', 'port'].every((k) => routes.some((r) => r.kind === k && (r.a === id || r.b === id)));
-  assert.deepEqual(map30.areas.filter((a) => both(a.id)).map((a) => a.id), ['uk-ireland', 'japan']);
+  assert.deepEqual(map30.areas.filter((a) => both(a.id)).map((a) => a.id), ['uk-ireland', 'japan', 'new-zealand']);
 });
 
 test('30-turn map: every area reachable and no single visa area traps anyone', () => {
   assert.deepEqual(stuckProblems(map30), []);
 });
 
-// The 2 connections added in task 9b are extra by design. The original 9-connection map is
-// still checked: there, each of the 9 is needed (owner-approved).
-const ADDED_IN_9B = ['uk-ireland arabia', 'japan usa-west'];
+// The 2 connections added in task 9b and the Australia East – New Zealand ship (task 14b) are
+// extra by design. The original 9-connection map is still checked, with Alaska's ferry (task 14b),
+// which Alaska needs: there, each of the 9 is needed (owner-approved).
+const EXTRA_ROUTES = ['uk-ireland arabia', 'japan usa-west', 'australia-east new-zealand'];
+const ALASKA_FERRY = 'usa-west alaska';
 
 test('original 9-connection map: every connection is needed', () => {
-  const original = (map30.routes ?? []).filter((r) => !ADDED_IN_9B.includes(`${r.a} ${r.b}`));
+  const kept = (map30.routes ?? []).filter((r) => !EXTRA_ROUTES.includes(`${r.a} ${r.b}`));
+  const original = kept.filter((r) => `${r.a} ${r.b}` !== ALASKA_FERRY);
   assert.equal(original.length, 9);
-  assert.deepEqual(stuckProblems({ ...map30, routes: original }), []);
+  assert.deepEqual(stuckProblems({ ...map30, routes: kept }), []);
   for (const r of original) {
-    const without = { ...map30, routes: original.filter((x) => x !== r) };
+    const without = { ...map30, routes: kept.filter((x) => x !== r) };
     assert.ok(stuckProblems(without).length > 0, `${r.a} – ${r.b} is not needed`);
   }
 });

@@ -36,7 +36,9 @@ function countryDraft(map: GameMap, area: Area): Draft | null {
   // Skip countries already named in the area name (too easy).
   const own = (area.countries ?? []).filter((c) => !area.name.toLowerCase().includes(c.toLowerCase()));
   if (own.length === 0) return null;
-  const wrong = map.areas.filter((a) => a.id !== area.id).flatMap((a) => a.countries ?? []);
+  // Never a country of this area as the wrong answer (big countries have several parts).
+  const wrong = map.areas.filter((a) => a.id !== area.id).flatMap((a) => a.countries ?? [])
+    .filter((c) => !(area.countries ?? []).includes(c));
   return { text: `Which country is part of ${area.name}?`, right: own, wrong };
 }
 

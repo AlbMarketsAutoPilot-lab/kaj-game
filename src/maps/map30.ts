@@ -1,9 +1,9 @@
 import type { Area, Continent, GameMap, Route } from '../engine/types.ts';
 import { FACT_BATCHES } from '../facts/index.ts';
 
-// The 30-turn map: 53 areas, 8 airports and 8 ports (12 connections).
+// The 30-turn map: 53 areas, 8 airports and 9 ports (13 connections).
 // Task 14a (owner-approved): Canada and Russia in 3 parts (50 → 52 areas).
-// Task 14b (owner-approved): Alaska is a 3rd part of the USA (53 areas); a ship Australia East ↔ New Zealand.
+// Task 14b (owner-approved): Alaska is a 3rd part of the USA (53 areas); ships Australia East ↔ New Zealand and USA West ↔ Alaska.
 // Each walking link is written once in BORDERS below; neighbours are built from it.
 
 interface AreaInfo {
@@ -237,6 +237,8 @@ const ROUTES: Route[] = [
   { kind: 'port', a: 'japan', b: 'usa-west' },
   // Task 14b (owner-approved): New Zealand can be reached by sea from Australia.
   { kind: 'port', a: 'australia-east', b: 'new-zealand' },
+  // Task 14b (owner-approved): Alaska's ferry to USA West, so a Canadian citizenship can't trap it.
+  { kind: 'port', a: 'usa-west', b: 'alaska' },
 ];
 
 function build(): GameMap {

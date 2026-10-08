@@ -19,7 +19,7 @@ export interface AreaGeo {
 }
 
 // Parts drawn but ignored for zooming and icons (owner's choice, task 14 B1):
-// Greenland in Scandinavia, Alaska in USA West. x = longitude.
+// Greenland in Scandinavia, Hawaii in USA West (Alaska is its own area since task 14b). x = longitude.
 const OUTLYING: Record<string, (x: number) => boolean> = {
   scandinavia: (x) => x < -11,
   'usa-west': (x) => x < -129,
