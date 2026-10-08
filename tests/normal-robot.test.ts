@@ -79,6 +79,18 @@ test('businesses: bought only when the reserve is kept (easy 5, normal 3, hard 2
   assert.equal(buys('easy', 7), true);
 });
 
+test('a last quiz try that would send it home: the robot walks instead, if it can', () => {
+  // A Backpacker in UK & Ireland (airport and port) after 2 wrong answers.
+  const s = startedGame(['uk-ireland', 'egypt'], 1, map30, ['backpacker', 'luxury']);
+  currentPlayer(s).visitedAreas.push('iceland', 'arabia', 'iberia', 'france');
+  currentPlayer(s).quizWrong = 2;
+  assert.deepEqual(act(s), { type: 'walk', to: 'france' });
+  // With France taken there is no walk: it takes the last try.
+  const taken = structuredClone(s);
+  taken.players.find((p) => p !== currentPlayer(taken))!.area = 'france';
+  assert.equal(act(taken).type, 'quiz');
+});
+
 test('challenges: played only with enough points (easy 5, normal 3, hard 1)', () => {
   const s = startedGame(['iberia', 'egypt'], 1, map30, ['business', 'luxury']);
   const travelling = (points: number) => {

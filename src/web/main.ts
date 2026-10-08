@@ -1,9 +1,9 @@
 // First playable screen (task 3): a plain test board on top of the engine.
 // No final art yet. Robots play with simple rules, at the level chosen for each seat (task 13).
 
-import { BUSINESS_PRICE, CHALLENGE_POINTS, CONTINENT_BONUS, GO_HOME_TURNS, NOMAD_MIN_CONTINENTS, NOMAD_PENALTY, NOMAD_WARNING_ROUND, POINTS_BUSINESS_CITIZENSHIP, TICKET_PRICE, TOUR_FEE, TRAVEL_TURNS, VISA_PRICE } from '../engine/constants.ts';
+import { BUSINESS_PRICE, CHALLENGE_POINTS, CONTINENT_BONUS, GO_HOME_TURNS, NOMAD_MIN_CONTINENTS, NOMAD_PENALTY, NOMAD_WARNING_ROUND, POINTS_BUSINESS_CITIZENSHIP, QUIZ_TRIES, TICKET_PRICE, TOUR_FEE, TRAVEL_TURNS, VISA_PRICE } from '../engine/constants.ts';
 import {
-  apply, blockedByMoney, businessAt, businessValue, createGame, currentPlayer, entryFees, feeTotal, finalScore, homeFor, landTurnsToCard, legalActions, nomadPenalty,
+  apply, blockedByMoney, businessAt, canPayAfterQuiz, businessValue, createGame, currentPlayer, entryFees, feeTotal, finalScore, homeFor, landTurnsToCard, legalActions, nomadPenalty,
 } from '../engine/engine.ts';
 import { robotAction } from '../engine/normal-robot.ts';
 import { loadGame, saveGame } from '../engine/save.ts';
@@ -184,6 +184,10 @@ function act(action: Action): void {
   const name = COLOUR_NAMES[mover.seat];
   const examBefore = mover.exam;
   const home = action.type === 'goHome' ? homeFor(state, map30, mover) : null;
+  // A 3rd wrong quiz answer: pay and travel, or go home (owner's rule, task 13).
+  const quiz = state.quiz;
+  const lastTry = action.type === 'answer' && quiz && action.choice !== quiz.question.correct && mover.quizWrong >= QUIZ_TRIES - 1
+    ? { pays: canPayAfterQuiz(state, mover, quiz.to), home: homeFor(state, map30, mover) } : null;
   const offer = state.offer;
   state = apply(state, map30, action);
   const after = state.players[mover.seat];
@@ -202,6 +206,11 @@ function act(action: Action): void {
     lines.push(`${PROFILE_LABEL[mover.profile!]} bonus: ${name} has visited ${bonus.continents} continents, +${bonus.points}!`);
   }
   if (home) lines.push(`🏠 ${name} ran out of money, so the trip ends here: ${name} goes home to ${areaById.get(home)!.name}, free of any fees.`);
+  if (lastTry) {
+    lines.push(lastTry.pays
+      ? `❌ ${name}: ${QUIZ_TRIES} wrong answers here, so ${name} pays the ticket and travels.`
+      : `❌ ${name}: ${QUIZ_TRIES} wrong answers here and no money for the ticket, so the trip ends here: ${name} goes home to ${areaById.get(lastTry.home)!.name}, free of any fees.`);
+  }
   if (state.challenged) lines.push(challengeNote(state.challenged));
   lines.push(...state.payments.map(paymentNote).filter((t) => t !== ''));
   // Event cards drawn by this move; a human's own start-of-turn card has its own box instead.
@@ -502,6 +511,8 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
     }
     const canAsk = (a: Action) => offered.some((o) => 'to' in o && 'to' in a && o.type === a.type && o.to === a.to
       && (!('kind' in a) || ('kind' in o && o.kind === a.kind)));
+    const warning = lastTryWarning(s, plainActions(actions));
+    if (warning) box.append(el('p', { className: 'note', textContent: warning }));
     const row = el('div', { className: 'row' });
     for (const a of plainActions(actions)) {
       const mark = canAsk(a) ? ' 🛂' : '';
@@ -626,7 +637,7 @@ function renderQuiz(box: HTMLElement, s: GameState, who: HTMLElement): void {
     el('p', { textContent: question.text }),
     el('div', { className: 'row' }, ...question.options.map((o, i) => button(o, () => act({ type: 'answer', choice: i as 0 | 1 })))),
     clock,
-    el('p', { className: 'small', textContent: `Wrong answers here so far: ${currentPlayer(s).quizWrong}. A wrong answer uses this turn.${forcedPayNote(s, kind)}` }));
+    el('p', { className: 'small', textContent: `Wrong answers here so far: ${currentPlayer(s).quizWrong}. A wrong answer uses this turn.${forcedPayNote(s, kind, to)}` }));
   quizTimer = window.setInterval(() => {
     if (state !== s) return clearInterval(quizTimer);
     left -= 1;
@@ -669,11 +680,29 @@ function challengeNote(r: ChallengeResult): string {
 }
 
 // After the 3rd wrong answer a player who can pay must pay: say who gets the ticket.
-function forcedPayNote(s: GameState, kind: RouteKind): string {
-  const price = TICKET_PRICE[currentPlayer(s).profile!];
-  if (price === null) return '';
+function forcedPayNote(s: GameState, kind: RouteKind, dest: string): string {
+  const me = currentPlayer(s);
+  if (me.quizWrong >= QUIZ_TRIES - 1) return ` ${lastTryText(s, dest)}`;
+  const price = TICKET_PRICE[me.profile!];
   const to = ticketTo(s, kind);
-  return ` After 3 wrong answers here you must pay the ${price}-point ticket and go, if you can${to ? ` (the ticket goes ${to.slice(2, -1)})` : ''}.`;
+  return price === null
+    ? ` After ${QUIZ_TRIES} wrong answers here your trip ends and you go home.`
+    : ` After ${QUIZ_TRIES} wrong answers here you must pay the ${price}-point ticket and go${to ? ` (the ticket goes ${to.slice(2, -1)})` : ''}; if you can't pay, you go home.`;
+}
+
+// Told before the 3rd quiz try in an area (owner's rule, task 13): what a wrong answer means.
+function lastTryText(s: GameState, dest: string): string {
+  const me = currentPlayer(s);
+  const name = areaById.get(dest)!.name;
+  return canPayAfterQuiz(s, me, dest)
+    ? `⚠️ Last try here for ${name}: Attention! If wrong, you pay the ${TICKET_PRICE[me.profile!]}-point ticket with your points and travel.`
+    : `⚠️ Last try here for ${name}: Attention! If wrong, you go home to ${areaById.get(homeFor(s, map30, me))!.name}.`;
+}
+
+function lastTryWarning(s: GameState, actions: Action[]): string {
+  if (currentPlayer(s).quizWrong < QUIZ_TRIES - 1) return '';
+  const dests = [...new Set(actions.flatMap((a) => (a.type === 'quiz' ? [a.to] : [])))];
+  return dests.map((d) => lastTryText(s, d)).join(' ');
 }
 
 function travelNote(me: Player): string {

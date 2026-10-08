@@ -134,30 +134,44 @@ test('quiz: a wrong answer uses the turn; the 3rd wrong answer pays and boards',
   assert.equal(seatOf(s, 0).quizWrong, 0);
 });
 
-test("quiz: can't pay after 3 wrong answers → keep trying or walk away (count starts again)", () => {
-  let s = game(['eu-west', 'af-north'], 'luxury');
-  seatOf(s, 0).points = 2;
-  for (let i = 1; i <= 4; i++) {
+// Owner's rule (task 13): no more endless tries. After the 3rd wrong answer, a player who can't
+// pay the ticket (always the Backpacker) goes home, free of fees, with the normal arrival points.
+function threeWrong(profile: Profile, points: number): GameState {
+  let s = game(['eu-west', 'af-north'], profile);
+  seatOf(s, 0).points = points;
+  seatOf(s, 0).home = 'eu-north'; // as if the journey had started there
+  for (let i = 1; i <= 2; i++) {
     s = answer(quiz(s, 'as-east'), false);
     assert.equal(seatOf(s, 0).area, 'eu-west');
-    s = walk(s, i % 2 ? 'af-south' : 'af-north');
+    assert.equal(seatOf(s, 0).quizWrong, i);
+    s = walk(s, i === 1 ? 'af-south' : 'af-north');
   }
-  assert.equal(seatOf(s, 0).quizWrong, 4);
-  assert.ok(legalActions(s, travelMap).some((a) => a.type === 'quiz'));
-  s = walk(s, 'eu-north');
+  return answer(quiz(s, 'as-east'), false);
+}
+
+test("quiz: can't pay after 3 wrong answers → go home", () => {
+  const s = threeWrong('luxury', 2); // ticket 3
+  assert.equal(seatOf(s, 0).area, 'eu-north');
+  assert.equal(seatOf(s, 0).points, 2 + 1); // no fees, a new area +1
   assert.equal(seatOf(s, 0).quizWrong, 0);
+  assert.deepEqual(s.payments, []);
 });
 
-test('Backpacker: no limit on quiz tries', () => {
+test('Backpacker: 3 quiz tries too, then home', () => {
+  const s = threeWrong('backpacker', 3);
+  assert.equal(seatOf(s, 0).area, 'eu-north');
+  assert.equal(seatOf(s, 0).quizWrong, 0);
+  assert.equal(seatOf(s, 0).travel, null);
+});
+
+test('home is the area itself: the player stays and the count starts again', () => {
   let s = game(['eu-west', 'af-north'], 'backpacker');
-  for (let i = 1; i <= 5; i++) {
+  for (let i = 1; i <= 3; i++) {
     s = answer(quiz(s, 'as-east'), false);
-    s = walk(s, i % 2 ? 'af-south' : 'af-north');
+    if (i < 3) s = walk(s, i === 1 ? 'af-south' : 'af-north');
   }
   assert.equal(seatOf(s, 0).area, 'eu-west');
-  assert.equal(seatOf(s, 0).points, 3);
-  s = answer(quiz(s, 'as-east'), true);
-  assert.equal(seatOf(s, 0).area, null); // 1 turn in the air
+  assert.equal(seatOf(s, 0).quizWrong, 0);
 });
 
 // The stuck-state checker (task 2b) assumes the quiz is always possible:

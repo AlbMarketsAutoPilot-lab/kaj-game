@@ -258,12 +258,14 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
         depart(next, map, me, quiz.kind, quiz.to, 0, ask); // free ticket
       } else {
         me.quizWrong += 1;
-        // After the 3rd wrong answer a player who can pay (ticket and any fees) must pay
-        // and board now. A player who can't pay may keep trying on later turns, or walk away.
-        const price = TICKET_PRICE[me.profile!];
-        const fees = feeTotal(entryFees(next, me, me.area, quiz.to));
-        if (price !== null && me.quizWrong >= QUIZ_TRIES && me.points >= price + fees) {
-          depart(next, map, me, quiz.kind, quiz.to, price, ask);
+        // After the 3rd wrong answer a player who can pay (ticket and any fees) must pay and
+        // board now; a player who can't (always the Backpacker) goes home (owner's rule, task 13).
+        if (me.quizWrong >= QUIZ_TRIES) {
+          if (canPayAfterQuiz(next, me, quiz.to)) {
+            depart(next, map, me, quiz.kind, quiz.to, TICKET_PRICE[me.profile!]!, ask);
+          } else {
+            goHome(next, map, me);
+          }
         }
       }
       endTurn(next, map);
@@ -556,6 +558,12 @@ export function homeFor(state: GameState, map: GameMap, me: Player): string {
     }
   }
   return me.area!;
+}
+
+// Whether a 3rd wrong quiz answer for `to` means paying the ticket (true) or going home (false).
+export function canPayAfterQuiz(state: GameState, me: Player, to: string): boolean {
+  const price = TICKET_PRICE[me.profile!];
+  return price !== null && me.points >= price + feeTotal(entryFees(state, me, me.area, to));
 }
 
 // Go home: free (no visa, no tour fee: the game moves the player), with the normal arrival

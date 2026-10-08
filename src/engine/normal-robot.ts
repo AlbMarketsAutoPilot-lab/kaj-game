@@ -1,7 +1,7 @@
 import {
-  bigCountryParts, blockedByMoney, currentPlayer, entryFees, feeTotal, legalActions,
+  bigCountryParts, blockedByMoney, canPayAfterQuiz, currentPlayer, entryFees, feeTotal, legalActions,
 } from './engine.ts';
-import { BUSINESS_PRICE, CONTINENT_BONUS, NOMAD_MIN_CONTINENTS, TICKET_PRICE, TRAVEL_TURNS, WELCOME_BONUS } from './constants.ts';
+import { BUSINESS_PRICE, CONTINENT_BONUS, NOMAD_MIN_CONTINENTS, QUIZ_TRIES, TICKET_PRICE, TRAVEL_TURNS, WELCOME_BONUS } from './constants.ts';
 import { areaById } from './map.ts';
 import { nextRandom } from './rng.ts';
 import type { Action, BusinessKind, Continent, GameMap, GameState, Player, RobotLevel, RouteKind } from './types.ts';
@@ -150,6 +150,9 @@ function chooseMove(state: GameState, map: GameMap, moves: Action[], me: Player,
       const pay = board && ticket !== null && (me.quizWrong > 0 || !quiz) && me.points - ticket - fees >= settings.reserve;
       const action = pay ? board : quiz;
       if (!action) continue;
+      // A last try that sends it home if wrong: only when it can't walk (owner's rule, task 13).
+      const lastTry = action === quiz && me.quizWrong >= QUIZ_TRIES - 1 && !canPayAfterQuiz(state, me, a.to);
+      if (lastTry && plain.some((b) => b.type === 'walk')) continue;
       const travel = TRAVEL_TURNS[me.profile!][a.kind as RouteKind];
       const nomad = me.profile === 'nomad' ? travel : 0;
       options.push({
