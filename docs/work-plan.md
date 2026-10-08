@@ -153,7 +153,7 @@ on day 14 it could miss the deadline.
   a script from open datasets. 15-second timer. Win +1, lose −1.
 - Done: 995 questions in `src/challenges/challenges.ts` (review page `docs/challenges.md`, made by
   `node scripts/challenges-make.ts`), data from mledoze/countries (ODbL 1.0) and flags from
-  flag-icons (MIT), credits on the start screen. Owner's changes: no event cards on trips (only
+  flag-icons (MIT), credits on the start screen. Owner's changes: the 21 plane and ship cards rewritten as walking cards (53 cards); no event cards on trips (only
   challenges, never obligatory, none with 0 points); event cards count each player's land turns.
   Saves are version 3. Rules and the 9 owner-approved choices in `docs/engine.md` (task 12).
 - Deferred (owner): a train France ↔ Russia West and France ↔ Turkey for Backpacker and Nomad

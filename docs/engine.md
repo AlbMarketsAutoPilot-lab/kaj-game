@@ -216,7 +216,7 @@ Task 12: challenges (`src/challenges/challenges.ts`, review page [`challenges.md
   mledoze/countries, ODbL 1.0) and our map's continents; flags from flag-icons (MIT) in
   `assets/flags/`. The start screen shows the credits. Only the 174 independent countries on the map
   (not Greenland, Western Sahara, Palestine, Kosovo).
-- **On a trip there are no event cards** (the plane and ship decks are gone; 32 cards left). Each
+- **On a trip there are no event cards** (owner's rule: the 21 plane and ship cards were rewritten as walking cards c13–c33, same strengths, so there are still 53 cards). Each
   travel turn the player may play one challenge, or say no and travel on (nothing happens). Never
   obligatory, and **not offered with 0 points**. The game picks a type, then a question, with a
   hidden random draw (no dice shown). The answer is the next move, in the same turn: right +1,
@@ -231,10 +231,10 @@ Task 12: challenges (`src/challenges/challenges.ts`, review page [`challenges.md
   travel panel ("Play the challenge (+1 / −1)" or "Continue the journey (no challenge)"), the
   question with the flag and a 15-second timer, and the result line.
 - **Saves:** version 3. A version-2 save can't be continued.
-- 1,000 random-robot games on the 30-turn map: 9,364 travel turns (278 with 0 points, so no
-  challenge), 4,498 challenges played, 2,262 right; 2,262 points won and 2,236 lost; 22,857
-  scheduled cards, 1,770 lost turns; longest trip 8 turns (was 9), longest "blocked" streak 3,
-  nobody stuck. The dist/kaj.html file is now about 2.2 MB (flags about 1.2 MB).
+- 1,000 random-robot games on the 30-turn map: 9,484 travel turns (390 with 0 points, so no
+  challenge), 4,595 challenges played, 2,275 right; 2,275 points won and 2,320 lost; 22,822
+  event cards (15,889 points won, 15,725 lost), 2,603 lost turns; longest trip 8 turns (was 9),
+  longest "blocked" streak 5 (the test limit is 5), nobody stuck. The dist/kaj.html file is now about 2.2 MB (flags about 1.2 MB).
 
 ## Choices made in task 1 (approved by the owner)
 

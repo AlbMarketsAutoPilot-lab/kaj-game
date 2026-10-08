@@ -38,8 +38,8 @@ function withCard(s: GameState, action: Action, wanted: (c: DrawnCard) => boolea
   throw new Error('no such card');
 }
 
-test('the card file: 30–60 cards, allowed strengths, area cards on the real map', () => {
-  assert.ok(CARDS.length >= 30 && CARDS.length <= 60, `${CARDS.length} cards`);
+test('the card file: 40–60 cards, allowed strengths, area cards on the real map', () => {
+  assert.ok(CARDS.length >= 40 && CARDS.length <= 60, `${CARDS.length} cards`);
   assert.equal(new Set(CARDS.map((c) => c.id)).size, CARDS.length, 'ids are unique');
   const areas = new Set(map30.areas.map((a) => a.id));
   for (const c of CARDS) {

@@ -1,6 +1,7 @@
 // Event cards (rulebook section 10, docs/engine.md task 11). Reviewed by the owner on
 // docs/cards.md (made by `node scripts/cards-review.ts`). Since task 12 there are no cards on
-// trips (the plane and ship decks are gone): a travel turn may have a challenge instead.
+// trips (a travel turn may have a challenge instead): the 21 plane and ship cards were rewritten
+// as country cards for the walking part of the game (c13–c33, same strengths).
 // - points: the change in points (never below 0 in the game);
 // - loseTurn: the turn is lost;
 // - area: a country card that is only drawn in that area.
@@ -20,6 +21,28 @@ export const CARDS: readonly EventCard[] = [
   { id: 'c10', deck: 'country', points: 0, loseTurn: true, text: 'A big festival fills every street. You stay and watch the parade.' },
   { id: 'c11', deck: 'country', points: 5, text: 'A museum hires you for a day to guide visitors from your country.' },
   { id: 'c12', deck: 'country', points: -5, text: 'You leave your wallet on a bench and never see it again.' },
+  // Task 12: rewritten from the plane and ship cards (same strengths).
+  { id: 'c13', deck: 'country', points: 1, text: 'A farmer invites you to pick fresh fruit from her trees.' },
+  { id: 'c14', deck: 'country', points: 1, text: 'You climb a hill and get a great view of the whole valley.' },
+  { id: 'c15', deck: 'country', points: 1, text: 'A friendly walker on the road tells you the best places to visit.' },
+  { id: 'c16', deck: 'country', points: 1, text: 'A café owner gives you a free lunch for your stories.' },
+  { id: 'c17', deck: 'country', points: 1, text: 'Wild horses run next to the path you are walking on.' },
+  { id: 'c18', deck: 'country', points: 1, text: 'A shepherd teaches you how to call the sheep home.' },
+  { id: 'c19', deck: 'country', points: 1, text: 'You see a rainbow over the mountains and take a great photo.' },
+  { id: 'c20', deck: 'country', points: -1, text: 'You trip on a stone and spill juice on your map. You buy a new one.' },
+  { id: 'c21', deck: 'country', points: -1, text: 'Your headphones break on a long walk.' },
+  { id: 'c22', deck: 'country', points: -1, text: 'Your bag is too heavy, so you pay to send some things home.' },
+  { id: 'c23', deck: 'country', points: -1, text: 'Too much sun! You buy a hat and sun cream.' },
+  { id: 'c24', deck: 'country', points: -1, text: 'The wind blows your hat into a river.' },
+  { id: 'c25', deck: 'country', points: -1, text: 'A noisy night in a cheap hotel. You pay for a quieter room.' },
+  { id: 'c26', deck: 'country', points: 2, text: 'The town gives you a travel badge for walking so far.' },
+  { id: 'c27', deck: 'country', points: 2, text: 'You help a village after a storm. The mayor thanks you.' },
+  { id: 'c28', deck: 'country', points: -2, text: 'You lose your suitcase at the bus station and buy new clothes.' },
+  { id: 'c29', deck: 'country', points: -2, text: 'Monkeys steal your lunch, and the only café is expensive.' },
+  { id: 'c30', deck: 'country', points: 0, loseTurn: true, text: 'Thick fog on the road. You wait a day until you can see the path.' },
+  { id: 'c31', deck: 'country', points: 0, loseTurn: true, text: 'Strong winds close the mountain road for a day.' },
+  { id: 'c32', deck: 'country', points: 0, loseTurn: true, text: 'Your shoes need repairs. You wait one day at the shoemaker.' },
+  { id: 'c33', deck: 'country', points: -5, text: 'A sneaky thief takes part of your money before the police chase him away.' },
 
   // ---------- country cards: one area only ----------
   { id: 'a1', deck: 'country', area: 'egypt', points: 5, text: 'You find a treasure near the pyramids of Egypt and give it to the museum. They reward you.' },
