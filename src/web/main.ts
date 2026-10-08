@@ -2,7 +2,7 @@
 // landscape board (left: the current area drawn; right: the world map and the turn panel).
 // Robots play with simple rules, at the level chosen for each seat (task 13).
 
-import { BUSINESS_PRICE, CHALLENGE_POINTS, CONTINENT_BONUS, POINTS_NEW_AREA, POINTS_NEW_CONTINENT, POINTS_WONDER, GO_HOME_TURNS, NOMAD_MIN_CONTINENTS, NOMAD_PENALTY, NOMAD_WARNING_ROUND, POINTS_BUSINESS_CITIZENSHIP, QUIZ_TRIES, TICKET_PRICE, TOUR_FEE, TRAVEL_TURNS, VISA_PRICE } from '../engine/constants.ts';
+import { BUSINESS_PRICE, CHALLENGE_POINTS, CONTINENT_BONUS, POINTS_NOMAD_TRAVEL_TURN, POINTS_NEW_AREA, POINTS_NEW_CONTINENT, POINTS_WONDER, GO_HOME_TURNS, NOMAD_MIN_CONTINENTS, NOMAD_PENALTY, NOMAD_WARNING_ROUND, POINTS_BUSINESS_CITIZENSHIP, QUIZ_TRIES, TICKET_PRICE, TOUR_FEE, TRAVEL_TURNS, VISA_PRICE } from '../engine/constants.ts';
 import {
   apply, blockedByMoney, bookedBy, businessAt, canPayAfterQuiz, destinations, businessValue, createGame, currentPlayer, entryFees, feeTotal, finalScore, homeFor, landTurnsToCard, legalActions, nomadPenalty,
 } from '../engine/engine.ts';
@@ -222,6 +222,31 @@ function guideBox(): HTMLElement {
     try { localStorage.setItem(GUIDE_KEY, guideOff ? '1' : '0'); } catch { /* not kept */ }
   });
   return el('label', { className: 'small' }, tick, ' 🧭 Guided help for people (what you can do each turn)');
+}
+
+// "You chose …": the profile's advantages and weaknesses (rulebook section 12), shown while
+// choosing the home country (owner's request).
+function profileNote(p: Profile): HTMLElement {
+  const price = TICKET_PRICE[p];
+  const plane = TRAVEL_TURNS[p].airport;
+  const ship = TRAVEL_TURNS[p].port;
+  const trips = `planes ${plane ? plural(plane, 'travel turn') : 'arrive right away'}, ships ${plural(ship, 'travel turn')}`;
+  const good: Record<Profile, string[]> = {
+    backpacker: ['Never pays for a ticket: always the free quiz.', `+${CONTINENT_BONUS.backpacker!.points} for visiting ${CONTINENT_BONUS.backpacker!.continents} continents.`, 'Its own Backpacker event cards.'],
+    business: [`+${plural(POINTS_BUSINESS_CITIZENSHIP, 'point')} when you get citizenship (any area).`, `Fast: ${trips}.`],
+    luxury: ['Can fly or sail to any airport or port.', 'Citizenship at once, with no test.', `+${CONTINENT_BONUS.luxury!.points} for visiting ${CONTINENT_BONUS.luxury!.continents} continents.`, `Fast: ${trips}.`],
+    nomad: [`Cheapest ticket: ${plural(price ?? 0, 'point')}.`, `+${POINTS_NOMAD_TRAVEL_TURN} for every turn on a plane or ship.`],
+  };
+  const bad: Record<Profile, string[]> = {
+    backpacker: ['Travels by plane or ship only with the quiz (one try per turn).', `Slow: ${trips}.`],
+    business: [`Ticket ${plural(price ?? 0, 'point')}.`],
+    luxury: [`The highest ticket: ${plural(price ?? 0, 'point')}.`],
+    nomad: ['Can never ask for citizenship.', `−${NOMAD_PENALTY} at the end with fewer than ${NOMAD_MIN_CONTINENTS} continents.`, `Slow: ${trips}.`],
+  };
+  return el('div', { className: 'note profile-note' },
+    el('strong', { textContent: `You chose ${PROFILE_LABEL[p]}.` }),
+    el('p', { className: 'small', textContent: `👍 ${good[p].join(' ')}` }),
+    el('p', { className: 'small', textContent: `👎 ${bad[p].join(' ')}` }));
 }
 
 // ---------- automatic save (task 10) ----------
@@ -551,6 +576,7 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
         ? `Tap an area in ${zoom} to choose it as your home country.`
         : 'Tap a continent on the map. Each player starts on a different continent. Welcome bonus: Europe, Asia, Africa +3 · Americas +4 · Oceania +5.' }),
       zoom ? el('p', { className: 'small', textContent: `⭐ Areas with a star have a wonder: your first visit there gives +${plural(POINTS_WONDER, 'point')} more. Each wonder has Guided Tours that one player can buy for ${plural(BUSINESS_PRICE.tours, 'point')}; after that, every other player who visits pays the owner a ${TOUR_FEE}-point tour fee.` }) : '',
+      me.profile ? profileNote(me.profile) : '',
       me.profile === 'backpacker'
         ? el('p', { className: 'small', textContent: '🎒 Tip: from Europe, Asia or Africa you can walk to 3 continents (+3 Backpacker bonus).' })
         : '');
@@ -1088,7 +1114,7 @@ function drawMap(view: Box, k: number, cls: (id: string) => string, onTap: (id: 
   for (const a of map30.areas) {
     const g = geo.get(a.id)!;
     if (!overlaps(g.box, view)) continue;
-    const path = svg('path', { d: g.path, class: `land ${cls(a.id)}` });
+    const path = svg('path', { d: g.path, class: `land ${cls(a.id)}`, 'data-area': a.id });
     path.style.fill = areaColour.get(a.id)!;
     const tap = onTap(a.id);
     if (tap) {
@@ -1227,6 +1253,21 @@ function renderAreaView(s: GameState, isRobot: boolean): HTMLElement {
     (id) => (walks.has(id) ? walkTo(id) : details(id)));
 
   const { fs } = d;
+  // Walk badges never cover each other (owner's report: Russia West's neighbours): a badge that
+  // would overlap one already placed moves down (or up near the bottom) until it is free.
+  const placed: Box[] = [];
+  const free = (x: number, y: number, w: number, h: number): number => {
+    const v = d.root.viewBox.baseVal;
+    let yy = y;
+    for (let tries = 0; tries < 12; tries++) {
+      const hit = placed.find((b) => Math.abs(b.x - x) < (b.w + w) / 2 && Math.abs(b.y - yy) < (b.h + h) / 2);
+      if (!hit) break;
+      yy = hit.y + (hit.h + h) / 2 + fs * 0.15;
+      if (yy > v.y + v.height - h) yy = hit.y - (hit.h + h) / 2 - fs * 0.15;
+    }
+    placed.push({ x, y: yy, w, h });
+    return yy;
+  };
   for (const id of d.paths.keys()) {
     if (id === focus) continue;
     const walk = walks.get(id);
@@ -1243,7 +1284,9 @@ function renderAreaView(s: GameState, isRobot: boolean): HTMLElement {
     if (icons) label(d, x, cy - fs * 1.4, icons, 'icons', 0.95);
     if (walk) {
       const fees = feeTotal(entryFees(s, me, me.area, id));
-      label(d, x, cy, `🚶${gainLabel(s, walk, areaById.get(id)!) || ' +0'}${fees ? ` 💰−${fees}` : ''}`, 'go', 0.9, walkTo(id));
+      const text = `🚶${gainLabel(s, walk, areaById.get(id)!) || ' +0'}${fees ? ` 💰−${fees}` : ''}`;
+      const by = free(x, cy, ([...text].length * fs * 0.62 + fs) * 0.9, fs * 1.6 * 0.9);
+      label(d, x, by, text, 'go', 0.9, walkTo(id));
     } else if (bookedBy(s, id)) {
       label(d, x, cy + fs * 1.4, '⏳', 'icons', 0.9);
     }
@@ -1260,11 +1303,13 @@ function renderAreaView(s: GameState, isRobot: boolean): HTMLElement {
     return b?.owner !== undefined && b.owner !== null ? COLOURS[b.owner] : undefined;
   };
   // The pawn stands in the middle of the area; the props sit around it.
-  if (here.wonder) d.labels.append(place(monument(owner('tours')), hx, hy - P * 0.95, P, `Wonder: ${WONDER_NAME[focus] ?? here.name}`, open('wonder')));
+  // Top row, centred over the pawn: the wonder and the citizenship flag (side by side if both).
+  const citizen = s.players.find((p) => p.citizenship?.includes(focus));
+  const both = here.wonder && citizen;
+  if (here.wonder) d.labels.append(place(monument(owner('tours')), both ? hx - P * 0.6 : hx, hy - P * 0.95, P, `Wonder: ${WONDER_NAME[focus] ?? here.name}`, open('wonder')));
+  if (citizen) d.labels.append(place(citizenFlag(COLOURS[citizen.seat]), both ? hx + P * 0.6 : hx, hy - P * 0.95, P * 0.9, `${COLOUR_NAMES[citizen.seat]}'s citizenship`, open('citizen')));
   if (hasRoute(focus, 'airport')) d.labels.append(place(airport(owner('airline')), hx - P * 1.2, hy, P, 'Airport', open('airport')));
   if (hasRoute(focus, 'port')) d.labels.append(place(port(owner('ferry')), hx + P * 1.2, hy, P, 'Port', open('port')));
-  const citizen = s.players.find((p) => p.citizenship?.includes(focus));
-  if (citizen) d.labels.append(place(citizenFlag(COLOURS[citizen.seat]), hx + P * 1.1, hy - P * 0.95, P * 0.9, `${COLOUR_NAMES[citizen.seat]}'s citizenship`, open('citizen')));
   visitedDots(d, s, focus, hx, hy + P * 0.75, fs * 0.32);
 
   // Pawns: every player standing in a drawn area.
@@ -1274,7 +1319,7 @@ function renderAreaView(s: GameState, isRobot: boolean): HTMLElement {
     const x = p.area === focus ? hx : cx * k;
     const y = p.area === focus ? hy : cy;
     if (!inView(d, x, y)) continue;
-    d.labels.append(place(pawn(COLOURS[p.seat], p === me), x, y, p.area === focus ? fs * 2.8 : fs * 2.2, COLOUR_NAMES[p.seat]));
+    d.labels.append(place(pawn(COLOURS[p.seat], p === me, p.profile), x, y, p.area === focus ? fs * 2.8 : fs * 2.2, `${COLOUR_NAMES[p.seat]}${p.profile ? ` · ${PROFILE_LABEL[p.profile]}` : ''}`));
   }
   attachZoom(d.root, k);
 

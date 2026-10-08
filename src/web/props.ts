@@ -2,6 +2,7 @@
 // hovering plane, a port with a rocking ship, a monument for the wonder, a citizenship flag,
 // and the players' pawns. Each one is drawn in a 40 × 40 box centred on (0, 0).
 
+import type { Profile } from '../engine/types.ts';
 import { svg } from './maps.ts';
 
 const INK = '#062a30';
@@ -80,20 +81,57 @@ export function monument(owner?: string): SVGGElement {
   return g;
 }
 
-// A flag pole in the citizen's colour, with a passport stamp.
+// A flag pole in the citizen's colour, with a passport stamp; centred on (0, 0) (owner's fix).
 export function citizenFlag(colour: string): SVGGElement {
   return svg('g', {},
-    svg('line', { x1: -6, y1: 15, x2: -6, y2: -17, stroke: INK, 'stroke-width': 2 }),
-    svg('path', { d: 'M-6 -17 Q2 -20 8 -16 T18 -15 L18 -3 Q12 -6 6 -4 T-6 -5 Z', fill: colour, stroke: INK, 'stroke-width': 1.2, class: 'wave-flag' }),
-    svg('circle', { cx: 9, cy: 8, r: 7, fill: '#fbf3dc', stroke: '#7a3b8f', 'stroke-width': 1.6 }),
-    svg('text', { x: 9, y: 8, 'font-size': 8, 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#7a3b8f', 'font-weight': 700 }, 'VISA'),
+    svg('line', { x1: -12, y1: 15, x2: -12, y2: -17, stroke: INK, 'stroke-width': 2 }),
+    svg('path', { d: 'M-12 -17 Q-4 -20 2 -16 T12 -15 L12 -3 Q6 -6 0 -4 T-12 -5 Z', fill: colour, stroke: INK, 'stroke-width': 1.2, class: 'wave-flag' }),
+    svg('circle', { cx: 0, cy: 8, r: 7, fill: '#fbf3dc', stroke: '#7a3b8f', 'stroke-width': 1.6 }),
+    svg('text', { x: 0, y: 8, 'font-size': 6.5, 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#7a3b8f', 'font-weight': 700 }, 'VISA'),
   );
 }
 
-// A traveller pawn in the player's colour.
-export function pawn(colour: string, active: boolean): SVGGElement {
+// The player's piece: a token in the player's colour with their profile drawn on it (owner's
+// request, task 14): a backpack, a suitcase, a diamond or a laptop. A plain figure before the
+// profile is chosen.
+export function pawn(colour: string, active: boolean, profile: Profile | null = null): SVGGElement {
+  const W = '#fbf7ec';
+  const line = { stroke: INK, 'stroke-width': 1.2, 'stroke-linejoin': 'round' as const };
+  const icons: Record<Profile, () => SVGElement[]> = {
+    backpacker: () => [
+      svg('path', { d: 'M-4 -9 Q0 -14 4 -9', fill: 'none', ...line, 'stroke-width': 1.6 }),
+      svg('rect', { x: -7, y: -9, width: 14, height: 17, rx: 5, fill: '#c47a55', ...line }),
+      svg('path', { d: 'M-7 -2 Q0 1 7 -2', fill: 'none', ...line }),
+      svg('rect', { x: -4.5, y: 1, width: 9, height: 5, rx: 1.5, fill: '#e3a072', ...line }),
+      svg('line', { x1: 0, y1: 1, x2: 0, y2: 3, ...line }),
+    ],
+    business: () => [
+      svg('path', { d: 'M-3.5 -7 L-3.5 -10 Q-3.5 -11 -2.5 -11 L2.5 -11 Q3.5 -11 3.5 -10 L3.5 -7', fill: 'none', ...line, 'stroke-width': 1.6 }),
+      svg('rect', { x: -10, y: -7, width: 20, height: 14, rx: 2.5, fill: '#5b4636', ...line }),
+      svg('line', { x1: -10, y1: -1, x2: 10, y2: -1, ...line }),
+      svg('rect', { x: -2, y: -2.5, width: 4, height: 3, rx: 0.8, fill: '#e3cf52', ...line, 'stroke-width': 0.8 }),
+    ],
+    luxury: () => [
+      svg('path', { d: 'M-10 -3 L-6 -9 L6 -9 L10 -3 L0 9 Z', fill: '#bfe9ff', ...line }),
+      svg('path', { d: 'M-10 -3 L10 -3 M-6 -9 L-3 -3 L0 9 L3 -3 L6 -9 M-3 -3 L0 -9 L3 -3', fill: 'none', ...line, 'stroke-width': 0.8 }),
+      svg('path', { d: 'M-6 -7 L-4 -4', stroke: '#fff', 'stroke-width': 1.2 }),
+    ],
+    nomad: () => [
+      svg('rect', { x: -8, y: -9, width: 16, height: 11, rx: 1.5, fill: '#2b3a40', ...line }),
+      svg('rect', { x: -6, y: -7, width: 12, height: 7, fill: '#7fd0e8' }),
+      svg('path', { d: 'M-11 3 L11 3 L9 7 L-9 7 Z', fill: '#c9d3d6', ...line }),
+      svg('line', { x1: -2.5, y1: 5, x2: 2.5, y2: 5, stroke: INK, 'stroke-width': 0.8 }),
+    ],
+  };
+  if (!profile) {
+    return svg('g', { class: active ? 'pawn active' : 'pawn' },
+      svg('path', { d: 'M-9 15 Q-9 2 0 2 Q9 2 9 15 Z', fill: colour, stroke: '#fff', 'stroke-width': 2 }),
+      svg('circle', { cx: 0, cy: -5, r: 7, fill: colour, stroke: '#fff', 'stroke-width': 2 }));
+  }
   return svg('g', { class: active ? 'pawn active' : 'pawn' },
-    svg('path', { d: 'M-9 15 Q-9 2 0 2 Q9 2 9 15 Z', fill: colour, stroke: '#fff', 'stroke-width': 2 }),
-    svg('circle', { cx: 0, cy: -5, r: 7, fill: colour, stroke: '#fff', 'stroke-width': 2 }),
+    // A round token in the player's colour, with a light face for the profile's picture.
+    svg('circle', { cx: 0, cy: 0, r: 16, fill: colour, stroke: '#fff', 'stroke-width': 2.2 }),
+    svg('circle', { cx: 0, cy: 0, r: 12.5, fill: W, stroke: INK, 'stroke-width': 0.8 }),
+    svg('g', { transform: 'translate(0 0.5) scale(0.95)' }, ...icons[profile]()),
   );
 }
