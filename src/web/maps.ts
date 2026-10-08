@@ -3,7 +3,7 @@
 // x by cos(latitude) so areas keep their real proportions.
 
 import type { Area, Continent, GameMap } from '../engine/types.ts';
-import { areaPolygons, type Ring } from '../maps/shapes.ts';
+import { arcPoints, areaPolygons, type Ring } from '../maps/shapes.ts';
 import type { Shapes } from '../maps/shapes.ts';
 
 const SVG = 'http://www.w3.org/2000/svg';
@@ -16,6 +16,8 @@ export interface AreaGeo {
   core: Box; // the box to zoom to: far-away parts left out (Greenland, Alaska, small islands)
   centre: [number, number]; // centre of the biggest piece of the core (for icons and markers)
   touches: string[]; // areas that share a border line on the map
+  // A point in the middle of the border shared with each touching area (x, y as in `path`).
+  borderWith: Map<string, [number, number]>;
 }
 
 // Parts drawn but ignored for zooming and icons (owner's choice, task 14 B1):
@@ -147,7 +149,7 @@ export function buildGeo(map: GameMap, shapes: Shapes): Map<string, AreaGeo> {
     const ys = corePoints.map(([, y]) => -y);
     const core = { x: Math.min(...xs), y: Math.min(...ys), w: Math.max(...xs) - Math.min(...xs), h: Math.max(...ys) - Math.min(...ys) };
     const [cx, cy] = best ? deepestPoint(best) : [0, 0];
-    out.set(a.id, { path: parts.join(''), box: { x: minx, y: miny, w: maxx - minx, h: maxy - miny }, core, centre: [cx, -cy], touches: [] });
+    out.set(a.id, { path: parts.join(''), box: { x: minx, y: miny, w: maxx - minx, h: maxy - miny }, core, centre: [cx, -cy], touches: [], borderWith: new Map() });
   }
   // Areas that share a border line in the topology touch each other.
   const byArc = new Map<number, string[]>();
@@ -159,11 +161,23 @@ export function buildGeo(map: GameMap, shapes: Shapes): Map<string, AreaGeo> {
       byArc.set(k, [...(byArc.get(k) ?? []), a.id]);
     }
   }
-  for (const ids of byArc.values()) {
+  const points = arcPoints(shapes);
+  const longest = new Map<string, number[][]>(); // "a b" -> the longest shared arc
+  for (const [k, ids] of byArc) {
     for (const id of ids) {
       const t = out.get(id)!.touches;
-      for (const other of ids) if (other !== id && !t.includes(other)) t.push(other);
+      for (const other of ids) {
+        if (other === id) continue;
+        if (!t.includes(other)) t.push(other);
+        const key = `${id} ${other}`;
+        if ((longest.get(key)?.length ?? 0) < points[k].length) longest.set(key, points[k]);
+      }
     }
+  }
+  for (const [key, arc] of longest) {
+    const [id, other] = key.split(' ');
+    const [x, y] = arc[Math.floor(arc.length / 2)];
+    out.get(id)!.borderWith.set(other, [x, -y]);
   }
   return out;
 }

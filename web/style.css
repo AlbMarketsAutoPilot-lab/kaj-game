@@ -197,3 +197,4 @@ button.link { background: none; border: none; padding: 0; text-align: left; font
 .guide h3 { margin: 0 0 4px; }
 .guide .small { margin: 4px 0; color: var(--ink); }
 .guide .off { display: block; margin-top: 6px; color: var(--muted); }
+.profile-note .small { color: var(--ink); margin: 4px 0; }

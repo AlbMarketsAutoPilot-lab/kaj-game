@@ -226,7 +226,7 @@ function guideBox(): HTMLElement {
 
 // "You chose …": the profile's advantages and weaknesses (rulebook section 12), shown while
 // choosing the home country (owner's request).
-function profileNote(p: Profile): HTMLElement {
+function profileNote(p: Profile, who = ''): HTMLElement {
   const price = TICKET_PRICE[p];
   const plane = TRAVEL_TURNS[p].airport;
   const ship = TRAVEL_TURNS[p].port;
@@ -244,7 +244,7 @@ function profileNote(p: Profile): HTMLElement {
     nomad: ['Can never ask for citizenship.', `−${NOMAD_PENALTY} at the end with fewer than ${NOMAD_MIN_CONTINENTS} continents.`, `Slow: ${trips}.`],
   };
   return el('div', { className: 'note profile-note' },
-    el('strong', { textContent: `You chose ${PROFILE_LABEL[p]}.` }),
+    el('strong', { textContent: `${who ? `${who}, you` : 'You'} chose ${PROFILE_LABEL[p]}.` }),
     el('p', { className: 'small', textContent: `👍 ${good[p].join(' ')}` }),
     el('p', { className: 'small', textContent: `👎 ${bad[p].join(' ')}` }));
 }
@@ -423,7 +423,9 @@ function render(): void {
   // The popup over the board (task 14 B2): main events show here, the right side is for info.
   const modal = renderModal(s, actions, isRobot);
   if (s.phase === 'chooseProfile') {
-    app.replaceChildren(el('section', { className: 'card setup' }, title(), renderTurn(s, actions, isRobot)));
+    const people = s.players.filter((p) => p.kind === 'human' && p.profile);
+    app.replaceChildren(el('section', { className: 'card setup' }, title(), renderTurn(s, actions, isRobot),
+      ...people.map((p) => profileNote(p.profile!, people.length > 1 ? COLOUR_NAMES[p.seat] : ''))));
   } else {
     const header = el('header', {},
       title('strong'),
@@ -438,6 +440,12 @@ function render(): void {
       side.append(el('section', { className: 'card turn' }, el('h2', {}, dot(actor.seat), ` ${COLOUR_NAMES[actor.seat]}'s turn`)));
     } else {
       side.append(renderTurn(s, actions, isRobot));
+    }
+    // Right after choosing the profile, on the world view too, also while the robots choose
+    // (owner's request): each person's profile, its advantages and weaknesses.
+    if (s.phase === 'chooseStart') {
+      const people = s.players.filter((p) => p.kind === 'human' && p.profile);
+      for (const p of people) side.append(profileNote(p.profile!, people.length > 1 ? COLOUR_NAMES[p.seat] : ''));
     }
     app.replaceChildren(el('div', { className: 'game' }, header,
       el('div', { className: 'board' },
@@ -576,7 +584,6 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
         ? `Tap an area in ${zoom} to choose it as your home country.`
         : 'Tap a continent on the map. Each player starts on a different continent. Welcome bonus: Europe, Asia, Africa +3 · Americas +4 · Oceania +5.' }),
       zoom ? el('p', { className: 'small', textContent: `⭐ Areas with a star have a wonder: your first visit there gives +${plural(POINTS_WONDER, 'point')} more. Each wonder has Guided Tours that one player can buy for ${plural(BUSINESS_PRICE.tours, 'point')}; after that, every other player who visits pays the owner a ${TOUR_FEE}-point tour fee.` }) : '',
-      me.profile ? profileNote(me.profile) : '',
       me.profile === 'backpacker'
         ? el('p', { className: 'small', textContent: '🎒 Tip: from Europe, Asia or Africa you can walk to 3 continents (+3 Backpacker bonus).' })
         : '');
@@ -1253,44 +1260,52 @@ function renderAreaView(s: GameState, isRobot: boolean): HTMLElement {
     (id) => (walks.has(id) ? walkTo(id) : details(id)));
 
   const { fs } = d;
-  // Walk badges never cover each other (owner's report: Russia West's neighbours): a badge that
-  // would overlap one already placed moves down (or up near the bottom) until it is free.
+  // Walk badges (owner's report, Russia West's neighbours): each one sits just across the border
+  // it shares with this area, on the neighbour's side, so the badges spread around the area. A
+  // badge that would still cover one already placed moves a little further out.
+  const v = d.root.viewBox.baseVal;
+  const [fx, fy] = geo.get(focus)!.centre;
   const placed: Box[] = [];
-  const free = (x: number, y: number, w: number, h: number): number => {
-    const v = d.root.viewBox.baseVal;
-    let yy = y;
-    for (let tries = 0; tries < 12; tries++) {
-      const hit = placed.find((b) => Math.abs(b.x - x) < (b.w + w) / 2 && Math.abs(b.y - yy) < (b.h + h) / 2);
-      if (!hit) break;
-      yy = hit.y + (hit.h + h) / 2 + fs * 0.15;
-      if (yy > v.y + v.height - h) yy = hit.y - (hit.h + h) / 2 - fs * 0.15;
+  const overlapsPlaced = (x: number, y: number, w: number, h: number) =>
+    placed.some((b) => Math.abs(b.x - x) < (b.w + w) / 2 && Math.abs(b.y - y) < (b.h + h) / 2);
+  const badgeSpot = (id: string, w: number, h: number): [number, number] => {
+    const border = geo.get(focus)!.borderWith.get(id);
+    const [cx, cy] = border ?? geo.get(id)!.centre;
+    let dx = cx * k - fx * k;
+    let dy = cy - fy;
+    const len = Math.hypot(dx, dy) || 1;
+    dx /= len;
+    dy /= len;
+    let x = cx * k;
+    let y = cy;
+    for (let step = 0; step < 14; step++) {
+      // Out across the border (a walking link with no shared border starts from the neighbour).
+      const out = (border ? 1.6 : 0) * fs + step * fs * 0.9;
+      x = Math.min(Math.max(cx * k + dx * out, v.x + w / 2), v.x + v.width - w / 2);
+      y = Math.min(Math.max(cy + dy * out, v.y + h / 2), v.y + v.height - h / 2);
+      if (!overlapsPlaced(x, y, w, h)) break;
     }
-    placed.push({ x, y: yy, w, h });
-    return yy;
+    placed.push({ x, y, w, h });
+    return [x, y];
   };
   for (const id of d.paths.keys()) {
     if (id === focus) continue;
     const walk = walks.get(id);
-    let [x, cy] = geo.get(id)!.centre;
-    x *= k;
-    if (walk) {
-      // A walkable neighbour always shows its badge: pulled in to the edge of the view.
-      const v = d.root.viewBox.baseVal;
-      x = Math.min(Math.max(x, v.x + fs * 3), v.x + v.width - fs * 3);
-      cy = Math.min(Math.max(cy, v.y + fs * 1.5), v.y + v.height - fs * 2.5);
+    const [cx0, cy] = geo.get(id)!.centre;
+    const x = cx0 * k;
+    if (inView(d, x, cy)) {
+      const icons = areaIcons(s, id);
+      if (icons) label(d, x, cy - fs * 1.4, icons, 'icons', 0.95);
+      if (!walk && bookedBy(s, id)) label(d, x, cy + fs * 1.4, '⏳', 'icons', 0.9);
+      visitedDots(d, s, id, x, cy + fs * 1.5, fs * 0.28);
     }
-    if (!inView(d, x, cy)) continue;
-    const icons = areaIcons(s, id);
-    if (icons) label(d, x, cy - fs * 1.4, icons, 'icons', 0.95);
     if (walk) {
       const fees = feeTotal(entryFees(s, me, me.area, id));
       const text = `🚶${gainLabel(s, walk, areaById.get(id)!) || ' +0'}${fees ? ` 💰−${fees}` : ''}`;
-      const by = free(x, cy, ([...text].length * fs * 0.62 + fs) * 0.9, fs * 1.6 * 0.9);
-      label(d, x, by, text, 'go', 0.9, walkTo(id));
-    } else if (bookedBy(s, id)) {
-      label(d, x, cy + fs * 1.4, '⏳', 'icons', 0.9);
+      const w = ([...text].length * fs * 0.62 + fs) * 0.9;
+      const [bx, by] = badgeSpot(id, w, fs * 1.6 * 0.9);
+      label(d, bx, by, text, 'go', 0.9, walkTo(id));
     }
-    visitedDots(d, s, id, x, cy + fs * 1.5, fs * 0.28);
   }
 
   // The drawn props on the current area (owner-approved icons).
@@ -1319,7 +1334,7 @@ function renderAreaView(s: GameState, isRobot: boolean): HTMLElement {
     const x = p.area === focus ? hx : cx * k;
     const y = p.area === focus ? hy : cy;
     if (!inView(d, x, y)) continue;
-    d.labels.append(place(pawn(COLOURS[p.seat], p === me, p.profile), x, y, p.area === focus ? fs * 2.8 : fs * 2.2, `${COLOUR_NAMES[p.seat]}${p.profile ? ` · ${PROFILE_LABEL[p.profile]}` : ''}`));
+    d.labels.append(place(pawn(COLOURS[p.seat], p === me), x, y, p.area === focus ? fs * 2.8 : fs * 2.2, `${COLOUR_NAMES[p.seat]}${p.profile ? ` · ${PROFILE_LABEL[p.profile]}` : ''}`));
   }
   attachZoom(d.root, k);
 
