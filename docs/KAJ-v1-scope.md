@@ -18,7 +18,7 @@ Target: a complete, playable v1 within about 15 days of work.
 ## 2. Players
 
 - **2–4 seats on one device.** Each seat is a human or a robot. At least 1 human, at most 3 robots.
-- **Robot: one level (normal)** in v1.
+- **Robots: three levels, easy, normal and hard** (owner's change, task 13). One robot with a level setting, chosen for each robot seat on the setup screen (default normal). Easy answers quizzes, the exam and challenges right about 50% of the time, normal about 75%, hard about 90%.
 - **Turn order:** random first player, then always the same order.
 - **Nothing is secret** (no keep cards), so there is no "pass the phone" screen. Exam answers are on the honour system.
 
@@ -38,7 +38,7 @@ Target: a complete, playable v1 within about 15 days of work.
 
 ## 5. Rules with 2–4 players
 
-- All rulebook rules apply to every player: two players are never in the same area; visas, tour fees and tickets go to **the player who owns** that citizenship or business; the first player to reach a wonder gets the right to buy its tours.
+- All rulebook rules apply to every player: two players are never in the same area, and an area someone is travelling to by plane or ship is **booked** (nobody else may go there until they land; task 13); visas, tour fees and tickets go to **the player who owns** that citizenship or business; the first player to reach a wonder gets the right to buy its tours.
 - Everything else follows `KAJ-rules-v7.md`, except the changes in section 9.
 
 ## 6. Quizzes and challenges
@@ -83,7 +83,7 @@ Target: a complete, playable v1 within about 15 days of work.
   - nobody is ever stuck;
   - points never go below 0;
   - two players are never in the same area.
-- The random robot is the base of the normal robot (random robot + simple strategy rules).
+- The random robot is the base of the robot (random robot + simple strategy rules, three levels).
 - The rulebook becomes automatic tests.
 
 ## 9. Changes from the rulebook for v1
@@ -104,10 +104,11 @@ Target: a complete, playable v1 within about 15 days of work.
 | 27–30 facts per country | **About 12 per area** |
 | Passport screen with stamps | **Not in v1** |
 | Online play, exam timers online | **No online play**; the timers in section 6 apply offline |
+| One robot level in v1 (this scope's first version) | **Easy, normal and hard** (owner's change, task 13) |
 
 ## 10. Deferred (after v1, only with the owner's agreement)
 
-The 50-turn map (first candidate), easy and hard robots, keep cards, mini missions, the memory game, landmark drawings, the full 27–30 facts, the passport screen, balance simulator reports, and online play.
+The 50-turn map (first candidate), keep cards, mini missions, the memory game, landmark drawings, the full 27–30 facts, the passport screen, balance simulator reports, and online play.
 
 8 profiles are **not planned**.
 

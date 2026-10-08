@@ -214,16 +214,18 @@ test('plane to a visa area: boarding needs the ticket + 2 (the quiz needs 2); pa
 });
 
 test('citizenship granted during a trip: no visa on landing', () => {
-  // The Backpacker sails eu-north → na-one (3 turns at sea); meanwhile Luxury becomes
-  // the citizen of na-one and leaves. The citizenship came after boarding: no visa.
+  // The Backpacker sails eu-north → na-one (3 turns at sea); meanwhile Luxury becomes the citizen
+  // of na-one. Since task 13 nobody can enter a booked area, so this happens only through a big
+  // country (a citizenship of one part covers the others); here it is set by hand.
   let t = game(['eu-north', 'as-east'], 'backpacker', 'luxury');
   t = go(t, { type: 'quiz', kind: 'port', to: 'na-one' });
   t = go(t, { type: 'answer', choice: t.quiz!.question.correct }); // 3 turns at sea
-  t = go(t, { type: 'walk', to: 'na-one', citizenship: true }); // Luxury takes na-one
+  assert.ok(!legalActions(t, map).some((a) => a.type === 'walk' && a.to === 'na-one'), 'na-one is booked');
+  other(t).citizenship = ['na-one'];
+  t = pass(t);
   t = go(t, { type: 'travel' });
-  t = go(t, { type: 'walk', to: 'as-east' }); // granted at the start of this turn; leaves
+  t = pass(t);
   t = go(t, { type: 'travel' });
-  assert.deepEqual(other(t).citizenship, ['na-one']);
   t = pass(t);
   const points = me(t).points;
   const citizen = other(t).points;

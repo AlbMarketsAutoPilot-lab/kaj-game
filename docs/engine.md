@@ -66,6 +66,7 @@ Task 7: planes, ships, tickets and the airline quiz (`tests/travel.test.ts`).
   Right: free ticket, board now. Wrong: the turn ends. The 3rd wrong answer (or later) in the
   same area: pay and board now, if the player can pay; if not, keep trying on later turns or
   walk away. Leaving the area starts the count again. The Backpacker has no limit.
+  (Changed in task 13: 3 tries for everyone; after the 3rd wrong answer a player who can't pay goes home.)
 - The test board has a 15-second quiz timer; time out = wrong answer.
 - 1,000 random-robot games on the 30-turn map: nobody stuck, about 6,000 paid trips and
   10,700 quiz tries, longest time in transit 6 turns.
@@ -236,6 +237,70 @@ Task 12: challenges (`src/challenges/challenges.ts`, review page [`challenges.md
   event cards (15,889 points won, 15,725 lost), 2,603 lost turns; longest trip 8 turns (was 9),
   longest "blocked" streak 5 (the test limit is 5), nobody stuck. The dist/kaj.html file is now about 2.2 MB (flags about 1.2 MB).
 
+Task 13: the robot, with three levels (`src/engine/normal-robot.ts`, `tests/normal-robot.test.ts`).
+
+- **One robot, three levels** (owner's change): easy, normal, hard, a setting of each robot seat
+  (`level` on the seat and the player; default normal). The test board has a level picker on each
+  robot seat and shows "🤖 Hard" on the player. The random robot stays for the 1,000-game checks.
+- It scores the legal moves and picks the best, with a hidden random tie-break (its own seed, never
+  the game's dice).
+
+  | | Easy | Normal | Hard |
+  |---|---|---|---|
+  | Right answers (airline quiz, exam, challenges) | 50% | 75% | 90% |
+  | Plays a challenge with at least | 5 points | 3 | 1 |
+  | Points kept after a ticket or a business | 5 | 3 | 2 |
+
+- **Walking:** most points now (new area, wonder, new continent, profile bonus, finishing a big
+  country; a new part of an unfinished big country counts ½), minus visa and tour fees; on a tie,
+  the step with the most unvisited areas next. With nothing new in reach: the quickest way towards
+  an unvisited area (walking, planes, ships), which also stops it walking back and forth.
+- **Planes and ships:** when the destination gives at least 1 point more than the best walk (the
+  Nomad's +1 per travel turn counts), or no new area is in reach on foot. The free quiz first; after
+  a wrong answer it pays, if that keeps the reserve. The Backpacker always takes the quiz.
+- **Citizenship:** once, in the first new area it reaches before round 10 (never the Nomad).
+- **Businesses:** bought when the reserve is kept: tours, then airline, then ferry agency.
+- **Selling:** only during the "out of money" warning: the dearest business, to the richest player
+  who can pay. Offers it receives: accepted whenever it can pay (task 9b).
+- **Setup:** random profile; start area with the highest welcome bonus, then the most neighbours;
+  the Backpacker avoids Oceania and the Americas (it can't walk to 3 continents from there).
+- **Nomad:** from round 18 with fewer than 3 continents, the quickest way to a new continent.
+- **Quiz tries (owner's rule):** 3 tries per area for everyone, the Backpacker too. After the 3rd
+  wrong answer a player who can pay (ticket and fees) pays and travels; one who can't (always the
+  Backpacker) goes home, free of fees, with the normal arrival points. If home is the area they
+  stand in, they stay and the count starts again. Before the 3rd try the test board warns
+  "⚠️ Last try here: Attention! If wrong, you go home to …" (or "…you pay the N-point ticket with
+  your points and travel"), and says afterwards what happened. The robot skips a last try that
+  would send it home when it can walk.
+- **Booked areas (owner's rule):** an area someone is travelling to by plane or ship is booked:
+  nobody else may walk in or board for it until the traveller lands, as if they were already
+  there. Nobody boards for an area where someone stands. Walking races stay as before (the first
+  to arrive gets in; the other picks another move). "Go home" never sends a player into a booked
+  area. The map shows "⏳ Waiting for Red ✈️", and the move panel says which areas nearby are booked.
+- **Saves:** version 4 (the level is saved). A version-3 save can't be continued.
+- 1,000 games for each level on the 30-turn map (2–4 players): nobody stuck, points ≥ 0, never two
+  in one area. Average final score: easy 42, normal 46, hard 49 (random robot 18).
+- Before and after the two new rules (1,000 games each; random / easy / normal / hard):
+
+  | | Before | After |
+  |---|---|---|
+  | Longest trip (turns) | 6 / 11 / 6 / 6 | 3 / 3 / 3 / 3 |
+  | Waits in the air before landing | 285 / 43 / 3 / 0 | 0 |
+  | Trips per game | 6.7 / 7.0 / 8.0 / 8.4 | 6.3 / 6.5 / 7.5 / 7.9 |
+  | Longest "blocked" streak | 3 / 3 / 2 / 2 | 3 / 2 / 3 / 2 |
+  | Average final score | 18.0 / 42.2 / 46.7 / 49.1 | 18.1 / 42.1 / 46.1 / 48.5 |
+  | Areas visited per player | 11.3 / 20.6 / 22.0 / 22.7 | 11.5 / 20.8 / 22.1 / 22.8 |
+- Head to head (`node scripts/robot-report.ts`, 1,000 two-player games each, seats swapped):
+
+  | Game | Wins |
+  |---|---|
+  | easy vs random | 99% – 1% |
+  | normal vs random | 100% – 0% |
+  | hard vs random | 100% – 0% |
+  | normal vs easy | 64% – 36% |
+  | hard vs normal | 63% – 37% |
+  | hard vs easy | 74% – 26% |
+
 ## Choices made in task 1 (approved by the owner)
 
 These points are not spelled out in the rulebook or the v1 scope.
@@ -264,7 +329,8 @@ These points are not spelled out in the rulebook or the v1 scope.
 2. **The 3rd wrong answer pays and boards at once**, if the player can pay. Otherwise the
    player may keep trying on later turns or walk away; the count starts again on leaving.
 3. **Destination taken at landing:** the plane or ship waits one more travel turn (Nomad +1)
-   and tries again. Any destination can be chosen when boarding.
+   and tries again. Any destination can be chosen when boarding. (Task 13: a booked area can't be
+   entered and nobody boards for a taken area, so this is only a safety net.)
 4. **Luxury "any":** plane to any airport, ship to any port.
 5. **Boarding on the first turn** from a starting airport or port is allowed.
 
@@ -352,6 +418,21 @@ These points are not spelled out in the rulebook or the v1 scope.
    the same continent; flags that look alike never asked together; land borders only.
 8. **Robots** pick a challenge or not at random and answer at random (task 13 makes them smarter).
 9. **The train** (France ↔ Russia West, France ↔ Turkey) is deferred: maybe later, if time allows.
+
+## Choices made in task 13 (approved by the owner)
+
+1. **Levels differ only** by right answers, the challenge threshold and the reserve (table above).
+2. **The Backpacker robot avoids Oceania and the Americas** as a start.
+3. **A plane or ship only for at least 1 point more** than the best walk, or when nothing new is in
+   reach on foot.
+4. **Robot buyers accept offers** whenever they can pay (as in task 9b).
+5. **Sale offers** go to the richest player who can pay.
+6. **Head-to-head games:** 2 players, random profiles; a draw counts as nobody winning.
+7. **Head-to-head games are a report script**, not part of `npm test` (the 1,000 games per level are).
+8. **Test limits stay** unless the owner agrees to change them.
+9. **3 quiz tries for everyone**; after the 3rd wrong answer: pay and travel, or (no money) go home.
+10. **Booked areas:** closed to walking and boarding while someone travels there; no boarding for an
+    area where someone stands.
 
 ## Project setup
 

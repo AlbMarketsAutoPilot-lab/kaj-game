@@ -39,7 +39,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | 10 | Profile bonuses, save and resume | medium | 1 | 7 | ✅ done |
 | 11 | Event cards | medium | 1 | 7–8 | ✅ done |
 | 12 | Challenges (6 types from open data) | medium | 1.5 | 8–9 | ✅ done |
-| 13 | Normal robot | medium | 1 | 10 | |
+| 13 | Robot: easy, normal and hard | medium | 1 | 10 | ✅ done |
 | 14 | Real screens, art and sounds | medium | 3 | 11–13 | |
 | 15 | Android release build (signed APK) | medium | 1 | 14 | |
 | 16 | Full-game tests, bug fixes, buffer | medium | 1–2 | 15 | |
@@ -159,10 +159,16 @@ on day 14 it could miss the deadline.
 - Deferred (owner): a train France ↔ Russia West and France ↔ Turkey for Backpacker and Nomad
   (2 points, 1 travel turn, fees only on arrival, a train booth to buy). Only if time allows.
 
-### 13. Normal robot — day 10
+### 13. Robot: easy, normal and hard — day 10
 
 - Random robot + simple rules: prefer new areas, wonders and finishing big countries; buy
   businesses it can afford; quiz or pay sensibly; answers quizzes right most of the time.
+- Owner's change: **three levels** (easy, normal, hard), one robot with a level setting; right
+  answers about 50% / 75% / 90%; a level picker on each robot seat (default normal).
+- Done: `src/engine/normal-robot.ts`, rules and the owner-approved choices in `docs/engine.md`
+  (task 13), tests in `tests/normal-robot.test.ts`, head-to-head report `node scripts/robot-report.ts`.
+  Saves are version 4. Owner's rules added: 3 airline quiz tries for everyone (no money after the
+  3rd wrong answer: go home), and booked areas (nobody goes to an area someone is flying or sailing to).
 
 ### 14. Real screens, art and sounds — days 11–13
 

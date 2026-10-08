@@ -96,17 +96,39 @@ test('Nomad ship: 3 travel turns (+3); Business ship: 1 travel turn', () => {
   assert.equal(seatOf(b, 0).points, 3 - 2 + 1 + 2);
 });
 
-test('destination taken at landing: wait one more travel turn (Nomad +1), then land', () => {
+// Owner's rule (task 13): a booked area (someone is travelling there) is closed, as if the
+// traveller were already there; and nobody boards for an area where someone stands.
+test('booked: nobody walks into or boards for an area someone is travelling to', () => {
   let s = game(['eu-west', 'as-west'], 'nomad');
   s = board(s, 'as-east');
-  s = walk(s, 'as-east'); // player 2 takes the destination
-  s = travel(s);
-  assert.equal(seatOf(s, 0).area, null);
-  assert.equal(seatOf(s, 0).points, 3 - 1 + 1);
-  s = walk(s, 'na-one'); // player 2 leaves
+  assert.equal(seatOf(s, 0).travel?.to, 'as-east');
+  const moves = legalActions(s, travelMap);
+  assert.ok(!moves.some((a) => 'to' in a && a.to === 'as-east'), 'as-east is booked');
+  s = walk(s, 'eu-east');
   s = travel(s);
   assert.equal(seatOf(s, 0).area, 'as-east');
-  assert.equal(seatOf(s, 0).points, 3 - 1 + 1 + 1 + 1 + 2);
+});
+
+test("booked: no trip to an area where someone stands", () => {
+  let s = game(['eu-west', 'af-north'], 'business');
+  s = walk(s, 'eu-north');
+  s = walk(s, 'as-west');
+  s = walk(s, 'eu-west');
+  s = walk(s, 'as-east'); // player 2 stands at the hub
+  s = walk(s, 'eu-north');
+  assert.ok(!legalActions(s, travelMap).some((a) => (a.type === 'board' || a.type === 'quiz') && a.to === 'as-east'));
+});
+
+test('destination taken at landing (safety net): wait one more travel turn (Nomad +1), then land', () => {
+  let s = game(['eu-west', 'as-west'], 'nomad');
+  s = board(s, 'as-east');
+  s = walk(s, 'eu-east');
+  seatOf(s, 1).area = 'as-east'; // only possible by changing the state by hand
+  s = travel(s);
+  assert.equal(seatOf(s, 0).area, null);
+  s = walk(s, 'na-one');
+  s = travel(s);
+  assert.equal(seatOf(s, 0).area, 'as-east');
 });
 
 test('quiz: the answer comes in the same turn; right = free ticket, board now', () => {
@@ -134,30 +156,44 @@ test('quiz: a wrong answer uses the turn; the 3rd wrong answer pays and boards',
   assert.equal(seatOf(s, 0).quizWrong, 0);
 });
 
-test("quiz: can't pay after 3 wrong answers → keep trying or walk away (count starts again)", () => {
-  let s = game(['eu-west', 'af-north'], 'luxury');
-  seatOf(s, 0).points = 2;
-  for (let i = 1; i <= 4; i++) {
+// Owner's rule (task 13): no more endless tries. After the 3rd wrong answer, a player who can't
+// pay the ticket (always the Backpacker) goes home, free of fees, with the normal arrival points.
+function threeWrong(profile: Profile, points: number): GameState {
+  let s = game(['eu-west', 'af-north'], profile);
+  seatOf(s, 0).points = points;
+  seatOf(s, 0).home = 'eu-north'; // as if the journey had started there
+  for (let i = 1; i <= 2; i++) {
     s = answer(quiz(s, 'as-east'), false);
     assert.equal(seatOf(s, 0).area, 'eu-west');
-    s = walk(s, i % 2 ? 'af-south' : 'af-north');
+    assert.equal(seatOf(s, 0).quizWrong, i);
+    s = walk(s, i === 1 ? 'af-south' : 'af-north');
   }
-  assert.equal(seatOf(s, 0).quizWrong, 4);
-  assert.ok(legalActions(s, travelMap).some((a) => a.type === 'quiz'));
-  s = walk(s, 'eu-north');
+  return answer(quiz(s, 'as-east'), false);
+}
+
+test("quiz: can't pay after 3 wrong answers → go home", () => {
+  const s = threeWrong('luxury', 2); // ticket 3
+  assert.equal(seatOf(s, 0).area, 'eu-north');
+  assert.equal(seatOf(s, 0).points, 2 + 1); // no fees, a new area +1
   assert.equal(seatOf(s, 0).quizWrong, 0);
+  assert.deepEqual(s.payments, []);
 });
 
-test('Backpacker: no limit on quiz tries', () => {
+test('Backpacker: 3 quiz tries too, then home', () => {
+  const s = threeWrong('backpacker', 3);
+  assert.equal(seatOf(s, 0).area, 'eu-north');
+  assert.equal(seatOf(s, 0).quizWrong, 0);
+  assert.equal(seatOf(s, 0).travel, null);
+});
+
+test('home is the area itself: the player stays and the count starts again', () => {
   let s = game(['eu-west', 'af-north'], 'backpacker');
-  for (let i = 1; i <= 5; i++) {
+  for (let i = 1; i <= 3; i++) {
     s = answer(quiz(s, 'as-east'), false);
-    s = walk(s, i % 2 ? 'af-south' : 'af-north');
+    if (i < 3) s = walk(s, i === 1 ? 'af-south' : 'af-north');
   }
   assert.equal(seatOf(s, 0).area, 'eu-west');
-  assert.equal(seatOf(s, 0).points, 3);
-  s = answer(quiz(s, 'as-east'), true);
-  assert.equal(seatOf(s, 0).area, null); // 1 turn in the air
+  assert.equal(seatOf(s, 0).quizWrong, 0);
 });
 
 // The stuck-state checker (task 2b) assumes the quiz is always possible:

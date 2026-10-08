@@ -1,13 +1,13 @@
 // First playable screen (task 3): a plain test board on top of the engine.
-// No final art yet. Robots pick random legal moves.
+// No final art yet. Robots play with simple rules, at the level chosen for each seat (task 13).
 
-import { BUSINESS_PRICE, CHALLENGE_POINTS, CONTINENT_BONUS, GO_HOME_TURNS, NOMAD_MIN_CONTINENTS, NOMAD_PENALTY, NOMAD_WARNING_ROUND, POINTS_BUSINESS_CITIZENSHIP, TICKET_PRICE, TOUR_FEE, TRAVEL_TURNS, VISA_PRICE } from '../engine/constants.ts';
+import { BUSINESS_PRICE, CHALLENGE_POINTS, CONTINENT_BONUS, GO_HOME_TURNS, NOMAD_MIN_CONTINENTS, NOMAD_PENALTY, NOMAD_WARNING_ROUND, POINTS_BUSINESS_CITIZENSHIP, QUIZ_TRIES, TICKET_PRICE, TOUR_FEE, TRAVEL_TURNS, VISA_PRICE } from '../engine/constants.ts';
 import {
-  apply, blockedByMoney, businessAt, businessValue, createGame, currentPlayer, entryFees, feeTotal, finalScore, homeFor, landTurnsToCard, legalActions, nomadPenalty,
+  apply, blockedByMoney, bookedBy, businessAt, canPayAfterQuiz, destinations, businessValue, createGame, currentPlayer, entryFees, feeTotal, finalScore, homeFor, landTurnsToCard, legalActions, nomadPenalty,
 } from '../engine/engine.ts';
-import { randomRobotAction } from '../engine/robot.ts';
+import { robotAction } from '../engine/normal-robot.ts';
 import { loadGame, saveGame } from '../engine/save.ts';
-import type { Action, Area, BusinessKind, ChallengeResult, ChallengeType, Deck, DrawnCard, GameState, Payment, Player, Profile, RouteKind, SeatKind } from '../engine/types.ts';
+import type { Action, Area, BusinessKind, ChallengeResult, ChallengeType, Deck, DrawnCard, GameState, Payment, Player, Profile, RobotLevel, RouteKind, SeatKind } from '../engine/types.ts';
 import { map30 } from '../maps/map30.ts';
 
 const COLOURS = ['#e4572e', '#2e86de', '#29a36a', '#e0a100'];
@@ -19,6 +19,7 @@ const PROFILE_LABEL: Record<Profile, string> = {
   nomad: '💻 Digital Nomad',
 };
 const ROBOT_DELAY_MS = 600;
+const LEVEL_LABEL: Record<RobotLevel, string> = { easy: 'Easy', normal: 'Normal', hard: 'Hard' };
 const SAVE_KEY = 'kaj-save';
 const QUIZ_SECONDS = 15;
 // Travel-turn challenges: 15 seconds, time out = wrong answer (v1 scope, section 6).
@@ -94,6 +95,7 @@ function renderSetup(): void {
   clearInterval(quizTimer);
   state = null;
   const kinds: SeatKind[] = ['human', 'robot', 'robot', 'robot'];
+  const levels: RobotLevel[] = ['normal', 'normal', 'normal', 'normal'];
   let count = 2;
 
   const rows = el('div', { className: 'seats' });
@@ -105,8 +107,14 @@ function renderSetup(): void {
         for (const k of ['human', 'robot'] as const) {
           select.append(el('option', { value: k, textContent: k === 'human' ? '🙂 Person' : '🤖 Robot', selected: k === kind }));
         }
-        select.addEventListener('change', () => (kinds[i] = select.value as SeatKind));
-        return el('div', { className: 'seat' }, dot(i), ` ${COLOUR_NAMES[i]} `, select);
+        select.addEventListener('change', () => { kinds[i] = select.value as SeatKind; draw(); });
+        // Each robot seat has a level (owner's change, task 13).
+        const level = el('select', { title: 'Robot level' });
+        for (const l of ['easy', 'normal', 'hard'] as const) {
+          level.append(el('option', { value: l, textContent: LEVEL_LABEL[l], selected: l === levels[i] }));
+        }
+        level.addEventListener('change', () => (levels[i] = level.value as RobotLevel));
+        return el('div', { className: 'seat' }, dot(i), ` ${COLOUR_NAMES[i]} `, select, kind === 'robot' ? level : '');
       }),
     );
   };
@@ -124,7 +132,7 @@ function renderSetup(): void {
     try {
       const seed = Math.floor(Math.random() * 2 ** 31);
       robotSeed = seed ^ 0x5bd1e995;
-      const seats = kinds.slice(0, count).map((kind, i) => ({ kind, colour: COLOUR_NAMES[i] }));
+      const seats = kinds.slice(0, count).map((kind, i) => ({ kind, colour: COLOUR_NAMES[i], ...(kind === 'robot' ? { level: levels[i] } : {}) }));
       state = createGame({ seats, seed }, map30);
       render();
     } catch (e) {
@@ -176,6 +184,10 @@ function act(action: Action): void {
   const name = COLOUR_NAMES[mover.seat];
   const examBefore = mover.exam;
   const home = action.type === 'goHome' ? homeFor(state, map30, mover) : null;
+  // A 3rd wrong quiz answer: pay and travel, or go home (owner's rule, task 13).
+  const quiz = state.quiz;
+  const lastTry = action.type === 'answer' && quiz && action.choice !== quiz.question.correct && mover.quizWrong >= QUIZ_TRIES - 1
+    ? { pays: canPayAfterQuiz(state, mover, quiz.to), home: homeFor(state, map30, mover) } : null;
   const offer = state.offer;
   state = apply(state, map30, action);
   const after = state.players[mover.seat];
@@ -194,6 +206,11 @@ function act(action: Action): void {
     lines.push(`${PROFILE_LABEL[mover.profile!]} bonus: ${name} has visited ${bonus.continents} continents, +${bonus.points}!`);
   }
   if (home) lines.push(`🏠 ${name} ran out of money, so the trip ends here: ${name} goes home to ${areaById.get(home)!.name}, free of any fees.`);
+  if (lastTry) {
+    lines.push(lastTry.pays
+      ? `❌ ${name}: ${QUIZ_TRIES} wrong answers here, so ${name} pays the ticket and travels.`
+      : `❌ ${name}: ${QUIZ_TRIES} wrong answers here and no money for the ticket, so the trip ends here: ${name} goes home to ${areaById.get(lastTry.home)!.name}, free of any fees.`);
+  }
   if (state.challenged) lines.push(challengeNote(state.challenged));
   lines.push(...state.payments.map(paymentNote).filter((t) => t !== ''));
   // Event cards drawn by this move; a human's own start-of-turn card has its own box instead.
@@ -303,8 +320,7 @@ function render(): void {
     robotTimer = window.setTimeout(() => {
       if (state !== s) return;
       // A robot buyer accepts an offer whenever it can pay (owner's choice, task 9b).
-      if (s.offer) return act(actions.find((a) => a.type === 'sellAnswer' && a.accept) ?? { type: 'sellAnswer', accept: false });
-      const [action, next] = randomRobotAction(s, map30, robotSeed);
+      const [action, next] = robotAction(s, map30, robotSeed, actor.level ?? 'normal');
       robotSeed = next;
       act(action);
     }, ROBOT_DELAY_MS);
@@ -319,7 +335,7 @@ function renderPlayers(s: GameState): HTMLElement {
       const area = p.area ? areaById.get(p.area)!.name
         : p.travel ? `${VEHICLE[p.travel.kind]} to ${areaById.get(p.travel.to)!.name}` : '—';
       const card = el('div', { className: 'player' + (p === me && s.phase !== 'finished' ? ' active' : '') },
-        el('div', {}, dot(seat), ` ${COLOUR_NAMES[seat]} ${p.kind === 'robot' ? '🤖' : '🙂'}`),
+        el('div', {}, dot(seat), ` ${COLOUR_NAMES[seat]} ${p.kind === 'robot' ? `🤖 ${LEVEL_LABEL[p.level ?? 'normal']}` : '🙂'}`),
         el('div', { className: 'small', textContent: p.profile ? PROFILE_LABEL[p.profile] : 'no profile yet' }),
         el('div', { className: 'points', textContent: s.phase === 'finished'
           ? `${finalScore(s, p)} points`
@@ -495,6 +511,10 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
     }
     const canAsk = (a: Action) => offered.some((o) => 'to' in o && 'to' in a && o.type === a.type && o.to === a.to
       && (!('kind' in a) || ('kind' in o && o.kind === a.kind)));
+    const waiting = waitingNote(s);
+    if (waiting) box.append(el('p', { className: 'small', textContent: waiting }));
+    const warning = lastTryWarning(s, plainActions(actions));
+    if (warning) box.append(el('p', { className: 'note', textContent: warning }));
     const row = el('div', { className: 'row' });
     for (const a of plainActions(actions)) {
       const mark = canAsk(a) ? ' 🛂' : '';
@@ -619,7 +639,7 @@ function renderQuiz(box: HTMLElement, s: GameState, who: HTMLElement): void {
     el('p', { textContent: question.text }),
     el('div', { className: 'row' }, ...question.options.map((o, i) => button(o, () => act({ type: 'answer', choice: i as 0 | 1 })))),
     clock,
-    el('p', { className: 'small', textContent: `Wrong answers here so far: ${currentPlayer(s).quizWrong}. A wrong answer uses this turn.${forcedPayNote(s, kind)}` }));
+    el('p', { className: 'small', textContent: `Wrong answers here so far: ${currentPlayer(s).quizWrong}. A wrong answer uses this turn.${forcedPayNote(s, kind, to)}` }));
   quizTimer = window.setInterval(() => {
     if (state !== s) return clearInterval(quizTimer);
     left -= 1;
@@ -662,11 +682,43 @@ function challengeNote(r: ChallengeResult): string {
 }
 
 // After the 3rd wrong answer a player who can pay must pay: say who gets the ticket.
-function forcedPayNote(s: GameState, kind: RouteKind): string {
-  const price = TICKET_PRICE[currentPlayer(s).profile!];
-  if (price === null) return '';
+function forcedPayNote(s: GameState, kind: RouteKind, dest: string): string {
+  const me = currentPlayer(s);
+  if (me.quizWrong >= QUIZ_TRIES - 1) return ` ${lastTryText(s, dest)}`;
+  const price = TICKET_PRICE[me.profile!];
   const to = ticketTo(s, kind);
-  return ` After 3 wrong answers here you must pay the ${price}-point ticket and go, if you can${to ? ` (the ticket goes ${to.slice(2, -1)})` : ''}.`;
+  return price === null
+    ? ` After ${QUIZ_TRIES} wrong answers here your trip ends and you go home.`
+    : ` After ${QUIZ_TRIES} wrong answers here you must pay the ${price}-point ticket and go${to ? ` (the ticket goes ${to.slice(2, -1)})` : ''}; if you can't pay, you go home.`;
+}
+
+// Neighbours and destinations closed because someone is travelling there (owner's rule, task 13).
+function waitingNote(s: GameState): string {
+  const me = currentPlayer(s);
+  const near = new Set([
+    ...areaById.get(me.area!)!.neighbours,
+    ...(['airport', 'port'] as const).flatMap((kind) => destinations(map30, me.area!, kind, me.profile!)),
+  ]);
+  const lines = [...near].flatMap((id) => {
+    const p = bookedBy(s, id);
+    return p && p.seat !== me.seat ? [`${areaById.get(id)!.name} is waiting for ${COLOUR_NAMES[p.seat]} ${VEHICLE[p.travel!.kind]} (booked)`] : [];
+  });
+  return lines.length ? `⏳ ${lines.join(' · ')}: nobody else can go there until they land.` : '';
+}
+
+// Told before the 3rd quiz try in an area (owner's rule, task 13): what a wrong answer means.
+function lastTryText(s: GameState, dest: string): string {
+  const me = currentPlayer(s);
+  const name = areaById.get(dest)!.name;
+  return canPayAfterQuiz(s, me, dest)
+    ? `⚠️ Last try here for ${name}: Attention! If wrong, you pay the ${TICKET_PRICE[me.profile!]}-point ticket with your points and travel.`
+    : `⚠️ Last try here for ${name}: Attention! If wrong, you go home to ${areaById.get(homeFor(s, map30, me))!.name}.`;
+}
+
+function lastTryWarning(s: GameState, actions: Action[]): string {
+  if (currentPlayer(s).quizWrong < QUIZ_TRIES - 1) return '';
+  const dests = [...new Set(actions.flatMap((a) => (a.type === 'quiz' ? [a.to] : [])))];
+  return dests.map((d) => lastTryText(s, d)).join(' ');
 }
 
 function travelNote(me: Player): string {
@@ -700,10 +752,13 @@ function renderMap(s: GameState): HTMLElement {
           const canGo = humanTurn && legal.has(a.id);
           const tags = `${a.wonder ? '⭐' : ''}${a.bigCountry ? '🧩' : ''}${(map30.routes ?? []).some((r) => r.kind === 'airport' && (r.a === a.id || r.b === a.id)) ? '✈️' : ''}${(map30.routes ?? []).some((r) => r.kind === 'port' && (r.a === a.id || r.b === a.id)) ? '⛴️' : ''}`;
           const citizen = s.players.find((p) => p.citizenship?.includes(a.id));
+          // Booked (owner's rule, task 13): closed until the traveller lands.
+          const booked = bookedBy(s, a.id);
           const owned = s.businesses.filter((b) => b.area === a.id && b.owner !== null)
             .flatMap((b) => [` ${BUSINESS_ICON[b.kind]}`, dot(b.owner!)]);
           const tile = el('div', { className: 'area' + (canGo ? ' legal' : '') + (here ? ' occupied' : ''), title: (a.countries ?? []).join(', ') },
             el('div', { className: 'name' }, `${a.name} ${tags}`, ...(citizen ? [' 🛂', dot(citizen.seat)] : []), ...owned),
+            booked ? el('div', { className: 'small' }, '⏳ Waiting for ', dot(booked.seat), ` ${COLOUR_NAMES[booked.seat]} ${VEHICLE[booked.travel!.kind]}`) : '',
             el('div', { className: 'marks' }, ...visitedBy.map((p) => {
               const m = dot(p.seat);
               m.classList.add(p.area === a.id ? 'big' : 'faint');
