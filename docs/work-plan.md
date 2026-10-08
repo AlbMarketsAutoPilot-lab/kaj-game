@@ -40,8 +40,9 @@ Every task also adds its part to the test board, so there is **always a playable
 | 11 | Event cards | medium | 1 | 7–8 | ✅ done |
 | 12 | Challenges (6 types from open data) | medium | 1.5 | 8–9 | ✅ done |
 | 13 | Robot: easy, normal and hard | medium | 1 | 10 | ✅ done |
-| 14 | Real screens, art and sounds | medium | 5 (A1, A2, B1, B2, C) | 11–14 | A1 ✅ A2 ✅ B1 ✅ |
+| 14 | Real screens, art and sounds | medium | 5 (A1, A2, B1, B2, C) | 11–14 | A1 ✅ A2 ✅ B1 ✅ B2 ✅ |
 | 14a | Canada and Russia in 3 parts (+5 bonus) | **high** | 1 | 11 | ✅ done (24 new facts checked by the owner) |
+| 14b | Ship Australia East ↔ New Zealand; Alaska as a 3rd USA part (+5) | **high** | 1 | 12 | approved by the owner, not started |
 | 15 | Android release build (signed APK) | medium | 1 | 14 | |
 | 16 | Full-game tests, bug fixes, buffer | medium | 1–2 | 15 | |
 
@@ -234,6 +235,16 @@ on day 14 it could miss the deadline.
 - **B2 (next, medium):** popups for the quiz, test, challenge, event cards, entry fees and others'
   moves; quiz timer bug (the countdown is stopped right after it starts) and a visible countdown;
   right/wrong popup with the right answer and its fact; the guide for the area you're in.
+- Owner: wonder names OK; ship Australia East ↔ New Zealand and Alaska as a 3rd part of the USA
+  (+5, still left out of the zoom) approved → task 14b (high effort, its own session).
+- **Done in B2:** popups over the board for the quiz, citizenship test, challenge, entry fees, sale
+  offers, event cards and "What happened" (other players' moves, shown on a person's turn or right
+  after their own move; robots wait while a popup is open); the countdown bug fixed (a redraw
+  stopped the timer) with a visible bar; after every answer a ✅/❌ popup with the right answer and
+  the fact behind it ("You lose this turn" when wrong); the guide for the area you're in (what the
+  arrival earned, walks with points, closed neighbours and why, next continent and bonus, plane and
+  ship, businesses to buy, citizenship) with "Turn off guided help" (kept on the device; turned
+  back on from the setup screen).
 
 ### 14a. Canada and Russia in 3 parts — before session A2 (high)
 

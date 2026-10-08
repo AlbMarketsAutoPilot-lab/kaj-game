@@ -174,3 +174,26 @@ main:has(.game) { max-width: none; padding: 6px; height: 100vh; height: 100dvh; 
 button.link { background: none; border: none; padding: 0; text-align: left; font-weight: 600; color: var(--ink); }
 .country { display: flex; gap: 6px; align-items: center; font-size: 0.85rem; margin: 2px 0; }
 .mini-flag { height: 14px; width: auto; border: 1px solid var(--muted); border-radius: 2px; }
+
+/* Task 14 B2: popups, countdown, guide */
+.modal-back { position: fixed; inset: 0; z-index: 5; background: rgba(2, 20, 24, 0.6); display: grid; place-items: center; padding: 12px; }
+.modal { width: min(560px, 100%); max-height: 100%; overflow-y: auto; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6); border-width: 2px; }
+.modal h2 { font-size: 1.15rem; }
+.modal p { margin: 6px 0; }
+.modal ul { margin: 4px 0 10px; padding-left: 20px; font-size: 0.92rem; }
+.modal .row { margin-top: 8px; }
+.modal .row button { min-width: 120px; }
+.modal.right { border-color: var(--legal); }
+.modal.wrong { border-color: #ff8a7a; }
+.modal.event { border-color: var(--accent); }
+.modal .note { margin: 0; }
+.clock { display: grid; gap: 4px; margin: 8px 0; }
+.clock .secs { font-weight: 700; color: var(--accent); }
+.timebar { height: 8px; border-radius: 4px; background: rgba(255, 255, 255, 0.15); overflow: hidden; }
+.timebar span { display: block; height: 100%; width: 100%; background: var(--legal); transition: width 0.25s linear; }
+.clock.hurry .secs { color: #ff8a7a; }
+.clock.hurry .timebar span { background: #ff8a7a; }
+.guide { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; margin: 6px 0; background: rgba(255, 255, 255, 0.04); }
+.guide h3 { margin: 0 0 4px; }
+.guide .small { margin: 4px 0; color: var(--ink); }
+.guide .off { display: block; margin-top: 6px; color: var(--muted); }
