@@ -1,7 +1,7 @@
 import {
   bigCountryParts, blockedByMoney, canPayAfterQuiz, currentPlayer, entryFees, feeTotal, legalActions,
 } from './engine.ts';
-import { BUSINESS_PRICE, CONTINENT_BONUS, NOMAD_MIN_CONTINENTS, QUIZ_TRIES, TICKET_PRICE, TRAVEL_TURNS, WELCOME_BONUS } from './constants.ts';
+import { BUSINESS_PRICE, bigCountryPoints, CONTINENT_BONUS, NOMAD_MIN_CONTINENTS, QUIZ_TRIES, TICKET_PRICE, TRAVEL_TURNS, WELCOME_BONUS } from './constants.ts';
 import { areaById } from './map.ts';
 import { nextRandom } from './rng.ts';
 import type { Action, BusinessKind, Continent, GameMap, GameState, Player, RobotLevel, RouteKind } from './types.ts';
@@ -200,7 +200,7 @@ export function arrivalValue(map: GameMap, me: Player, to: string): number {
   if (!me.visitedAreas.includes(to)) {
     if (area.bigCountry) {
       const parts = bigCountryParts(map, area.bigCountry);
-      value += parts.every((id) => id === to || me.visitedAreas.includes(id)) ? 1 + parts.length : PART_PROGRESS;
+      value += parts.every((id) => id === to || me.visitedAreas.includes(id)) ? bigCountryPoints(parts.length) : PART_PROGRESS;
     } else {
       value += area.wonder ? 2 : 1;
     }

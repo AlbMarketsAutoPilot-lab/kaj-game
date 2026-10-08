@@ -1,5 +1,6 @@
-// First playable screen (task 3): a plain test board on top of the engine.
-// No final art yet. Robots play with simple rules, at the level chosen for each seat (task 13).
+// The game screens on top of the engine. Task 14 A2: poster, setup, home-area picker, and the
+// landscape board (left: the current area drawn; right: the world map and the turn panel).
+// Robots play with simple rules, at the level chosen for each seat (task 13).
 
 import { BUSINESS_PRICE, CHALLENGE_POINTS, CONTINENT_BONUS, GO_HOME_TURNS, NOMAD_MIN_CONTINENTS, NOMAD_PENALTY, NOMAD_WARNING_ROUND, POINTS_BUSINESS_CITIZENSHIP, QUIZ_TRIES, TICKET_PRICE, TOUR_FEE, TRAVEL_TURNS, VISA_PRICE } from '../engine/constants.ts';
 import {
@@ -7,8 +8,10 @@ import {
 } from '../engine/engine.ts';
 import { robotAction } from '../engine/normal-robot.ts';
 import { loadGame, saveGame } from '../engine/save.ts';
-import type { Action, Area, BusinessKind, ChallengeResult, ChallengeType, Deck, DrawnCard, GameState, Payment, Player, Profile, RobotLevel, RouteKind, SeatKind } from '../engine/types.ts';
+import type { Action, Area, BusinessKind, ChallengeResult, ChallengeType, Continent, Deck, DrawnCard, GameState, Payment, Player, Profile, RobotLevel, RouteKind, SeatKind } from '../engine/types.ts';
 import { map30 } from '../maps/map30.ts';
+import { shapes30 } from '../maps/shapes30.ts';
+import { buildGeo, continentBox, pad, squeeze, svg, unionBox, type Box } from './maps.ts';
 
 const COLOURS = ['#e4572e', '#2e86de', '#29a36a', '#e0a100'];
 const COLOUR_NAMES = ['Red', 'Blue', 'Green', 'Yellow'];
@@ -30,15 +33,17 @@ const CHALLENGE_NAME: Record<ChallengeType, string> = {
 };
 // Flag pictures (assets/flags), put into the page by the build as data URIs.
 const FLAGS: Record<string, string> = (window as unknown as { KAJ_FLAGS?: Record<string, string> }).KAJ_FLAGS ?? {};
+// The owner's poster, put into the page by the build as a data URI.
+const POSTER: string = (window as unknown as { KAJ_POSTER?: string }).KAJ_POSTER ?? '';
 // Credits for the open data and flags (shown on the start screen).
-const CREDITS = 'Country data: mledoze/countries, ODbL 1.0 · Flags: flag-icons by Panayiotis Lipiridis, MIT licence';
+const CREDITS = 'Country data: mledoze/countries, ODbL 1.0 · Flags: flag-icons by Panayiotis Lipiridis, MIT licence · Map shapes: Natural Earth · Lettering: Cinzel, SIL Open Font Licence';
 // Citizenship test: 15 seconds for each question (owner's choice, task 8).
 const EXAM_SECONDS = 15;
 const VEHICLE: Record<RouteKind, string> = { airport: '✈️', port: '⛴️' };
 const BUSINESS_ICON: Record<BusinessKind, string> = { tours: '🏛️', airline: '✈️', ferry: '⛴️' };
 const BUSINESS_NAME: Record<BusinessKind, string> = { tours: 'guided tours', airline: 'airline', ferry: 'ferry agency' };
 const BUSINESS_EARNS: Record<BusinessKind, string> = {
-  tours: `every other player pays you ${TOUR_FEE} point to enter`,
+  tours: `every other player pays you ${plural(TOUR_FEE, 'point')} to enter`,
   airline: 'every paid plane ticket from here goes to you',
   ferry: 'every paid ship ticket from here goes to you',
 };
@@ -46,6 +51,9 @@ const BUSINESS_EARNS: Record<BusinessKind, string> = {
 const app = document.getElementById('app')!;
 const areaById = new Map(map30.areas.map((a) => [a.id, a]));
 const continents = [...new Set(map30.areas.map((a) => a.continent))];
+const geo = buildGeo(map30, shapes30);
+const worldBox = unionBox([...geo.values()].map((g) => g.box));
+const hasRoute = (id: string, kind: RouteKind) => (map30.routes ?? []).some((r) => r.kind === kind && (r.a === id || r.b === id));
 
 let state: GameState | null = null;
 let robotSeed = 1;
@@ -59,6 +67,12 @@ let note = '';
 let pendingFees: Action | null = null;
 // The "sell a business" list is open on the move panel.
 let selling = false;
+// Choosing the home area: the continent zoomed into, and the area tapped (waiting for "Start here").
+let zoom: Continent | null = null;
+let pickedStart: string | null = null;
+// The area tapped on the world map (its details show in the side panel), and the player card opened.
+let detailArea: string | null = null;
+let shownPlayer: number | null = null;
 
 // ---------- small DOM helpers ----------
 
@@ -88,6 +102,30 @@ function plural(n: number, word: string): string {
   return `${n} ${word}${n === 1 ? '' : 's'}`;
 }
 
+// The title, in the poster's lettering (Cinzel, see web/style.css).
+function title(tag: 'h1' | 'strong' = 'h1'): HTMLElement {
+  return el(tag, { className: 'title', textContent: "Kris Ann's Journey" });
+}
+
+// ---------- start screen: the owner's poster ----------
+
+function renderStart(): void {
+  clearTimeout(robotTimer);
+  clearInterval(quizTimer);
+  state = null;
+  const saved = readSave();
+  const play = button('▶ Play', renderSetup);
+  play.className = 'primary big';
+  const resume = saved && 'state' in saved
+    ? button(`Continue (round ${saved.state.round} / ${saved.state.totalRounds})`, () => { state = saved.state; render(); })
+    : null;
+  app.replaceChildren(
+    el('section', { className: 'poster' },
+      POSTER ? el('img', { src: POSTER, alt: "Kris Ann's Journey" }) : title(),
+      el('div', { className: 'poster-buttons' }, play, resume ?? '')),
+  );
+}
+
 // ---------- setup screen ----------
 
 function renderSetup(): void {
@@ -99,8 +137,14 @@ function renderSetup(): void {
   let count = 2;
 
   const rows = el('div', { className: 'seats' });
+  const counts = el('div', { className: 'row' });
   const error = el('p', { className: 'error' });
   const draw = () => {
+    counts.replaceChildren('Players: ', ...[2, 3, 4].map((n) => {
+      const b = button(String(n), () => { count = n; draw(); });
+      if (n === count) b.className = 'chosen';
+      return b;
+    }));
     rows.replaceChildren(
       ...kinds.slice(0, count).map((kind, i) => {
         const select = el('select');
@@ -120,19 +164,14 @@ function renderSetup(): void {
   };
   draw();
 
-  const counts = el('div', { className: 'row' }, 'Players: ',
-    ...[2, 3, 4].map((n) => button(String(n), () => { count = n; draw(); })));
-
   const saved = readSave();
-  const resume = saved && 'state' in saved
-    ? button(`Continue game (round ${saved.state.round} / ${saved.state.totalRounds})`, () => { state = saved.state; render(); })
-    : null;
-  if (resume) resume.className = 'primary';
   const start = button('Start journey', () => {
     try {
       const seed = Math.floor(Math.random() * 2 ** 31);
       robotSeed = seed ^ 0x5bd1e995;
       const seats = kinds.slice(0, count).map((kind, i) => ({ kind, colour: COLOUR_NAMES[i], ...(kind === 'robot' ? { level: levels[i] } : {}) }));
+      zoom = null;
+      pickedStart = null;
       state = createGame({ seats, seed }, map30);
       render();
     } catch (e) {
@@ -143,13 +182,13 @@ function renderSetup(): void {
 
   app.replaceChildren(
     el('section', { className: 'card setup' },
-      el('h1', { textContent: "Kris Ann's Journey" }),
-      el('p', { textContent: 'Test board — 30 rounds on the 30-turn map. Walking, planes and ships.' }),
-      resume ?? '',
+      title(),
+      el('p', { textContent: '30 rounds around the world: walk, fly and sail.' }),
       saved && 'error' in saved ? el('p', { className: 'small', textContent: `${saved.error} It can't be continued; start a new journey.` }) : '',
       counts, rows, start,
-      resume ? el('p', { className: 'small', textContent: 'Starting a new journey replaces the saved game.' }) : '',
+      saved && 'state' in saved ? el('p', { className: 'small', textContent: 'Starting a new journey replaces the saved game.' }) : '',
       error,
+      el('div', { className: 'row' }, button('← Back', renderStart)),
       el('p', { className: 'small', textContent: CREDITS })),
   );
 }
@@ -220,6 +259,8 @@ function act(action: Action): void {
   askCitizenship = false;
   pendingFees = null;
   selling = false;
+  zoom = null;
+  pickedStart = null;
   render();
 }
 
@@ -266,9 +307,9 @@ function paymentNote(p: Payment): string {
         : `${from}'s ${p.amount}-point ticket went to ${to}, owner of the ${business}.`;
     }
     case 'sale':
-      return `🤝 ${from} bought ${to}'s ${BUSINESS_ICON[p.business!]} ${BUSINESS_NAME[p.business!]} in ${where} for ${p.amount} points. It now earns for ${from}, and counts ${p.amount} points at the end.`;
+      return `🤝 ${from} bought ${to}'s ${BUSINESS_ICON[p.business!]} ${BUSINESS_NAME[p.business!]} in ${where} for ${plural(p.amount, 'point')}. It now earns for ${from}, and counts ${plural(p.amount, 'point')} at the end.`;
     case 'buy':
-      return `${BUSINESS_ICON[p.business!]} ${from} bought the ${BUSINESS_NAME[p.business!]} in ${where} for ${p.amount} points: ${BUSINESS_EARNS[p.business!].replace('you', from)}. It counts ${p.amount} points at the end.`;
+      return `${BUSINESS_ICON[p.business!]} ${from} bought the ${BUSINESS_NAME[p.business!]} in ${where} for ${plural(p.amount, 'point')}: ${BUSINESS_EARNS[p.business!].replace('you', from)}. It counts ${plural(p.amount, 'point')} at the end.`;
   }
 }
 
@@ -295,7 +336,7 @@ const asksOffered = (actions: Action[]) => actions.filter((a) => 'citizenship' i
 const plainActions = (actions: Action[]) => actions.filter((a) => !('citizenship' in a && a.citizenship));
 
 function render(): void {
-  if (!state) return renderSetup();
+  if (!state) return renderStart();
   const s = state;
   const me = currentPlayer(s);
   const actions = legalActions(s, map30);
@@ -304,15 +345,24 @@ function render(): void {
   const isRobot = s.phase !== 'finished' && actor.kind === 'robot';
   writeSave(s);
 
-  app.replaceChildren(
-    el('header', {},
-      el('strong', { textContent: "Kris Ann's Journey" }),
-      el('span', { textContent: s.phase === 'play' || s.phase === 'finished' ? `Round ${s.round} / ${s.totalRounds}` : 'Getting ready' }),
-      button('New game', renderSetup)),
-    renderPlayers(s),
-    renderTurn(s, actions, isRobot),
-    renderMap(s),
-  );
+  if (s.phase === 'chooseProfile') {
+    app.replaceChildren(el('section', { className: 'card setup' }, title(), renderTurn(s, actions, isRobot)));
+  } else {
+    const header = el('header', {},
+      title('strong'),
+      el('span', { className: 'round', textContent: s.phase === 'play' || s.phase === 'finished' ? `Round ${s.round} / ${s.totalRounds}` : 'Getting ready' }),
+      renderChips(s),
+      button('New game', renderSetup));
+    const side = el('div', { className: 'side' });
+    if (s.phase !== 'chooseStart') side.append(renderWorld(s));
+    if (detailArea) side.append(renderAreaDetails(s, detailArea));
+    if (shownPlayer !== null) side.append(playerCard(s, shownPlayer));
+    side.append(renderTurn(s, actions, isRobot));
+    app.replaceChildren(el('div', { className: 'game' }, header,
+      el('div', { className: 'board' },
+        el('div', { className: 'left' }, s.phase === 'chooseStart' ? renderStartMap(s, isRobot) : renderAreaView(s, isRobot)),
+        side)));
+  }
 
   clearTimeout(robotTimer);
   clearInterval(quizTimer);
@@ -327,31 +377,43 @@ function render(): void {
   }
 }
 
-function renderPlayers(s: GameState): HTMLElement {
+// One small chip per player in the top bar; tapping it opens the full player card.
+function renderChips(s: GameState): HTMLElement {
   const me = currentPlayer(s);
-  return el('section', { className: 'players' },
-    ...s.turnOrder.map((seat) => {
-      const p = s.players[seat];
-      const area = p.area ? areaById.get(p.area)!.name
-        : p.travel ? `${VEHICLE[p.travel.kind]} to ${areaById.get(p.travel.to)!.name}` : '—';
-      const card = el('div', { className: 'player' + (p === me && s.phase !== 'finished' ? ' active' : '') },
-        el('div', {}, dot(seat), ` ${COLOUR_NAMES[seat]} ${p.kind === 'robot' ? `🤖 ${LEVEL_LABEL[p.level ?? 'normal']}` : '🙂'}`),
-        el('div', { className: 'small', textContent: p.profile ? PROFILE_LABEL[p.profile] : 'no profile yet' }),
-        el('div', { className: 'points', textContent: s.phase === 'finished'
-          ? `${finalScore(s, p)} points`
-          : `${p.points} points${businessValue(s, seat) ? ` + 🏢 ${businessValue(s, seat)}` : ''}` }),
-        el('div', { className: 'small', textContent: `📍 ${area}` }),
-        el('div', { className: 'small', textContent: p.citizenship
-          ? `🛂 Citizen of ${citizenshipName(p.citizenship)}`
-          : p.exam ? `🛂 Asking for citizenship in ${areaById.get(p.exam.area)!.name}` : '' }),
-        el('div', { className: 'small', textContent: `${plural(p.visitedContinents.length, 'continent')} · ${plural(p.visitedAreas.length, 'area')}` }),
-        continentBar(s, p),
-        el('div', { className: 'small', textContent: s.phase === 'play' ? nextCardText(s, p) : '' }),
-        el('div', { className: 'small', textContent: s.businesses.filter((b) => b.owner === seat)
-          .map((b) => `${BUSINESS_ICON[b.kind]} ${areaById.get(b.area)!.name}`).join(' · ') }));
-      card.style.borderColor = COLOURS[seat];
-      return card;
-    }));
+  return el('div', { className: 'chips' }, ...s.turnOrder.map((seat) => {
+    const p = s.players[seat];
+    const points = s.phase === 'finished' ? finalScore(s, p) : p.points;
+    const chip = el('button', { className: 'chip' + (p === me && s.phase !== 'finished' ? ' active' : '') + (shownPlayer === seat ? ' open' : ''), title: 'Show details' },
+      dot(seat), ` ${COLOUR_NAMES[seat]}${p.kind === 'robot' ? ' 🤖' : ''} `, el('b', { textContent: String(points) }),
+      businessValue(s, seat) && s.phase !== 'finished' ? ` +🏢${businessValue(s, seat)}` : '');
+    chip.style.borderColor = COLOURS[seat];
+    chip.addEventListener('click', () => { shownPlayer = shownPlayer === seat ? null : seat; render(); });
+    return chip;
+  }));
+}
+
+function playerCard(s: GameState, seat: number): HTMLElement {
+  const p = s.players[seat];
+  const area = p.area ? areaById.get(p.area)!.name
+    : p.travel ? `${VEHICLE[p.travel.kind]} to ${areaById.get(p.travel.to)!.name}` : '—';
+  const card = el('div', { className: 'player' },
+    el('div', {}, dot(seat), ` ${COLOUR_NAMES[seat]} ${p.kind === 'robot' ? `🤖 ${LEVEL_LABEL[p.level ?? 'normal']}` : '🙂'} `,
+      button('✕', () => { shownPlayer = null; render(); })),
+    el('div', { className: 'small', textContent: p.profile ? PROFILE_LABEL[p.profile] : 'no profile yet' }),
+    el('div', { className: 'points', textContent: s.phase === 'finished'
+      ? plural(finalScore(s, p), 'point')
+      : `${plural(p.points, 'point')}${businessValue(s, seat) ? ` + 🏢 ${businessValue(s, seat)}` : ''}` }),
+    el('div', { className: 'small', textContent: `📍 ${area}${p.home ? ` · 🏠 Home: ${areaById.get(p.home)!.name}` : ''}` }),
+    el('div', { className: 'small', textContent: p.citizenship
+      ? `🛂 Citizen of ${citizenshipName(p.citizenship)}`
+      : p.exam ? `🛂 Asking for citizenship in ${areaById.get(p.exam.area)!.name}` : '' }),
+    el('div', { className: 'small', textContent: `${plural(p.visitedContinents.length, 'continent')} · ${plural(p.visitedAreas.length, 'area')}` }),
+    continentBar(s, p),
+    el('div', { className: 'small', textContent: s.phase === 'play' ? nextCardText(s, p) : '' }),
+    el('div', { className: 'small', textContent: s.businesses.filter((b) => b.owner === seat)
+      .map((b) => `${BUSINESS_ICON[b.kind]} ${areaById.get(b.area)!.name}`).join(' · ') }));
+  card.style.borderColor = COLOURS[seat];
+  return card;
 }
 
 // When the player's next event card comes: every 3rd turn begun in an area; trip turns don't
@@ -398,7 +460,7 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
         // One total in points: travel points + assets (businesses at their price) − Nomad penalty.
         const detail = [`${p.points} travel`, `${value} assets`]
           .join(' + ') + (penalty ? ` − ${penalty} Nomad penalty` : '');
-        return el('li', {}, dot(seat), ` ${COLOUR_NAMES[seat]}: ${finalScore(s, p)} points (${detail}), ${p.visitedContinents.length} continents, ${p.visitedAreas.length} areas`);
+        return el('li', {}, dot(seat), ` ${COLOUR_NAMES[seat]}: ${plural(finalScore(s, p), 'point')} (${detail}), ${plural(p.visitedContinents.length, 'continent')}, ${plural(p.visitedAreas.length, 'area')}`);
       })),
       button('Play again', renderSetup));
     return box;
@@ -413,8 +475,8 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
       box.append(el('h2', {}, buyer, ` is thinking about ${COLOUR_NAMES[o.from]}'s offer… 🤖`));
       return box;
     }
-    box.append(el('h2', {}, buyer, `: ${COLOUR_NAMES[o.from]} offers you ${what} for ${o.price} points`),
-      el('p', { textContent: `If you buy it, ${BUSINESS_EARNS[o.business]}, and it counts ${o.price} points for you at the end. You have ${s.players[o.to].points} points.` }),
+    box.append(el('h2', {}, buyer, `: ${COLOUR_NAMES[o.from]} offers you ${what} for ${plural(o.price, 'point')}`),
+      el('p', { textContent: `If you buy it, ${BUSINESS_EARNS[o.business]}, and it counts ${plural(o.price, 'point')} for you at the end. You have ${plural(s.players[o.to].points, 'point')}.` }),
       el('div', { className: 'row' }, ...actions.map((a) => a.type === 'sellAnswer'
         ? button(a.accept ? `Yes, buy it (−${o.price})` : 'No, thanks', () => act(a)) : '')));
     return box;
@@ -429,12 +491,24 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
       el('div', { className: 'row' }, ...actions.map((a) =>
         button(a.type === 'chooseProfile' ? PROFILE_LABEL[a.profile] : '', () => act(a)))));
   } else if (s.phase === 'chooseStart') {
-    box.append(el('h2', {}, who, ', choose where your journey starts'),
-      el('p', { className: 'small', textContent: 'Each player starts on a different continent. Welcome bonus: Europe, Asia, Africa +3 · Americas +4 · Oceania +5.' }),
+    box.append(el('h2', {}, who, ', choose your home country'),
+      el('p', { className: 'small', textContent: zoom
+        ? `Tap a green area in ${zoom}.`
+        : 'Tap a continent on the map. Each player starts on a different continent. Welcome bonus: Europe, Asia, Africa +3 · Americas +4 · Oceania +5.' }),
       me.profile === 'backpacker'
         ? el('p', { className: 'small', textContent: '🎒 Tip: from Europe, Asia or Africa you can walk to 3 continents (+3 Backpacker bonus).' })
-        : '',
-      el('p', { className: 'small', textContent: 'Tap a green area on the map below.' }));
+        : '');
+    // The home area is stressed before it is confirmed (owner's request, task 14 A2):
+    // it is not a citizenship, and "go home" always comes back here.
+    if (pickedStart) {
+      const chosen = { type: 'chooseStart' as const, area: pickedStart };
+      const start = button(`🏠 Start in ${areaById.get(pickedStart)!.name}`, () => act(chosen));
+      start.className = 'primary';
+      box.append(el('div', { className: 'note home' },
+        el('strong', { textContent: `🏠 ${areaById.get(pickedStart)!.name} will be your home country for the whole game.` }),
+        el('p', { textContent: 'Your home country is not a citizenship. If you are ever sent home (for example when your money runs out), you come back here.' }),
+        el('div', { className: 'row' }, start, button('Choose again', () => { pickedStart = null; render(); }))));
+    }
   } else if (s.quiz) {
     renderQuiz(box, s, who);
   } else if (s.challenge) {
@@ -454,7 +528,7 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
         ? `${plural(trip.turnsLeft, 'travel turn')} left; you land at the end of the last one.`
         : `${to} is taken, so you wait one more turn and try to land again.` }),
       el('p', { className: 'small', textContent: `❓ Another passenger would like to play a geography challenge with you: one question, ${CHALLENGE_SECONDS} seconds. Right +${CHALLENGE_POINTS}, wrong −${CHALLENGE_POINTS}. You don't have to play.${me.profile === 'nomad' ? ' 💻 Digital Nomad: +1 for this travel turn either way.' : ''}` }),
-      me.points < CHALLENGE_POINTS ? el('p', { className: 'small', textContent: `A challenge needs at least ${CHALLENGE_POINTS} point, so there is none this turn.` }) : '',
+      me.points < CHALLENGE_POINTS ? el('p', { className: 'small', textContent: `A challenge needs at least ${plural(CHALLENGE_POINTS, 'point')}, so there is none this turn.` }) : '',
       el('div', { className: 'row' },
         ...(actions.some((a) => a.type === 'travel' && a.challenge) ? [button(`❓ Play the challenge (+${CHALLENGE_POINTS} / −${CHALLENGE_POINTS})`, () => act({ type: 'travel', challenge: true }))] : []),
         button('Continue the journey (no challenge)', () => act({ type: 'travel' }))));
@@ -466,8 +540,8 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
       const where = areaById.get(a.to)!.name;
       box.append(el('h2', {}, who, `: entering ${where} costs ${plural(feeTotal(fees), 'point')}`),
         el('ul', {}, ...fees.map((f) => el('li', { textContent: f.reason === 'visa'
-          ? `🛂 Visa: ${f.amount} points to ${COLOUR_NAMES[f.to.seat]} (${where} is ${COLOUR_NAMES[f.to.seat]}'s citizenship)`
-          : `🏛️ Tour fee: ${f.amount} point to ${COLOUR_NAMES[f.to.seat]} (owner of the guided tours in ${where})` }))),
+          ? `🛂 Visa: ${plural(f.amount, 'point')} to ${COLOUR_NAMES[f.to.seat]} (${where} is ${COLOUR_NAMES[f.to.seat]}'s citizenship)`
+          : `🏛️ Tour fee: ${plural(f.amount, 'point')} to ${COLOUR_NAMES[f.to.seat]} (owner of the guided tours in ${where})` }))),
         el('p', { className: 'small', textContent: a.type === 'walk' ? 'You pay when you enter.'
           : a.type === 'board' ? 'You pay now, with the ticket. Nothing more to pay when you land.'
           : 'You pay when you board (a right answer, or the ticket after the 3rd wrong one).' }),
@@ -486,14 +560,14 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
           const mine = exam.answers[i];
           return el('li', {}, `${q.text} ✅ ${q.options[q.correct]}`, mine === q.correct ? '' : ` (you said: ${q.options[mine]})`);
         })),
-        el('p', { textContent: `🎉 Your citizenship of ${citizenshipName(me.citizenship!)} is now granted! You may travel on.${me.profile === 'business' ? ` 💼 +${POINTS_BUSINESS_CITIZENSHIP} points.` : ''}` })));
+        el('p', { textContent: `🎉 Your citizenship of ${citizenshipName(me.citizenship!)} is now granted! You may travel on.${me.profile === 'business' ? ` 💼 +${plural(POINTS_BUSINESS_CITIZENSHIP, 'point')}.` : ''}` })));
     }
     if (s.card?.seat === me.seat) box.append(renderCard(s.card));
     box.append(el('h2', {}, who, `, you are in ${here.name}`), el('p', { className: 'small', textContent: travelNote(me) }));
     const businessesHere = s.businesses.filter((b) => b.area === here.id);
     if (businessesHere.length > 0) {
       box.append(el('p', { className: 'small', textContent: businessesHere.map((b) => `${BUSINESS_ICON[b.kind]} ${capital(BUSINESS_NAME[b.kind])} here: ${
-        b.owner === null ? `for sale, ${BUSINESS_PRICE[b.kind]} points (${BUSINESS_EARNS[b.kind]})` : b.owner === me.seat ? 'yours' : `owned by ${COLOUR_NAMES[b.owner]}`}`).join(' · ') }));
+        b.owner === null ? `for sale, ${plural(BUSINESS_PRICE[b.kind], 'point')} (${BUSINESS_EARNS[b.kind]})` : b.owner === me.seat ? 'yours' : `owned by ${COLOUR_NAMES[b.owner]}`}`).join(' · ') }));
     }
     if (actions.some((a) => a.type === 'blocked' || a.type === 'goHome') && blockedByMoney(s, map30, me)) {
       const homeName = areaById.get(homeFor(s, map30, me))!.name;
@@ -544,7 +618,7 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
         button('Cancel', () => { selling = false; render(); })));
     }
     box.append(
-      el('p', { className: 'small', textContent: 'New area +1 · new continent +2 · ⭐ wonder +1 more · 🧩 big country: 0 until every part is visited, then +1 + number of parts.' }),
+      el('p', { className: 'small', textContent: 'New area +1 · new continent +2 · ⭐ wonder +1 more · 🧩 big country: 0 until every part is visited, then +1 + number of parts (Canada and Russia, 3 parts: +5).' }),
       el('p', { className: 'small', textContent: `Businesses: buying doesn't end your turn, and each one counts its price at the end. Fees are strict: no money, no entry. Can't pay for ${GO_HOME_TURNS} turns in a row? You go home.` }),
       renderBigCountries(me));
   }
@@ -676,8 +750,8 @@ function renderChallenge(box: HTMLElement, s: GameState, who: HTMLElement): void
 
 function challengeNote(r: ChallengeResult): string {
   const name = COLOUR_NAMES[r.seat];
-  if (r.right) return `❓ ${name}'s challenge: right, it is ${r.challenge.options[r.challenge.correct]}! +${r.change} point.`;
-  const lost = r.change === 0 ? 'No points to lose' : `−${-r.change} point`;
+  if (r.right) return `❓ ${name}'s challenge: right, it is ${r.challenge.options[r.challenge.correct]}! +${plural(r.change, 'point')}.`;
+  const lost = r.change === 0 ? 'No points to lose' : `−${plural(-r.change, 'point')}`;
   return `❓ ${name}'s challenge: wrong, the answer was ${r.challenge.options[r.challenge.correct]}. ${lost}.`;
 }
 
@@ -735,44 +809,216 @@ function travelNote(me: Player): string {
   return notes.length ? `${notes.join(' · ')}. ${quiz}` : '';
 }
 
-function renderMap(s: GameState): HTMLElement {
-  const me = currentPlayer(s);
-  const legal = new Set(
-    legalActions(s, map30).flatMap((a) => (a.type === 'chooseStart' ? [a.area] : a.type === 'walk' ? [a.to] : [])),
-  );
-  const humanTurn = s.phase !== 'finished' && me.kind === 'human';
+// ---------- drawn maps (task 14 A2) ----------
 
-  return el('section', { className: 'map' },
-    ...continents.map((c) =>
-      el('div', { className: 'continent' },
-        el('h3', { textContent: c }),
-        el('div', { className: 'areas' }, ...map30.areas.filter((a) => a.continent === c).map((a) => {
-          const here = s.players.find((p) => p.area === a.id);
-          const visitedBy = s.players.filter((p) => p.visitedAreas.includes(a.id));
-          const canGo = humanTurn && legal.has(a.id);
-          const tags = `${a.wonder ? '⭐' : ''}${a.bigCountry ? '🧩' : ''}${(map30.routes ?? []).some((r) => r.kind === 'airport' && (r.a === a.id || r.b === a.id)) ? '✈️' : ''}${(map30.routes ?? []).some((r) => r.kind === 'port' && (r.a === a.id || r.b === a.id)) ? '⛴️' : ''}`;
-          const citizen = s.players.find((p) => p.citizenship?.includes(a.id));
-          // Booked (owner's rule, task 13): closed until the traveller lands.
-          const booked = bookedBy(s, a.id);
-          const owned = s.businesses.filter((b) => b.area === a.id && b.owner !== null)
-            .flatMap((b) => [` ${BUSINESS_ICON[b.kind]}`, dot(b.owner!)]);
-          const tile = el('div', { className: 'area' + (canGo ? ' legal' : '') + (here ? ' occupied' : ''), title: (a.countries ?? []).join(', ') },
-            el('div', { className: 'name' }, `${a.name} ${tags}`, ...(citizen ? [' 🛂', dot(citizen.seat)] : []), ...owned),
-            booked ? el('div', { className: 'small' }, '⏳ Waiting for ', dot(booked.seat), ` ${COLOUR_NAMES[booked.seat]} ${VEHICLE[booked.travel!.kind]}`) : '',
-            el('div', { className: 'marks' }, ...visitedBy.map((p) => {
-              const m = dot(p.seat);
-              m.classList.add(p.area === a.id ? 'big' : 'faint');
-              return m;
-            })));
-          if (here) tile.style.borderColor = COLOURS[here.seat];
-          if (canGo) {
-            const action = s.phase === 'chooseStart'
-              ? { type: 'chooseStart' as const, area: a.id }
-              : { type: 'walk' as const, to: a.id };
-            tile.addEventListener('click', () => (s.phase === 'chooseStart' ? act(action) : go(pick(legalActions(s, map30), action))));
-          }
-          return tile;
-        })))));
+interface Drawn { root: SVGSVGElement; labels: SVGGElement; paths: Map<string, SVGPathElement>; vb: Box; k: number; fs: number }
+
+const overlaps = (a: Box, b: Box) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), Math.max(lo, hi));
+
+// Draws the areas that show in the view (world units), squeezed by k across.
+// Text is sized in screen pixels (px), from the size of the pane the map fills.
+function drawMap(view: Box, k: number, cls: (id: string) => string, onTap: (id: string) => (() => void) | null, pane: 'left' | 'world' = 'left', px = 13): Drawn {
+  const vb = { x: view.x * k, y: view.y, w: view.w * k, h: view.h };
+  const root = svg('svg', { viewBox: `${vb.x} ${vb.y} ${vb.w} ${vb.h}`, class: 'map-svg' });
+  const shapes = svg('g', { transform: `scale(${k} 1)` });
+  const paths = new Map<string, SVGPathElement>();
+  for (const a of map30.areas) {
+    const g = geo.get(a.id)!;
+    if (!overlaps(g.box, view)) continue;
+    const path = svg('path', { d: g.path, class: `land ${cls(a.id)}` });
+    const tap = onTap(a.id);
+    if (tap) {
+      path.classList.add('tap');
+      path.addEventListener('click', tap);
+    }
+    paths.set(a.id, path);
+    shapes.append(path);
+  }
+  const labels = svg('g');
+  root.append(shapes, labels);
+  const w = window.innerWidth / 2 - 12;
+  const h = pane === 'left' ? window.innerHeight - 90 : w / 2.6;
+  const scale = Math.min(w / vb.w, h / vb.h);
+  return { root, labels, paths, vb, k, fs: px / scale };
 }
 
-renderSetup();
+// A label at (x, y) in view units; a tappable one gets a pill behind it.
+function label(d: Drawn, x: number, y: number, text: string, cls: string, size = 1, onTap?: () => void): void {
+  const fs = d.fs * size;
+  const g = svg('g', { class: `label ${cls}` });
+  if (onTap) {
+    const w = [...text].length * fs * 0.62 + fs;
+    g.append(svg('rect', { x: x - w / 2, y: y - fs * 0.8, width: w, height: fs * 1.6, rx: fs * 0.8 }));
+    g.classList.add('tap');
+    g.addEventListener('click', onTap);
+  }
+  g.append(svg('text', { x, y, 'font-size': fs, 'stroke-width': fs * 0.22, 'text-anchor': 'middle', 'dominant-baseline': 'central' }, text));
+  d.labels.append(g);
+}
+
+// Players' pieces: one dot each, side by side in the middle of their area.
+function pieces(d: Drawn, s: GameState, r: number): void {
+  for (const p of s.players) {
+    if (!p.area) continue;
+    const [cx, cy] = geo.get(p.area)!.centre;
+    const x = cx * d.k + (p.seat - 1.5) * r * 2.3;
+    if (x < d.vb.x || x > d.vb.x + d.vb.w || cy < d.vb.y || cy > d.vb.y + d.vb.h) continue;
+    d.labels.append(svg('circle', { cx: x, cy: cy + r * 2.4, r, fill: COLOURS[p.seat], class: 'piece' }));
+  }
+}
+
+// Left half: the current area, its neighbours around it (tap a green one to walk there).
+function renderAreaView(s: GameState, isRobot: boolean): HTMLElement {
+  const me = currentPlayer(s);
+  const focus = me.area ?? me.travel?.to ?? me.home ?? map30.areas[0].id;
+  const here = areaById.get(focus)!;
+  const view = pad(geo.get(focus)!.box, 0.5, 4);
+  const k = squeeze(view);
+  const actions = legalActions(s, map30);
+  const canWalk = !isRobot && s.phase === 'play' && !s.quiz && !s.challenge && !pendingFees;
+  const walks = new Map(canWalk ? plainActions(actions).flatMap((a) => (a.type === 'walk' ? [[a.to, a] as const] : [])) : []);
+  const walkTo = (id: string) => () => go(pick(legalActions(s, map30), walks.get(id)!));
+  const d = drawMap(view, k,
+    (id) => (id === focus ? 'here' : walks.has(id) ? 'go' : here.neighbours.includes(id) ? 'near' : ''),
+    (id) => (walks.has(id) ? walkTo(id) : null));
+
+  const { vb, fs } = d;
+  for (const n of here.neighbours) {
+    const area = areaById.get(n)!;
+    const [cx, cy] = geo.get(n)!.centre;
+    const name = area.name;
+    const w = ([...name].length * fs * 0.62 + fs * 3) / 2;
+    const x = clamp(cx * k, vb.x + w, vb.x + vb.w - w);
+    const y = clamp(cy, vb.y + fs, vb.y + vb.h - fs);
+    const walk = walks.get(n);
+    if (walk) {
+      const fees = feeTotal(entryFees(s, me, me.area, n));
+      label(d, x, y, `🚶 ${name}${gainLabel(s, walk, area)}${fees ? ` 💰−${fees}` : ''}`, 'go', 1, walkTo(n));
+    } else {
+      label(d, x, y, `${name}${bookedBy(s, n) ? ' ⏳' : ''}`, 'near', 0.85);
+    }
+  }
+  const [hx, hy] = geo.get(focus)!.centre;
+  const icons = `${here.wonder ? '⭐' : ''}${hasRoute(focus, 'airport') ? '✈️' : ''}${hasRoute(focus, 'port') ? '⛴️' : ''}${here.bigCountry ? '🧩' : ''}`;
+  label(d, hx * k, hy - fs * 1.1, here.name, 'here', 1.25);
+  if (icons) label(d, hx * k, hy + fs * 0.4, icons, 'here', 1.1);
+  pieces(d, s, fs * 0.45);
+
+  const caption = me.travel
+    ? `${VEHICLE[me.travel.kind]} ${COLOUR_NAMES[me.seat]} is on the way to ${here.name}`
+    : (['airport', 'port'] as const).flatMap((kind) => {
+      const to = me.profile ? destinations(map30, focus, kind, me.profile) : [];
+      return to.length ? [`${VEHICLE[kind]} ${kind === 'airport' ? 'Plane' : 'Ship'} to ${to.map((t) => areaById.get(t)!.name).join(', ')}`] : [];
+    }).join(' · ');
+  return el('div', { className: 'areaview' },
+    el('div', { className: 'where' }, dot(me.seat), ` ${here.name} · ${here.continent}`),
+    d.root,
+    caption ? el('div', { className: 'small caption', textContent: caption }) : '');
+}
+
+// Right half: the whole world. Players, trips, routes, booked and visited areas; tap for details.
+function renderWorld(s: GameState): HTMLElement {
+  const me = currentPlayer(s);
+  const d = drawMap(pad(worldBox, 0.01), 1,
+    (id) => [
+      id === me.area ? 'here' : '',
+      me.visitedAreas.includes(id) ? 'visited' : '',
+      bookedBy(s, id) ? 'booked' : '',
+      id === detailArea ? 'picked' : '',
+    ].join(' '),
+    (id) => () => { detailArea = detailArea === id ? null : id; render(); },
+    'world');
+  for (const [id, path] of d.paths) {
+    const b = bookedBy(s, id);
+    if (b) path.style.stroke = COLOURS[b.seat];
+  }
+  const centre = (id: string) => geo.get(id)!.centre;
+  for (const r of map30.routes ?? []) {
+    const [ax, ay] = centre(r.a);
+    let [bx, by] = centre(r.b);
+    if (bx - ax > 180) bx -= 360;
+    if (ax - bx > 180) bx += 360;
+    d.labels.append(svg('line', { x1: ax, y1: ay, x2: bx, y2: by, class: `route ${r.kind}` }));
+  }
+  for (const p of s.players) {
+    if (!p.travel) continue;
+    const [ax, ay] = centre(p.travel.from);
+    const [bx, by] = centre(p.travel.to);
+    const total = p.profile ? TRAVEL_TURNS[p.profile][p.travel.kind] : 1;
+    const t = Math.min(1, Math.max(0, (total - p.travel.turnsLeft) / (total + 1)));
+    const line = svg('line', { x1: ax, y1: ay, x2: bx, y2: by, class: 'trip' });
+    line.style.stroke = COLOURS[p.seat];
+    d.labels.append(line, svg('circle', { cx: ax + (bx - ax) * t, cy: ay + (by - ay) * t, r: d.fs * 0.4, fill: COLOURS[p.seat], class: 'piece' }));
+  }
+  pieces(d, s, d.fs * 0.4);
+  return el('div', { className: 'world' }, d.root);
+}
+
+// The details of an area tapped on the world map (for planning; nobody moves).
+function renderAreaDetails(s: GameState, id: string): HTMLElement {
+  const a = areaById.get(id)!;
+  const routes = (kind: RouteKind) => (map30.routes ?? []).filter((r) => r.kind === kind && (r.a === id || r.b === id))
+    .map((r) => areaById.get(r.a === id ? r.b : r.a)!.name);
+  const lines = [
+    `${a.continent} · ${(a.countries ?? []).join(', ')}`,
+    a.wonder ? '⭐ Wonder: +1 more the first time you visit' : '',
+    a.bigCountry ? `🧩 Part of ${a.bigCountry}` : '',
+    routes('airport').length ? `✈️ Airport: flights to ${routes('airport').join(', ')}` : '',
+    routes('port').length ? `⛴️ Port: ships to ${routes('port').join(', ')}` : '',
+    `🚶 Walk to: ${a.neighbours.map((n) => areaById.get(n)!.name).join(', ') || 'nowhere (island)'}`,
+    ...s.businesses.filter((b) => b.area === id).map((b) => `${BUSINESS_ICON[b.kind]} ${capital(BUSINESS_NAME[b.kind])}: ${b.owner === null ? `for sale, ${plural(BUSINESS_PRICE[b.kind], 'point')}` : `owned by ${COLOUR_NAMES[b.owner]}`}`),
+    ...s.players.filter((p) => p.citizenship?.includes(id)).map((p) => `🛂 ${COLOUR_NAMES[p.seat]} is a citizen here: others pay a ${VISA_PRICE}-point visa`),
+    ...s.players.filter((p) => p.area === id).map((p) => `📍 ${COLOUR_NAMES[p.seat]} is here`),
+    ...s.players.filter((p) => p.home === id).map((p) => `🏠 ${COLOUR_NAMES[p.seat]}'s home country`),
+    bookedBy(s, id) ? `⏳ Booked: ${COLOUR_NAMES[bookedBy(s, id)!.seat]} is on the way here` : '',
+    `Visited by: ${s.players.filter((p) => p.visitedAreas.includes(id)).map((p) => COLOUR_NAMES[p.seat]).join(', ') || 'nobody yet'}`,
+  ].filter((t) => t !== '');
+  return el('div', { className: 'card details' },
+    el('div', { className: 'row spread' }, el('h3', { textContent: a.name }), button('✕', () => { detailArea = null; render(); })),
+    ...lines.map((t) => el('p', { className: 'small', textContent: t })));
+}
+
+// Choosing the home country: the 6 continents first, then a zoom into one.
+function renderStartMap(s: GameState, isRobot: boolean): HTMLElement {
+  const legal = new Set(isRobot ? [] : legalActions(s, map30).flatMap((a) => (a.type === 'chooseStart' ? [a.area] : [])));
+  const homes = new Map(s.players.flatMap((p) => (p.area ? [[p.area, p] as const] : [])));
+  const open = (c: Continent) => map30.areas.some((a) => a.continent === c && legal.has(a.id));
+  const wrap = el('div', { className: 'areaview' });
+  if (zoom === null) {
+    const d = drawMap(pad(worldBox, 0.01), 1,
+      (id) => {
+        const c = areaById.get(id)!.continent;
+        return `c${continents.indexOf(c)}${homes.has(id) ? ' here' : open(c) ? '' : ' dim'}`;
+      },
+      (id) => (open(areaById.get(id)!.continent) ? () => { zoom = areaById.get(id)!.continent; render(); } : null));
+    for (const c of continents) {
+      const ids = map30.areas.filter((a) => a.continent === c).map((a) => geo.get(a.id)!.centre);
+      // The middle of the continent's areas (Greenland would pull Europe's box far west).
+      const x = ids.reduce((t, p) => t + p[0], 0) / ids.length;
+      const y = ids.reduce((t, p) => t + p[1], 0) / ids.length;
+      const taken = s.players.find((p) => p.startContinent === c);
+      label(d, x, y, taken ? `${c}: ${COLOUR_NAMES[taken.seat]}` : c, open(c) ? 'go' : 'near', 1,
+        open(c) ? () => { zoom = c; render(); } : undefined);
+    }
+    pieces(d, s, d.fs * 0.4);
+    wrap.append(el('div', { className: 'where' }, 'The world: tap a continent'), d.root);
+    return wrap;
+  }
+  const c = zoom;
+  const view = pad(continentBox(map30, geo, c), 0.06, 2);
+  const k = squeeze(view);
+  const d = drawMap(view, k,
+    (id) => (id === pickedStart ? 'here' : legal.has(id) ? 'go' : areaById.get(id)!.continent === c ? '' : 'dim'),
+    (id) => (legal.has(id) ? () => { pickedStart = id; render(); } : null));
+  for (const a of map30.areas.filter((x) => x.continent === c)) {
+    const [x, y] = geo.get(a.id)!.centre;
+    label(d, x * k, y, `${a.name}${a.wonder ? ' ⭐' : ''}`, a.id === pickedStart ? 'here' : legal.has(a.id) ? 'go' : 'near', 0.85,
+      legal.has(a.id) ? () => { pickedStart = a.id; render(); } : undefined);
+  }
+  pieces(d, s, d.fs * 0.4);
+  wrap.append(el('div', { className: 'where' }, button('← All continents', () => { zoom = null; pickedStart = null; render(); }), ` ${c}`), d.root);
+  return wrap;
+}
+
+renderStart();

@@ -1,3 +1,5 @@
+/* The poster's lettering: Cinzel (SIL Open Font Licence), inlined by the build. */
+@font-face { font-family: "Cinzel"; font-weight: 700; src: url("FONT_CINZEL") format("woff2"); }
 :root {
   --ink: #eef8f6;
   --muted: #b5d6d1;
@@ -12,13 +14,11 @@ body {
   min-height: 100vh;
   color: var(--ink);
   font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  background: #0b3b42 url("BG_LANDSCAPE") center / cover fixed no-repeat;
-}
-@media (max-aspect-ratio: 1/1) {
-  body { background-image: url("BG_PORTRAIT"); }
+  /* The whole picture stays inside the screen, borders included (owner's note, task 6). */
+  background: #0a3a40 url("BG_LANDSCAPE") center / contain fixed no-repeat;
 }
 main { max-width: 1100px; margin: 0 auto; padding: 16px; display: grid; gap: 12px; }
-h1, h2, h3 { margin: 0 0 8px; font-family: Georgia, "Times New Roman", serif; }
+h1, h2, h3 { margin: 0 0 8px; font-family: "Cinzel", Georgia, serif; }
 h1 { font-size: 2rem; color: var(--accent); }
 h2 { font-size: 1.25rem; }
 h3 { font-size: 1rem; color: var(--accent); }
@@ -60,3 +60,84 @@ select option { color: #000; }
 .note { border: 1px solid var(--accent); color: var(--accent); border-radius: 8px; padding: 6px 10px; margin: 0 0 8px; }
 .ask { display: block; margin: 8px 0; font-size: 0.9rem; }
 .flag { display: block; height: 90px; width: auto; margin: 4px 0 8px; border: 1px solid var(--muted); border-radius: 4px; }
+
+/* Task 14 A2: lettering, poster, landscape board, drawn maps */
+.title {
+  font-family: "Cinzel", Georgia, serif; font-weight: 700; letter-spacing: 0.02em;
+  background: linear-gradient(180deg, #d9fff6 0%, #8fd8cc 45%, #c9a6df 80%, #e5c6ee 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 1px 0 #062a30) drop-shadow(0 0 3px rgba(4, 30, 34, 0.9));
+}
+h1.title { font-size: 2.2rem; margin: 0; }
+strong.title { font-size: 1.05rem; white-space: nowrap; }
+.poster { position: fixed; inset: 0; background: #0a3a40; display: grid; place-items: center; }
+.poster img { width: 100%; height: 100%; object-fit: contain; }
+.poster-buttons { position: absolute; bottom: 9%; left: 0; right: 0; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+button.big { font-size: 1.3rem; padding: 10px 34px; font-family: "Cinzel", Georgia, serif; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45); }
+.poster-buttons button:not(.primary) { background: var(--card); }
+button.chosen { background: var(--accent); color: #1c2b2b; font-weight: 700; }
+.setup { margin: 4vh auto 0; }
+
+/* Landscape only (owner's decision, task 14 A1); Android is locked, a browser shows this. */
+#turn-phone { display: none; }
+@media (orientation: portrait) and (max-width: 900px) {
+  #turn-phone { display: flex; position: fixed; inset: 0; z-index: 10; flex-direction: column; gap: 8px;
+    align-items: center; justify-content: center; text-align: center; background: #0a3a40; font-size: 1.2rem; padding: 24px; }
+  #turn-phone .title { font-size: 2rem; margin: 0; }
+  #app { display: none; }
+}
+
+main:has(.game) { max-width: none; padding: 6px; height: 100vh; height: 100dvh; }
+.game { height: 100%; display: grid; grid-template-rows: auto 1fr; gap: 6px; min-height: 0; }
+.game header { padding: 4px 8px; flex-wrap: wrap; }
+.game header button { padding: 4px 10px; font-size: 0.85rem; }
+.round { font-size: 0.85rem; color: var(--muted); white-space: nowrap; }
+.chips { display: flex; gap: 4px; flex-wrap: wrap; flex: 1; justify-content: center; }
+.chip { padding: 2px 8px; font-size: 0.8rem; border-width: 2px; }
+.chip.active { box-shadow: 0 0 0 2px var(--accent); }
+.chip.open { background: rgba(255, 255, 255, 0.2); }
+.chip b { color: var(--accent); }
+.board { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; min-height: 0; }
+.left, .side { min-height: 0; }
+.side { overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+.side > * { flex-shrink: 0; }
+.side .card { padding: 10px; }
+.side h2 { font-size: 1.05rem; }
+.player .points { font-size: 1.1rem; }
+.player button { padding: 0 8px; float: right; }
+.row.spread { justify-content: space-between; }
+.details h3 { margin: 0; }
+.details .small { margin: 2px 0; }
+.note.home { border-width: 2px; }
+.note.home strong { font-size: 1.05rem; }
+
+.areaview { position: relative; height: 100%; display: grid; grid-template-rows: auto 1fr auto; background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.where { padding: 4px 10px; font-family: "Cinzel", Georgia, serif; font-weight: 700; color: var(--accent); font-size: 0.95rem; }
+.where button { padding: 2px 10px; font-size: 0.8rem; font-family: system-ui, sans-serif; }
+.caption { padding: 2px 10px 6px; }
+.map-svg { width: 100%; height: 100%; min-height: 0; display: block; background: rgba(4, 40, 52, 0.55); }
+.world { background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.world { aspect-ratio: 2.6; flex-shrink: 0; }
+.map-svg .land { fill: #2f6f6a; stroke: #bfe9e1; stroke-width: 0.6px; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+.map-svg .land.visited { fill: #4e9b8f; }
+.map-svg .land.near { fill: #3f7d76; }
+.map-svg .land.go { fill: #2fae7f; }
+.map-svg .land.here { fill: #e9c46a; }
+.map-svg .land.dim { fill: #24524f; opacity: 0.6; }
+.map-svg .land.booked { stroke-width: 2px; stroke-dasharray: 4 3; }
+.map-svg .land.picked { stroke: #fff; stroke-width: 2px; }
+.map-svg .land.c0 { fill: #4f8fc0; } .map-svg .land.c1 { fill: #c98b4f; } .map-svg .land.c2 { fill: #c9b04f; }
+.map-svg .land.c3 { fill: #5fae6e; } .map-svg .land.c4 { fill: #a96fc0; } .map-svg .land.c5 { fill: #4fb3b0; }
+.map-svg .land.c0.dim, .map-svg .land.c1.dim, .map-svg .land.c2.dim, .map-svg .land.c3.dim, .map-svg .land.c4.dim, .map-svg .land.c5.dim { fill: #24524f; }
+.map-svg .land.c0.here, .map-svg .land.c1.here, .map-svg .land.c2.here, .map-svg .land.c3.here, .map-svg .land.c4.here, .map-svg .land.c5.here { fill: #e9c46a; }
+.map-svg .tap { cursor: pointer; }
+.map-svg .land.tap:hover { filter: brightness(1.2); }
+.map-svg .label text { fill: #f4fbf9; stroke: #06292e; paint-order: stroke; font-weight: 600; font-family: system-ui, sans-serif; }
+.map-svg .label.here text { fill: #fff3c4; font-family: "Cinzel", Georgia, serif; font-weight: 700; }
+.map-svg .label.near text { fill: #cfe6e2; }
+.map-svg .label rect { fill: rgba(20, 120, 86, 0.92); stroke: #9ff0cf; stroke-width: 1px; vector-effect: non-scaling-stroke; }
+.map-svg .label.tap:hover rect { fill: rgba(30, 160, 112, 0.95); }
+.map-svg .piece { stroke: #fff; stroke-width: 1.5px; vector-effect: non-scaling-stroke; }
+.map-svg .route { stroke: rgba(255, 255, 255, 0.45); stroke-width: 1px; stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
+.map-svg .route.port { stroke: rgba(140, 200, 255, 0.6); }
+.map-svg .trip { stroke-width: 2.5px; stroke-dasharray: 6 4; vector-effect: non-scaling-stroke; }

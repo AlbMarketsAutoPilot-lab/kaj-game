@@ -1,6 +1,6 @@
 import { f, type FactBatch } from './types.ts';
 
-// Batch 5: map areas 41–50 (Central and South America, Oceania).
+// Batch 5: map areas 43–52 (Central and South America, Oceania).
 // Drafted by Claude, to be checked by the owner.
 
 export const batch5: FactBatch = {

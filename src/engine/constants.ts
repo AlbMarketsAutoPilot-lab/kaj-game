@@ -33,8 +33,15 @@ export const POINTS_NEW_AREA = 1;
 export const POINTS_NEW_CONTINENT = 2;
 // Wonder area, first visit: +1 extra on top of the area point.
 export const POINTS_WONDER = 1;
-// Big country with N parts, all parts visited: +1 (the area point) +N.
+// Big country with N parts, all parts visited: +1 (the area point) +N, given once.
 export const POINTS_BIG_COUNTRY_AREA = 1;
+// Task 14a (owner-approved): a big country in 3 parts (Canada, Russia) gives +5 instead of +1 +3.
+export const POINTS_BIG_COUNTRY_3_PARTS = 5;
+
+// Points for completing a big country with this many parts.
+export function bigCountryPoints(parts: number): number {
+  return parts >= 3 ? POINTS_BIG_COUNTRY_3_PARTS : POINTS_BIG_COUNTRY_AREA + parts;
+}
 
 // An airport or port has 1 to 3 fixed destinations (v1 scope section 4).
 export const MAX_DESTINATIONS = 3;

@@ -10,7 +10,7 @@ import {
   MIN_SEATS,
   NOMAD_MIN_CONTINENTS,
   NOMAD_PENALTY,
-  POINTS_BIG_COUNTRY_AREA,
+  bigCountryPoints,
   POINTS_BUSINESS_CITIZENSHIP,
   POINTS_NEW_AREA,
   POINTS_NEW_CONTINENT,
@@ -640,11 +640,11 @@ function arrive(state: GameState, map: GameMap, me: Player, area: Area, ask: boo
   if (!me.visitedAreas.includes(area.id)) {
     me.visitedAreas.push(area.id);
     if (area.bigCountry) {
-      // All or nothing: a part gives 0 until every part is visited, then +1 +N once.
+      // All or nothing: a part gives 0 until every part is visited, then +1 +N once (3 parts: +5).
       // Visited parts are kept, so a player can leave and continue later.
       const parts = bigCountryParts(map, area.bigCountry);
       if (parts.every((id) => me.visitedAreas.includes(id))) {
-        me.points = addPoints(me.points, POINTS_BIG_COUNTRY_AREA + parts.length);
+        me.points = addPoints(me.points, bigCountryPoints(parts.length));
       }
     } else {
       me.points = addPoints(me.points, POINTS_NEW_AREA);

@@ -30,10 +30,11 @@ Target: a complete, playable v1 within about 15 days of work.
 
 ## 4. Map
 
-- **Only the 30-turn map:** 50 areas, 7 wonders, **8 airports** and **6 ports** with **11 two-way connections**. (Task 9b, owner-approved: UK & Ireland gets an airport to the Arabian Peninsula and Japan a port to USA West, so UK & Ireland and Japan have both.) An airport or port has **1 to 3 fixed destinations**; the traveller chooses one when boarding. Luxury can choose any airport or port. (Changed in task 2b, owner-approved: 6 airports + 4 ports with one destination each could not pass the map check.)
+- **Only the 30-turn map:** 52 areas (50 until task 14a), 7 wonders, **8 airports** and **6 ports** with **11 two-way connections**. (Task 9b, owner-approved: UK & Ireland gets an airport to the Arabian Peninsula and Japan a port to USA West, so UK & Ireland and Japan have both.) An airport or port has **1 to 3 fixed destinations**; the traveller chooses one when boarding. Luxury can choose any airport or port. (Changed in task 2b, owner-approved: 6 airports + 4 ports with one destination each could not pass the map check.)
 - **Starting continents: 6 choices**, all different between players: Europe, Asia, Africa, **North America**, **South America**, Oceania.
 - **Welcome bonus:** Europe, Asia, Africa +3 · North America +4 · South America +4 · Oceania +5.
 - Big countries: a country split into N parts gives +N when all parts are visited (e.g. USA East + USA West = +2).
+- **Canada and Russia in 3 parts** (owner's change, task 14a): Canada West, Canada Central, Canada East; Russia West, Siberia, Russia Far East. Completing either gives **+5** (instead of +1 +3); the other big countries keep +1 +2 = +3.
 - Map check (automatic): every island is reachable, and no player can ever be stuck forever, including behind a visa area.
 
 ## 5. Rules with 2–4 players
@@ -105,6 +106,7 @@ Target: a complete, playable v1 within about 15 days of work.
 | Passport screen with stamps | **Not in v1** |
 | Online play, exam timers online | **No online play**; the timers in section 6 apply offline |
 | One robot level in v1 (this scope's first version) | **Easy, normal and hard** (owner's change, task 13) |
+| 30-turn map: every big country in 2 parts | **Canada and Russia in 3 parts, +5 when complete** (owner's change, task 14a); 52 areas |
 
 ## 10. Deferred (after v1, only with the owner's agreement)
 

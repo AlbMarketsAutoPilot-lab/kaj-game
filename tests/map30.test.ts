@@ -14,8 +14,8 @@ test('30-turn map: valid, two-way links, no duplicate links', () => {
   for (const a of areas) assert.equal(new Set(a.neighbours).size, a.neighbours.length, a.id);
 });
 
-test('30-turn map: 45–50 areas and 6–7 wonders', () => {
-  assert.ok(areas.length >= 45 && areas.length <= 50, `${areas.length} areas`);
+test('30-turn map: 52 areas (task 14a: Canada and Russia in 3 parts) and 6–7 wonders', () => {
+  assert.equal(areas.length, 52);
   const wonders = areas.filter((a) => a.wonder).length;
   assert.ok(wonders >= 6 && wonders <= 7, `${wonders} wonders`);
 });
@@ -60,7 +60,7 @@ test('walking groups: airports and ports join these 6 groups', () => {
   assert.equal(groups.length, 6);
   assert.deepEqual(small, ['australia-east,australia-west', 'iceland', 'japan', 'new-zealand']);
   const americas = groups.find((g) => g.includes('usa-east'))!;
-  assert.equal(americas.length, 12);
+  assert.equal(americas.length, 13);
 });
 
 test('a game can start on the 30-turn map with 4 seats', () => {
