@@ -44,21 +44,28 @@ test('start area: the highest welcome bonus, then the most neighbours; the Backp
   }
 });
 
-test('walking: most points now (a wonder), less after fees; citizenship in the first new area', () => {
+test('walking: most points now (a wonder), less after fees', () => {
   const s = startedGame(['central-europe', 'egypt'], 1, map30, ['business', 'luxury']);
   const a = act(s);
-  assert.deepEqual(a, { type: 'walk', to: 'italy', citizenship: true });
+  assert.deepEqual(a, { type: 'walk', to: 'italy' });
 
   // Italy with a visa (2) gives 2 − 2 = 0: a plain new area (+1) is better.
   const visa = structuredClone(s);
   visa.players.find((p) => p !== currentPlayer(visa))!.citizenship = ['italy'];
   const b = act(visa);
   assert.ok(b.type === 'walk' && b.to !== 'italy');
+});
 
-  // After round 9 it no longer asks.
-  const late = structuredClone(s);
+// Task 14d: asked in the area it stands in, before round 10; never in the home country.
+test('citizenship: asked in the first area where it can, before round 10', () => {
+  const home = startedGame(['central-europe', 'egypt'], 1, map30, ['business', 'luxury']);
+  assert.notEqual(act(home).type, 'askCitizenship'); // the home country
+  const away = structuredClone(home);
+  currentPlayer(away).area = 'italy';
+  assert.deepEqual(act(away), { type: 'askCitizenship' });
+  const late = structuredClone(away);
   late.round = 10;
-  assert.deepEqual(act(late), { type: 'walk', to: 'italy' });
+  assert.notEqual(act(late).type, 'askCitizenship');
 });
 
 test('businesses: bought only when the reserve is kept (easy 5, normal 3, hard 2)', () => {

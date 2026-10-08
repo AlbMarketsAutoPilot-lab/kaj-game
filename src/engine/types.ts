@@ -133,15 +133,14 @@ export interface Payment {
   business?: BusinessKind;
 }
 
-// Citizenship steps (docs/engine.md, task 8, owner's shorter timeline). The arrival turn is
-// citizenship turn 1: "request approved, the test is next turn".
+// Citizenship steps (docs/engine.md, tasks 8 and 14d). Turn 1: the player asks in the area they
+// stand in ("askCitizenship"), and the turn ends: "request approved, the test is next turn".
 // - test: turn 2, 3 a/b questions; the player stays;
 // - result: turn 3 after a wrong answer: "one more turn learning"; the player stays;
 // - learning: turn 4: the right answers are shown, citizenship is granted, the player moves;
-// - granted: citizenship was granted at the start of this turn and the player moves
-//   (turn 3 after all right answers; Luxury: the turn after arriving, no test);
-// - submitted: Luxury only, until the start of its next turn.
-export type ExamStage = 'submitted' | 'test' | 'result' | 'learning' | 'granted';
+// - granted: citizenship was granted and the player moves (turn 3 after all right answers;
+//   Luxury: at once when asking, no test, and the turn goes on).
+export type ExamStage = 'test' | 'result' | 'learning' | 'granted';
 
 export interface Exam {
   area: string;
@@ -157,8 +156,6 @@ export interface Travel {
   to: string;
   // Travel turns still to come. At 0 the player lands, or waits if the destination is taken.
   turnsLeft: number;
-  // Ask for citizenship on landing, if the area can still take one.
-  citizenship?: true;
 }
 
 // One a/b airline-quiz question. Nothing is secret in v1, so it can sit in the state.
@@ -172,8 +169,6 @@ export interface PendingQuiz {
   kind: RouteKind;
   to: string;
   question: QuizQuestion;
-  // Ask for citizenship on arrival (carried to the trip if the answer is right).
-  citizenship?: true;
 }
 
 export type Phase = 'chooseProfile' | 'chooseStart' | 'play' | 'finished';
@@ -269,16 +264,18 @@ export interface GameResult {
   winners: number[];
 }
 
-// `citizenship: true` on walk, board and quiz asks for citizenship on arrival
-// (only offered where the player could still get one).
 export type Action =
   | { type: 'chooseProfile'; profile: Profile }
   | { type: 'chooseStart'; area: string }
-  | { type: 'walk'; to: string; citizenship?: true }
+  | { type: 'walk'; to: string }
   // Pay the ticket and board. Not for the Backpacker, who travels only with the quiz.
-  | { type: 'board'; kind: RouteKind; to: string; citizenship?: true }
+  | { type: 'board'; kind: RouteKind; to: string }
   // Try the airline quiz for this trip; the next move is the answer.
-  | { type: 'quiz'; kind: RouteKind; to: string; citizenship?: true }
+  | { type: 'quiz'; kind: RouteKind; to: string }
+  // Ask for citizenship of the area the player stands in (owner's rule, task 14d): never the
+  // home country, once per game, never the Nomad, where nobody holds or is asking for it.
+  // Luxury: granted at once and the turn goes on. Others: the turn ends, the test is next turn.
+  | { type: 'askCitizenship' }
   | { type: 'answer'; choice: 0 | 1 }
   // A citizenship turn with nothing to choose ("approved", "granted", "learn the answers").
   | { type: 'exam' }

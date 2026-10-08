@@ -32,7 +32,7 @@ const canWalk = (s: GameState, to: string) => legalActions(s, map).some((a) => a
 
 // The current player's first plain move (never a purchase or a citizenship request).
 function pass(s: GameState): GameState {
-  return go(s, legalActions(s, map).find((a) => a.type !== 'buy' && !('citizenship' in a && a.citizenship))!);
+  return go(s, legalActions(s, map).find((a) => a.type !== 'buy' && a.type !== 'askCitizenship')!);
 }
 
 test('the map has guided tours at each wonder, an airline at each airport and a ferry agency at each port', () => {
@@ -195,6 +195,9 @@ test('tours bought while the player is at sea cost nothing on landing', () => {
 
 // Two players. p1 stands in af-south with 1 point: the walk to af-north and the plane to
 // as-east both need p2's 2-point visa. p2 starts in na-one and walks away from p1's home.
+// The moves, without asking for citizenship (also possible when out of money, task 14d).
+const moves = (s: GameState) => legalActions(s, map).filter((a) => a.type !== 'askCitizenship');
+
 function brokeGame(): GameState {
   const s = game(['eu-west', 'na-one']);
   p1(s).area = 'af-south';
@@ -207,12 +210,12 @@ function brokeGame(): GameState {
 test(`go home: blocked by lack of money ${GO_HOME_TURNS} turns in a row sends the player home, for free`, () => {
   let s = brokeGame();
   for (let turn = 1; turn < GO_HOME_TURNS; turn++) {
-    assert.deepEqual(legalActions(s, map), [{ type: 'blocked' }]);
+    assert.deepEqual(moves(s), [{ type: 'blocked' }]);
     s = go(s, { type: 'blocked' });
     assert.equal(p1(s).broke, turn);
     s = pass(s);
   }
-  assert.deepEqual(legalActions(s, map), [{ type: 'goHome' }]);
+  assert.deepEqual(moves(s), [{ type: 'goHome' }]);
   // Home is p2's citizenship now: going home is still free.
   p2(s).citizenship!.push('eu-west');
   s = go(s, { type: 'goHome' });
@@ -243,7 +246,7 @@ test('a move, or being blocked only by players, ends the "no money" count', () =
   p1(s).area = 'af-north';
   p1(s).broke = 1;
   seatOf(s, 2).area = 'eu-west';
-  assert.deepEqual(legalActions(s, map), [{ type: 'blocked' }]);
+  assert.deepEqual(moves(s), [{ type: 'blocked' }]);
   s = go(s, { type: 'blocked' });
   assert.equal(p1(s).broke, 0);
 });

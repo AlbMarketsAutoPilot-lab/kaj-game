@@ -43,6 +43,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | 14 | Real screens, art and sounds | medium | 5 (A1, A2, B1, B2, C) | 11–14 | A1 ✅ A2 ✅ B1 ✅ B2 ✅ |
 | 14a | Canada and Russia in 3 parts (+5 bonus) | **high** | 1 | 11 | ✅ done (24 new facts checked by the owner) |
 | 14b | Ships Australia East ↔ New Zealand and USA West ↔ Alaska; Alaska as a 3rd USA part (+5) | **high** | 1 | 12 | ✅ done (12 facts to check) |
+| 14d | Citizenship asked in the area you stand in (button) | **high** | 1 | 12 | ✅ done |
 | 15 | Android release build (signed APK) | medium | 1 | 14 | |
 | 16 | Full-game tests, bug fixes, buffer | medium | 1–2 | 15 | |
 

@@ -34,7 +34,7 @@ test('first arrival on a new continent: +1 area +2 continent; the start continen
 
 test('two players are never in the same area', () => {
   let s = startedGame(['eu-west', 'af-north']);
-  const moves = legalActions(s, testMap).flatMap((a) => (a.type === 'walk' && !a.citizenship ? [a.to] : []));
+  const moves = legalActions(s, testMap).flatMap((a) => (a.type === 'walk' ? [a.to] : []));
   assert.deepEqual(moves.sort(), ['eu-east', 'eu-north']);
   assert.throws(() => walk(s, 'af-north'));
   // Once the other player leaves, the area is free again.

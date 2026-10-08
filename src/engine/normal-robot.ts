@@ -25,7 +25,7 @@ export const ROBOT_LEVELS: Readonly<Record<RobotLevel, LevelSettings>> = {
   hard: { accuracy: 0.9, challengeFrom: 1, reserve: 2 },
 };
 
-// Asks for citizenship in the first new area it reaches before this round.
+// Asks for citizenship in the first area it can (not its home country) before this round.
 export const ROBOT_CITIZENSHIP_BEFORE = 10;
 // From this round the Nomad heads for a 3rd continent.
 export const ROBOT_NOMAD_ROUND = 18;
@@ -96,6 +96,11 @@ function choose(state: GameState, map: GameMap, actions: Action[], me: Player, s
     .find((a) => a && me.points - BUSINESS_PRICE[(a as { business: BusinessKind }).business] >= settings.reserve);
   if (buy) return buy;
 
+  // Citizenship: once, in the first area where it can ask, before round 10 (task 14d: asked in
+  // the area it stands in; the engine never offers it to the Nomad or in the home country).
+  const ask = actions.find((a) => a.type === 'askCitizenship');
+  if (ask && state.round < ROBOT_CITIZENSHIP_BEFORE) return ask;
+
   const moves = actions.filter((a) => a.type === 'walk' || a.type === 'board' || a.type === 'quiz');
   if (moves.length === 0) {
     // Sell only during the "out of money" warning: the dearest business, to the richest buyer.
@@ -131,7 +136,7 @@ interface Move {
 }
 
 function chooseMove(state: GameState, map: GameMap, moves: Action[], me: Player, settings: LevelSettings, rnd: Rand): Action {
-  const plain = moves.filter((a) => !('citizenship' in a && a.citizenship));
+  const plain = moves;
   const options: Move[] = [];
   const ticket = TICKET_PRICE[me.profile!];
   const tripsSeen = new Set<string>();
@@ -180,14 +185,6 @@ function chooseMove(state: GameState, map: GameMap, moves: Action[], me: Player,
       const dist = distances(map, me, (id) => !me.visitedAreas.includes(id));
       chosen = rnd.best(options, (m) => [-(dist.get(m.to)! + m.turns), m.gain, unvisitedNext(map, me, m.to)]);
     }
-  }
-
-  // Citizenship: once, in the first new area it reaches before round 10 (never the Nomad: the
-  // engine doesn't offer it).
-  if (state.round < ROBOT_CITIZENSHIP_BEFORE && !me.visitedAreas.includes(chosen.to)) {
-    const ask = moves.find((a) => a.type === chosen.action.type && 'citizenship' in a && a.citizenship
-      && (a as { to: string }).to === chosen.to && (!('kind' in a) || a.kind === (chosen.action as { kind?: RouteKind }).kind));
-    if (ask) return ask;
   }
   return chosen.action;
 }
