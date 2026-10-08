@@ -7,7 +7,8 @@ Made by `node scripts/map-shapes.ts --from <file>` from Natural Earth 1:10m stat
 
 | Part | States or provinces |
 |---|---|
-| USA West | Alaska, Arizona, California, Colorado, Hawaii, Idaho, Montana, Nevada, New Mexico, Oregon, Utah, Washington, Wyoming |
+| USA West | Arizona, California, Colorado, Hawaii, Idaho, Montana, Nevada, New Mexico, Oregon, Utah, Washington, Wyoming |
+| Alaska | Alaska |
 | Canada West | Alberta, British Columbia, Yukon |
 | Canada Central | Manitoba, Northwest Territories, Nunavut, Saskatchewan |
 | China West | Gansu, Qinghai, Xinjiang, Xizang |

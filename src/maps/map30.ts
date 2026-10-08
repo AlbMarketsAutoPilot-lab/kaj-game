@@ -1,8 +1,9 @@
 import type { Area, Continent, GameMap, Route } from '../engine/types.ts';
 import { FACT_BATCHES } from '../facts/index.ts';
 
-// The 30-turn map: 52 areas, 7 airports and 4 ports (9 connections).
+// The 30-turn map: 53 areas, 8 airports and 8 ports (12 connections).
 // Task 14a (owner-approved): Canada and Russia in 3 parts (50 → 52 areas).
+// Task 14b (owner-approved): Alaska is a 3rd part of the USA (53 areas); a ship Australia East ↔ New Zealand.
 // Each walking link is written once in BORDERS below; neighbours are built from it.
 
 interface AreaInfo {
@@ -102,11 +103,12 @@ const AREAS: AreaInfo[] = [
     countries: ['Angola', 'Zambia', 'Malawi', 'Mozambique', 'Zimbabwe', 'Botswana', 'Namibia', 'South Africa', 'Lesotho', 'Eswatini'],
   },
 
-  // North America (7)
+  // North America (8)
   { id: 'canada-west', name: 'Canada West', continent: 'North America', countries: ['Canada'], bigCountry: 'Canada' },
   { id: 'canada-central', name: 'Canada Central', continent: 'North America', countries: ['Canada'], bigCountry: 'Canada' },
   { id: 'canada-east', name: 'Canada East', continent: 'North America', countries: ['Canada'], bigCountry: 'Canada' },
   { id: 'usa-west', name: 'USA West', continent: 'North America', countries: ['United States'], bigCountry: 'United States' },
+  { id: 'alaska', name: 'Alaska', continent: 'North America', countries: ['United States'], bigCountry: 'United States' },
   { id: 'usa-east', name: 'USA East', continent: 'North America', countries: ['United States'], bigCountry: 'United States' },
   { id: 'mexico', name: 'Mexico', continent: 'North America', countries: ['Mexico'], wonder: true },
   {
@@ -196,6 +198,7 @@ const BORDERS: [string, string][] = [
   ['east-africa', 'southern-africa'],
   ['canada-west', 'canada-central'],
   ['canada-west', 'usa-west'],
+  ['canada-west', 'alaska'],
   ['canada-central', 'canada-east'],
   ['canada-central', 'usa-west'],
   ['canada-central', 'usa-east'],
@@ -232,6 +235,8 @@ const ROUTES: Route[] = [
   // Task 9b (owner-approved): two areas with both an airport and a port.
   { kind: 'airport', a: 'uk-ireland', b: 'arabia' },
   { kind: 'port', a: 'japan', b: 'usa-west' },
+  // Task 14b (owner-approved): New Zealand can be reached by sea from Australia.
+  { kind: 'port', a: 'australia-east', b: 'new-zealand' },
 ];
 
 function build(): GameMap {
