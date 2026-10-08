@@ -40,7 +40,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | 11 | Event cards | medium | 1 | 7–8 | ✅ done |
 | 12 | Challenges (6 types from open data) | medium | 1.5 | 8–9 | ✅ done |
 | 13 | Robot: easy, normal and hard | medium | 1 | 10 | ✅ done |
-| 14 | Real screens, art and sounds | medium | 4 (A1, A2, B, C) | 11–13 | A1 ✅ done (map shapes) |
+| 14 | Real screens, art and sounds | medium | 4 (A1, A2, B, C) | 11–13 | A1 ✅ A2 ✅ done (screens, maps) |
 | 14a | Canada and Russia in 3 parts (+5 bonus) | **high** | 1 | 11 | ✅ done (24 new facts checked by the owner) |
 | 15 | Android release build (signed APK) | medium | 1 | 14 | |
 | 16 | Full-game tests, bug fixes, buffer | medium | 1–2 | 15 | |
@@ -207,6 +207,16 @@ on day 14 it could miss the deadline.
   - Sessions: A1 map shapes ✅; A2 poster, background, lettering, setup, area view with the world
     map, landscape lock, "1 point"; B quiz, exam, challenge, event card, sale, go home, end screen;
     C guided help, sounds, polish.
+- **Done in A2:** start poster (borders inside the screen) with Play / Continue; background kept inside
+  the screen; lettering in Cinzel (free, SIL Open Font Licence, inside the game file) like the poster;
+  setup; home country picker (world with 6 continents → zoom → tap an area → the owner's message
+  "… will be your home country for the whole game", not a citizenship, "go home" comes back here →
+  "Start in …"); the board: left half the current area drawn with its neighbours (tap a green one to
+  walk), right half the world map (players, trips, routes, booked, visited; tap an area for its
+  details) and the turn panel; players as chips in the top bar (tap for the full card). Landscape
+  only: Android locked (`sensorLandscape`), a phone browser held upright shows "Please turn your
+  phone". Wording: "1 point", never "1 points". The quiz, exam, challenge, event card, sale and end
+  screen still use the simple panels until session B.
 
 ### 14a. Canada and Russia in 3 parts — before session A2 (high)
 
