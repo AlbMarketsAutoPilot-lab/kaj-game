@@ -1,0 +1,3071 @@
+[
+ {
+  "cca2": "es",
+  "cca3": "ESP",
+  "name": "Spain",
+  "capital": [
+   "Madrid"
+  ],
+  "currencies": {
+   "EUR": "Euro"
+  },
+  "borders": [
+   "AND",
+   "FRA",
+   "GIB",
+   "PRT",
+   "MAR"
+  ],
+  "area": 505992
+ },
+ {
+  "cca2": "pt",
+  "cca3": "PRT",
+  "name": "Portugal",
+  "capital": [
+   "Lisbon"
+  ],
+  "currencies": {
+   "EUR": "Euro"
+  },
+  "borders": [
+   "ESP"
+  ],
+  "area": 92090
+ },
+ {
+  "cca2": "ad",
+  "cca3": "AND",
+  "name": "Andorra",
+  "capital": [
+   "Andorra la Vella"
+  ],
+  "currencies": {
+   "EUR": "Euro"
+  },
+  "borders": [
+   "FRA",
+   "ESP"
+  ],
+  "area": 468
+ },
+ {
+  "cca2": "fr",
+  "cca3": "FRA",
+  "name": "France",
+  "capital": [
+   "Paris"
+  ],
+  "currencies": {
+   "EUR": "Euro"
+  },
+  "borders": [
+   "AND",
+   "BEL",
+   "DEU",
+   "ITA",
+   "LUX",
+   "MCO",
+   "ESP",
+   "CHE"
+  ],
+  "area": 551695
+ },
+ {
+  "cca2": "mc",
+  "cca3": "MCO",
+  "name": "Monaco",
+  "capital": [
+   "Monaco"
+  ],
+  "currencies": {
+   "EUR": "Euro"
+  },
+  "borders": [
+   "FRA"
+  ],
+  "area": 2.02
+ },
+ {
+  "cca2": "gb",
+  "cca3": "GBR",
+  "name": "United Kingdom",
+  "capital": [
+   "London"
+  ],
+  "currencies": {
+   "GBP": "British pound"
+  },
+  "borders": [
+   "IRL"
+  ],
+  "area": 242900
+ },
+ {
+  "cca2": "ie",
+  "cca3": "IRL",
+  "name": "Ireland",
+  "capital": [
+   "Dublin"
+  ],
+  "currencies": {
+   "EUR": "Euro"
+  },
+  "borders": [
+   "GBR"
+  ],
+  "area": 70273
+ },
+ {
+  "cca2": "de",
+  "cca3": "DEU",
+  "name": "Germany",
+  "capital": [
+   "Berlin"
+  ],
+  "currencies": {
+   "EUR": "Euro"
+  },
+  "borders": [
+   "AUT",
+   "BEL",
+   "CZE",
+   "DNK",
+   "FRA",
+   "LUX",
+   "NLD",
+   "POL",
+   "CHE"
+  ],
+  "area": 357114
+ },
+ {
+  "cca2": "at",
+  "cca3": "AUT",
+  "name": "Austria",
+  "capital": [
+   "Vienna"
+  ],
+  "currencies": {
+   "EUR": "Euro"
+  },
+  "borders": [
+   "CZE",
+   "DEU",
+   "HUN",
+   "ITA",
+   "LIE",
+   "SVK",
+   "SVN",
+   "CHE"
+  ],
+  "area": 83871
+ },
+ {
+  "cca2": "ch",
+  "cca3": "CHE",
+  "name": "Switzerland",
+  "capital": [
+   "Bern"
+  ],
+  "currencies": {
+   "CHF": "Swiss franc"
+  },
+  "borders": [
+   "AUT",
+   "FRA",
+   "ITA",
+   "LIE",
+   "DEU"
+  ],
+  "area": 41284
+ },
+ {
+  "cca2": "li",
+  "cca3": "LIE",
+  "name": "Liechtenstein",
+  "capital": [
+   "Vaduz"
+  ],
+  "currencies": {
+   "CHF": "Swiss franc"
+  },
+  "borders": [
+   "AUT",
+   "CHE"
+  ],
+  "area": 160
+ },
+ {
+  "cca2": "be",
+  "cca3": "BEL",
+  "name": "Belgium",
+  "capital": [
+   "Brussels"
+  ],
+  "currencies": {
+   "EUR": "Euro"
+  },
+  "borders": [
+   "FRA",
+   "DEU",
+   "LUX",
+   "NLD"
+  ],
+  "area": 30528
+ },
+ {
+  "cca2": "nl",
+  "cca3": "NLD",
+  "name": "Netherlands",
+  "capital": [
+   "Amsterdam"
+  ],
+  "currencies": {
+   "EUR": "Euro"
+  },
+  "borders": [
+   "BEL",
+   "DEU"
+  ],
+  "area": 41850
+ },
+ {
+  "cca2": "lu",
+  "cca3": "LUX",
+  "name": "Luxembourg",
+  "capital": [
+   "Luxembourg"
+  ],
+  "currencies": {
+   "EUR": "Euro"
+  },
+  "borders": [
+   "BEL",
+   "FRA",
+   "DEU"
+  ],
+  "area": 2586
+ },
+ {
+  "cca2": "it",
+  "cca3": "ITA",
+  "name": "Italy",
+  "capital": [
+   "Rome"
+  ],
+  "currencies": {
+   "EUR": "Euro"
+  },
+  "borders": [
+   "AUT",
+   "FRA",
+   "SMR",
+   "SVN",
+   "CHE",
+   "VAT"
+  ],
+  "area": 301336
+ },
+ {
+  "cca2": "sm",
+  "cca3": "SMR",
+  "name": "San Marino",
+  "capital": [
+   "City of San Marino"
+  ],
+  "currencies": {
+   "EUR": "Euro"
+  },
+  "borders": [
+   "ITA"
+  ],
+  "area": 61
+ },
+ {
+  "cca2": "va",
+  "cca3": "VAT",
+  "name": "Vatican City",
+  "capital": [
+   "Vatican City"
+  ],
+  "currencies": {
+   "EUR": "Euro"
+  },
+  "borders": [
+   "ITA"
+  ],
+  "area": 0.44
+ },
+ {
+  "cca2": "mt",
+  "cca3": "MLT",
+  "name": "Malta",
+  "capital": [
+   "Valletta"
+  ],
+  "currencies": {
+   "EUR": "Euro"
+  },
+  "borders": [],
+  "area": 316
+ },
+ {
+  "cca2": "no",
+  "cca3": "NOR",
+  "name": "Norway",
+  "capital": [
+   "Oslo"
+  ],
+  "currencies": {
+   "NOK": "Norwegian krone"
+  },
+  "borders": [
+   "FIN",
+   "SWE",
+   "RUS"
+  ],
+  "area": 323802
+ },
+ {
+  "cca2": "se",
+  "cca3": "SWE",
+  "name": "Sweden",
+  "capital": [
+   "Stockholm"
+  ],
+  "currencies": {
+   "SEK": "Swedish krona"
+  },
+  "borders": [
+   "FIN",
+   "NOR"
+  ],
+  "area": 450295
+ },
+ {
+  "cca2": "dk",
+  "cca3": "DNK",
+  "name": "Denmark",
+  "capital": [
+   "Copenhagen"
+  ],
+  "currencies": {
+   "DKK": "Danish krone"
+  },
+  "borders": [
+   "DEU"
+  ],
+  "area": 43094
+ },
+ {
+  "cca2": "fi",
+  "cca3": "FIN",
+  "name": "Finland",
+  "capital": [
+   "Helsinki"
+  ],
+  "currencies": {
+   "EUR": "Euro"
+  },
+  "borders": [
+   "NOR",
+   "SWE",
+   "RUS"
+  ],
+  "area": 338424
+ },
+ {
+  "cca2": "is",
+  "cca3": "ISL",
+  "name": "Iceland",
+  "capital": [
+   "Reykjavik"
+  ],
+  "currencies": {
+   "ISK": "Icelandic króna"
+  },
+  "borders": [],
+  "area": 103000
+ },
+ {
+  "cca2": "pl",
+  "cca3": "POL",
+  "name": "Poland",
+  "capital": [
+   "Warsaw"
+  ],
+  "currencies": {
+   "PLN": "Polish złoty"
+  },
+  "borders": [
+   "BLR",
+   "CZE",
+   "DEU",
+   "LTU",
+   "RUS",
+   "SVK",
+   "UKR"
+  ],
+  "area": 312679
+ },
+ {
+  "cca2": "cz",
+  "cca3": "CZE",
+  "name": "Czechia",
+  "capital": [
+   "Prague"
+  ],
+  "currencies": {
+   "CZK": "Czech koruna"
+  },
+  "borders": [
+   "AUT",
+   "DEU",
+   "POL",
+   "SVK"
+  ],
+  "area": 78865
+ },
+ {
+  "cca2": "sk",
+  "cca3": "SVK",
+  "name": "Slovakia",
+  "capital": [
+   "Bratislava"
+  ],
+  "currencies": {
+   "EUR": "Euro"
+  },
+  "borders": [
+   "AUT",
+   "CZE",
+   "HUN",
+   "POL",
+   "UKR"
+  ],
+  "area": 49037
+ },
+ {
+  "cca2": "hu",
+  "cca3": "HUN",
+  "name": "Hungary",
+  "capital": [
+   "Budapest"
+  ],
+  "currencies": {
+   "HUF": "Hungarian forint"
+  },
+  "borders": [
+   "AUT",
+   "HRV",
+   "ROU",
+   "SRB",
+   "SVK",
+   "SVN",
+   "UKR"
+  ],
+  "area": 93028
+ },
+ {
+  "cca2": "ee",
+  "cca3": "EST",
+  "name": "Estonia",
+  "capital": [
+   "Tallinn"
+  ],
+  "currencies": {
+   "EUR": "Euro"
+  },
+  "borders": [
+   "LVA",
+   "RUS"
+  ],
+  "area": 45227
+ },
+ {
+  "cca2": "lv",
+  "cca3": "LVA",
+  "name": "Latvia",
+  "capital": [
+   "Riga"
+  ],
+  "currencies": {
+   "EUR": "Euro"
+  },
+  "borders": [
+   "BLR",
+   "EST",
+   "LTU",
+   "RUS"
+  ],
+  "area": 64559
+ },
+ {
+  "cca2": "lt",
+  "cca3": "LTU",
+  "name": "Lithuania",
+  "capital": [
+   "Vilnius"
+  ],
+  "currencies": {
+   "EUR": "Euro"
+  },
+  "borders": [
+   "BLR",
+   "LVA",
+   "POL",
+   "RUS"
+  ],
+  "area": 65300
+ },
+ {
+  "cca2": "by",
+  "cca3": "BLR",
+  "name": "Belarus",
+  "capital": [
+   "Minsk"
+  ],
+  "currencies": {
+   "BYN": "Belarusian ruble"
+  },
+  "borders": [
+   "LVA",
+   "LTU",
+   "POL",
+   "RUS",
+   "UKR"
+  ],
+  "area": 207600
+ },
+ {
+  "cca2": "ua",
+  "cca3": "UKR",
+  "name": "Ukraine",
+  "capital": [
+   "Kyiv"
+  ],
+  "currencies": {
+   "UAH": "Ukrainian hryvnia"
+  },
+  "borders": [
+   "BLR",
+   "HUN",
+   "MDA",
+   "POL",
+   "ROU",
+   "RUS",
+   "SVK"
+  ],
+  "area": 603500
+ },
+ {
+  "cca2": "md",
+  "cca3": "MDA",
+  "name": "Moldova",
+  "capital": [
+   "Chișinău"
+  ],
+  "currencies": {
+   "MDL": "Moldovan leu"
+  },
+  "borders": [
+   "ROU",
+   "UKR"
+  ],
+  "area": 33846
+ },
+ {
+  "cca2": "si",
+  "cca3": "SVN",
+  "name": "Slovenia",
+  "capital": [
+   "Ljubljana"
+  ],
+  "currencies": {
+   "EUR": "Euro"
+  },
+  "borders": [
+   "AUT",
+   "HRV",
+   "ITA",
+   "HUN"
+  ],
+  "area": 20273
+ },
+ {
+  "cca2": "hr",
+  "cca3": "HRV",
+  "name": "Croatia",
+  "capital": [
+   "Zagreb"
+  ],
+  "currencies": {
+   "EUR": "Euro"
+  },
+  "borders": [
+   "BIH",
+   "HUN",
+   "MNE",
+   "SRB",
+   "SVN"
+  ],
+  "area": 56594
+ },
+ {
+  "cca2": "ba",
+  "cca3": "BIH",
+  "name": "Bosnia and Herzegovina",
+  "capital": [
+   "Sarajevo"
+  ],
+  "currencies": {
+   "BAM": "Bosnia and Herzegovina convertible mark"
+  },
+  "borders": [
+   "HRV",
+   "MNE",
+   "SRB"
+  ],
+  "area": 51209
+ },
+ {
+  "cca2": "rs",
+  "cca3": "SRB",
+  "name": "Serbia",
+  "capital": [
+   "Belgrade"
+  ],
+  "currencies": {
+   "RSD": "Serbian dinar"
+  },
+  "borders": [
+   "BIH",
+   "BGR",
+   "HRV",
+   "HUN",
+   "UNK",
+   "MKD",
+   "MNE",
+   "ROU"
+  ],
+  "area": 88361
+ },
+ {
+  "cca2": "me",
+  "cca3": "MNE",
+  "name": "Montenegro",
+  "capital": [
+   "Podgorica"
+  ],
+  "currencies": {
+   "EUR": "Euro"
+  },
+  "borders": [
+   "ALB",
+   "BIH",
+   "HRV",
+   "UNK",
+   "SRB"
+  ],
+  "area": 13812
+ },
+ {
+  "cca2": "mk",
+  "cca3": "MKD",
+  "name": "North Macedonia",
+  "capital": [
+   "Skopje"
+  ],
+  "currencies": {
+   "MKD": "denar"
+  },
+  "borders": [
+   "ALB",
+   "BGR",
+   "GRC",
+   "UNK",
+   "SRB"
+  ],
+  "area": 25713
+ },
+ {
+  "cca2": "al",
+  "cca3": "ALB",
+  "name": "Albania",
+  "capital": [
+   "Tirana"
+  ],
+  "currencies": {
+   "ALL": "Albanian lek"
+  },
+  "borders": [
+   "MNE",
+   "GRC",
+   "MKD",
+   "UNK"
+  ],
+  "area": 28748
+ },
+ {
+  "cca2": "ro",
+  "cca3": "ROU",
+  "name": "Romania",
+  "capital": [
+   "Bucharest"
+  ],
+  "currencies": {
+   "RON": "Romanian leu"
+  },
+  "borders": [
+   "BGR",
+   "HUN",
+   "MDA",
+   "SRB",
+   "UKR"
+  ],
+  "area": 238391
+ },
+ {
+  "cca2": "bg",
+  "cca3": "BGR",
+  "name": "Bulgaria",
+  "capital": [
+   "Sofia"
+  ],
+  "currencies": {
+   "EUR": "Euro"
+  },
+  "borders": [
+   "GRC",
+   "MKD",
+   "ROU",
+   "SRB",
+   "TUR"
+  ],
+  "area": 110879
+ },
+ {
+  "cca2": "gr",
+  "cca3": "GRC",
+  "name": "Greece",
+  "capital": [
+   "Athens"
+  ],
+  "currencies": {
+   "EUR": "Euro"
+  },
+  "borders": [
+   "ALB",
+   "BGR",
+   "TUR",
+   "MKD"
+  ],
+  "area": 131990
+ },
+ {
+  "cca2": "ru",
+  "cca3": "RUS",
+  "name": "Russia",
+  "capital": [
+   "Moscow"
+  ],
+  "currencies": {
+   "RUB": "Russian ruble"
+  },
+  "borders": [
+   "AZE",
+   "BLR",
+   "CHN",
+   "EST",
+   "FIN",
+   "GEO",
+   "KAZ",
+   "PRK",
+   "LVA",
+   "LTU",
+   "MNG",
+   "NOR",
+   "POL",
+   "UKR"
+  ],
+  "area": 17098242
+ },
+ {
+  "cca2": "tr",
+  "cca3": "TUR",
+  "name": "Turkey",
+  "capital": [
+   "Ankara"
+  ],
+  "currencies": {
+   "TRY": "Turkish lira"
+  },
+  "borders": [
+   "ARM",
+   "AZE",
+   "BGR",
+   "GEO",
+   "GRC",
+   "IRN",
+   "IRQ",
+   "SYR"
+  ],
+  "area": 783562
+ },
+ {
+  "cca2": "ge",
+  "cca3": "GEO",
+  "name": "Georgia",
+  "capital": [
+   "Tbilisi"
+  ],
+  "currencies": {
+   "GEL": "lari"
+  },
+  "borders": [
+   "ARM",
+   "AZE",
+   "RUS",
+   "TUR"
+  ],
+  "area": 69700
+ },
+ {
+  "cca2": "am",
+  "cca3": "ARM",
+  "name": "Armenia",
+  "capital": [
+   "Yerevan"
+  ],
+  "currencies": {
+   "AMD": "Armenian dram"
+  },
+  "borders": [
+   "AZE",
+   "GEO",
+   "IRN",
+   "TUR"
+  ],
+  "area": 29743
+ },
+ {
+  "cca2": "az",
+  "cca3": "AZE",
+  "name": "Azerbaijan",
+  "capital": [
+   "Baku"
+  ],
+  "currencies": {
+   "AZN": "Azerbaijani manat"
+  },
+  "borders": [
+   "ARM",
+   "GEO",
+   "IRN",
+   "RUS",
+   "TUR"
+  ],
+  "area": 86600
+ },
+ {
+  "cca2": "il",
+  "cca3": "ISR",
+  "name": "Israel",
+  "capital": [
+   "Jerusalem"
+  ],
+  "currencies": {
+   "ILS": "Israeli new shekel"
+  },
+  "borders": [
+   "EGY",
+   "JOR",
+   "LBN",
+   "PSE",
+   "SYR"
+  ],
+  "area": 20770
+ },
+ {
+  "cca2": "lb",
+  "cca3": "LBN",
+  "name": "Lebanon",
+  "capital": [
+   "Beirut"
+  ],
+  "currencies": {
+   "LBP": "Lebanese pound"
+  },
+  "borders": [
+   "ISR",
+   "SYR"
+  ],
+  "area": 10452
+ },
+ {
+  "cca2": "sy",
+  "cca3": "SYR",
+  "name": "Syria",
+  "capital": [
+   "Damascus"
+  ],
+  "currencies": {
+   "SYP": "Syrian pound"
+  },
+  "borders": [
+   "IRQ",
+   "ISR",
+   "JOR",
+   "LBN",
+   "TUR"
+  ],
+  "area": 185180
+ },
+ {
+  "cca2": "jo",
+  "cca3": "JOR",
+  "name": "Jordan",
+  "capital": [
+   "Amman"
+  ],
+  "currencies": {
+   "JOD": "Jordanian dinar"
+  },
+  "borders": [
+   "IRQ",
+   "ISR",
+   "PSE",
+   "SAU",
+   "SYR"
+  ],
+  "area": 89342
+ },
+ {
+  "cca2": "iq",
+  "cca3": "IRQ",
+  "name": "Iraq",
+  "capital": [
+   "Baghdad"
+  ],
+  "currencies": {
+   "IQD": "Iraqi dinar"
+  },
+  "borders": [
+   "IRN",
+   "JOR",
+   "KWT",
+   "SAU",
+   "SYR",
+   "TUR"
+  ],
+  "area": 438317
+ },
+ {
+  "cca2": "sa",
+  "cca3": "SAU",
+  "name": "Saudi Arabia",
+  "capital": [
+   "Riyadh"
+  ],
+  "currencies": {
+   "SAR": "Saudi riyal"
+  },
+  "borders": [
+   "IRQ",
+   "JOR",
+   "KWT",
+   "OMN",
+   "QAT",
+   "ARE",
+   "YEM"
+  ],
+  "area": 2149690
+ },
+ {
+  "cca2": "ye",
+  "cca3": "YEM",
+  "name": "Yemen",
+  "capital": [
+   "Sana'a"
+  ],
+  "currencies": {
+   "YER": "Yemeni rial"
+  },
+  "borders": [
+   "OMN",
+   "SAU"
+  ],
+  "area": 527968
+ },
+ {
+  "cca2": "om",
+  "cca3": "OMN",
+  "name": "Oman",
+  "capital": [
+   "Muscat"
+  ],
+  "currencies": {
+   "OMR": "Omani rial"
+  },
+  "borders": [
+   "SAU",
+   "ARE",
+   "YEM"
+  ],
+  "area": 309500
+ },
+ {
+  "cca2": "ae",
+  "cca3": "ARE",
+  "name": "United Arab Emirates",
+  "capital": [
+   "Abu Dhabi"
+  ],
+  "currencies": {
+   "AED": "United Arab Emirates dirham"
+  },
+  "borders": [
+   "OMN",
+   "SAU"
+  ],
+  "area": 83600
+ },
+ {
+  "cca2": "qa",
+  "cca3": "QAT",
+  "name": "Qatar",
+  "capital": [
+   "Doha"
+  ],
+  "currencies": {
+   "QAR": "Qatari riyal"
+  },
+  "borders": [
+   "SAU"
+  ],
+  "area": 11586
+ },
+ {
+  "cca2": "bh",
+  "cca3": "BHR",
+  "name": "Bahrain",
+  "capital": [
+   "Manama"
+  ],
+  "currencies": {
+   "BHD": "Bahraini dinar"
+  },
+  "borders": [],
+  "area": 765
+ },
+ {
+  "cca2": "kw",
+  "cca3": "KWT",
+  "name": "Kuwait",
+  "capital": [
+   "Kuwait City"
+  ],
+  "currencies": {
+   "KWD": "Kuwaiti dinar"
+  },
+  "borders": [
+   "IRQ",
+   "SAU"
+  ],
+  "area": 17818
+ },
+ {
+  "cca2": "ir",
+  "cca3": "IRN",
+  "name": "Iran",
+  "capital": [
+   "Tehran"
+  ],
+  "currencies": {
+   "IRR": "Iranian rial"
+  },
+  "borders": [
+   "AFG",
+   "ARM",
+   "AZE",
+   "IRQ",
+   "PAK",
+   "TUR",
+   "TKM"
+  ],
+  "area": 1648195
+ },
+ {
+  "cca2": "kz",
+  "cca3": "KAZ",
+  "name": "Kazakhstan",
+  "capital": [
+   "Astana"
+  ],
+  "currencies": {
+   "KZT": "Kazakhstani tenge"
+  },
+  "borders": [
+   "CHN",
+   "KGZ",
+   "RUS",
+   "TKM",
+   "UZB"
+  ],
+  "area": 2724900
+ },
+ {
+  "cca2": "uz",
+  "cca3": "UZB",
+  "name": "Uzbekistan",
+  "capital": [
+   "Tashkent"
+  ],
+  "currencies": {
+   "UZS": "Uzbekistani soʻm"
+  },
+  "borders": [
+   "AFG",
+   "KAZ",
+   "KGZ",
+   "TJK",
+   "TKM"
+  ],
+  "area": 447400
+ },
+ {
+  "cca2": "tm",
+  "cca3": "TKM",
+  "name": "Turkmenistan",
+  "capital": [
+   "Ashgabat"
+  ],
+  "currencies": {
+   "TMT": "Turkmenistan manat"
+  },
+  "borders": [
+   "AFG",
+   "IRN",
+   "KAZ",
+   "UZB"
+  ],
+  "area": 488100
+ },
+ {
+  "cca2": "kg",
+  "cca3": "KGZ",
+  "name": "Kyrgyzstan",
+  "capital": [
+   "Bishkek"
+  ],
+  "currencies": {
+   "KGS": "Kyrgyzstani som"
+  },
+  "borders": [
+   "CHN",
+   "KAZ",
+   "TJK",
+   "UZB"
+  ],
+  "area": 199951
+ },
+ {
+  "cca2": "tj",
+  "cca3": "TJK",
+  "name": "Tajikistan",
+  "capital": [
+   "Dushanbe"
+  ],
+  "currencies": {
+   "TJS": "Tajikistani somoni"
+  },
+  "borders": [
+   "AFG",
+   "CHN",
+   "KGZ",
+   "UZB"
+  ],
+  "area": 143100
+ },
+ {
+  "cca2": "pk",
+  "cca3": "PAK",
+  "name": "Pakistan",
+  "capital": [
+   "Islamabad"
+  ],
+  "currencies": {
+   "PKR": "Pakistani rupee"
+  },
+  "borders": [
+   "AFG",
+   "CHN",
+   "IND",
+   "IRN"
+  ],
+  "area": 881912
+ },
+ {
+  "cca2": "af",
+  "cca3": "AFG",
+  "name": "Afghanistan",
+  "capital": [
+   "Kabul"
+  ],
+  "currencies": {
+   "AFN": "Afghan afghani"
+  },
+  "borders": [
+   "IRN",
+   "PAK",
+   "TKM",
+   "UZB",
+   "TJK",
+   "CHN"
+  ],
+  "area": 652230
+ },
+ {
+  "cca2": "in",
+  "cca3": "IND",
+  "name": "India",
+  "capital": [
+   "New Delhi"
+  ],
+  "currencies": {
+   "INR": "Indian rupee"
+  },
+  "borders": [
+   "BGD",
+   "BTN",
+   "MMR",
+   "CHN",
+   "NPL",
+   "PAK"
+  ],
+  "area": 3287590
+ },
+ {
+  "cca2": "lk",
+  "cca3": "LKA",
+  "name": "Sri Lanka",
+  "capital": [
+   "Colombo"
+  ],
+  "currencies": {
+   "LKR": "Sri Lankan rupee"
+  },
+  "borders": [
+   "IND"
+  ],
+  "area": 65610
+ },
+ {
+  "cca2": "np",
+  "cca3": "NPL",
+  "name": "Nepal",
+  "capital": [
+   "Kathmandu"
+  ],
+  "currencies": {
+   "NPR": "Nepalese rupee"
+  },
+  "borders": [
+   "CHN",
+   "IND"
+  ],
+  "area": 147181
+ },
+ {
+  "cca2": "bt",
+  "cca3": "BTN",
+  "name": "Bhutan",
+  "capital": [
+   "Thimphu"
+  ],
+  "currencies": {
+   "BTN": "Bhutanese ngultrum",
+   "INR": "Indian rupee"
+  },
+  "borders": [
+   "CHN",
+   "IND"
+  ],
+  "area": 38394
+ },
+ {
+  "cca2": "bd",
+  "cca3": "BGD",
+  "name": "Bangladesh",
+  "capital": [
+   "Dhaka"
+  ],
+  "currencies": {
+   "BDT": "Bangladeshi taka"
+  },
+  "borders": [
+   "MMR",
+   "IND"
+  ],
+  "area": 147570
+ },
+ {
+  "cca2": "mv",
+  "cca3": "MDV",
+  "name": "Maldives",
+  "capital": [
+   "Malé"
+  ],
+  "currencies": {
+   "MVR": "Maldivian rufiyaa"
+  },
+  "borders": [],
+  "area": 300
+ },
+ {
+  "cca2": "cn",
+  "cca3": "CHN",
+  "name": "China",
+  "capital": [
+   "Beijing"
+  ],
+  "currencies": {
+   "CNY": "Chinese yuan"
+  },
+  "borders": [
+   "AFG",
+   "BTN",
+   "MMR",
+   "HKG",
+   "IND",
+   "KAZ",
+   "NPL",
+   "PRK",
+   "KGZ",
+   "LAO",
+   "MAC",
+   "MNG",
+   "PAK",
+   "RUS",
+   "TJK",
+   "VNM"
+  ],
+  "area": 9706961
+ },
+ {
+  "cca2": "mn",
+  "cca3": "MNG",
+  "name": "Mongolia",
+  "capital": [
+   "Ulan Bator"
+  ],
+  "currencies": {
+   "MNT": "Mongolian tögrög"
+  },
+  "borders": [
+   "CHN",
+   "RUS"
+  ],
+  "area": 1564110
+ },
+ {
+  "cca2": "kr",
+  "cca3": "KOR",
+  "name": "South Korea",
+  "capital": [
+   "Seoul"
+  ],
+  "currencies": {
+   "KRW": "South Korean won"
+  },
+  "borders": [
+   "PRK"
+  ],
+  "area": 100210
+ },
+ {
+  "cca2": "kp",
+  "cca3": "PRK",
+  "name": "North Korea",
+  "capital": [
+   "Pyongyang"
+  ],
+  "currencies": {
+   "KPW": "North Korean won"
+  },
+  "borders": [
+   "CHN",
+   "KOR",
+   "RUS"
+  ],
+  "area": 120538
+ },
+ {
+  "cca2": "jp",
+  "cca3": "JPN",
+  "name": "Japan",
+  "capital": [
+   "Tokyo"
+  ],
+  "currencies": {
+   "JPY": "Japanese yen"
+  },
+  "borders": [],
+  "area": 377930
+ },
+ {
+  "cca2": "mm",
+  "cca3": "MMR",
+  "name": "Myanmar",
+  "capital": [
+   "Naypyidaw"
+  ],
+  "currencies": {
+   "MMK": "Burmese kyat"
+  },
+  "borders": [
+   "BGD",
+   "CHN",
+   "IND",
+   "LAO",
+   "THA"
+  ],
+  "area": 676578
+ },
+ {
+  "cca2": "th",
+  "cca3": "THA",
+  "name": "Thailand",
+  "capital": [
+   "Bangkok"
+  ],
+  "currencies": {
+   "THB": "Thai baht"
+  },
+  "borders": [
+   "MMR",
+   "KHM",
+   "LAO",
+   "MYS"
+  ],
+  "area": 513120
+ },
+ {
+  "cca2": "la",
+  "cca3": "LAO",
+  "name": "Laos",
+  "capital": [
+   "Vientiane"
+  ],
+  "currencies": {
+   "LAK": "Lao kip"
+  },
+  "borders": [
+   "MMR",
+   "KHM",
+   "CHN",
+   "THA",
+   "VNM"
+  ],
+  "area": 236800
+ },
+ {
+  "cca2": "kh",
+  "cca3": "KHM",
+  "name": "Cambodia",
+  "capital": [
+   "Phnom Penh"
+  ],
+  "currencies": {
+   "KHR": "Cambodian riel",
+   "USD": "United States dollar"
+  },
+  "borders": [
+   "LAO",
+   "THA",
+   "VNM"
+  ],
+  "area": 181035
+ },
+ {
+  "cca2": "vn",
+  "cca3": "VNM",
+  "name": "Vietnam",
+  "capital": [
+   "Hanoi"
+  ],
+  "currencies": {
+   "VND": "Vietnamese đồng"
+  },
+  "borders": [
+   "KHM",
+   "CHN",
+   "LAO"
+  ],
+  "area": 331212
+ },
+ {
+  "cca2": "my",
+  "cca3": "MYS",
+  "name": "Malaysia",
+  "capital": [
+   "Kuala Lumpur"
+  ],
+  "currencies": {
+   "MYR": "Malaysian ringgit"
+  },
+  "borders": [
+   "BRN",
+   "IDN",
+   "THA"
+  ],
+  "area": 330803
+ },
+ {
+  "cca2": "sg",
+  "cca3": "SGP",
+  "name": "Singapore",
+  "capital": [
+   "Singapore"
+  ],
+  "currencies": {
+   "SGD": "Singapore dollar"
+  },
+  "borders": [],
+  "area": 710
+ },
+ {
+  "cca2": "bn",
+  "cca3": "BRN",
+  "name": "Brunei",
+  "capital": [
+   "Bandar Seri Begawan"
+  ],
+  "currencies": {
+   "BND": "Brunei dollar",
+   "SGD": "Singapore dollar"
+  },
+  "borders": [
+   "MYS"
+  ],
+  "area": 5765
+ },
+ {
+  "cca2": "id",
+  "cca3": "IDN",
+  "name": "Indonesia",
+  "capital": [
+   "Jakarta"
+  ],
+  "currencies": {
+   "IDR": "Indonesian rupiah"
+  },
+  "borders": [
+   "TLS",
+   "MYS",
+   "PNG"
+  ],
+  "area": 1904569
+ },
+ {
+  "cca2": "ph",
+  "cca3": "PHL",
+  "name": "Philippines",
+  "capital": [
+   "Manila"
+  ],
+  "currencies": {
+   "PHP": "Philippine peso"
+  },
+  "borders": [],
+  "area": 342353
+ },
+ {
+  "cca2": "tl",
+  "cca3": "TLS",
+  "name": "Timor-Leste",
+  "capital": [
+   "Dili"
+  ],
+  "currencies": {
+   "USD": "United States dollar"
+  },
+  "borders": [
+   "IDN"
+  ],
+  "area": 14874
+ },
+ {
+  "cca2": "pg",
+  "cca3": "PNG",
+  "name": "Papua New Guinea",
+  "capital": [
+   "Port Moresby"
+  ],
+  "currencies": {
+   "PGK": "Papua New Guinean kina"
+  },
+  "borders": [
+   "IDN"
+  ],
+  "area": 462840
+ },
+ {
+  "cca2": "ma",
+  "cca3": "MAR",
+  "name": "Morocco",
+  "capital": [
+   "Rabat"
+  ],
+  "currencies": {
+   "MAD": "Moroccan dirham"
+  },
+  "borders": [
+   "DZA",
+   "ESH",
+   "ESP"
+  ],
+  "area": 446550
+ },
+ {
+  "cca2": "dz",
+  "cca3": "DZA",
+  "name": "Algeria",
+  "capital": [
+   "Algiers"
+  ],
+  "currencies": {
+   "DZD": "Algerian dinar"
+  },
+  "borders": [
+   "TUN",
+   "LBY",
+   "NER",
+   "ESH",
+   "MRT",
+   "MLI",
+   "MAR"
+  ],
+  "area": 2381741
+ },
+ {
+  "cca2": "tn",
+  "cca3": "TUN",
+  "name": "Tunisia",
+  "capital": [
+   "Tunis"
+  ],
+  "currencies": {
+   "TND": "Tunisian dinar"
+  },
+  "borders": [
+   "DZA",
+   "LBY"
+  ],
+  "area": 163610
+ },
+ {
+  "cca2": "ly",
+  "cca3": "LBY",
+  "name": "Libya",
+  "capital": [
+   "Tripoli"
+  ],
+  "currencies": {
+   "LYD": "Libyan dinar"
+  },
+  "borders": [
+   "DZA",
+   "TCD",
+   "EGY",
+   "NER",
+   "SDN",
+   "TUN"
+  ],
+  "area": 1759540
+ },
+ {
+  "cca2": "eg",
+  "cca3": "EGY",
+  "name": "Egypt",
+  "capital": [
+   "Cairo"
+  ],
+  "currencies": {
+   "EGP": "Egyptian pound"
+  },
+  "borders": [
+   "ISR",
+   "LBY",
+   "PSE",
+   "SDN"
+  ],
+  "area": 1002450
+ },
+ {
+  "cca2": "mr",
+  "cca3": "MRT",
+  "name": "Mauritania",
+  "capital": [
+   "Nouakchott"
+  ],
+  "currencies": {
+   "MRU": "Mauritanian ouguiya"
+  },
+  "borders": [
+   "DZA",
+   "MLI",
+   "SEN",
+   "ESH"
+  ],
+  "area": 1030700
+ },
+ {
+  "cca2": "ml",
+  "cca3": "MLI",
+  "name": "Mali",
+  "capital": [
+   "Bamako"
+  ],
+  "currencies": {
+   "XOF": "West African CFA franc"
+  },
+  "borders": [
+   "DZA",
+   "BFA",
+   "GIN",
+   "CIV",
+   "MRT",
+   "NER",
+   "SEN"
+  ],
+  "area": 1240192
+ },
+ {
+  "cca2": "ne",
+  "cca3": "NER",
+  "name": "Niger",
+  "capital": [
+   "Niamey"
+  ],
+  "currencies": {
+   "XOF": "West African CFA franc"
+  },
+  "borders": [
+   "DZA",
+   "BEN",
+   "BFA",
+   "TCD",
+   "LBY",
+   "MLI",
+   "NGA"
+  ],
+  "area": 1267000
+ },
+ {
+  "cca2": "td",
+  "cca3": "TCD",
+  "name": "Chad",
+  "capital": [
+   "N'Djamena"
+  ],
+  "currencies": {
+   "XAF": "Central African CFA franc"
+  },
+  "borders": [
+   "CMR",
+   "CAF",
+   "LBY",
+   "NER",
+   "NGA",
+   "SDN"
+  ],
+  "area": 1284000
+ },
+ {
+  "cca2": "bf",
+  "cca3": "BFA",
+  "name": "Burkina Faso",
+  "capital": [
+   "Ouagadougou"
+  ],
+  "currencies": {
+   "XOF": "West African CFA franc"
+  },
+  "borders": [
+   "BEN",
+   "CIV",
+   "GHA",
+   "MLI",
+   "NER",
+   "TGO"
+  ],
+  "area": 272967
+ },
+ {
+  "cca2": "sn",
+  "cca3": "SEN",
+  "name": "Senegal",
+  "capital": [
+   "Dakar"
+  ],
+  "currencies": {
+   "XOF": "West African CFA franc"
+  },
+  "borders": [
+   "GMB",
+   "GIN",
+   "GNB",
+   "MLI",
+   "MRT"
+  ],
+  "area": 196722
+ },
+ {
+  "cca2": "gm",
+  "cca3": "GMB",
+  "name": "Gambia",
+  "capital": [
+   "Banjul"
+  ],
+  "currencies": {
+   "GMD": "dalasi"
+  },
+  "borders": [
+   "SEN"
+  ],
+  "area": 10689
+ },
+ {
+  "cca2": "gw",
+  "cca3": "GNB",
+  "name": "Guinea-Bissau",
+  "capital": [
+   "Bissau"
+  ],
+  "currencies": {
+   "XOF": "West African CFA franc"
+  },
+  "borders": [
+   "GIN",
+   "SEN"
+  ],
+  "area": 36125
+ },
+ {
+  "cca2": "gn",
+  "cca3": "GIN",
+  "name": "Guinea",
+  "capital": [
+   "Conakry"
+  ],
+  "currencies": {
+   "GNF": "Guinean franc"
+  },
+  "borders": [
+   "CIV",
+   "GNB",
+   "LBR",
+   "MLI",
+   "SEN",
+   "SLE"
+  ],
+  "area": 245857
+ },
+ {
+  "cca2": "sl",
+  "cca3": "SLE",
+  "name": "Sierra Leone",
+  "capital": [
+   "Freetown"
+  ],
+  "currencies": {
+   "SLE": "Sierra Leonean leone"
+  },
+  "borders": [
+   "GIN",
+   "LBR"
+  ],
+  "area": 71740
+ },
+ {
+  "cca2": "lr",
+  "cca3": "LBR",
+  "name": "Liberia",
+  "capital": [
+   "Monrovia"
+  ],
+  "currencies": {
+   "LRD": "Liberian dollar"
+  },
+  "borders": [
+   "GIN",
+   "CIV",
+   "SLE"
+  ],
+  "area": 111369
+ },
+ {
+  "cca2": "ci",
+  "cca3": "CIV",
+  "name": "Côte d'Ivoire",
+  "capital": [
+   "Yamoussoukro"
+  ],
+  "currencies": {
+   "XOF": "West African CFA franc"
+  },
+  "borders": [
+   "BFA",
+   "GHA",
+   "GIN",
+   "LBR",
+   "MLI"
+  ],
+  "area": 322463
+ },
+ {
+  "cca2": "gh",
+  "cca3": "GHA",
+  "name": "Ghana",
+  "capital": [
+   "Accra"
+  ],
+  "currencies": {
+   "GHS": "Ghanaian cedi"
+  },
+  "borders": [
+   "BFA",
+   "CIV",
+   "TGO"
+  ],
+  "area": 238533
+ },
+ {
+  "cca2": "tg",
+  "cca3": "TGO",
+  "name": "Togo",
+  "capital": [
+   "Lomé"
+  ],
+  "currencies": {
+   "XOF": "West African CFA franc"
+  },
+  "borders": [
+   "BEN",
+   "BFA",
+   "GHA"
+  ],
+  "area": 56785
+ },
+ {
+  "cca2": "bj",
+  "cca3": "BEN",
+  "name": "Benin",
+  "capital": [
+   "Porto-Novo"
+  ],
+  "currencies": {
+   "XOF": "West African CFA franc"
+  },
+  "borders": [
+   "BFA",
+   "NER",
+   "NGA",
+   "TGO"
+  ],
+  "area": 112622
+ },
+ {
+  "cca2": "ng",
+  "cca3": "NGA",
+  "name": "Nigeria",
+  "capital": [
+   "Abuja"
+  ],
+  "currencies": {
+   "NGN": "Nigerian naira"
+  },
+  "borders": [
+   "BEN",
+   "CMR",
+   "TCD",
+   "NER"
+  ],
+  "area": 923768
+ },
+ {
+  "cca2": "cv",
+  "cca3": "CPV",
+  "name": "Cabo Verde",
+  "capital": [
+   "Praia"
+  ],
+  "currencies": {
+   "CVE": "Cape Verdean escudo"
+  },
+  "borders": [],
+  "area": 4033
+ },
+ {
+  "cca2": "sd",
+  "cca3": "SDN",
+  "name": "Sudan",
+  "capital": [
+   "Khartoum"
+  ],
+  "currencies": {
+   "SDG": "Sudanese pound"
+  },
+  "borders": [
+   "CAF",
+   "TCD",
+   "EGY",
+   "ERI",
+   "ETH",
+   "LBY",
+   "SSD"
+  ],
+  "area": 1886068
+ },
+ {
+  "cca2": "ss",
+  "cca3": "SSD",
+  "name": "South Sudan",
+  "capital": [
+   "Juba"
+  ],
+  "currencies": {
+   "SSP": "South Sudanese pound"
+  },
+  "borders": [
+   "CAF",
+   "COD",
+   "ETH",
+   "KEN",
+   "SDN",
+   "UGA"
+  ],
+  "area": 619745
+ },
+ {
+  "cca2": "et",
+  "cca3": "ETH",
+  "name": "Ethiopia",
+  "capital": [
+   "Addis Ababa"
+  ],
+  "currencies": {
+   "ETB": "Ethiopian birr"
+  },
+  "borders": [
+   "DJI",
+   "ERI",
+   "KEN",
+   "SOM",
+   "SSD",
+   "SDN"
+  ],
+  "area": 1104300
+ },
+ {
+  "cca2": "er",
+  "cca3": "ERI",
+  "name": "Eritrea",
+  "capital": [
+   "Asmara"
+  ],
+  "currencies": {
+   "ERN": "Eritrean nakfa"
+  },
+  "borders": [
+   "DJI",
+   "ETH",
+   "SDN"
+  ],
+  "area": 117600
+ },
+ {
+  "cca2": "dj",
+  "cca3": "DJI",
+  "name": "Djibouti",
+  "capital": [
+   "Djibouti"
+  ],
+  "currencies": {
+   "DJF": "Djiboutian franc"
+  },
+  "borders": [
+   "ERI",
+   "ETH",
+   "SOM"
+  ],
+  "area": 23200
+ },
+ {
+  "cca2": "so",
+  "cca3": "SOM",
+  "name": "Somalia",
+  "capital": [
+   "Mogadishu"
+  ],
+  "currencies": {
+   "SOS": "Somali shilling"
+  },
+  "borders": [
+   "DJI",
+   "ETH",
+   "KEN"
+  ],
+  "area": 637657
+ },
+ {
+  "cca2": "cm",
+  "cca3": "CMR",
+  "name": "Cameroon",
+  "capital": [
+   "Yaoundé"
+  ],
+  "currencies": {
+   "XAF": "Central African CFA franc"
+  },
+  "borders": [
+   "CAF",
+   "TCD",
+   "COG",
+   "GNQ",
+   "GAB",
+   "NGA"
+  ],
+  "area": 475442
+ },
+ {
+  "cca2": "cf",
+  "cca3": "CAF",
+  "name": "Central African Republic",
+  "capital": [
+   "Bangui"
+  ],
+  "currencies": {
+   "XAF": "Central African CFA franc"
+  },
+  "borders": [
+   "CMR",
+   "TCD",
+   "COD",
+   "COG",
+   "SSD",
+   "SDN"
+  ],
+  "area": 622984
+ },
+ {
+  "cca2": "gq",
+  "cca3": "GNQ",
+  "name": "Equatorial Guinea",
+  "capital": [
+   "Malabo"
+  ],
+  "currencies": {
+   "XAF": "Central African CFA franc"
+  },
+  "borders": [
+   "CMR",
+   "GAB"
+  ],
+  "area": 28051
+ },
+ {
+  "cca2": "ga",
+  "cca3": "GAB",
+  "name": "Gabon",
+  "capital": [
+   "Libreville"
+  ],
+  "currencies": {
+   "XAF": "Central African CFA franc"
+  },
+  "borders": [
+   "CMR",
+   "COG",
+   "GNQ"
+  ],
+  "area": 267668
+ },
+ {
+  "cca2": "cg",
+  "cca3": "COG",
+  "name": "Republic of the Congo",
+  "capital": [
+   "Brazzaville"
+  ],
+  "currencies": {
+   "XAF": "Central African CFA franc"
+  },
+  "borders": [
+   "AGO",
+   "CMR",
+   "CAF",
+   "COD",
+   "GAB"
+  ],
+  "area": 342000
+ },
+ {
+  "cca2": "cd",
+  "cca3": "COD",
+  "name": "DR Congo",
+  "capital": [
+   "Kinshasa"
+  ],
+  "currencies": {
+   "CDF": "Congolese franc"
+  },
+  "borders": [
+   "AGO",
+   "BDI",
+   "CAF",
+   "COG",
+   "RWA",
+   "SSD",
+   "TZA",
+   "UGA",
+   "ZMB"
+  ],
+  "area": 2344858
+ },
+ {
+  "cca2": "st",
+  "cca3": "STP",
+  "name": "São Tomé and Príncipe",
+  "capital": [
+   "São Tomé"
+  ],
+  "currencies": {
+   "STN": "São Tomé and Príncipe dobra"
+  },
+  "borders": [],
+  "area": 964
+ },
+ {
+  "cca2": "ke",
+  "cca3": "KEN",
+  "name": "Kenya",
+  "capital": [
+   "Nairobi"
+  ],
+  "currencies": {
+   "KES": "Kenyan shilling"
+  },
+  "borders": [
+   "ETH",
+   "SOM",
+   "SSD",
+   "TZA",
+   "UGA"
+  ],
+  "area": 580367
+ },
+ {
+  "cca2": "ug",
+  "cca3": "UGA",
+  "name": "Uganda",
+  "capital": [
+   "Kampala"
+  ],
+  "currencies": {
+   "UGX": "Ugandan shilling"
+  },
+  "borders": [
+   "COD",
+   "KEN",
+   "RWA",
+   "SSD",
+   "TZA"
+  ],
+  "area": 241550
+ },
+ {
+  "cca2": "tz",
+  "cca3": "TZA",
+  "name": "Tanzania",
+  "capital": [
+   "Dodoma"
+  ],
+  "currencies": {
+   "TZS": "Tanzanian shilling"
+  },
+  "borders": [
+   "BDI",
+   "COD",
+   "KEN",
+   "MWI",
+   "MOZ",
+   "RWA",
+   "UGA",
+   "ZMB"
+  ],
+  "area": 945087
+ },
+ {
+  "cca2": "rw",
+  "cca3": "RWA",
+  "name": "Rwanda",
+  "capital": [
+   "Kigali"
+  ],
+  "currencies": {
+   "RWF": "Rwandan franc"
+  },
+  "borders": [
+   "BDI",
+   "COD",
+   "TZA",
+   "UGA"
+  ],
+  "area": 26338
+ },
+ {
+  "cca2": "bi",
+  "cca3": "BDI",
+  "name": "Burundi",
+  "capital": [
+   "Gitega"
+  ],
+  "currencies": {
+   "BIF": "Burundian franc"
+  },
+  "borders": [
+   "COD",
+   "RWA",
+   "TZA"
+  ],
+  "area": 27834
+ },
+ {
+  "cca2": "mg",
+  "cca3": "MDG",
+  "name": "Madagascar",
+  "capital": [
+   "Antananarivo"
+  ],
+  "currencies": {
+   "MGA": "Malagasy ariary"
+  },
+  "borders": [],
+  "area": 587041
+ },
+ {
+  "cca2": "sc",
+  "cca3": "SYC",
+  "name": "Seychelles",
+  "capital": [
+   "Victoria"
+  ],
+  "currencies": {
+   "SCR": "Seychellois rupee"
+  },
+  "borders": [],
+  "area": 452
+ },
+ {
+  "cca2": "km",
+  "cca3": "COM",
+  "name": "Comoros",
+  "capital": [
+   "Moroni"
+  ],
+  "currencies": {
+   "KMF": "Comorian franc"
+  },
+  "borders": [],
+  "area": 1862
+ },
+ {
+  "cca2": "mu",
+  "cca3": "MUS",
+  "name": "Mauritius",
+  "capital": [
+   "Port Louis"
+  ],
+  "currencies": {
+   "MUR": "Mauritian rupee"
+  },
+  "borders": [],
+  "area": 2040
+ },
+ {
+  "cca2": "ao",
+  "cca3": "AGO",
+  "name": "Angola",
+  "capital": [
+   "Luanda"
+  ],
+  "currencies": {
+   "AOA": "Angolan kwanza"
+  },
+  "borders": [
+   "COG",
+   "COD",
+   "ZMB",
+   "NAM"
+  ],
+  "area": 1246700
+ },
+ {
+  "cca2": "zm",
+  "cca3": "ZMB",
+  "name": "Zambia",
+  "capital": [
+   "Lusaka"
+  ],
+  "currencies": {
+   "ZMW": "Zambian kwacha"
+  },
+  "borders": [
+   "AGO",
+   "BWA",
+   "COD",
+   "MWI",
+   "MOZ",
+   "NAM",
+   "TZA",
+   "ZWE"
+  ],
+  "area": 752612
+ },
+ {
+  "cca2": "mw",
+  "cca3": "MWI",
+  "name": "Malawi",
+  "capital": [
+   "Lilongwe"
+  ],
+  "currencies": {
+   "MWK": "Malawian kwacha"
+  },
+  "borders": [
+   "MOZ",
+   "TZA",
+   "ZMB"
+  ],
+  "area": 118484
+ },
+ {
+  "cca2": "mz",
+  "cca3": "MOZ",
+  "name": "Mozambique",
+  "capital": [
+   "Maputo"
+  ],
+  "currencies": {
+   "MZN": "Mozambican metical"
+  },
+  "borders": [
+   "MWI",
+   "ZAF",
+   "SWZ",
+   "TZA",
+   "ZMB",
+   "ZWE"
+  ],
+  "area": 801590
+ },
+ {
+  "cca2": "zw",
+  "cca3": "ZWE",
+  "name": "Zimbabwe",
+  "capital": [
+   "Harare"
+  ],
+  "currencies": {
+   "BWP": "Botswana pula",
+   "CNY": "Chinese yuan",
+   "EUR": "Euro",
+   "GBP": "British pound",
+   "INR": "Indian rupee",
+   "JPY": "Japanese yen",
+   "USD": "United States dollar",
+   "ZAR": "South African rand",
+   "ZWB": "Zimbabwean bonds"
+  },
+  "borders": [
+   "BWA",
+   "MOZ",
+   "ZAF",
+   "ZMB"
+  ],
+  "area": 390757
+ },
+ {
+  "cca2": "bw",
+  "cca3": "BWA",
+  "name": "Botswana",
+  "capital": [
+   "Gaborone"
+  ],
+  "currencies": {
+   "BWP": "Botswana pula"
+  },
+  "borders": [
+   "NAM",
+   "ZAF",
+   "ZMB",
+   "ZWE"
+  ],
+  "area": 582000
+ },
+ {
+  "cca2": "na",
+  "cca3": "NAM",
+  "name": "Namibia",
+  "capital": [
+   "Windhoek"
+  ],
+  "currencies": {
+   "NAD": "Namibian dollar",
+   "ZAR": "South African rand"
+  },
+  "borders": [
+   "AGO",
+   "BWA",
+   "ZAF",
+   "ZMB"
+  ],
+  "area": 825615
+ },
+ {
+  "cca2": "za",
+  "cca3": "ZAF",
+  "name": "South Africa",
+  "capital": [
+   "Pretoria",
+   "Bloemfontein",
+   "Cape Town"
+  ],
+  "currencies": {
+   "ZAR": "South African rand"
+  },
+  "borders": [
+   "BWA",
+   "LSO",
+   "MOZ",
+   "NAM",
+   "SWZ",
+   "ZWE"
+  ],
+  "area": 1221037
+ },
+ {
+  "cca2": "ls",
+  "cca3": "LSO",
+  "name": "Lesotho",
+  "capital": [
+   "Maseru"
+  ],
+  "currencies": {
+   "LSL": "Lesotho loti",
+   "ZAR": "South African rand"
+  },
+  "borders": [
+   "ZAF"
+  ],
+  "area": 30355
+ },
+ {
+  "cca2": "sz",
+  "cca3": "SWZ",
+  "name": "Eswatini",
+  "capital": [
+   "Lobamba"
+  ],
+  "currencies": {
+   "SZL": "Swazi lilangeni",
+   "ZAR": "South African rand"
+  },
+  "borders": [
+   "MOZ",
+   "ZAF"
+  ],
+  "area": 17364
+ },
+ {
+  "cca2": "ca",
+  "cca3": "CAN",
+  "name": "Canada",
+  "capital": [
+   "Ottawa"
+  ],
+  "currencies": {
+   "CAD": "Canadian dollar"
+  },
+  "borders": [
+   "USA"
+  ],
+  "area": 9984670
+ },
+ {
+  "cca2": "us",
+  "cca3": "USA",
+  "name": "United States",
+  "capital": [
+   "Washington D.C."
+  ],
+  "currencies": {
+   "USD": "United States dollar"
+  },
+  "borders": [
+   "CAN",
+   "MEX"
+  ],
+  "area": 9372610
+ },
+ {
+  "cca2": "mx",
+  "cca3": "MEX",
+  "name": "Mexico",
+  "capital": [
+   "Mexico City"
+  ],
+  "currencies": {
+   "MXN": "Mexican peso"
+  },
+  "borders": [
+   "BLZ",
+   "GTM",
+   "USA"
+  ],
+  "area": 1964375
+ },
+ {
+  "cca2": "gt",
+  "cca3": "GTM",
+  "name": "Guatemala",
+  "capital": [
+   "Guatemala City"
+  ],
+  "currencies": {
+   "GTQ": "Guatemalan quetzal"
+  },
+  "borders": [
+   "BLZ",
+   "SLV",
+   "HND",
+   "MEX"
+  ],
+  "area": 108889
+ },
+ {
+  "cca2": "bz",
+  "cca3": "BLZ",
+  "name": "Belize",
+  "capital": [
+   "Belmopan"
+  ],
+  "currencies": {
+   "BZD": "Belize dollar"
+  },
+  "borders": [
+   "GTM",
+   "MEX"
+  ],
+  "area": 22966
+ },
+ {
+  "cca2": "hn",
+  "cca3": "HND",
+  "name": "Honduras",
+  "capital": [
+   "Tegucigalpa"
+  ],
+  "currencies": {
+   "HNL": "Honduran lempira"
+  },
+  "borders": [
+   "GTM",
+   "SLV",
+   "NIC"
+  ],
+  "area": 112492
+ },
+ {
+  "cca2": "sv",
+  "cca3": "SLV",
+  "name": "El Salvador",
+  "capital": [
+   "San Salvador"
+  ],
+  "currencies": {
+   "USD": "United States dollar"
+  },
+  "borders": [
+   "GTM",
+   "HND"
+  ],
+  "area": 21041
+ },
+ {
+  "cca2": "ni",
+  "cca3": "NIC",
+  "name": "Nicaragua",
+  "capital": [
+   "Managua"
+  ],
+  "currencies": {
+   "NIO": "Nicaraguan córdoba"
+  },
+  "borders": [
+   "CRI",
+   "HND"
+  ],
+  "area": 130373
+ },
+ {
+  "cca2": "cr",
+  "cca3": "CRI",
+  "name": "Costa Rica",
+  "capital": [
+   "San José"
+  ],
+  "currencies": {
+   "CRC": "Costa Rican colón"
+  },
+  "borders": [
+   "NIC",
+   "PAN"
+  ],
+  "area": 51100
+ },
+ {
+  "cca2": "pa",
+  "cca3": "PAN",
+  "name": "Panama",
+  "capital": [
+   "Panama City"
+  ],
+  "currencies": {
+   "PAB": "Panamanian balboa",
+   "USD": "United States dollar"
+  },
+  "borders": [
+   "COL",
+   "CRI"
+  ],
+  "area": 75417
+ },
+ {
+  "cca2": "cu",
+  "cca3": "CUB",
+  "name": "Cuba",
+  "capital": [
+   "Havana"
+  ],
+  "currencies": {
+   "CUC": "Cuban convertible peso",
+   "CUP": "Cuban peso"
+  },
+  "borders": [],
+  "area": 109884
+ },
+ {
+  "cca2": "jm",
+  "cca3": "JAM",
+  "name": "Jamaica",
+  "capital": [
+   "Kingston"
+  ],
+  "currencies": {
+   "JMD": "Jamaican dollar"
+  },
+  "borders": [],
+  "area": 10991
+ },
+ {
+  "cca2": "ht",
+  "cca3": "HTI",
+  "name": "Haiti",
+  "capital": [
+   "Port-au-Prince"
+  ],
+  "currencies": {
+   "HTG": "Haitian gourde"
+  },
+  "borders": [
+   "DOM"
+  ],
+  "area": 27750
+ },
+ {
+  "cca2": "do",
+  "cca3": "DOM",
+  "name": "Dominican Republic",
+  "capital": [
+   "Santo Domingo"
+  ],
+  "currencies": {
+   "DOP": "Dominican peso"
+  },
+  "borders": [
+   "HTI"
+  ],
+  "area": 48671
+ },
+ {
+  "cca2": "bs",
+  "cca3": "BHS",
+  "name": "Bahamas",
+  "capital": [
+   "Nassau"
+  ],
+  "currencies": {
+   "BSD": "Bahamian dollar",
+   "USD": "United States dollar"
+  },
+  "borders": [],
+  "area": 13943
+ },
+ {
+  "cca2": "co",
+  "cca3": "COL",
+  "name": "Colombia",
+  "capital": [
+   "Bogotá"
+  ],
+  "currencies": {
+   "COP": "Colombian peso"
+  },
+  "borders": [
+   "BRA",
+   "ECU",
+   "PAN",
+   "PER",
+   "VEN"
+  ],
+  "area": 1141748
+ },
+ {
+  "cca2": "ve",
+  "cca3": "VEN",
+  "name": "Venezuela",
+  "capital": [
+   "Caracas"
+  ],
+  "currencies": {
+   "VES": "Venezuelan bolívar soberano"
+  },
+  "borders": [
+   "BRA",
+   "COL",
+   "GUY"
+  ],
+  "area": 916445
+ },
+ {
+  "cca2": "ec",
+  "cca3": "ECU",
+  "name": "Ecuador",
+  "capital": [
+   "Quito"
+  ],
+  "currencies": {
+   "USD": "United States dollar"
+  },
+  "borders": [
+   "COL",
+   "PER"
+  ],
+  "area": 276841
+ },
+ {
+  "cca2": "gy",
+  "cca3": "GUY",
+  "name": "Guyana",
+  "capital": [
+   "Georgetown"
+  ],
+  "currencies": {
+   "GYD": "Guyanese dollar"
+  },
+  "borders": [
+   "BRA",
+   "SUR",
+   "VEN"
+  ],
+  "area": 214969
+ },
+ {
+  "cca2": "sr",
+  "cca3": "SUR",
+  "name": "Suriname",
+  "capital": [
+   "Paramaribo"
+  ],
+  "currencies": {
+   "SRD": "Surinamese dollar"
+  },
+  "borders": [
+   "BRA",
+   "GUF",
+   "GUY"
+  ],
+  "area": 163820
+ },
+ {
+  "cca2": "pe",
+  "cca3": "PER",
+  "name": "Peru",
+  "capital": [
+   "Lima"
+  ],
+  "currencies": {
+   "PEN": "Peruvian sol"
+  },
+  "borders": [
+   "BOL",
+   "BRA",
+   "CHL",
+   "COL",
+   "ECU"
+  ],
+  "area": 1285216
+ },
+ {
+  "cca2": "bo",
+  "cca3": "BOL",
+  "name": "Bolivia",
+  "capital": [
+   "Sucre"
+  ],
+  "currencies": {
+   "BOB": "Bolivian boliviano"
+  },
+  "borders": [
+   "ARG",
+   "BRA",
+   "CHL",
+   "PRY",
+   "PER"
+  ],
+  "area": 1098581
+ },
+ {
+  "cca2": "cl",
+  "cca3": "CHL",
+  "name": "Chile",
+  "capital": [
+   "Santiago"
+  ],
+  "currencies": {
+   "CLP": "Chilean peso"
+  },
+  "borders": [
+   "ARG",
+   "BOL",
+   "PER"
+  ],
+  "area": 756102
+ },
+ {
+  "cca2": "br",
+  "cca3": "BRA",
+  "name": "Brazil",
+  "capital": [
+   "Brasília"
+  ],
+  "currencies": {
+   "BRL": "Brazilian real"
+  },
+  "borders": [
+   "ARG",
+   "BOL",
+   "COL",
+   "GUF",
+   "GUY",
+   "PRY",
+   "PER",
+   "SUR",
+   "URY",
+   "VEN"
+  ],
+  "area": 8515767
+ },
+ {
+  "cca2": "ar",
+  "cca3": "ARG",
+  "name": "Argentina",
+  "capital": [
+   "Buenos Aires"
+  ],
+  "currencies": {
+   "ARS": "Argentine peso"
+  },
+  "borders": [
+   "BOL",
+   "BRA",
+   "CHL",
+   "PRY",
+   "URY"
+  ],
+  "area": 2780400
+ },
+ {
+  "cca2": "uy",
+  "cca3": "URY",
+  "name": "Uruguay",
+  "capital": [
+   "Montevideo"
+  ],
+  "currencies": {
+   "UYU": "Uruguayan peso"
+  },
+  "borders": [
+   "ARG",
+   "BRA"
+  ],
+  "area": 181034
+ },
+ {
+  "cca2": "py",
+  "cca3": "PRY",
+  "name": "Paraguay",
+  "capital": [
+   "Asunción"
+  ],
+  "currencies": {
+   "PYG": "Paraguayan guaraní"
+  },
+  "borders": [
+   "ARG",
+   "BOL",
+   "BRA"
+  ],
+  "area": 406752
+ },
+ {
+  "cca2": "au",
+  "cca3": "AUS",
+  "name": "Australia",
+  "capital": [
+   "Canberra"
+  ],
+  "currencies": {
+   "AUD": "Australian dollar"
+  },
+  "borders": [],
+  "area": 7692024
+ },
+ {
+  "cca2": "nz",
+  "cca3": "NZL",
+  "name": "New Zealand",
+  "capital": [
+   "Wellington"
+  ],
+  "currencies": {
+   "NZD": "New Zealand dollar"
+  },
+  "borders": [],
+  "area": 270467
+ }
+]

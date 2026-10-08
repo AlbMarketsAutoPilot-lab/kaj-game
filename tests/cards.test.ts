@@ -1,8 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { CARDS } from '../src/cards/cards.ts';
-import { CARD_LAST_ROUND } from '../src/engine/constants.ts';
-import { apply, createGame, eligibleCards, isCardRound, legalActions, nextCardRound } from '../src/engine/engine.ts';
+import { apply, createGame, eligibleCards, landTurnsToCard, legalActions } from '../src/engine/engine.ts';
 import { randomRobotAction } from '../src/engine/robot.ts';
 import { loadGame, saveGame } from '../src/engine/save.ts';
 import type { Action, DrawnCard, GameState, Profile } from '../src/engine/types.ts';
@@ -10,7 +9,8 @@ import { map30 } from '../src/maps/map30.ts';
 import { travelMap as map } from './fixtures/test-map.ts';
 import { seatOf, seats, startedGame } from './helpers.ts';
 
-// Event cards (docs/engine.md, task 11).
+// Event cards (docs/engine.md, task 11; since task 12: no cards on trips, and each player's
+// card comes on every 3rd turn begun in an area).
 //   eu-north — eu-east — as-west — as-east — na-one      ✈️ eu-west ↔ as-east ↔ af-south
 //      |      /            |                             ⛴️ eu-north ↔ na-one
 //   eu-west — af-north ----+
@@ -52,7 +52,7 @@ test('the card file: 40–60 cards, allowed strengths, area cards on the real ma
     if (c.deck === 'backpacker') assert.ok(c.points > 0 && !c.loseTurn, `${c.id}: Backpacker cards help`);
     assert.ok(c.text.length > 0 && c.text.length <= 110, `${c.id}: text length`);
   }
-  for (const deck of ['country', 'plane', 'ship', 'backpacker'] as const) {
+  for (const deck of ['country', 'backpacker'] as const) {
     assert.ok(CARDS.filter((c) => c.deck === deck).length >= 8, deck);
   }
   // Mostly ±1, some ±2 or "lose a turn", rare ±5.
@@ -67,20 +67,14 @@ test('which cards can be drawn: area cards only in their area', () => {
   assert.ok(!ids(['country'], 'egypt').includes('a4'));
   assert.ok(!ids(['country'], 'iceland').includes('a1'));
   assert.ok(ids(['country', 'backpacker'], 'france').some((id) => id.startsWith('b')));
-  assert.ok(ids(['plane'], null).every((id) => id.startsWith('p')));
-  assert.ok(ids(['ship'], null).every((id) => id.startsWith('s')));
 });
 
-test('the schedule: rounds 3, 6 … 27, none in the last round', () => {
-  const rounds = Array.from({ length: 30 }, (_, i) => i + 1).filter(isCardRound);
-  assert.deepEqual(rounds, [3, 6, 9, 12, 15, 18, 21, 24, 27]);
-  assert.equal(CARD_LAST_ROUND, 27);
-  assert.equal(nextCardRound(1), 3);
-  assert.equal(nextCardRound(4), 6);
-  assert.equal(nextCardRound(28), null);
+test('the count: every 3rd land turn', () => {
+  const after = (landTurns: number) => landTurnsToCard({ landTurns } as GameState['players'][number]);
+  assert.deepEqual([0, 1, 2, 3, 4, 5, 6].map(after), [0, 2, 1, 0, 2, 1, 0]);
 });
 
-test('a card at the start of each turn in round 3, shown for the whole turn', () => {
+test('walking every turn: a card at the start of each turn in round 3, shown for the whole turn', () => {
   let s = game(['eu-west', 'as-east']);
   while (s.round < 3) {
     assert.equal(s.card, null, `no card in round ${s.round}`);
@@ -100,7 +94,7 @@ test('a card at the start of each turn in round 3, shown for the whole turn', ()
 
 test('a card changes points, never below 0, and says what really happened', () => {
   let s = game(['eu-west', 'as-east']);
-  s.round = 3; // the second player's turn starts in a card round
+  p2(s).landTurns = 2; // the second player's next turn is their 3rd land turn
   p2(s).points = 0;
   const lost = withCard(s, { type: 'walk', to: 'eu-north' }, (c) => c.card.points < 0);
   assert.equal(p2(lost).points, 0);
@@ -114,7 +108,7 @@ test('a card changes points, never below 0, and says what really happened', () =
 
 test('lose a turn in an area: the only move is "lostTurn"; it changes nothing else', () => {
   let s = game(['eu-west', 'as-east']);
-  s.round = 3;
+  p2(s).landTurns = 2;
   p2(s).broke = 1;
   s = withCard(s, { type: 'walk', to: 'eu-north' }, (c) => c.card.loseTurn === true);
   assert.deepEqual(legalActions(s, map), [{ type: 'lostTurn' }]);
@@ -128,39 +122,41 @@ test('lose a turn in an area: the only move is "lostTurn"; it changes nothing el
 
 test('no scheduled card during a citizenship request (the exam is the event)', () => {
   let s = game(['eu-west', 'as-east']);
-  s.round = 3;
+  p2(s).landTurns = 2;
   p2(s).exam = { area: 'as-east', stage: 'test', questions: [], answers: [] };
   s = go(s, { type: 'walk', to: 'eu-north' });
   assert.equal(s.card, null);
 });
 
-test('a travel turn draws a ship card; "lose a turn" makes the ship one turn late, no Nomad point', () => {
+test('no card on a trip: a travel turn draws nothing and does not count', () => {
   let s = game(['eu-north', 'as-east'], ['nomad', 'luxury']); // Nomad: ship 3 turns
-  s = go(s, { type: 'board', kind: 'port', to: 'na-one' });
+  s = go(s, { type: 'board', kind: 'port', to: 'na-one' }); // land turn 1
   s = pass(s);
-  const late = withCard(s, { type: 'travel' }, (c) => c.card.loseTurn === true);
-  assert.equal(late.drawn[0].card.deck, 'ship');
-  assert.equal(late.card, null, 'a travel card is shown with the move, not kept for a turn');
-  assert.equal(p1(late).travel!.turnsLeft, 3);
-  assert.equal(p1(late).points, p1(s).points);
-  const onTime = withCard(s, { type: 'travel' }, (c) => c.card.points === 1);
-  assert.equal(p1(onTime).travel!.turnsLeft, 2);
-  assert.equal(p1(onTime).points, p1(s).points + 1 + 1); // Nomad +1, card +1
+  for (let i = 0; i < 3; i++) {
+    const before = p1(s).points;
+    s = go(s, { type: 'travel' });
+    assert.ok(s.drawn.every((c) => c.seat !== p1(s).seat), 'no travel card');
+    assert.equal(p1(s).points, before + 1 + (i === 2 ? 1 + 2 : 0)); // Nomad +1; landing: area +1, continent +2
+    assert.equal(p1(s).landTurns, 1, 'trip turns are not counted');
+    s = pass(s);
+  }
+  // Rounds 2–4 were at sea, so the card comes on land turns 3 (round 6), not in round 3.
+  assert.equal(s.round, 5);
+  assert.equal(p1(s).landTurns, 2);
+  assert.equal(s.card, null);
+  s = pass(s);
+  s = pass(s);
+  assert.equal(s.card!.seat, p1(s).seat);
+  assert.equal(p1(s).landTurns, 3);
 });
 
-test('one card per turn: a traveller in a card round draws only the travel card', () => {
-  let s = game(['eu-west', 'as-east'], ['nomad', 'luxury']); // Nomad: plane 1 turn
-  s.round = 2;
-  s = go(s, { type: 'board', kind: 'airport', to: 'as-east' });
-  s = go(s, { type: 'walk', to: 'as-west' }); // ends round 2: round 3 starts with the traveller
-  assert.equal(s.round, 3);
-  assert.equal(s.card, null, 'no scheduled card for a traveller');
-  s = go(s, { type: 'travel' });
-  assert.equal(s.drawn[0].seat, p1(s).seat);
-  assert.equal(s.drawn[0].card.deck, 'plane');
-  // The next player's turn (round 3) starts with their own card, listed after it.
-  assert.equal(s.drawn.length, 2);
-  assert.deepEqual(s.card, s.drawn[1]);
+test('no card in the last round', () => {
+  let s = game(['eu-west', 'as-east']);
+  s.round = s.totalRounds;
+  p2(s).landTurns = 2;
+  s = pass(s);
+  assert.equal(p2(s).landTurns, 3);
+  assert.equal(s.card, null);
 });
 
 test('cards off (rule tests only): no cards at all', () => {
@@ -172,7 +168,7 @@ test('cards off (rule tests only): no cards at all', () => {
   }
 });
 
-test('the same seed draws the same cards; saves from version 1 are not continued', () => {
+test('the same seed draws the same cards; saves from versions 1 and 2 are not continued', () => {
   const play = () => {
     let s = createGame({ seats: seats(3, 2), seed: 5 }, map30);
     let seed = 9;
@@ -188,6 +184,8 @@ test('the same seed draws the same cards; saves from version 1 are not continued
   const a = play();
   assert.ok(a.length > 0);
   assert.deepEqual(play(), a);
-  const old = JSON.stringify({ version: 1, state: JSON.parse(saveGame(createGame({ seats: seats(2), seed: 1 }, map30))).state });
-  assert.ok('error' in loadGame(old));
+  for (const version of [1, 2]) {
+    const old = JSON.stringify({ version, state: JSON.parse(saveGame(createGame({ seats: seats(2), seed: 1 }, map30))).state });
+    assert.ok('error' in loadGame(old));
+  }
 });

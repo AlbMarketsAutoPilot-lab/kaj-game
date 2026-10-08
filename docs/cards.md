@@ -2,8 +2,9 @@
 
 53 cards. Source: `src/cards/cards.ts`. ±1: 33 · ±2: 11 · lose a turn: 5 · ±5: 4.
 
-When: at the start of every turn in rounds 3, 6 … 27 (not during a citizenship request, not on a trip),
-and on every travel turn. Points never go below 0.
+When: at the start of each player's 3rd, 6th, 9th … turn that begins in an area (trip turns don't count;
+not during a citizenship request; none in the last round). No cards on trips since task 12 (challenges instead).
+Points never go below 0.
 
 To report a problem, give the id (for example "c7: too harsh").
 
@@ -23,6 +24,27 @@ To report a problem, give the id (for example "c7: too harsh").
 | c10 | A big festival fills every street. You stay and watch the parade. | lose a turn |
 | c11 | A museum hires you for a day to guide visitors from your country. | +5 |
 | c12 | You leave your wallet on a bench and never see it again. | -5 |
+| c13 | A farmer invites you to pick fresh fruit from her trees. | +1 |
+| c14 | You climb a hill and get a great view of the whole valley. | +1 |
+| c15 | A friendly walker on the road tells you the best places to visit. | +1 |
+| c16 | A café owner gives you a free lunch for your stories. | +1 |
+| c17 | Wild horses run next to the path you are walking on. | +1 |
+| c18 | A shepherd teaches you how to call the sheep home. | +1 |
+| c19 | You see a rainbow over the mountains and take a great photo. | +1 |
+| c20 | You trip on a stone and spill juice on your map. You buy a new one. | -1 |
+| c21 | Your headphones break on a long walk. | -1 |
+| c22 | Your bag is too heavy, so you pay to send some things home. | -1 |
+| c23 | Too much sun! You buy a hat and sun cream. | -1 |
+| c24 | The wind blows your hat into a river. | -1 |
+| c25 | A noisy night in a cheap hotel. You pay for a quieter room. | -1 |
+| c26 | The town gives you a travel badge for walking so far. | +2 |
+| c27 | You help a village after a storm. The mayor thanks you. | +2 |
+| c28 | You lose your suitcase at the bus station and buy new clothes. | -2 |
+| c29 | Monkeys steal your lunch, and the only café is expensive. | -2 |
+| c30 | Thick fog on the road. You wait a day until you can see the path. | lose a turn |
+| c31 | Strong winds close the mountain road for a day. | lose a turn |
+| c32 | Your shoes need repairs. You wait one day at the shoemaker. | lose a turn |
+| c33 | A sneaky thief takes part of your money before the police chase him away. | -5 |
 
 ## Country cards: one area only
 
@@ -40,37 +62,6 @@ To report a problem, give the id (for example "c7: too harsh").
 | a10 | Mosquitoes in the Amazon! You buy a net and some cream. | -1 | Brazil North |
 | a11 | You see the northern lights dance across the sky. | +2 | Scandinavia |
 | a12 | You walk along the Great Wall on a clear day. | +1 | China East |
-
-## Plane cards (a travel turn on a plane)
-
-| Id | Card | Effect |
-|---|---|---|
-| p1 | The pilot invites you to see the cockpit. | +1 |
-| p2 | You get a window seat and a great view of the clouds. | +1 |
-| p3 | Your neighbour on the plane tells you the best places to visit. | +1 |
-| p4 | You get a free meal upgrade. | +1 |
-| p5 | Bumpy air! You spill juice on your map and buy a new one. | -1 |
-| p6 | Your headphones break during the flight. | -1 |
-| p7 | You pay extra for a bag that is too heavy. | -1 |
-| p8 | The airline gives you bonus miles for flying with them. | +2 |
-| p9 | Your suitcase goes to the wrong city. You buy new clothes. | -2 |
-| p10 | Thick fog at the airport. Your flight lands one turn late. | lose a turn |
-
-## Ship cards (a travel turn on a ship; "lose a turn" = one turn late)
-
-| Id | Card | Effect |
-|---|---|---|
-| s1 | Dolphins swim next to the ship. | +1 |
-| s2 | The captain teaches you how to tie sailor knots. | +1 |
-| s3 | You see a whale jump out of the water. | +1 |
-| s4 | Big waves! You feel seasick and buy medicine. | -1 |
-| s5 | Your hat flies into the sea. | -1 |
-| s6 | You pay for a cabin with a window after a noisy night. | -1 |
-| s7 | You help the crew in a storm. The captain thanks you. | +2 |
-| s8 | Seagulls steal your lunch, and the ship café is expensive. | -2 |
-| s9 | Strong winds! The ship arrives one turn late. | lose a turn |
-| s10 | The engine needs repairs. The ship waits one turn at sea. | lose a turn |
-| s11 | Pirates! They take part of your money before the navy chases them away. | -5 |
 
 ## Backpacker cards (only the Backpacker, drawn with the country cards)
 

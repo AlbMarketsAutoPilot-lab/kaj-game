@@ -96,7 +96,9 @@ export const NOMAD_PENALTY = 5;
 // From this round the Nomad's continent bar warns about the penalty.
 export const NOMAD_WARNING_ROUND = 25;
 
-// Event cards (task 11): at the start of every player's turn in rounds 3, 6 … 27
-// (owner's choice: none in the last round), and on every travel turn.
+// Event cards (task 11, count changed in task 12): at the start of each player's 3rd, 6th, 9th …
+// turn that begins in an area (trip turns don't count); none in the last round.
 export const CARD_EVERY = 3;
-export const CARD_LAST_ROUND = 27;
+
+// Travel-turn challenges (task 12): right +1, wrong −1; not offered with 0 points.
+export const CHALLENGE_POINTS = 1;

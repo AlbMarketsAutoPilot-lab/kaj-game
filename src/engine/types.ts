@@ -87,6 +87,8 @@ export interface Player {
   broke: number;
   // An event card took this turn: the only move is "lostTurn" (task 11).
   loseTurn: boolean;
+  // Turns begun in an area (trip turns don't count): every 3rd one draws an event card (task 12).
+  landTurns: number;
 }
 
 // Businesses (rulebook section 6): guided tours at a wonder, an airline at an airport,
@@ -198,11 +200,40 @@ export interface GameState {
   // The cards drawn by the last move (a travel card, and the next player's start-of-turn card),
   // so the screens can say what happened. Cleared by every move, like `payments`.
   drawn: DrawnCard[];
+  // The challenge the current player must answer now (task 12).
+  challenge: Challenge | null;
+  // The challenge answered by the last move, so the screens can say what happened.
+  // Cleared by every move, like `payments`.
+  challenged: ChallengeResult | null;
   result: GameResult | null;
 }
 
 // Event cards (rulebook section 10, docs/engine.md task 11). The cards: src/cards/cards.ts.
-export type Deck = 'country' | 'plane' | 'ship' | 'backpacker';
+export type Deck = 'country' | 'backpacker';
+
+// ---------- travel-turn challenges (task 12) ----------
+
+export type ChallengeType = 'flag' | 'bigger' | 'capital' | 'continent' | 'neighbour' | 'currency';
+
+// One a/b question made from open data (src/challenges/challenges.ts).
+export interface Challenge {
+  id: string;
+  type: ChallengeType;
+  question: string;
+  options: [string, string];
+  correct: 0 | 1;
+  // Flag questions: the flag to show (assets/flags/<flag>.svg).
+  flag?: string;
+}
+
+export interface ChallengeResult {
+  seat: number;
+  challenge: Challenge;
+  choice: 0 | 1;
+  right: boolean;
+  // The real change in points (a wrong answer at 1 point: −1; points never go below 0).
+  change: number;
+}
 
 export interface EventCard {
   id: string;
@@ -210,7 +241,7 @@ export interface EventCard {
   text: string;
   // The change in points (points never go below 0).
   points: number;
-  // In an area: this turn is lost. On a trip: the plane or ship is one turn late.
+  // This turn is lost.
   loseTurn?: true;
   // A country card drawn only in this area.
   area?: string;
@@ -246,8 +277,11 @@ export type Action =
   | { type: 'exam' }
   // One answer in the citizenship test (turn 2); the turn ends after the 3rd.
   | { type: 'examAnswer'; choice: 0 | 1 }
-  // A turn in the air or at sea: an event card is drawn (challenges come in task 12).
-  | { type: 'travel' }
+  // A turn in the air or at sea. With `challenge` the player plays a challenge: the turn goes
+  // on, and the next move is the answer (task 12). Without it nothing happens.
+  | { type: 'travel'; challenge?: true }
+  // The answer to the challenge; the trip then goes on as on any travel turn.
+  | { type: 'challengeAnswer'; choice: 0 | 1 }
   // Buy the business in the player's area. The turn goes on: the player still moves.
   | { type: 'buy'; business: BusinessKind }
   // Offer one of the player's businesses to another player at the price it was bought for.

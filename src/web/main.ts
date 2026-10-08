@@ -1,13 +1,13 @@
 // First playable screen (task 3): a plain test board on top of the engine.
 // No final art yet. Robots pick random legal moves.
 
-import { BUSINESS_PRICE, CONTINENT_BONUS, GO_HOME_TURNS, NOMAD_MIN_CONTINENTS, NOMAD_PENALTY, NOMAD_WARNING_ROUND, POINTS_BUSINESS_CITIZENSHIP, TICKET_PRICE, TOUR_FEE, TRAVEL_TURNS, VISA_PRICE } from '../engine/constants.ts';
+import { BUSINESS_PRICE, CHALLENGE_POINTS, CONTINENT_BONUS, GO_HOME_TURNS, NOMAD_MIN_CONTINENTS, NOMAD_PENALTY, NOMAD_WARNING_ROUND, POINTS_BUSINESS_CITIZENSHIP, TICKET_PRICE, TOUR_FEE, TRAVEL_TURNS, VISA_PRICE } from '../engine/constants.ts';
 import {
-  apply, blockedByMoney, nextCardRound, businessAt, businessValue, createGame, currentPlayer, entryFees, feeTotal, finalScore, homeFor, legalActions, nomadPenalty,
+  apply, blockedByMoney, businessAt, businessValue, createGame, currentPlayer, entryFees, feeTotal, finalScore, homeFor, landTurnsToCard, legalActions, nomadPenalty,
 } from '../engine/engine.ts';
 import { randomRobotAction } from '../engine/robot.ts';
 import { loadGame, saveGame } from '../engine/save.ts';
-import type { Action, Area, BusinessKind, Deck, DrawnCard, GameState, Payment, Player, Profile, RouteKind, SeatKind } from '../engine/types.ts';
+import type { Action, Area, BusinessKind, ChallengeResult, ChallengeType, Deck, DrawnCard, GameState, Payment, Player, Profile, RouteKind, SeatKind } from '../engine/types.ts';
 import { map30 } from '../maps/map30.ts';
 
 const COLOURS = ['#e4572e', '#2e86de', '#29a36a', '#e0a100'];
@@ -21,6 +21,16 @@ const PROFILE_LABEL: Record<Profile, string> = {
 const ROBOT_DELAY_MS = 600;
 const SAVE_KEY = 'kaj-save';
 const QUIZ_SECONDS = 15;
+// Travel-turn challenges: 15 seconds, time out = wrong answer (v1 scope, section 6).
+const CHALLENGE_SECONDS = 15;
+const CHALLENGE_NAME: Record<ChallengeType, string> = {
+  flag: '🏳️ Which flag?', bigger: '📏 Which is bigger?', capital: '🏙️ Which capital?',
+  continent: '🌍 Which continent?', neighbour: '🤝 Neighbours', currency: '💰 Which currency?',
+};
+// Flag pictures (assets/flags), put into the page by the build as data URIs.
+const FLAGS: Record<string, string> = (window as unknown as { KAJ_FLAGS?: Record<string, string> }).KAJ_FLAGS ?? {};
+// Credits for the open data and flags (shown on the start screen).
+const CREDITS = 'Country data: mledoze/countries, ODbL 1.0 · Flags: flag-icons by Panayiotis Lipiridis, MIT licence';
 // Citizenship test: 15 seconds for each question (owner's choice, task 8).
 const EXAM_SECONDS = 15;
 const VEHICLE: Record<RouteKind, string> = { airport: '✈️', port: '⛴️' };
@@ -131,7 +141,8 @@ function renderSetup(): void {
       saved && 'error' in saved ? el('p', { className: 'small', textContent: `${saved.error} It can't be continued; start a new journey.` }) : '',
       counts, rows, start,
       resume ? el('p', { className: 'small', textContent: 'Starting a new journey replaces the saved game.' }) : '',
-      error),
+      error,
+      el('p', { className: 'small', textContent: CREDITS })),
   );
 }
 
@@ -183,6 +194,7 @@ function act(action: Action): void {
     lines.push(`${PROFILE_LABEL[mover.profile!]} bonus: ${name} has visited ${bonus.continents} continents, +${bonus.points}!`);
   }
   if (home) lines.push(`🏠 ${name} ran out of money, so the trip ends here: ${name} goes home to ${areaById.get(home)!.name}, free of any fees.`);
+  if (state.challenged) lines.push(challengeNote(state.challenged));
   lines.push(...state.payments.map(paymentNote).filter((t) => t !== ''));
   // Event cards drawn by this move; a human's own start-of-turn card has its own box instead.
   const next = currentPlayer(state);
@@ -196,12 +208,12 @@ function act(action: Action): void {
 
 // ---------- event cards (task 11) ----------
 
-const DECK_ICON: Record<Deck, string> = { country: '🗺️', plane: '✈️', ship: '⛴️', backpacker: '🎒' };
+const DECK_ICON: Record<Deck, string> = { country: '🗺️', backpacker: '🎒' };
 
 // What the card did: the points really won or lost, or the lost turn.
-function cardEffect(c: DrawnCard, travelling: boolean): string {
+function cardEffect(c: DrawnCard): string {
   const { points, loseTurn } = c.card;
-  if (loseTurn) return travelling ? '⏸️ One turn late.' : '⏸️ This turn is lost.';
+  if (loseTurn) return '⏸️ This turn is lost.';
   if (points > 0) return `+${plural(points, 'point')}.`;
   if (c.change === 0) return `−${plural(-points, 'point')}, but there were no points to lose.`;
   if (c.change !== points) return `−${plural(-points, 'point')}: only ${-c.change} to lose, so ${-c.change} lost.`;
@@ -209,15 +221,14 @@ function cardEffect(c: DrawnCard, travelling: boolean): string {
 }
 
 function cardNote(c: DrawnCard): string {
-  const travelling = c.card.deck === 'plane' || c.card.deck === 'ship';
-  return `🃏 ${COLOUR_NAMES[c.seat]}'s ${c.card.deck} card ${DECK_ICON[c.card.deck]}: “${c.card.text}” ${cardEffect(c, travelling)}`;
+  return `🃏 ${COLOUR_NAMES[c.seat]}'s ${c.card.deck} card ${DECK_ICON[c.card.deck]}: “${c.card.text}” ${cardEffect(c)}`;
 }
 
 function renderCard(c: DrawnCard): HTMLElement {
   return el('div', { className: 'note' },
     el('strong', { textContent: `🃏 Event card · ${DECK_ICON[c.card.deck]} ${c.card.deck} card` }),
     el('p', { textContent: `“${c.card.text}”` }),
-    el('p', { textContent: cardEffect(c, false) }));
+    el('p', { textContent: cardEffect(c) }));
 }
 
 // "Who was paid", after a move.
@@ -327,12 +338,16 @@ function renderPlayers(s: GameState): HTMLElement {
     }));
 }
 
-// When the player's next scheduled event card comes (none during a citizenship request).
+// When the player's next event card comes: every 3rd turn begun in an area; trip turns don't
+// count (task 12); none in the last round (and none during a citizenship request).
 function nextCardText(s: GameState, p: Player): string {
-  const done = s.turnOrder.indexOf(p.seat) < s.current; // already played this round
-  const round = nextCardRound(done ? s.round + 1 : s.round);
-  if (round === null) return '🃏 No more event cards';
-  return round === s.round && !done ? '🃏 Event card this turn' : `🃏 Next event card: round ${round}`;
+  if (s.card?.seat === p.seat && s.card.round === s.round && currentPlayer(s) === p) return '🃏 Event card this turn';
+  const order = s.turnOrder.indexOf(p.seat);
+  const started = order <= s.current; // this round's turn has begun (and is counted) or is over
+  const turns = landTurnsToCard(p) || 3;
+  const turnsLeft = s.totalRounds - 1 - s.round + (started ? 0 : 1); // turns that can still have a card
+  if (turns > turnsLeft) return '🃏 No more event cards';
+  return turns === 1 ? '🃏 Event card: next turn on land' : `🃏 Event card: in ${turns} turns on land`;
 }
 
 // "Continents 2/3" for the profiles with a continent bonus or penalty (rulebook section 14).
@@ -406,6 +421,8 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
       el('p', { className: 'small', textContent: 'Tap a green area on the map below.' }));
   } else if (s.quiz) {
     renderQuiz(box, s, who);
+  } else if (s.challenge) {
+    renderChallenge(box, s, who);
   } else if (me.exam && (me.exam.stage === 'test' || me.exam.stage === 'result')) {
     renderCitizenship(box, s, who);
   } else if (me.loseTurn) {
@@ -420,8 +437,11 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
       el('p', { className: 'small', textContent: trip.turnsLeft > 0
         ? `${plural(trip.turnsLeft, 'travel turn')} left; you land at the end of the last one.`
         : `${to} is taken, so you wait one more turn and try to land again.` }),
-      el('p', { className: 'small', textContent: `🃏 Every travel turn draws a ${trip.kind === 'airport' ? 'plane' : 'ship'} card: mostly ±1, sometimes ±2 or one turn late, rarely ±5.${me.profile === 'nomad' ? ' 💻 Digital Nomad: +1 for this travel turn (not if the card makes you late).' : ''} Challenges come later.` }),
-      el('div', { className: 'row' }, button('Continue the journey (draws an event card)', () => act({ type: 'travel' }))));
+      el('p', { className: 'small', textContent: `🎲 Another passenger would like to play a geography challenge with you: one question, ${CHALLENGE_SECONDS} seconds. Right +${CHALLENGE_POINTS}, wrong −${CHALLENGE_POINTS}. You don't have to play.${me.profile === 'nomad' ? ' 💻 Digital Nomad: +1 for this travel turn either way.' : ''}` }),
+      me.points < CHALLENGE_POINTS ? el('p', { className: 'small', textContent: `A challenge needs at least ${CHALLENGE_POINTS} point, so there is none this turn.` }) : '',
+      el('div', { className: 'row' },
+        ...(actions.some((a) => a.type === 'travel' && a.challenge) ? [button(`🎲 Play the challenge (+${CHALLENGE_POINTS} / −${CHALLENGE_POINTS})`, () => act({ type: 'travel', challenge: true }))] : []),
+        button('Continue the journey (no challenge)', () => act({ type: 'travel' }))));
   } else {
     const here = areaById.get(me.area!)!;
     if (pendingFees && (pendingFees.type === 'walk' || pendingFees.type === 'board' || pendingFees.type === 'quiz')) {
@@ -609,6 +629,36 @@ function renderQuiz(box: HTMLElement, s: GameState, who: HTMLElement): void {
       act({ type: 'answer', choice: (1 - question.correct) as 0 | 1 });
     }
   }, 1000);
+}
+
+// Travel-turn challenge: one a/b question, 15 seconds. Time out = wrong answer.
+function renderChallenge(box: HTMLElement, s: GameState, who: HTMLElement): void {
+  const c = s.challenge!;
+  let left = CHALLENGE_SECONDS;
+  const clock = el('p', { className: 'small', textContent: `⏱️ ${left} s` });
+  const flag = c.flag && FLAGS[c.flag] ? el('img', { className: 'flag', src: FLAGS[c.flag], alt: 'A flag' }) : '';
+  box.append(el('h2', {}, who, `: challenge! ${CHALLENGE_NAME[c.type]}`),
+    flag,
+    el('p', { textContent: c.question }),
+    el('div', { className: 'row' }, ...c.options.map((o, i) => button(o, () => act({ type: 'challengeAnswer', choice: i as 0 | 1 })))),
+    clock,
+    el('p', { className: 'small', textContent: `Right +${CHALLENGE_POINTS}, wrong −${CHALLENGE_POINTS}. The journey goes on either way.` }));
+  quizTimer = window.setInterval(() => {
+    if (state !== s) return clearInterval(quizTimer);
+    left -= 1;
+    clock.textContent = `⏱️ ${left} s`;
+    if (left <= 0) {
+      clearInterval(quizTimer);
+      act({ type: 'challengeAnswer', choice: (1 - c.correct) as 0 | 1 });
+    }
+  }, 1000);
+}
+
+function challengeNote(r: ChallengeResult): string {
+  const name = COLOUR_NAMES[r.seat];
+  if (r.right) return `🎲 ${name}'s challenge: right, it is ${r.challenge.options[r.challenge.correct]}! +${r.change} point.`;
+  const lost = r.change === 0 ? 'No points to lose' : `−${-r.change} point`;
+  return `🎲 ${name}'s challenge: wrong, the answer was ${r.challenge.options[r.challenge.correct]}. ${lost}.`;
 }
 
 // After the 3rd wrong answer a player who can pay must pay: say who gets the ticket.

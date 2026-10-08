@@ -59,3 +59,4 @@ select option { color: #000; }
 /* Task 8: citizenship */
 .note { border: 1px solid var(--accent); color: var(--accent); border-radius: 8px; padding: 6px 10px; margin: 0 0 8px; }
 .ask { display: block; margin: 8px 0; font-size: 0.9rem; }
+.flag { display: block; height: 90px; width: auto; margin: 4px 0 8px; border: 1px solid var(--muted); border-radius: 4px; }

@@ -71,7 +71,8 @@ test(`random robots play ${GAMES} games on the 30-turn map with planes and ships
   const bonuses = { backpacker: 0, luxury: 0, nomadPenalty: 0, nomadPenaltyLostWin: 0 };
   const profiles: Record<string, number> = {};
   let resumes = 0;
-  const cards = { scheduled: 0, travel: 0, lostTurns: 0, lateTrips: 0, won: 0, lost: 0 };
+  const cards = { scheduled: 0, travel: 0, lostTurns: 0, won: 0, lost: 0 };
+  const challenges = { travelTurns: 0, zeroPoints: 0, played: 0, right: 0, won: 0, lost: 0 };
   for (let g = 0; g < GAMES; g++) {
     const n = 2 + (g % 3);
     let s = createGame({ seats: seats(n, n - 1), seed: g * 7919 + 13 }, map30);
@@ -86,6 +87,12 @@ test(`random robots play ${GAMES} games on the 30-turn map with planes and ships
       const [action, next] = randomRobotAction(s, map30, robotSeed);
       robotSeed = next;
       if (action.type === 'quiz') quizzes++;
+      // Challenges (task 12): offered on every travel turn, except with 0 points.
+      if (action.type === 'travel') {
+        challenges.travelTurns++;
+        if (s.players[seat].points === 0) challenges.zeroPoints++;
+        if (action.challenge) challenges.played++;
+      }
       if (s.phase === 'play' && !s.quiz && action.type !== 'buy') {
         blockedInARow[seat] = action.type === 'blocked' ? blockedInARow[seat] + 1 : 0;
         longestBlock = Math.max(longestBlock, blockedInARow[seat]);
@@ -104,9 +111,14 @@ test(`random robots play ${GAMES} games on the 30-turn map with planes and ships
       for (const c of s.drawn) {
         const travel = action.type === 'travel' && c.seat === seat;
         cards[travel ? 'travel' : 'scheduled']++;
-        if (c.card.loseTurn) cards[travel ? 'lateTrips' : 'lostTurns']++;
+        if (c.card.loseTurn) cards.lostTurns++;
         if (c.change > 0) cards.won += c.change;
         else cards.lost -= c.change;
+      }
+      if (s.challenged) {
+        if (s.challenged.right) challenges.right++;
+        if (s.challenged.change > 0) challenges.won += s.challenged.change;
+        else challenges.lost -= s.challenged.change;
       }
       for (const pay of s.payments) {
         if (pay.reason === 'visa') visas++;
@@ -115,7 +127,10 @@ test(`random robots play ${GAMES} games on the 30-turn map with planes and ships
         if ((pay.reason === 'tour' || pay.reason === 'ticket') && pay.to !== null && pay.to !== pay.from) income += pay.amount;
       }
       const p = s.players[seat];
-      if (p.travel) {
+      // A challenge question doesn't end the turn: only the answer counts as the travel turn.
+      if (s.challenge) {
+        // the turn goes on
+      } else if (p.travel) {
         if (inTransit[seat] === 0) trips++;
         inTransit[seat]++;
         longestTrip = Math.max(longestTrip, inTransit[seat]);
@@ -144,16 +159,20 @@ test(`random robots play ${GAMES} games on the 30-turn map with planes and ships
     }
   }
   console.log(`task 11: cards ${JSON.stringify(cards)}, longest trip ${longestTrip}, longest blocked ${longestBlock}`);
+  console.log(`task 12: challenges ${JSON.stringify(challenges)}`);
   console.log(`task 10: ${JSON.stringify(bonuses)} of ${JSON.stringify(profiles)}, ${resumes} save/resume round trips`);
   assert.ok(trips > GAMES, `only ${trips} trips`);
-  assert.ok(cards.scheduled > GAMES && cards.travel > GAMES, `only ${cards.scheduled} + ${cards.travel} cards`);
+  assert.ok(cards.scheduled > GAMES, `only ${cards.scheduled} cards`);
+  assert.equal(cards.travel, 0, 'no cards on trips (task 12)');
+  assert.ok(challenges.played > GAMES, `only ${challenges.played} challenges`);
   assert.ok(citizens > GAMES, `only ${citizens} citizenships`);
   assert.ok(visas > GAMES / 2, `only ${visas} visas`);
   assert.ok(quizzes > GAMES, `only ${quizzes} quizzes`);
   assert.ok(purchases > GAMES, `only ${purchases} businesses bought`);
   assert.ok(income > GAMES, `only ${income} points of business income`);
   assert.ok(offers > GAMES && sales > GAMES / 2, `only ${offers} sale offers, ${sales} sales`);
-  // A ship takes at most 3 travel turns; a taken destination and "late" cards (task 11) add a few.
+  // A ship takes at most 3 travel turns; a taken destination adds a few. (Task 11's "late" cards
+  // are gone since task 12.)
   // Limit raised from 8 to 10 in task 11 (owner-approved).
   assert.ok(longestTrip <= 10, `a trip lasted ${longestTrip} turns`);
   assert.ok(longestBlock <= 5, `a player was blocked ${longestBlock} turns in a row`);
