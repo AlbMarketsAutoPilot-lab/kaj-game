@@ -1,4 +1,4 @@
-// Builds dist/kaj.html: one self-contained file (script, styles, poster, background art and font inlined).
+// Builds dist/kaj.html: one self-contained file (script, styles, poster, background art, font and sounds inlined).
 // It opens straight from disk, with no server: npm run build
 import { build } from 'esbuild';
 import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
@@ -29,10 +29,18 @@ const flags = Object.fromEntries(
     .map((f) => [f.slice(0, -4), `data:image/svg+xml;base64,${read(`assets/flags/${f}`).toString('base64')}`]),
 );
 
+// Sounds (task 14C), as data URIs keyed by file name.
+const sounds = Object.fromEntries(
+  readdirSync(new URL('assets/sounds/', root))
+    .filter((f) => f.endsWith('.mp3'))
+    .map((f) => [f.slice(0, -4), dataUri(`assets/sounds/${f}`, 'audio/mpeg')]),
+);
+
 const html = read('web/index.html')
   .toString()
   .replace('/*STYLE*/', () => css)
   .replace('/*FLAGS*/', () => JSON.stringify(flags))
+  .replace('/*SOUNDS*/', () => JSON.stringify(sounds))
   .replace('/*POSTER*/', () => dataUri('assets/art/poster.webp'))
   .replace('/*SCRIPT*/', () => js);
 

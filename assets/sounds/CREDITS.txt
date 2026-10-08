@@ -1,0 +1,9 @@
+Sounds for Kris Ann's Journey (task 14C)
+
+All sounds come from Pixabay (https://pixabay.com/sound-effects/), under the Pixabay Content License
+(free to use, commercial use included, no credit required). Chosen by the owner, then trimmed,
+made mono and set to the same loudness for the game.
+
+right.mp3: https://pixabay.com/sound-effects/technology-glock-correct-answer-504462/
+tap, walk, plane, ship, wrong, card-good, card-bad, coins, citizenship, milestone, win,
+timer (15-second answer loop), music: Pixabay, individual links not kept (owner's choice).

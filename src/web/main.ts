@@ -14,6 +14,7 @@ import { shapes30 } from '../maps/shapes30.ts';
 import { countryCapital, countryFlag, WONDER_NAME } from './countries.ts';
 import { buildGeo, colourAreas, continentBox, pad, squeeze, svg, unionBox, type Box } from './maps.ts';
 import { airport, citizenFlag, monument, pawn, place, port } from './props.ts';
+import { play, setMusic, soundOn, startTimer, stopTimer, toggleSound, type SoundName } from './sound.ts';
 
 const COLOURS = ['#e4572e', '#2e86de', '#29a36a', '#e0a100'];
 const COLOUR_NAMES = ['Red', 'Blue', 'Green', 'Yellow'];
@@ -38,7 +39,7 @@ const FLAGS: Record<string, string> = (window as unknown as { KAJ_FLAGS?: Record
 // The owner's poster, put into the page by the build as a data URI.
 const POSTER: string = (window as unknown as { KAJ_POSTER?: string }).KAJ_POSTER ?? '';
 // Credits for the open data and flags (shown on the start screen).
-const CREDITS = 'Country data: mledoze/countries, ODbL 1.0 · Flags: flag-icons by Panayiotis Lipiridis, MIT licence · Map shapes: Natural Earth · Lettering: Cinzel, SIL Open Font Licence';
+const CREDITS = 'Country data: mledoze/countries, ODbL 1.0 · Flags: flag-icons by Panayiotis Lipiridis, MIT licence · Map shapes: Natural Earth · Lettering: Cinzel, SIL Open Font Licence · Sounds: Pixabay, Pixabay Content License';
 // Citizenship test: 15 seconds for each question (owner's choice, task 8).
 const EXAM_SECONDS = 15;
 const VEHICLE: Record<RouteKind, string> = { airport: '✈️', port: '⛴️' };
@@ -80,6 +81,8 @@ const arrivals = new Map<number, { area: string; lines: string[] }>();
 let citizenPopup = false;
 // One countdown per question, kept across redraws.
 let countdown: { key: string; deadline: number } | null = null;
+// The popup that last played its sound (task 14C).
+let lastSound: unknown;
 // Guided help can be turned off; kept on the device (task 10 request, task 14 B2).
 const GUIDE_KEY = 'kaj-guide-off';
 let guideOff = (() => { try { return localStorage.getItem(GUIDE_KEY) === '1'; } catch { return false; } })();
@@ -126,6 +129,13 @@ function plural(n: number, word: string): string {
   return `${n} ${word}${n === 1 ? '' : 's'}`;
 }
 
+// The 🔊 / 🔇 button: all sounds and the music on or off, kept on the device (task 14C).
+function soundButton(): HTMLButtonElement {
+  const b = button(soundOn() ? '🔊' : '🔇', () => { toggleSound(); b.textContent = soundOn() ? '🔊' : '🔇'; });
+  b.title = 'Sound on or off';
+  return b;
+}
+
 // The title, in the poster's lettering (Cinzel, see web/style.css).
 function title(tag: 'h1' | 'strong' = 'h1'): HTMLElement {
   return el(tag, { className: 'title', textContent: "Kris Ann's Journey" });
@@ -136,6 +146,8 @@ function title(tag: 'h1' | 'strong' = 'h1'): HTMLElement {
 function renderStart(): void {
   clearTimeout(robotTimer);
   clearInterval(quizTimer);
+  stopTimer();
+  setMusic('menu');
   state = null;
   const saved = readSave();
   const play = button('▶ Play', renderSetup);
@@ -146,7 +158,7 @@ function renderStart(): void {
   app.replaceChildren(
     el('section', { className: 'poster' },
       POSTER ? el('img', { src: POSTER, alt: "Kris Ann's Journey" }) : title(),
-      el('div', { className: 'poster-buttons' }, play, resume ?? '')),
+      el('div', { className: 'poster-buttons' }, play, resume ?? '', soundButton())),
   );
 }
 
@@ -155,6 +167,8 @@ function renderStart(): void {
 function renderSetup(): void {
   clearTimeout(robotTimer);
   clearInterval(quizTimer);
+  stopTimer();
+  setMusic('menu');
   state = null;
   const kinds: SeatKind[] = ['human', 'robot', 'robot', 'robot'];
   const levels: RobotLevel[] = ['normal', 'normal', 'normal', 'normal'];
@@ -294,7 +308,9 @@ function act(action: Action): void {
   state = apply(state, map30, action);
   const after = state.players[mover.seat];
   const lines: string[] = [];
+  stopTimer();
   if (mover.kind === 'human') {
+    moveSound(action, state.payments.some((p) => p.from === mover.seat && (p.reason === 'buy' || p.reason === 'sale')));
     answered = answerResult(before, state, action);
     // The start area gives the welcome bonus, not visit points: no arrival lines for it.
     const arrival = action.type === 'chooseStart' ? null : arrivalLines(mover, after);
@@ -347,6 +363,14 @@ function act(action: Action): void {
   pickedStart = null;
   popup = null;
   render();
+}
+
+// A person's own move: footsteps, a plane, a ship, or coins for buying a business (task 14C).
+// Answers, cards, money from others and the end of the game sound with their popups.
+function moveSound(action: Action, bought: boolean): void {
+  if (bought) play('coins');
+  else if (action.type === 'walk') play('walk');
+  else if (action.type === 'board') play(action.kind === 'port' ? 'ship' : 'plane');
 }
 
 // ---------- event cards (task 11) ----------
@@ -492,9 +516,13 @@ function render(): void {
   writeSave(s);
   clearTimeout(robotTimer);
   clearInterval(quizTimer);
+  setMusic('game');
 
   // The popup over the board (task 14 B2): main events show here, the right side is for info.
   const modal = renderModal(s, actions, isRobot);
+  // Each popup sounds once, not on every redraw.
+  if (modal?.sound && modal.soundKey !== lastSound) play(modal.sound);
+  lastSound = modal?.soundKey;
   if (s.phase === 'chooseProfile') {
     const people = s.players.filter((p) => p.kind === 'human' && p.profile);
     app.replaceChildren(el('section', { className: 'card setup' }, title(), renderTurn(s, actions, isRobot),
@@ -504,6 +532,7 @@ function render(): void {
       title('strong'),
       el('span', { className: 'round', textContent: s.phase === 'play' || s.phase === 'finished' ? `Round ${s.round} / ${s.totalRounds}` : 'Getting ready' }),
       renderChips(s),
+      soundButton(),
       button('New game', renderSetup));
     const side = el('div', { className: 'side' });
     if (s.phase !== 'chooseStart') side.append(renderWorld(s));
@@ -908,7 +937,10 @@ function travelNote(me: Player): string {
 
 // One countdown per question (a redraw doesn't restart it). Time out = wrong answer.
 function startCountdown(key: string, seconds: number, clock: HTMLElement, onTimeout: () => void): void {
-  if (countdown?.key !== key) countdown = { key, deadline: Date.now() + seconds * 1000 };
+  if (countdown?.key !== key) {
+    countdown = { key, deadline: Date.now() + seconds * 1000 };
+    startTimer();
+  }
   const { deadline } = countdown;
   const secs = clock.querySelector<HTMLElement>('.secs')!;
   const bar = clock.querySelector<HTMLElement>('.timebar span')!;
@@ -919,6 +951,7 @@ function startCountdown(key: string, seconds: number, clock: HTMLElement, onTime
     clock.classList.toggle('hurry', left <= 5000);
     if (left <= 0) {
       clearInterval(quizTimer);
+      stopTimer();
       onTimeout();
     }
   };
@@ -1104,7 +1137,9 @@ function closedReason(s: GameState, to: string): string {
 
 // The popup over the board: an answer, what happened, an event card, or the current main event
 // (quiz, test, challenge, entry fees, an offer). `turn` = the turn panel itself is in the popup.
-function renderModal(s: GameState, actions: Action[], isRobot: boolean): { node: HTMLElement; turn: boolean } | null {
+type Modal = { node: HTMLElement; turn: boolean; sound?: SoundName; soundKey?: unknown };
+
+function renderModal(s: GameState, actions: Action[], isRobot: boolean): Modal | null {
   const me = currentPlayer(s);
   const wrap = (content: HTMLElement, cls = '') => el('div', { className: 'modal-back' }, el('div', { className: `modal card ${cls}` }, content));
   const ok = (onClick: () => void, text = 'OK') => {
@@ -1117,7 +1152,7 @@ function renderModal(s: GameState, actions: Action[], isRobot: boolean): { node:
     return { turn: false, node: wrap(el('div', {},
       el('h2', { textContent: r.title }),
       ...r.lines.map((t) => el('p', { textContent: t })),
-      ok(() => { answered = null; render(); })), r.ok ? 'right' : 'wrong') };
+      ok(() => { answered = null; render(); })), r.ok ? 'right' : 'wrong'), sound: r.ok ? 'right' : 'wrong', soundKey: r };
   }
   // Money for people: a gold popup per person (never for a robot).
   if (income.length > 0 && (newsNow || !isRobot || s.phase === 'finished')) {
@@ -1127,7 +1162,7 @@ function renderModal(s: GameState, actions: Action[], isRobot: boolean): { node:
       ...seats.map((seat) => el('div', {},
         el('h2', { className: 'big-title', textContent: `Great news, ${COLOUR_NAMES[seat]}!` }),
         el('ul', {}, ...income.filter((i) => i.seat === seat).map((i) => el('li', { textContent: i.text }))))),
-      ok(() => { income = []; if (news.length === 0) newsNow = false; render(); }, 'Wonderful!')), 'gold') };
+      ok(() => { income = []; if (news.length === 0) newsNow = false; render(); }, 'Wonderful!')), 'gold'), sound: 'coins', soundKey: income };
   }
   if (news.length > 0 && (newsNow || !isRobot || s.phase === 'finished')) {
     return { turn: false, node: wrap(el('div', {},
@@ -1137,7 +1172,8 @@ function renderModal(s: GameState, actions: Action[], isRobot: boolean): { node:
   }
   const key = s.card ? `${s.card.round}-${s.card.seat}-${s.card.card.text}` : '';
   if (s.phase === 'play' && me.kind === 'human' && s.card?.seat === me.seat && !seenCards.has(key)) {
-    return { turn: false, node: wrap(el('div', {}, eventCard(s.card), ok(() => { seenCards.add(key); render(); }, 'Continue')), 'event') };
+    const bad = s.card.card.loseTurn || s.card.card.points < 0;
+    return { turn: false, node: wrap(el('div', {}, eventCard(s.card), ok(() => { seenCards.add(key); render(); }, 'Continue')), 'event'), sound: bad ? 'card-bad' : 'card-good', soundKey: key };
   }
   // Halfway and the last five turns, on a person's turn.
   if (s.phase === 'play' && !isRobot && me.kind === 'human') {
@@ -1148,12 +1184,12 @@ function renderModal(s: GameState, actions: Action[], isRobot: boolean): { node:
         el('h2', { className: 'big-title', textContent: m.title }),
         el('p', { textContent: m.text }),
         el('p', { className: 'small', textContent: `Round ${s.round} of ${s.totalRounds}.` }),
-        ok(() => { for (const x of due) seenCards.add(x.key); render(); }, "Let's go!")), 'gold') };
+        ok(() => { for (const x of due) seenCards.add(x.key); render(); }, "Let's go!")), 'gold'), sound: 'milestone', soundKey: m.key };
     }
   }
   // The end of the game: the winner popup.
   if (s.phase === 'finished' && !seenCards.has('finished')) {
-    return { turn: false, node: wrap(finishPopup(s, () => { seenCards.add('finished'); render(); }), 'gold') };
+    return { turn: false, node: wrap(finishPopup(s, () => { seenCards.add('finished'); render(); }), 'gold'), sound: 'win', soundKey: 'finished' };
   }
   // Choosing the home country: stressed before it is confirmed (owner's request, task 14 A2).
   if (s.phase === 'chooseStart' && !isRobot && pickedStart) {
@@ -1192,7 +1228,7 @@ function renderModal(s: GameState, actions: Action[], isRobot: boolean): { node:
           return el('li', {}, `${q.text} ✅ ${q.options[q.correct]}`, mine === q.correct ? '' : ` (you said: ${q.options[mine]})`);
         })) : '',
         el('p', { textContent: `Every other player now pays you a ${VISA_PRICE}-point visa to enter.${bonus} You may travel on.` }),
-        ok(() => { seenCards.add(ek); render(); })), 'right') };
+        ok(() => { seenCards.add(ek); render(); })), 'right'), sound: 'citizenship', soundKey: ek };
     }
   }
   // Every call to action is a popup (owner's request): quiz, test, challenge, fees, an offer,
