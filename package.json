@@ -1,7 +1,7 @@
 {
   "name": "kaj-game",
   "version": "0.1.0",
-  "description": "KAJ \u2014 Kris Ann's Journey: a kid-friendly geography board game",
+  "description": "KAJ — Kris Ann's Journey: a kid-friendly geography board game",
   "private": true,
   "type": "module",
   "scripts": {
@@ -18,6 +18,9 @@
   "devDependencies": {
     "@types/node": "^22.20.5",
     "esbuild": "^0.28.2",
+    "topojson-client": "^3.1.0",
+    "topojson-server": "^3.0.1",
+    "topojson-simplify": "^3.0.3",
     "typescript": "^7.0.2"
   }
 }
