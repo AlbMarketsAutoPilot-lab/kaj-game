@@ -174,7 +174,7 @@ export function legalActions(state: GameState, map: GameMap): Action[] {
         // Strict fees (owner's rule, task 9): no money, no entry. A visa or tour fee
         // the player can't pay closes the area.
         if (me.points < feeTotal(entryFees(state, me, me.area, to))) continue;
-        moves.push(...withCitizenship(state, map, me, to, { type: 'walk', to }));
+        moves.push({ type: 'walk', to });
       }
       moves.push(...tripActions(state, me, map));
       if (moves.length === 0) {
@@ -182,8 +182,10 @@ export function legalActions(state: GameState, map: GameMap): Action[] {
         const home = me.broke >= GO_HOME_TURNS - 1 && blockedByMoney(state, map, me);
         moves.push(home ? { type: 'goHome' } : { type: 'blocked' });
       }
+      // Asking for citizenship here is a move of its own (owner's rule, task 14d).
+      const ask: Action[] = canAskCitizenship(state, map, me, me.area!) ? [{ type: 'askCitizenship' }] : [];
       // Buying and selling never end the turn, so they come with the moves.
-      return [...moves, ...buyActions(state, me), ...sellActions(state, me)];
+      return [...moves, ...ask, ...buyActions(state, me), ...sellActions(state, me)];
     }
     case 'finished':
       return [];
@@ -237,34 +239,40 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
     case 'walk': {
       me.quizWrong = 0;
       payFees(next, me, entryFees(next, me, me.area, action.to), action.to);
-      arrive(next, map, me, areaById(map, action.to), action.citizenship === true);
+      arrive(next, map, me, areaById(map, action.to));
+      endTurn(next, map);
+      return next;
+    }
+    case 'askCitizenship': {
+      submitCitizenship(next, map, me, me.area!);
+      // Luxury: granted at once, and the turn goes on (the player may still move).
+      if (me.profile === 'luxury') return next;
       endTurn(next, map);
       return next;
     }
     case 'board':
-      depart(next, map, me, action.kind, action.to, TICKET_PRICE[me.profile!]!, action.citizenship === true);
+      depart(next, map, me, action.kind, action.to, TICKET_PRICE[me.profile!]!);
       endTurn(next, map);
       return next;
     case 'quiz': {
       // The question is about the destination. The turn goes on: the next move is the answer.
       const [question, rng] = makeQuestion(map, action.to, next.rng);
       next.rng = rng;
-      next.quiz = { kind: action.kind, to: action.to, question, ...(action.citizenship ? { citizenship: true as const } : {}) };
+      next.quiz = { kind: action.kind, to: action.to, question };
       return next;
     }
     case 'answer': {
       const quiz = next.quiz!;
       next.quiz = null;
-      const ask = quiz.citizenship === true;
       if (action.choice === quiz.question.correct) {
-        depart(next, map, me, quiz.kind, quiz.to, 0, ask); // free ticket
+        depart(next, map, me, quiz.kind, quiz.to, 0); // free ticket
       } else {
         me.quizWrong += 1;
         // After the 3rd wrong answer a player who can pay (ticket and any fees) must pay and
         // board now; a player who can't (always the Backpacker) goes home (owner's rule, task 13).
         if (me.quizWrong >= QUIZ_TRIES) {
           if (canPayAfterQuiz(next, me, quiz.to)) {
-            depart(next, map, me, quiz.kind, quiz.to, TICKET_PRICE[me.profile!]!, ask);
+            depart(next, map, me, quiz.kind, quiz.to, TICKET_PRICE[me.profile!]!);
           } else {
             goHome(next, map, me);
           }
@@ -379,21 +387,16 @@ function tripActions(state: GameState, me: Player, map: GameMap): Action[] {
       if (closed.has(to)) continue;
       const fees = feeTotal(entryFees(state, me, me.area, to));
       if (price !== null && me.points >= price + fees) {
-        out.push(...withCitizenship(state, map, me, to, { type: 'board', kind, to }));
+        out.push({ type: 'board', kind, to });
       }
-      if (me.points >= fees) out.push(...withCitizenship(state, map, me, to, { type: 'quiz', kind, to }));
+      if (me.points >= fees) out.push({ type: 'quiz', kind, to });
     }
   }
   return out;
 }
 
-// A move, plus the same move with a citizenship request where the player could still get one.
-function withCitizenship<A extends Action & { to: string }>(state: GameState, map: GameMap, me: Player, to: string, action: A): A[] {
-  return canAskCitizenship(state, map, me, to) ? [action, { ...action, citizenship: true }] : [action];
-}
-
 function depart(
-  state: GameState, map: GameMap, me: Player, kind: RouteKind, to: string, ticket: number, ask: boolean,
+  state: GameState, map: GameMap, me: Player, kind: RouteKind, to: string, ticket: number,
 ): void {
   // The ticket goes to the owner of the departure airline or ferry agency (the owner pays
   // their own ticket to themselves); with no owner it goes to nobody (there is no bank).
@@ -408,10 +411,7 @@ function depart(
   // The visa and tour fee due now are paid at boarding, with the ticket (owner's rule, task 11),
   // so nothing is owed on landing; a citizenship or tours that appear during the trip are free.
   payFees(state, me, entryFees(state, me, me.area, to), to);
-  me.travel = {
-    kind, from: me.area!, to, turnsLeft: TRAVEL_TURNS[me.profile!][kind],
-    ...(ask ? { citizenship: true as const } : {}),
-  };
+  me.travel = { kind, from: me.area!, to, turnsLeft: TRAVEL_TURNS[me.profile!][kind] };
   me.area = null;
   me.quizWrong = 0;
   if (me.travel.turnsLeft === 0) land(state, map, me);
@@ -424,7 +424,7 @@ function land(state: GameState, map: GameMap, me: Player): void {
   const trip = me.travel!;
   if (occupiedAreas(state, me.seat).has(trip.to)) return;
   me.travel = null;
-  arrive(state, map, me, areaById(map, trip.to), trip.citizenship === true);
+  arrive(state, map, me, areaById(map, trip.to));
 }
 
 // ---------- visas and citizenship (rulebook sections 7 and 8, docs/engine.md task 8) ----------
@@ -577,25 +577,30 @@ export function canPayAfterQuiz(state: GameState, me: Player, to: string): boole
 function goHome(state: GameState, map: GameMap, me: Player): void {
   const to = homeFor(state, map, me);
   me.quizWrong = 0;
-  if (to !== me.area) arrive(state, map, me, areaById(map, to), false);
+  if (to !== me.area) arrive(state, map, me, areaById(map, to));
 }
 
-// Citizenship can be asked on arrival in a new area, once per game, never by the Nomad,
-// and only where nobody holds it or is asking for it (one citizen per area or big country).
+// Citizenship can be asked in the area the player stands in (owner's rule, task 14d): any area
+// but the home country, also one visited before; once per game, never by the Nomad, never
+// during a request, and only where nobody holds it or is asking for it (one citizen per area or
+// big country). For a big country the whole country is one citizenship, so the home country's
+// other parts can't be asked for either.
 export function canAskCitizenship(state: GameState, map: GameMap, me: Player, areaId: string): boolean {
-  if (me.profile === 'nomad' || me.askedCitizenship || me.visitedAreas.includes(areaId)) return false;
+  if (me.profile === 'nomad' || me.askedCitizenship || me.exam !== null) return false;
+  if (me.home !== null && citizenshipAreas(map, areaId).includes(me.home)) return false;
   const covered = citizenshipAreas(map, areaId);
   return !state.players.some(
     (p) => p.citizenship?.includes(areaId) || (p.exam !== null && covered.includes(p.exam.area)),
   );
 }
 
-// The arrival turn (citizenship turn 1): "request approved, the test is next turn".
-// The questions are drawn now (nothing is secret in v1); Luxury needs no test.
+// Citizenship turn 1: "request approved, the test is next turn". The questions are drawn now
+// (nothing is secret in v1). Luxury needs no test: granted at once (owner's rule, task 14d).
 function submitCitizenship(state: GameState, map: GameMap, me: Player, areaId: string): void {
   me.askedCitizenship = true;
   if (me.profile === 'luxury') {
-    me.exam = { area: areaId, stage: 'submitted', questions: [], answers: [] };
+    me.exam = { area: areaId, stage: 'granted', questions: [], answers: [] };
+    grantCitizenship(map, me);
     return;
   }
   const [questions, rng] = makeExam(map, areaId, EXAM_QUESTIONS, state.rng);
@@ -617,14 +622,14 @@ function grantCitizenship(map: GameMap, me: Player): void {
   if (me.profile === 'business') me.points = addPoints(me.points, POINTS_BUSINESS_CITIZENSHIP);
 }
 
-// Start of a player's turn: citizenship is granted at the start of the turn after arriving
-// (Luxury), turn 3 (all answers right) or turn 4 (after the learning turn).
+// Start of a player's turn: citizenship is granted at the start of turn 3 (all answers right)
+// or turn 4 (after the learning turn).
 function startTurn(state: GameState, map: GameMap): void {
   const me = currentPlayer(state);
   countLandTurn(state, me);
   const exam = me.exam;
   if (!exam) return;
-  if (exam.stage === 'submitted' || (exam.stage === 'result' && passed(exam))) {
+  if (exam.stage === 'result' && passed(exam)) {
     grantCitizenship(map, me);
     exam.stage = 'granted';
   } else if (exam.stage === 'learning') {
@@ -632,10 +637,8 @@ function startTurn(state: GameState, map: GameMap): void {
   }
 }
 
-// Scoring for arriving in an area (rulebook section 3), by walking, plane or ship,
-// and the citizenship request if the player asked for one (and the area can still take it).
-function arrive(state: GameState, map: GameMap, me: Player, area: Area, ask: boolean): void {
-  const asking = ask && canAskCitizenship(state, map, me, area.id);
+// Scoring for arriving in an area (rulebook section 3), by walking, plane or ship.
+function arrive(state: GameState, map: GameMap, me: Player, area: Area): void {
   me.area = area.id;
   if (!me.visitedAreas.includes(area.id)) {
     me.visitedAreas.push(area.id);
@@ -657,7 +660,6 @@ function arrive(state: GameState, map: GameMap, me: Player, area: Area, ask: boo
     const bonus = me.profile ? CONTINENT_BONUS[me.profile] : undefined;
     if (bonus && me.visitedContinents.length === bonus.continents) me.points = addPoints(me.points, bonus.points);
   }
-  if (asking) submitCitizenship(state, map, me, area.id);
 }
 
 // One travel turn: Nomad +1, and the player lands at the end of the last one.

@@ -26,7 +26,7 @@ function answer(s: GameState, right: boolean): GameState {
 
 const trips = (s: GameState) =>
   legalActions(s, travelMap)
-    .filter((a) => (a.type === 'board' || a.type === 'quiz') && !a.citizenship)
+    .filter((a) => a.type === 'board' || a.type === 'quiz')
     .map((a) => `${a.type} ${'to' in a ? a.to : ''}`)
     .sort();
 

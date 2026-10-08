@@ -21,7 +21,7 @@ function checkInvariants(s: GameState): void {
 // staying for citizenship can trap others here. On it the robots never ask for citizenship
 // (owner-approved, task 8); citizenship and visas are checked on the real map below.
 function plainRobotAction(s: GameState, seed: number): [Action, number] {
-  const plain = legalActions(s, testMap).filter((a) => !('citizenship' in a && a.citizenship));
+  const plain = legalActions(s, testMap).filter((a) => a.type !== 'askCitizenship');
   const [i, next] = randomInt(seed, plain.length);
   return [plain[i], next];
 }

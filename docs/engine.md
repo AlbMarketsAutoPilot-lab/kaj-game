@@ -339,6 +339,21 @@ Task 14b: Alaska and two ships (owner's change; `tests/map30.test.ts`, `tests/sc
   47.5 → 47.2. With normal robots (300 games): the USA completed by 53% → 22% of players, New Zealand
   visited by 44% → 63%. Two citizenships at once trap someone in 21 → 19 of 946 pairs; nobody stuck.
 
+Task 14d: citizenship asked where the player stands (owner's change; `tests/citizenship.test.ts`).
+
+- **Asking** is a move of its own (`askCitizenship`), for the area the player stands in, on their
+  turn: any area except the home country (for a big country: no part of the home country's
+  country), also an area visited before. Never while travelling, never the Nomad, once per game,
+  and only where nobody holds or is asking for that citizenship. It replaces the request carried
+  by a walk, plane or quiz (task 8). A player out of money may ask too.
+- **Timeline:** asking ends the turn (citizenship turn 1); the test is next turn; then granted and
+  moves (or one learning turn after a wrong answer), as before. One turn longer than task 8.
+  **Luxury:** granted at once, and the turn goes on (the player may still move).
+- **Robots:** ask in the first area where they can, before round 10.
+- **Saves:** version 7.
+- 1,000 games per level, before → after: average score easy 39.6 → 38.8, normal 44.2 → 43.5, hard
+  47.2 → 46.2.
+
 ## Choices made in task 1 (approved by the owner)
 
 These points are not spelled out in the rulebook or the v1 scope.
