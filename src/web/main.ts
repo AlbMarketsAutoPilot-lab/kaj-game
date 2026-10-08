@@ -66,6 +66,9 @@ let quizTimer = 0;
 // on a person's turn, or straight after a person's own move (`newsNow`).
 let news: string[] = [];
 let newsNow = false;
+// Money people earn from others (visa, tour fee, a ticket on their airline or ferry): a gold
+// popup for each person, never for a robot (owner's request).
+let income: { seat: number; text: string }[] = [];
 // The popup after a person answers a quiz, test or challenge question: right or wrong, the
 // right answer and the fact behind it (owner's request).
 let answered: { ok: boolean; title: string; lines: string[] } | null = null;
@@ -193,6 +196,9 @@ function renderSetup(): void {
       const seats = kinds.slice(0, count).map((kind, i) => ({ kind, colour: COLOUR_NAMES[i], ...(kind === 'robot' ? { level: levels[i] } : {}) }));
       zoom = null;
       pickedStart = null;
+      seenCards.clear();
+      news = [];
+      income = [];
       state = createGame({ seats, seed }, map30);
       render();
     } catch (e) {
@@ -323,7 +329,12 @@ function act(action: Action): void {
       : `❌ ${name}: ${QUIZ_TRIES} wrong answers here and no money for the ticket, so the trip ends here: ${name} goes home to ${areaById.get(lastTry.home)!.name}, free of any fees.`);
   }
   if (state.challenged && !answered) lines.push(challengeNote(state.challenged));
-  lines.push(...state.payments.map(paymentNote).filter((t) => t !== ''));
+  for (const p of state.payments) {
+    const line = incomeLine(state, p);
+    if (line) income.push(line);
+    else if (paymentNote(p) !== '') lines.push(paymentNote(p));
+  }
+  if (mover.kind === 'human' && income.length > 0) newsNow = true;
   // Event cards drawn by this move; a human's own start-of-turn card has its own box instead.
   const next = currentPlayer(state);
   lines.push(...state.drawn.filter((c) => !(c === state!.card && next.kind === 'human' && c.seat === next.seat)).map(cardNote));
@@ -362,6 +373,68 @@ function renderCard(c: DrawnCard): HTMLElement {
     el('p', { textContent: `“${c.card.text}”` }),
     el('p', { textContent: cardEffect(c) }));
 }
+
+// The event card in its popup: a big golden card (owner's request: "it must look like an event").
+function eventCard(c: DrawnCard): HTMLElement {
+  const { points, loseTurn } = c.card;
+  const badge = loseTurn ? '⏸️ Lose a turn' : points > 0 ? `+${plural(points, 'point')}` : `−${plural(Math.abs(points), 'point')}`;
+  return el('div', { className: 'event-card' },
+    el('div', { className: 'event-rays' }),
+    el('div', { className: 'event-deck', textContent: DECK_ICON[c.card.deck] }),
+    el('div', { className: 'event-kind', textContent: `${c.card.deck === 'backpacker' ? 'Backpacker' : 'Country'} event card` }),
+    el('p', { className: 'event-text', textContent: `“${c.card.text}”` }),
+    el('div', { className: `event-badge ${loseTurn || points < 0 ? 'bad' : 'good'}`, textContent: badge }),
+    // Only when it says more than the badge (e.g. "only 1 to lose").
+    !loseTurn && c.change !== points ? el('p', { className: 'small', textContent: cardEffect(c) }) : '');
+}
+
+// A payment to a person from someone else: their income, cheered in a popup (owner's request).
+function incomeLine(s: GameState, p: Payment): { seat: number; text: string } | null {
+  if (p.to === null || p.to === p.from || s.players[p.to].kind !== 'human') return null;
+  const from = `${COLOUR_NAMES[p.from]}${s.players[p.from].kind === 'robot' ? ' 🤖' : ''}`;
+  const where = areaById.get(p.area)!.name;
+  const pts = plural(p.amount, 'point');
+  switch (p.reason) {
+    case 'visa': return { seat: p.to, text: `🛂 ${from} just paid you a ${pts} visa to enter ${where}, your citizenship country!` };
+    case 'tour': return { seat: p.to, text: `🏛️ ${from} just paid you ${pts} to visit your Guided Tours of ${WONDER_NAME[p.area] ?? where}!` };
+    case 'ticket': return { seat: p.to, text: `${p.business === 'ferry' ? '⛴️' : '✈️'} ${from} just ${p.business === 'ferry' ? 'sailed with your ferry agency' : 'flew with your airline'} from ${where}: +${pts} for you!` };
+    default: return null;
+  }
+}
+
+// The end of the game: the winner popup. People are always cheered, robots never (owner's rule).
+function finishPopup(s: GameState, close: () => void): HTMLElement {
+  const r = s.result!;
+  const name = (seat: number) => `${COLOUR_NAMES[seat]}${s.players[seat].kind === 'robot' ? ' 🤖' : ''}`;
+  const people = s.players.filter((p) => p.kind === 'human');
+  const humanWinners = r.winners.filter((w) => s.players[w].kind === 'human');
+  const title = humanWinners.length > 0
+    ? `🎉 ${humanWinners.map((w) => COLOUR_NAMES[w]).join(' and ')} ${humanWinners.length > 1 || r.winners.length > 1 ? 'share the cup' : 'wins'}!`
+    : '🏁 The journey is over!';
+  const cheers = people.map((p) => (r.winners.includes(p.seat)
+    ? `🏆 Congratulations, ${COLOUR_NAMES[p.seat]}! What a journey: ${plural(finalScore(s, p), 'point')}, ${plural(p.visitedAreas.length, 'area')} and ${plural(p.visitedContinents.length, 'continent')}!`
+    : `🌟 ${COLOUR_NAMES[p.seat]}, you did a great job: ${plural(p.visitedAreas.length, 'area')} and ${plural(p.visitedContinents.length, 'continent')} explored! You'll do even better next time.`));
+  const again = button('▶ Play again', renderSetup);
+  again.className = 'primary big';
+  return el('div', { className: 'finish' },
+    el('div', { className: 'trophy', textContent: humanWinners.length > 0 ? '🏆' : '🧭' }),
+    el('h2', { className: 'big-title', textContent: title }),
+    ...cheers.map((t) => el('p', { className: 'cheer', textContent: t })),
+    el('ol', { className: 'ranking' }, ...r.ranking.map((seat) => {
+      const p = s.players[seat];
+      const value = businessValue(s, seat);
+      const penalty = nomadPenalty(p);
+      const detail = [`${p.points} travel`, `${value} assets`].join(' + ') + (penalty ? ` − ${penalty} Nomad penalty` : '');
+      return el('li', {}, dot(seat), ` ${name(seat)}: `, el('b', { textContent: plural(finalScore(s, p), 'point') }), ` (${detail})`);
+    })),
+    el('div', { className: 'row' }, again, button('See the map', close)));
+}
+
+// Halfway and the last five turns (owner's request): one popup each per game.
+const MILESTONES = [
+  { key: 'milestone-half', round: 16, title: '🧭 Halfway there!', text: 'Half of your journey is already behind you: 15 more turns to go. Think about where you still want to go!' },
+  { key: 'milestone-last', round: 26, title: '⏳ The last five turns!', text: 'These are the last five turns of the journey. Make them count: new areas, wonders and the continents you still need!' },
+];
 
 // "Who was paid", after a move.
 function paymentNote(p: Payment): string {
@@ -541,7 +614,9 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
     const r = s.result!;
     const names = r.winners.map((w) => COLOUR_NAMES[w]).join(' and ');
     box.append(
-      el('h2', { textContent: r.winners.length > 1 ? `It's a draw: ${names}! 🎉` : `${names} wins! 🎉` }),
+      el('h2', { textContent: r.winners.some((w) => s.players[w].kind === 'human')
+        ? (r.winners.length > 1 ? `It's a draw: ${names}! 🎉` : `${names} wins! 🎉`)
+        : '🏁 The journey is over!' }),
       el('ol', {}, ...r.ranking.map((seat) => {
         const p = s.players[seat];
         const value = businessValue(s, seat);
@@ -1044,6 +1119,16 @@ function renderModal(s: GameState, actions: Action[], isRobot: boolean): { node:
       ...r.lines.map((t) => el('p', { textContent: t })),
       ok(() => { answered = null; render(); })), r.ok ? 'right' : 'wrong') };
   }
+  // Money for people: a gold popup per person (never for a robot).
+  if (income.length > 0 && (newsNow || !isRobot || s.phase === 'finished')) {
+    const seats = [...new Set(income.map((i) => i.seat))];
+    return { turn: false, node: wrap(el('div', { className: 'income' },
+      el('div', { className: 'coins', textContent: '💰' }),
+      ...seats.map((seat) => el('div', {},
+        el('h2', { className: 'big-title', textContent: `Great news, ${COLOUR_NAMES[seat]}!` }),
+        el('ul', {}, ...income.filter((i) => i.seat === seat).map((i) => el('li', { textContent: i.text }))))),
+      ok(() => { income = []; if (news.length === 0) newsNow = false; render(); }, 'Wonderful!')), 'gold') };
+  }
   if (news.length > 0 && (newsNow || !isRobot || s.phase === 'finished')) {
     return { turn: false, node: wrap(el('div', {},
       el('h2', { textContent: '📣 What happened' }),
@@ -1052,7 +1137,23 @@ function renderModal(s: GameState, actions: Action[], isRobot: boolean): { node:
   }
   const key = s.card ? `${s.card.round}-${s.card.seat}-${s.card.card.text}` : '';
   if (s.phase === 'play' && me.kind === 'human' && s.card?.seat === me.seat && !seenCards.has(key)) {
-    return { turn: false, node: wrap(el('div', {}, renderCard(s.card), ok(() => { seenCards.add(key); render(); })), 'event') };
+    return { turn: false, node: wrap(el('div', {}, eventCard(s.card), ok(() => { seenCards.add(key); render(); }, 'Continue')), 'event') };
+  }
+  // Halfway and the last five turns, on a person's turn.
+  if (s.phase === 'play' && !isRobot && me.kind === 'human') {
+    const due = MILESTONES.filter((m) => s.round >= m.round && !seenCards.has(m.key));
+    if (due.length > 0) {
+      const m = due[due.length - 1];
+      return { turn: false, node: wrap(el('div', { className: 'milestone' },
+        el('h2', { className: 'big-title', textContent: m.title }),
+        el('p', { textContent: m.text }),
+        el('p', { className: 'small', textContent: `Round ${s.round} of ${s.totalRounds}.` }),
+        ok(() => { for (const x of due) seenCards.add(x.key); render(); }, "Let's go!")), 'gold') };
+    }
+  }
+  // The end of the game: the winner popup.
+  if (s.phase === 'finished' && !seenCards.has('finished')) {
+    return { turn: false, node: wrap(finishPopup(s, () => { seenCards.add('finished'); render(); }), 'gold') };
   }
   // Choosing the home country: stressed before it is confirmed (owner's request, task 14 A2).
   if (s.phase === 'chooseStart' && !isRobot && pickedStart) {
