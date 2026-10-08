@@ -40,7 +40,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | 11 | Event cards | medium | 1 | 7–8 | ✅ done |
 | 12 | Challenges (6 types from open data) | medium | 1.5 | 8–9 | ✅ done |
 | 13 | Robot: easy, normal and hard | medium | 1 | 10 | ✅ done |
-| 14 | Real screens, art and sounds | medium | 4 (A1, A2, B, C) | 11–13 | A1 ✅ A2 ✅ done (screens, maps) |
+| 14 | Real screens, art and sounds | medium | 5 (A1, A2, B1, B2, C) | 11–14 | A1 ✅ A2 ✅ B1 ✅ |
 | 14a | Canada and Russia in 3 parts (+5 bonus) | **high** | 1 | 11 | ✅ done (24 new facts checked by the owner) |
 | 15 | Android release build (signed APK) | medium | 1 | 14 | |
 | 16 | Full-game tests, bug fixes, buffer | medium | 1–2 | 15 | |
@@ -217,6 +217,23 @@ on day 14 it could miss the deadline.
   only: Android locked (`sensorLandscape`), a phone browser held upright shows "Please turn your
   phone". Wording: "1 point", never "1 points". The quiz, exam, challenge, event card, sale and end
   screen still use the simple panels until session B.
+- **Owner's phone test after A2 → new plan (owner-approved):** B1 maps and full screen; B2 popups,
+  answers with explanations, guide for the area you're in (moved up from C); sounds move to task 16
+  or are cut. Rule ideas waiting for the owner: a ship Australia East ↔ New Zealand; Alaska as a 3rd
+  part of the USA (+5). Both are rule changes (high effort).
+- **Done in B1:** full screen on Android (clock, notifications and back/home bar hidden; a swipe shows
+  them for a moment); the owner's 20:9 poster and background fill the screen (portrait images
+  deleted); Risk-style map: each area its own colour (touching areas never share one), **no names on
+  the map** (tap an area: name, flags, capitals, wonder, businesses, routes, citizenship, visits on the
+  right); zoom to the area itself (Greenland and Alaska ignored for zooming), pinch or scroll to zoom
+  and drag to move; small icons ⭐ ✈️ ⛴️ 🛂 on the other areas; drawn airport (hovering plane), port
+  (rocking ship), wonder monument (one for all) and citizenship flag on the player's area; tapping
+  them opens a menu (destinations with price, quiz and fees; buy the business; the wonder and its
+  tours); pawns; visited dots in each player's colour; no destination buttons. Wonder names are a
+  draft for the owner to check (`src/web/countries.ts`).
+- **B2 (next, medium):** popups for the quiz, test, challenge, event cards, entry fees and others'
+  moves; quiz timer bug (the countdown is stopped right after it starts) and a visible countdown;
+  right/wrong popup with the right answer and its fact; the guide for the area you're in.
 
 ### 14a. Canada and Russia in 3 parts — before session A2 (high)
 

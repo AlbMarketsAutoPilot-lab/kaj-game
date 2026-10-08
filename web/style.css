@@ -14,8 +14,8 @@ body {
   min-height: 100vh;
   color: var(--ink);
   font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  /* The whole picture stays inside the screen, borders included (owner's note, task 6). */
-  background: #0a3a40 url("BG_LANDSCAPE") center / contain fixed no-repeat;
+  /* The owner's 20:9 background fills the screen (task 14 B1). */
+  background: #0a3a40 url("BG_LANDSCAPE") center / cover fixed no-repeat;
 }
 main { max-width: 1100px; margin: 0 auto; padding: 16px; display: grid; gap: 12px; }
 h1, h2, h3 { margin: 0 0 8px; font-family: "Cinzel", Georgia, serif; }
@@ -71,8 +71,9 @@ select option { color: #000; }
 h1.title { font-size: 2.2rem; margin: 0; }
 strong.title { font-size: 1.05rem; white-space: nowrap; }
 .poster { position: fixed; inset: 0; background: #0a3a40; display: grid; place-items: center; }
-.poster img { width: 100%; height: 100%; object-fit: contain; }
-.poster-buttons { position: absolute; bottom: 9%; left: 0; right: 0; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.poster img { width: 100%; height: 100%; object-fit: cover; }
+/* On the right, under the galaxy: the title, the globe and the city stay free. */
+.poster-buttons { position: absolute; bottom: 30%; right: 7%; display: flex; flex-direction: column; gap: 10px; align-items: center; }
 button.big { font-size: 1.3rem; padding: 10px 34px; font-family: "Cinzel", Georgia, serif; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45); }
 .poster-buttons button:not(.primary) { background: var(--card); }
 button.chosen { background: var(--accent); color: #1c2b2b; font-weight: 700; }
@@ -118,18 +119,19 @@ main:has(.game) { max-width: none; padding: 6px; height: 100vh; height: 100dvh; 
 .map-svg { width: 100%; height: 100%; min-height: 0; display: block; background: rgba(4, 40, 52, 0.55); }
 .world { background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
 .world { aspect-ratio: 2.6; flex-shrink: 0; }
-.map-svg .land { fill: #2f6f6a; stroke: #bfe9e1; stroke-width: 0.6px; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
-.map-svg .land.visited { fill: #4e9b8f; }
-.map-svg .land.near { fill: #3f7d76; }
-.map-svg .land.go { fill: #2fae7f; }
-.map-svg .land.here { fill: #e9c46a; }
-.map-svg .land.dim { fill: #24524f; opacity: 0.6; }
+.map-svg .land { fill: #2f6f6a; stroke: #10343a; stroke-width: 1px; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+.map-svg .land.far { filter: saturate(0.55) brightness(0.75); }
+.map-svg .land.near { filter: saturate(0.8) brightness(0.9); }
+.map-svg .land.go { stroke: #eafff6; stroke-width: 2.5px; stroke-dasharray: 6 4; animation: march 1.2s linear infinite; }
+.map-svg .land.here { stroke: #fff6c8; stroke-width: 3.5px; filter: drop-shadow(0 0 4px rgba(255, 240, 180, 0.8)); }
+.map-svg .land.dim { filter: saturate(0.3) brightness(0.55); }
 .map-svg .land.booked { stroke-width: 2px; stroke-dasharray: 4 3; }
-.map-svg .land.picked { stroke: #fff; stroke-width: 2px; }
+.map-svg .land.picked { stroke: #fff; stroke-width: 2.5px; }
 .map-svg .land.c0 { fill: #4f8fc0; } .map-svg .land.c1 { fill: #c98b4f; } .map-svg .land.c2 { fill: #c9b04f; }
 .map-svg .land.c3 { fill: #5fae6e; } .map-svg .land.c4 { fill: #a96fc0; } .map-svg .land.c5 { fill: #4fb3b0; }
-.map-svg .land.c0.dim, .map-svg .land.c1.dim, .map-svg .land.c2.dim, .map-svg .land.c3.dim, .map-svg .land.c4.dim, .map-svg .land.c5.dim { fill: #24524f; }
-.map-svg .land.c0.here, .map-svg .land.c1.here, .map-svg .land.c2.here, .map-svg .land.c3.here, .map-svg .land.c4.here, .map-svg .land.c5.here { fill: #e9c46a; }
+.map-svg .label.icons text { stroke: none; }
+.map-svg .visit { stroke: #fff; stroke-width: 1px; vector-effect: non-scaling-stroke; }
+@keyframes march { to { stroke-dashoffset: -20; } }
 .map-svg .tap { cursor: pointer; }
 .map-svg .land.tap:hover { filter: brightness(1.2); }
 .map-svg .label text { fill: #f4fbf9; stroke: #06292e; paint-order: stroke; font-weight: 600; font-family: system-ui, sans-serif; }
@@ -141,3 +143,34 @@ main:has(.game) { max-width: none; padding: 6px; height: 100vh; height: 100dvh; 
 .map-svg .route { stroke: rgba(255, 255, 255, 0.45); stroke-width: 1px; stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
 .map-svg .route.port { stroke: rgba(140, 200, 255, 0.6); }
 .map-svg .trip { stroke-width: 2.5px; stroke-dasharray: 6 4; vector-effect: non-scaling-stroke; }
+
+/* Task 14 B1: drawn props, pawns, zoom, popup, details */
+.map-svg { touch-action: none; }
+.prop.tap { cursor: pointer; }
+.prop-shadow { fill: rgba(0, 0, 0, 0.35); }
+.prop .hover { animation: hover 2.4s ease-in-out infinite; }
+.prop .rock { transform-box: fill-box; transform-origin: 50% 100%; animation: rock 3s ease-in-out infinite; }
+.prop .wave { animation: wave 2s ease-in-out infinite; }
+.prop .twinkle { transform-box: fill-box; transform-origin: center; animation: twinkle 2.8s ease-in-out infinite; }
+.prop .wave-flag { transform-box: fill-box; transform-origin: 0 50%; animation: flag 2.2s ease-in-out infinite; }
+.pawn.active { filter: drop-shadow(0 0 4px #fff6c8); }
+@keyframes hover { 50% { transform: translateY(-3px); } }
+@keyframes rock { 25% { transform: rotate(-4deg); } 75% { transform: rotate(4deg); } }
+@keyframes wave { 50% { transform: translateX(2px); } }
+@keyframes twinkle { 0%, 70%, 100% { opacity: 0.2; transform: scale(0.6); } 85% { opacity: 1; transform: scale(1.15); } }
+@keyframes flag { 50% { transform: skewY(-4deg) scaleX(0.94); } }
+@media (prefers-reduced-motion: reduce) {
+  .prop *, .map-svg .land.go { animation: none !important; }
+}
+.where button { margin-left: 6px; }
+.popup { position: absolute; left: 8px; right: 8px; bottom: 8px; max-height: 80%; overflow-y: auto; z-index: 2; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.55); }
+.popup h3 { margin: 0; }
+.popup .small { margin: 4px 0; }
+.dests { display: grid; gap: 4px; margin-top: 6px; }
+.dest { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; align-items: center; padding: 4px 6px; border: 1px solid var(--line); border-radius: 8px; }
+.dest.picked { border-color: #fff; }
+.dest .row { grid-row: span 2; grid-column: 2; grid-row-start: 1; }
+.dest button { padding: 4px 10px; font-size: 0.85rem; }
+button.link { background: none; border: none; padding: 0; text-align: left; font-weight: 600; color: var(--ink); }
+.country { display: flex; gap: 6px; align-items: center; font-size: 0.85rem; margin: 2px 0; }
+.mini-flag { height: 14px; width: auto; border: 1px solid var(--muted); border-radius: 2px; }

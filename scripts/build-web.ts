@@ -18,7 +18,7 @@ const result = await build({
 
 const css = read('web/style.css')
   .toString()
-  .replace('BG_LANDSCAPE', dataUri('assets/art/background-landscape.webp'))
+  .replace('BG_LANDSCAPE', dataUri('assets/art/background.webp'))
   .replace('FONT_CINZEL', dataUri('assets/fonts/cinzel-700.woff2', 'font/woff2'));
 const js = result.outputFiles[0].text.replace(/<\/script/gi, '<\\/script');
 
@@ -33,7 +33,7 @@ const html = read('web/index.html')
   .toString()
   .replace('/*STYLE*/', () => css)
   .replace('/*FLAGS*/', () => JSON.stringify(flags))
-  .replace('/*POSTER*/', () => dataUri('assets/art/poster-landscape.webp'))
+  .replace('/*POSTER*/', () => dataUri('assets/art/poster.webp'))
   .replace('/*SCRIPT*/', () => js);
 
 mkdirSync(new URL('dist/', root), { recursive: true });
