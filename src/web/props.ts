@@ -80,13 +80,13 @@ export function monument(owner?: string): SVGGElement {
   return g;
 }
 
-// A flag pole in the citizen's colour, with a passport stamp.
+// A flag pole in the citizen's colour, with a passport stamp; centred on (0, 0) (owner's fix).
 export function citizenFlag(colour: string): SVGGElement {
   return svg('g', {},
-    svg('line', { x1: -6, y1: 15, x2: -6, y2: -17, stroke: INK, 'stroke-width': 2 }),
-    svg('path', { d: 'M-6 -17 Q2 -20 8 -16 T18 -15 L18 -3 Q12 -6 6 -4 T-6 -5 Z', fill: colour, stroke: INK, 'stroke-width': 1.2, class: 'wave-flag' }),
-    svg('circle', { cx: 9, cy: 8, r: 7, fill: '#fbf3dc', stroke: '#7a3b8f', 'stroke-width': 1.6 }),
-    svg('text', { x: 9, y: 8, 'font-size': 8, 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#7a3b8f', 'font-weight': 700 }, 'VISA'),
+    svg('line', { x1: -12, y1: 15, x2: -12, y2: -17, stroke: INK, 'stroke-width': 2 }),
+    svg('path', { d: 'M-12 -17 Q-4 -20 2 -16 T12 -15 L12 -3 Q6 -6 0 -4 T-12 -5 Z', fill: colour, stroke: INK, 'stroke-width': 1.2, class: 'wave-flag' }),
+    svg('circle', { cx: 0, cy: 8, r: 7, fill: '#fbf3dc', stroke: '#7a3b8f', 'stroke-width': 1.6 }),
+    svg('text', { x: 0, y: 8, 'font-size': 6.5, 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#7a3b8f', 'font-weight': 700 }, 'VISA'),
   );
 }
 

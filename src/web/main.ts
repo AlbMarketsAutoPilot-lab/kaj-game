@@ -2,7 +2,7 @@
 // landscape board (left: the current area drawn; right: the world map and the turn panel).
 // Robots play with simple rules, at the level chosen for each seat (task 13).
 
-import { BUSINESS_PRICE, CHALLENGE_POINTS, CONTINENT_BONUS, POINTS_NEW_AREA, POINTS_NEW_CONTINENT, POINTS_WONDER, GO_HOME_TURNS, NOMAD_MIN_CONTINENTS, NOMAD_PENALTY, NOMAD_WARNING_ROUND, POINTS_BUSINESS_CITIZENSHIP, QUIZ_TRIES, TICKET_PRICE, TOUR_FEE, TRAVEL_TURNS, VISA_PRICE } from '../engine/constants.ts';
+import { BUSINESS_PRICE, CHALLENGE_POINTS, CONTINENT_BONUS, POINTS_NOMAD_TRAVEL_TURN, POINTS_NEW_AREA, POINTS_NEW_CONTINENT, POINTS_WONDER, GO_HOME_TURNS, NOMAD_MIN_CONTINENTS, NOMAD_PENALTY, NOMAD_WARNING_ROUND, POINTS_BUSINESS_CITIZENSHIP, QUIZ_TRIES, TICKET_PRICE, TOUR_FEE, TRAVEL_TURNS, VISA_PRICE } from '../engine/constants.ts';
 import {
   apply, blockedByMoney, bookedBy, businessAt, canPayAfterQuiz, destinations, businessValue, createGame, currentPlayer, entryFees, feeTotal, finalScore, homeFor, landTurnsToCard, legalActions, nomadPenalty,
 } from '../engine/engine.ts';
@@ -66,6 +66,9 @@ let quizTimer = 0;
 // on a person's turn, or straight after a person's own move (`newsNow`).
 let news: string[] = [];
 let newsNow = false;
+// Money people earn from others (visa, tour fee, a ticket on their airline or ferry): a gold
+// popup for each person, never for a robot (owner's request).
+let income: { seat: number; text: string }[] = [];
 // The popup after a person answers a quiz, test or challenge question: right or wrong, the
 // right answer and the fact behind it (owner's request).
 let answered: { ok: boolean; title: string; lines: string[] } | null = null;
@@ -193,6 +196,9 @@ function renderSetup(): void {
       const seats = kinds.slice(0, count).map((kind, i) => ({ kind, colour: COLOUR_NAMES[i], ...(kind === 'robot' ? { level: levels[i] } : {}) }));
       zoom = null;
       pickedStart = null;
+      seenCards.clear();
+      news = [];
+      income = [];
       state = createGame({ seats, seed }, map30);
       render();
     } catch (e) {
@@ -222,6 +228,31 @@ function guideBox(): HTMLElement {
     try { localStorage.setItem(GUIDE_KEY, guideOff ? '1' : '0'); } catch { /* not kept */ }
   });
   return el('label', { className: 'small' }, tick, ' 🧭 Guided help for people (what you can do each turn)');
+}
+
+// "You chose …": the profile's advantages and weaknesses (rulebook section 12), shown while
+// choosing the home country (owner's request).
+function profileNote(p: Profile, who = ''): HTMLElement {
+  const price = TICKET_PRICE[p];
+  const plane = TRAVEL_TURNS[p].airport;
+  const ship = TRAVEL_TURNS[p].port;
+  const trips = `planes ${plane ? plural(plane, 'travel turn') : 'arrive right away'}, ships ${plural(ship, 'travel turn')}`;
+  const good: Record<Profile, string[]> = {
+    backpacker: ['Never pays for a ticket: always the free quiz.', `+${CONTINENT_BONUS.backpacker!.points} for visiting ${CONTINENT_BONUS.backpacker!.continents} continents.`, 'Its own Backpacker event cards.'],
+    business: [`+${plural(POINTS_BUSINESS_CITIZENSHIP, 'point')} when you get citizenship (any area).`, `Fast: ${trips}.`],
+    luxury: ['Can fly or sail to any airport or port.', 'Citizenship at once, with no test.', `+${CONTINENT_BONUS.luxury!.points} for visiting ${CONTINENT_BONUS.luxury!.continents} continents.`, `Fast: ${trips}.`],
+    nomad: [`Cheapest ticket: ${plural(price ?? 0, 'point')}.`, `+${POINTS_NOMAD_TRAVEL_TURN} for every turn on a plane or ship.`],
+  };
+  const bad: Record<Profile, string[]> = {
+    backpacker: ['Travels by plane or ship only with the quiz (one try per turn).', `Slow: ${trips}.`],
+    business: [`Ticket ${plural(price ?? 0, 'point')}.`],
+    luxury: [`The highest ticket: ${plural(price ?? 0, 'point')}.`],
+    nomad: ['Can never ask for citizenship.', `−${NOMAD_PENALTY} at the end with fewer than ${NOMAD_MIN_CONTINENTS} continents.`, `Slow: ${trips}.`],
+  };
+  return el('div', { className: 'note profile-note' },
+    el('strong', { textContent: `${who ? `${who}, you` : 'You'} chose ${PROFILE_LABEL[p]}.` }),
+    el('p', { className: 'small', textContent: `👍 ${good[p].join(' ')}` }),
+    el('p', { className: 'small', textContent: `👎 ${bad[p].join(' ')}` }));
 }
 
 // ---------- automatic save (task 10) ----------
@@ -298,7 +329,12 @@ function act(action: Action): void {
       : `❌ ${name}: ${QUIZ_TRIES} wrong answers here and no money for the ticket, so the trip ends here: ${name} goes home to ${areaById.get(lastTry.home)!.name}, free of any fees.`);
   }
   if (state.challenged && !answered) lines.push(challengeNote(state.challenged));
-  lines.push(...state.payments.map(paymentNote).filter((t) => t !== ''));
+  for (const p of state.payments) {
+    const line = incomeLine(state, p);
+    if (line) income.push(line);
+    else if (paymentNote(p) !== '') lines.push(paymentNote(p));
+  }
+  if (mover.kind === 'human' && income.length > 0) newsNow = true;
   // Event cards drawn by this move; a human's own start-of-turn card has its own box instead.
   const next = currentPlayer(state);
   lines.push(...state.drawn.filter((c) => !(c === state!.card && next.kind === 'human' && c.seat === next.seat)).map(cardNote));
@@ -337,6 +373,68 @@ function renderCard(c: DrawnCard): HTMLElement {
     el('p', { textContent: `“${c.card.text}”` }),
     el('p', { textContent: cardEffect(c) }));
 }
+
+// The event card in its popup: a big golden card (owner's request: "it must look like an event").
+function eventCard(c: DrawnCard): HTMLElement {
+  const { points, loseTurn } = c.card;
+  const badge = loseTurn ? '⏸️ Lose a turn' : points > 0 ? `+${plural(points, 'point')}` : `−${plural(Math.abs(points), 'point')}`;
+  return el('div', { className: 'event-card' },
+    el('div', { className: 'event-rays' }),
+    el('div', { className: 'event-deck', textContent: DECK_ICON[c.card.deck] }),
+    el('div', { className: 'event-kind', textContent: `${c.card.deck === 'backpacker' ? 'Backpacker' : 'Country'} event card` }),
+    el('p', { className: 'event-text', textContent: `“${c.card.text}”` }),
+    el('div', { className: `event-badge ${loseTurn || points < 0 ? 'bad' : 'good'}`, textContent: badge }),
+    // Only when it says more than the badge (e.g. "only 1 to lose").
+    !loseTurn && c.change !== points ? el('p', { className: 'small', textContent: cardEffect(c) }) : '');
+}
+
+// A payment to a person from someone else: their income, cheered in a popup (owner's request).
+function incomeLine(s: GameState, p: Payment): { seat: number; text: string } | null {
+  if (p.to === null || p.to === p.from || s.players[p.to].kind !== 'human') return null;
+  const from = `${COLOUR_NAMES[p.from]}${s.players[p.from].kind === 'robot' ? ' 🤖' : ''}`;
+  const where = areaById.get(p.area)!.name;
+  const pts = plural(p.amount, 'point');
+  switch (p.reason) {
+    case 'visa': return { seat: p.to, text: `🛂 ${from} just paid you a ${pts} visa to enter ${where}, your citizenship country!` };
+    case 'tour': return { seat: p.to, text: `🏛️ ${from} just paid you ${pts} to visit your Guided Tours of ${WONDER_NAME[p.area] ?? where}!` };
+    case 'ticket': return { seat: p.to, text: `${p.business === 'ferry' ? '⛴️' : '✈️'} ${from} just ${p.business === 'ferry' ? 'sailed with your ferry agency' : 'flew with your airline'} from ${where}: +${pts} for you!` };
+    default: return null;
+  }
+}
+
+// The end of the game: the winner popup. People are always cheered, robots never (owner's rule).
+function finishPopup(s: GameState, close: () => void): HTMLElement {
+  const r = s.result!;
+  const name = (seat: number) => `${COLOUR_NAMES[seat]}${s.players[seat].kind === 'robot' ? ' 🤖' : ''}`;
+  const people = s.players.filter((p) => p.kind === 'human');
+  const humanWinners = r.winners.filter((w) => s.players[w].kind === 'human');
+  const title = humanWinners.length > 0
+    ? `🎉 ${humanWinners.map((w) => COLOUR_NAMES[w]).join(' and ')} ${humanWinners.length > 1 || r.winners.length > 1 ? 'share the cup' : 'wins'}!`
+    : '🏁 The journey is over!';
+  const cheers = people.map((p) => (r.winners.includes(p.seat)
+    ? `🏆 Congratulations, ${COLOUR_NAMES[p.seat]}! What a journey: ${plural(finalScore(s, p), 'point')}, ${plural(p.visitedAreas.length, 'area')} and ${plural(p.visitedContinents.length, 'continent')}!`
+    : `🌟 ${COLOUR_NAMES[p.seat]}, you did a great job: ${plural(p.visitedAreas.length, 'area')} and ${plural(p.visitedContinents.length, 'continent')} explored! You'll do even better next time.`));
+  const again = button('▶ Play again', renderSetup);
+  again.className = 'primary big';
+  return el('div', { className: 'finish' },
+    el('div', { className: 'trophy', textContent: humanWinners.length > 0 ? '🏆' : '🧭' }),
+    el('h2', { className: 'big-title', textContent: title }),
+    ...cheers.map((t) => el('p', { className: 'cheer', textContent: t })),
+    el('ol', { className: 'ranking' }, ...r.ranking.map((seat) => {
+      const p = s.players[seat];
+      const value = businessValue(s, seat);
+      const penalty = nomadPenalty(p);
+      const detail = [`${p.points} travel`, `${value} assets`].join(' + ') + (penalty ? ` − ${penalty} Nomad penalty` : '');
+      return el('li', {}, dot(seat), ` ${name(seat)}: `, el('b', { textContent: plural(finalScore(s, p), 'point') }), ` (${detail})`);
+    })),
+    el('div', { className: 'row' }, again, button('See the map', close)));
+}
+
+// Halfway and the last five turns (owner's request): one popup each per game.
+const MILESTONES = [
+  { key: 'milestone-half', round: 16, title: '🧭 Halfway there!', text: 'Half of your journey is already behind you: 15 more turns to go. Think about where you still want to go!' },
+  { key: 'milestone-last', round: 26, title: '⏳ The last five turns!', text: 'These are the last five turns of the journey. Make them count: new areas, wonders and the continents you still need!' },
+];
 
 // "Who was paid", after a move.
 function paymentNote(p: Payment): string {
@@ -398,7 +496,9 @@ function render(): void {
   // The popup over the board (task 14 B2): main events show here, the right side is for info.
   const modal = renderModal(s, actions, isRobot);
   if (s.phase === 'chooseProfile') {
-    app.replaceChildren(el('section', { className: 'card setup' }, title(), renderTurn(s, actions, isRobot)));
+    const people = s.players.filter((p) => p.kind === 'human' && p.profile);
+    app.replaceChildren(el('section', { className: 'card setup' }, title(), renderTurn(s, actions, isRobot),
+      ...people.map((p) => profileNote(p.profile!, people.length > 1 ? COLOUR_NAMES[p.seat] : ''))));
   } else {
     const header = el('header', {},
       title('strong'),
@@ -413,6 +513,12 @@ function render(): void {
       side.append(el('section', { className: 'card turn' }, el('h2', {}, dot(actor.seat), ` ${COLOUR_NAMES[actor.seat]}'s turn`)));
     } else {
       side.append(renderTurn(s, actions, isRobot));
+    }
+    // Right after choosing the profile, on the world view too, also while the robots choose
+    // (owner's request): each person's profile, its advantages and weaknesses.
+    if (s.phase === 'chooseStart') {
+      const people = s.players.filter((p) => p.kind === 'human' && p.profile);
+      for (const p of people) side.append(profileNote(p.profile!, people.length > 1 ? COLOUR_NAMES[p.seat] : ''));
     }
     app.replaceChildren(el('div', { className: 'game' }, header,
       el('div', { className: 'board' },
@@ -508,7 +614,9 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
     const r = s.result!;
     const names = r.winners.map((w) => COLOUR_NAMES[w]).join(' and ');
     box.append(
-      el('h2', { textContent: r.winners.length > 1 ? `It's a draw: ${names}! 🎉` : `${names} wins! 🎉` }),
+      el('h2', { textContent: r.winners.some((w) => s.players[w].kind === 'human')
+        ? (r.winners.length > 1 ? `It's a draw: ${names}! 🎉` : `${names} wins! 🎉`)
+        : '🏁 The journey is over!' }),
       el('ol', {}, ...r.ranking.map((seat) => {
         const p = s.players[seat];
         const value = businessValue(s, seat);
@@ -1011,6 +1119,16 @@ function renderModal(s: GameState, actions: Action[], isRobot: boolean): { node:
       ...r.lines.map((t) => el('p', { textContent: t })),
       ok(() => { answered = null; render(); })), r.ok ? 'right' : 'wrong') };
   }
+  // Money for people: a gold popup per person (never for a robot).
+  if (income.length > 0 && (newsNow || !isRobot || s.phase === 'finished')) {
+    const seats = [...new Set(income.map((i) => i.seat))];
+    return { turn: false, node: wrap(el('div', { className: 'income' },
+      el('div', { className: 'coins', textContent: '💰' }),
+      ...seats.map((seat) => el('div', {},
+        el('h2', { className: 'big-title', textContent: `Great news, ${COLOUR_NAMES[seat]}!` }),
+        el('ul', {}, ...income.filter((i) => i.seat === seat).map((i) => el('li', { textContent: i.text }))))),
+      ok(() => { income = []; if (news.length === 0) newsNow = false; render(); }, 'Wonderful!')), 'gold') };
+  }
   if (news.length > 0 && (newsNow || !isRobot || s.phase === 'finished')) {
     return { turn: false, node: wrap(el('div', {},
       el('h2', { textContent: '📣 What happened' }),
@@ -1019,7 +1137,23 @@ function renderModal(s: GameState, actions: Action[], isRobot: boolean): { node:
   }
   const key = s.card ? `${s.card.round}-${s.card.seat}-${s.card.card.text}` : '';
   if (s.phase === 'play' && me.kind === 'human' && s.card?.seat === me.seat && !seenCards.has(key)) {
-    return { turn: false, node: wrap(el('div', {}, renderCard(s.card), ok(() => { seenCards.add(key); render(); })), 'event') };
+    return { turn: false, node: wrap(el('div', {}, eventCard(s.card), ok(() => { seenCards.add(key); render(); }, 'Continue')), 'event') };
+  }
+  // Halfway and the last five turns, on a person's turn.
+  if (s.phase === 'play' && !isRobot && me.kind === 'human') {
+    const due = MILESTONES.filter((m) => s.round >= m.round && !seenCards.has(m.key));
+    if (due.length > 0) {
+      const m = due[due.length - 1];
+      return { turn: false, node: wrap(el('div', { className: 'milestone' },
+        el('h2', { className: 'big-title', textContent: m.title }),
+        el('p', { textContent: m.text }),
+        el('p', { className: 'small', textContent: `Round ${s.round} of ${s.totalRounds}.` }),
+        ok(() => { for (const x of due) seenCards.add(x.key); render(); }, "Let's go!")), 'gold') };
+    }
+  }
+  // The end of the game: the winner popup.
+  if (s.phase === 'finished' && !seenCards.has('finished')) {
+    return { turn: false, node: wrap(finishPopup(s, () => { seenCards.add('finished'); render(); }), 'gold') };
   }
   // Choosing the home country: stressed before it is confirmed (owner's request, task 14 A2).
   if (s.phase === 'chooseStart' && !isRobot && pickedStart) {
@@ -1088,7 +1222,7 @@ function drawMap(view: Box, k: number, cls: (id: string) => string, onTap: (id: 
   for (const a of map30.areas) {
     const g = geo.get(a.id)!;
     if (!overlaps(g.box, view)) continue;
-    const path = svg('path', { d: g.path, class: `land ${cls(a.id)}` });
+    const path = svg('path', { d: g.path, class: `land ${cls(a.id)}`, 'data-area': a.id });
     path.style.fill = areaColour.get(a.id)!;
     const tap = onTap(a.id);
     if (tap) {
@@ -1227,27 +1361,52 @@ function renderAreaView(s: GameState, isRobot: boolean): HTMLElement {
     (id) => (walks.has(id) ? walkTo(id) : details(id)));
 
   const { fs } = d;
+  // Walk badges (owner's report, Russia West's neighbours): each one sits just across the border
+  // it shares with this area, on the neighbour's side, so the badges spread around the area. A
+  // badge that would still cover one already placed moves a little further out.
+  const v = d.root.viewBox.baseVal;
+  const [fx, fy] = geo.get(focus)!.centre;
+  const placed: Box[] = [];
+  const overlapsPlaced = (x: number, y: number, w: number, h: number) =>
+    placed.some((b) => Math.abs(b.x - x) < (b.w + w) / 2 && Math.abs(b.y - y) < (b.h + h) / 2);
+  const badgeSpot = (id: string, w: number, h: number): [number, number] => {
+    const border = geo.get(focus)!.borderWith.get(id);
+    const [cx, cy] = border ?? geo.get(id)!.centre;
+    let dx = cx * k - fx * k;
+    let dy = cy - fy;
+    const len = Math.hypot(dx, dy) || 1;
+    dx /= len;
+    dy /= len;
+    let x = cx * k;
+    let y = cy;
+    for (let step = 0; step < 14; step++) {
+      // Out across the border (a walking link with no shared border starts from the neighbour).
+      const out = (border ? 1.6 : 0) * fs + step * fs * 0.9;
+      x = Math.min(Math.max(cx * k + dx * out, v.x + w / 2), v.x + v.width - w / 2);
+      y = Math.min(Math.max(cy + dy * out, v.y + h / 2), v.y + v.height - h / 2);
+      if (!overlapsPlaced(x, y, w, h)) break;
+    }
+    placed.push({ x, y, w, h });
+    return [x, y];
+  };
   for (const id of d.paths.keys()) {
     if (id === focus) continue;
     const walk = walks.get(id);
-    let [x, cy] = geo.get(id)!.centre;
-    x *= k;
-    if (walk) {
-      // A walkable neighbour always shows its badge: pulled in to the edge of the view.
-      const v = d.root.viewBox.baseVal;
-      x = Math.min(Math.max(x, v.x + fs * 3), v.x + v.width - fs * 3);
-      cy = Math.min(Math.max(cy, v.y + fs * 1.5), v.y + v.height - fs * 2.5);
+    const [cx0, cy] = geo.get(id)!.centre;
+    const x = cx0 * k;
+    if (inView(d, x, cy)) {
+      const icons = areaIcons(s, id);
+      if (icons) label(d, x, cy - fs * 1.4, icons, 'icons', 0.95);
+      if (!walk && bookedBy(s, id)) label(d, x, cy + fs * 1.4, '⏳', 'icons', 0.9);
+      visitedDots(d, s, id, x, cy + fs * 1.5, fs * 0.28);
     }
-    if (!inView(d, x, cy)) continue;
-    const icons = areaIcons(s, id);
-    if (icons) label(d, x, cy - fs * 1.4, icons, 'icons', 0.95);
     if (walk) {
       const fees = feeTotal(entryFees(s, me, me.area, id));
-      label(d, x, cy, `🚶${gainLabel(s, walk, areaById.get(id)!) || ' +0'}${fees ? ` 💰−${fees}` : ''}`, 'go', 0.9, walkTo(id));
-    } else if (bookedBy(s, id)) {
-      label(d, x, cy + fs * 1.4, '⏳', 'icons', 0.9);
+      const text = `🚶${gainLabel(s, walk, areaById.get(id)!) || ' +0'}${fees ? ` 💰−${fees}` : ''}`;
+      const w = ([...text].length * fs * 0.62 + fs) * 0.9;
+      const [bx, by] = badgeSpot(id, w, fs * 1.6 * 0.9);
+      label(d, bx, by, text, 'go', 0.9, walkTo(id));
     }
-    visitedDots(d, s, id, x, cy + fs * 1.5, fs * 0.28);
   }
 
   // The drawn props on the current area (owner-approved icons).
@@ -1260,11 +1419,13 @@ function renderAreaView(s: GameState, isRobot: boolean): HTMLElement {
     return b?.owner !== undefined && b.owner !== null ? COLOURS[b.owner] : undefined;
   };
   // The pawn stands in the middle of the area; the props sit around it.
-  if (here.wonder) d.labels.append(place(monument(owner('tours')), hx, hy - P * 0.95, P, `Wonder: ${WONDER_NAME[focus] ?? here.name}`, open('wonder')));
+  // Top row, centred over the pawn: the wonder and the citizenship flag (side by side if both).
+  const citizen = s.players.find((p) => p.citizenship?.includes(focus));
+  const both = here.wonder && citizen;
+  if (here.wonder) d.labels.append(place(monument(owner('tours')), both ? hx - P * 0.6 : hx, hy - P * 0.95, P, `Wonder: ${WONDER_NAME[focus] ?? here.name}`, open('wonder')));
+  if (citizen) d.labels.append(place(citizenFlag(COLOURS[citizen.seat]), both ? hx + P * 0.6 : hx, hy - P * 0.95, P * 0.9, `${COLOUR_NAMES[citizen.seat]}'s citizenship`, open('citizen')));
   if (hasRoute(focus, 'airport')) d.labels.append(place(airport(owner('airline')), hx - P * 1.2, hy, P, 'Airport', open('airport')));
   if (hasRoute(focus, 'port')) d.labels.append(place(port(owner('ferry')), hx + P * 1.2, hy, P, 'Port', open('port')));
-  const citizen = s.players.find((p) => p.citizenship?.includes(focus));
-  if (citizen) d.labels.append(place(citizenFlag(COLOURS[citizen.seat]), hx + P * 1.1, hy - P * 0.95, P * 0.9, `${COLOUR_NAMES[citizen.seat]}'s citizenship`, open('citizen')));
   visitedDots(d, s, focus, hx, hy + P * 0.75, fs * 0.32);
 
   // Pawns: every player standing in a drawn area.
@@ -1274,7 +1435,7 @@ function renderAreaView(s: GameState, isRobot: boolean): HTMLElement {
     const x = p.area === focus ? hx : cx * k;
     const y = p.area === focus ? hy : cy;
     if (!inView(d, x, y)) continue;
-    d.labels.append(place(pawn(COLOURS[p.seat], p === me), x, y, p.area === focus ? fs * 2.8 : fs * 2.2, COLOUR_NAMES[p.seat]));
+    d.labels.append(place(pawn(COLOURS[p.seat], p === me), x, y, p.area === focus ? fs * 2.8 : fs * 2.2, `${COLOUR_NAMES[p.seat]}${p.profile ? ` · ${PROFILE_LABEL[p.profile]}` : ''}`));
   }
   attachZoom(d.root, k);
 

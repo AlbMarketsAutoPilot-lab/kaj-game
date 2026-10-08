@@ -281,6 +281,14 @@ travel turn (challenge offer), a lost turn, being stuck or sent home, and citize
 learned; the airport and port menus say why a destination is closed (a player is there, booked, or
 fees too high).
 
+### 14e. Owner's review: celebrations (medium)
+
+Done: event cards as a big golden card popup; popups at round 16 ("Halfway there, 15 more turns")
+and round 26 ("the last five turns"); the winner popup with the trophy, ranking and Play again;
+"Great news, Red!" income popups when someone pays a person a visa, tour fee or ticket. Messages
+always cheer people (winners congratulated, others encouraged) and never cheer robots.
+Sounds: not in yet (they need the owner's sound files; see task 16).
+
 ### 15. Android release build — day 14
 
 - Signed APK from GitHub Actions; app icon, name, splash, screen orientation.

@@ -13,7 +13,7 @@ export type Ring = Point[];
 
 const decoded = new WeakMap<Shapes, Point[][]>();
 
-function arcPoints(s: Shapes): Point[][] {
+export function arcPoints(s: Shapes): Point[][] {
   let out = decoded.get(s);
   if (!out) {
     const [kx, ky] = s.transform.scale;
