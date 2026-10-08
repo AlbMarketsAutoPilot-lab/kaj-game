@@ -270,6 +270,16 @@ Canada West; ships Australia East ↔ New Zealand and USA West ↔ Alaska (the o
 a Canadian citizenship can't trap Alaska). Saves version 6. 12 new facts for the owner to check
 (`docs/facts/batch-4.md`: Alaska 3–12, USA West 8–9).
 
+### 14c. Owner's phone test after 14b — fixes (medium)
+
+Done: slim solid borders (no moving lines); "Tap an area in …" text and a ⭐ wonder explanation on
+the home-country picker; pawns and icons in the deepest point of each area (no longer outside it);
+turn panel order: title, action buttons (Ask for citizenship…, sell, go home), then the guide;
+citizenship is a button with a popup (and a "request ready" note); popups for the home country, the
+travel turn (challenge offer), a lost turn, being stuck or sent home, and citizenship granted or
+learned; the airport and port menus say why a destination is closed (a player is there, booked, or
+fees too high).
+
 ### 15. Android release build — day 14
 
 - Signed APK from GitHub Actions; app icon, name, splash, screen orientation.

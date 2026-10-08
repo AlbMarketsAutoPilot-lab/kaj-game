@@ -60,6 +60,60 @@ function ringCentre(r: Ring): [number, number] {
 
 const r1 = (n: number) => Math.round(n * 10) / 10;
 
+function inside(r: Ring, x: number, y: number): boolean {
+  let c = false;
+  for (let i = 0, j = r.length - 1; i < r.length; j = i++) {
+    const [xi, yi] = r[i];
+    const [xj, yj] = r[j];
+    if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) c = !c;
+  }
+  return c;
+}
+
+function edgeDistance(r: Ring, x: number, y: number): number {
+  let best = Infinity;
+  for (let i = 0, j = r.length - 1; i < r.length; j = i++) {
+    const [ax, ay] = r[j];
+    const [bx, by] = r[i];
+    const dx = bx - ax;
+    const dy = by - ay;
+    const t = dx || dy ? Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy))) : 0;
+    best = Math.min(best, Math.hypot(x - ax - t * dx, y - ay - t * dy));
+  }
+  return best;
+}
+
+// The point deepest inside a shape (task 14 B2 fix: the pawn and icons stay inside their area,
+// even for curved shapes whose centre of mass lies outside). A grid search, refined twice.
+function deepestPoint(r: Ring): [number, number] {
+  const xs = r.map(([x]) => x);
+  const ys = r.map(([, y]) => y);
+  let [cx, cy] = ringCentre(r);
+  let best = inside(r, cx, cy) ? edgeDistance(r, cx, cy) : -1;
+  let w = Math.max(...xs) - Math.min(...xs);
+  let h = Math.max(...ys) - Math.min(...ys);
+  let x0 = Math.min(...xs);
+  let y0 = Math.min(...ys);
+  for (let round = 0; round < 3; round++) {
+    const n = 20;
+    let bx = cx;
+    let by = cy;
+    for (let i = 0; i <= n; i++) {
+      for (let j = 0; j <= n; j++) {
+        const x = x0 + (w * i) / n;
+        const y = y0 + (h * j) / n;
+        if (!inside(r, x, y)) continue;
+        const d = edgeDistance(r, x, y);
+        if (d > best) { best = d; bx = x; by = y; }
+      }
+    }
+    cx = bx; cy = by;
+    w /= 5; h /= 5;
+    x0 = cx - w / 2; y0 = cy - h / 2;
+  }
+  return [cx, cy];
+}
+
 export function buildGeo(map: GameMap, shapes: Shapes): Map<string, AreaGeo> {
   const out = new Map<string, AreaGeo>();
   for (const a of map.areas) {
@@ -92,7 +146,7 @@ export function buildGeo(map: GameMap, shapes: Shapes): Map<string, AreaGeo> {
     const xs = corePoints.map(([x]) => x);
     const ys = corePoints.map(([, y]) => -y);
     const core = { x: Math.min(...xs), y: Math.min(...ys), w: Math.max(...xs) - Math.min(...xs), h: Math.max(...ys) - Math.min(...ys) };
-    const [cx, cy] = best ? ringCentre(best) : [0, 0];
+    const [cx, cy] = best ? deepestPoint(best) : [0, 0];
     out.set(a.id, { path: parts.join(''), box: { x: minx, y: miny, w: maxx - minx, h: maxy - miny }, core, centre: [cx, -cy], touches: [] });
   }
   // Areas that share a border line in the topology touch each other.
