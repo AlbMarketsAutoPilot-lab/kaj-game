@@ -50,23 +50,34 @@ export function makeQuestion(map: GameMap, to: string, seed: number): [QuizQuest
   return factQuestion(fact, rng);
 }
 
-// Citizenship test: `count` questions about the area, from different facts.
-export function makeExam(map: GameMap, areaId: string, count: number, seed: number): [QuizQuestion[], number] {
-  const facts = [...(map.facts?.[areaId] ?? [])];
-  const questions: QuizQuestion[] = [];
+// Citizenship test (owner's change after task 15 planning): `studied` facts of the area to read,
+// then `count` questions about `count` of them. The study lines keep the area's own order, so
+// they don't show which facts are asked. An area without facts (the test maps) gets placeholder
+// questions, each with its answer as the study line.
+export function makeExam(map: GameMap, areaId: string, count: number, studied: number, seed: number): [{ questions: QuizQuestion[]; study: string[] }, number] {
+  const all = map.facts?.[areaId] ?? [];
+  const left = all.map((_, i) => i);
+  const picked: number[] = [];
   let rng = seed;
+  for (let k = 0; k < Math.min(studied, all.length); k++) {
+    let i: number;
+    [i, rng] = randomInt(rng, left.length);
+    picked.push(left.splice(i, 1)[0]);
+  }
+  const questions: QuizQuestion[] = [];
+  const study: string[] = [];
   for (let k = 0; k < count; k++) {
     let q: QuizQuestion;
-    if (facts.length > 0) {
-      let i: number;
-      [i, rng] = randomInt(rng, facts.length);
-      [q, rng] = factQuestion(facts.splice(i, 1)[0], rng);
+    if (k < picked.length) {
+      [q, rng] = factQuestion(all[picked[k]], rng);
     } else {
       [q, rng] = placeholderQuestion(map, areaId, rng);
+      study.push(`${q.text} ${q.options[q.correct]}.`);
     }
     questions.push(q);
   }
-  return [questions, rng];
+  study.unshift(...[...picked].sort((a, b) => a - b).map((i) => all[i].text));
+  return [{ questions, study }, rng];
 }
 
 function factQuestion(fact: Fact, seed: number): [QuizQuestion, number] {

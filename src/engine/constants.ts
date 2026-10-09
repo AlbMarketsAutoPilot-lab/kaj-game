@@ -74,8 +74,11 @@ export const VISA_PRICE = 2;
 // Business Traveler: +3 when granted citizenship (rulebook section 12).
 export const POINTS_BUSINESS_CITIZENSHIP = 3;
 
-// Citizenship test: 3 a/b questions (v1 scope, changed by the owner in task 8: no study step).
+// Citizenship test (owner's change, after task 14e): read 6 facts, then 3 a/b questions about
+// them in the same turn; 2 right answers or more pass, fewer: no citizenship.
+export const EXAM_FACTS = 6;
 export const EXAM_QUESTIONS = 3;
+export const EXAM_PASS = 2;
 
 // Businesses (rulebook section 6). At the end of the game each one counts for its price.
 export const BUSINESS_PRICE: Readonly<Record<BusinessKind, number>> = {

@@ -123,7 +123,7 @@ test('lose a turn in an area: the only move is "lostTurn"; it changes nothing el
 test('no scheduled card during a citizenship request (the exam is the event)', () => {
   let s = game(['eu-west', 'as-east']);
   p2(s).landTurns = 2;
-  p2(s).exam = { area: 'as-east', stage: 'test', questions: [], answers: [] };
+  p2(s).exam = { area: 'as-east', stage: 'test', study: [], questions: [], answers: [] };
   s = go(s, { type: 'walk', to: 'eu-north' });
   assert.equal(s.card, null);
 });

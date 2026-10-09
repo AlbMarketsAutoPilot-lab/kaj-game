@@ -387,6 +387,16 @@ These points are not spelled out in the rulebook or the v1 scope.
 4. **Luxury "any":** plane to any airport, ship to any port.
 5. **Boarding on the first turn** from a starting airport or port is allowed.
 
+Task 14f: a fair citizenship test (owner's change; `tests/citizenship.test.ts`).
+
+- **Turn 2:** the player reads 6 facts of the area (no timer, "I'm ready"), then answers 3 a/b
+  questions about 3 of them, in the same turn. Each question waits for "Start"; its 15 s clock
+  runs only after that, so it never runs while the last answer is on show.
+- **Turn 3:** 2 or more right: granted, moves (`granted`). Fewer: no citizenship, moves
+  (`failed`); the one request of the game is used up. The learning turn and the `exam` move are
+  gone. Robots answer at their level's rate, as before (normal passes about 84% of the time).
+- The save version goes to 8 (the exam carries its study lines).
+
 ## Choices made in task 8 (approved by the owner)
 
 1. **No study step:** the test is 3 questions, 15 seconds each. The right answers are shown in

@@ -3,6 +3,8 @@ import {
   CARD_EVERY,
   CHALLENGE_POINTS,
   CONTINENT_BONUS,
+  EXAM_FACTS,
+  EXAM_PASS,
   EXAM_QUESTIONS,
   GO_HOME_TURNS,
   MAX_ROBOTS,
@@ -154,12 +156,8 @@ export function legalActions(state: GameState, map: GameMap): Action[] {
           { type: 'sellAnswer', accept: false },
         ];
       }
-      // During a citizenship request the player stays, until it is granted.
-      if (me.exam && !examOver(me.exam)) {
-        return me.exam.stage === 'test'
-          ? [{ type: 'examAnswer', choice: 0 }, { type: 'examAnswer', choice: 1 }]
-          : [{ type: 'exam' }];
-      }
+      // During a citizenship test the player stays and answers.
+      if (me.exam?.stage === 'test') return [{ type: 'examAnswer', choice: 0 }, { type: 'examAnswer', choice: 1 }];
       if (me.loseTurn) return [{ type: 'lostTurn' }];
       // A challenge is never obligatory, and not offered with 0 points (owner's rule, task 12).
       if (me.travel) {
@@ -204,7 +202,7 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
   // A card drawn at the start of this turn stays on show for the whole turn; any other card
   // (the last player's) is cleared by the next move.
   if (next.card && (next.card.seat !== me.seat || next.card.round !== next.round)) next.card = null;
-  // The "citizenship granted" turn: the request is over once the player moves on.
+  // The "granted" or "failed" turn: the request is over once the player moves on.
   if (me.exam && examOver(me.exam)) me.exam = null;
   // Any move except waiting (or buying and selling, which don't end the turn) ends a
   // "no money" streak.
@@ -281,16 +279,10 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
       endTurn(next, map);
       return next;
     }
-    case 'exam': {
-      // Only after a wrong answer (turn 3): "one more turn learning the right answers".
-      me.exam!.stage = 'learning';
-      endTurn(next, map);
-      return next;
-    }
     case 'examAnswer': {
       const exam = me.exam!;
       exam.answers.push(action.choice);
-      // The 3 answers come in one turn; the turn ends after the last one.
+      // The 3 answers come in one turn (after reading the facts); the turn ends after the last one.
       if (exam.answers.length < exam.questions.length) return next;
       exam.stage = 'result';
       endTurn(next, map);
@@ -599,22 +591,23 @@ export function canAskCitizenship(state: GameState, map: GameMap, me: Player, ar
 function submitCitizenship(state: GameState, map: GameMap, me: Player, areaId: string): void {
   me.askedCitizenship = true;
   if (me.profile === 'luxury') {
-    me.exam = { area: areaId, stage: 'granted', questions: [], answers: [] };
+    me.exam = { area: areaId, stage: 'granted', study: [], questions: [], answers: [] };
     grantCitizenship(map, me);
     return;
   }
-  const [questions, rng] = makeExam(map, areaId, EXAM_QUESTIONS, state.rng);
+  const [{ questions, study }, rng] = makeExam(map, areaId, EXAM_QUESTIONS, EXAM_FACTS, state.rng);
   state.rng = rng;
-  me.exam = { area: areaId, stage: 'test', questions, answers: [] };
+  me.exam = { area: areaId, stage: 'test', study, questions, answers: [] };
 }
 
-// Citizenship granted at the start of this turn: the player moves as usual.
+// Citizenship granted or refused at the start of this turn: the player moves as usual.
 function examOver(exam: Exam): boolean {
-  return exam.stage === 'granted' || exam.stage === 'learning';
+  return exam.stage === 'granted' || exam.stage === 'failed';
 }
 
-function passed(exam: Exam): boolean {
-  return exam.questions.every((q, i) => exam.answers[i] === q.correct);
+// The test is passed with 2 right answers of 3 (owner's change, after task 14e).
+export function examPassed(exam: Exam): boolean {
+  return exam.questions.filter((q, i) => exam.answers[i] === q.correct).length >= EXAM_PASS;
 }
 
 function grantCitizenship(map: GameMap, me: Player): void {
@@ -622,18 +615,19 @@ function grantCitizenship(map: GameMap, me: Player): void {
   if (me.profile === 'business') me.points = addPoints(me.points, POINTS_BUSINESS_CITIZENSHIP);
 }
 
-// Start of a player's turn: citizenship is granted at the start of turn 3 (all answers right)
-// or turn 4 (after the learning turn).
+// Start of a player's turn: on turn 3 of a request, citizenship is granted (2 or more right
+// answers) or refused (fewer).
 function startTurn(state: GameState, map: GameMap): void {
   const me = currentPlayer(state);
   countLandTurn(state, me);
   const exam = me.exam;
   if (!exam) return;
-  if (exam.stage === 'result' && passed(exam)) {
+  if (exam.stage !== 'result') return;
+  if (examPassed(exam)) {
     grantCitizenship(map, me);
     exam.stage = 'granted';
-  } else if (exam.stage === 'learning') {
-    grantCitizenship(map, me);
+  } else {
+    exam.stage = 'failed';
   }
 }
 
