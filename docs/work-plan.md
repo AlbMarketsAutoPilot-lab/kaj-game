@@ -343,7 +343,7 @@ so no rule changes): the name in the poster's lettering, "+1 point just for
 visiting…", and the Guided Tours offer (Buy / Not now) when nobody owns them. Once per wonder per game,
 never for robots, never in the home area. Not kept in the save: after "Continue" it may show once more.
 **Calm popups (owner, all popups):** after a popup is closed (OK, Let's go, End turn…), the board shows
-for 2 seconds (taps wait) before the next popup opens; popups that answer the player's own tap (quiz,
+for 2 seconds with a turning ⌛ before the next popup opens (a tap opens it at once); popups that answer the player's own tap (quiz,
 answer, fees, citizenship) open at once. Order: M6 is merged first, then the 50-turn work starts at high effort (owner).
 
 ### 15. Android release build — postponed

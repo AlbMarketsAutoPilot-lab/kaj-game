@@ -649,7 +649,10 @@ function render(): void {
   clearTimeout(pauseTimer);
   if (modal && Date.now() < pauseUntil) {
     pauseTimer = window.setTimeout(() => { if (state === s) render(); }, pauseUntil - Date.now());
-    modal = { turn: false, node: el('div', { className: 'modal-back wait' }) };
+    // An hourglass shows there is more to come; a tap opens the next popup at once (owner's choice).
+    const skip = el('div', { className: 'modal-back wait' }, el('div', { className: 'hourglass', textContent: '⌛' }));
+    skip.addEventListener('click', (e) => { e.stopPropagation(); pauseUntil = 0; render(); });
+    modal = { turn: false, node: skip };
   }
   // Each popup sounds once, not on every redraw.
   if (modal?.sound && modal.soundKey !== lastSound) play(modal.sound);
