@@ -57,6 +57,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | M3 | 50-turn map: shapes, facts sorted by country (write only the missing ones) | medium | 1 | 14 | |
 | M4 | 50-turn map: screens (turn picker, home country, world map, guide), web and APK | medium | 1 | 15 | |
 | M5 | 50-turn map: full test games and fixes | medium | 1 | 15 | |
+| M6 | Wonder posters: one realistic SVG drawing per wonder (11), in the style of the poster and background, shown as a popup the first time any player reaches that wonder (+1 for the wonder; offer to buy its guided tours if nobody owns them). SVGs go to the owner for approval first | medium | 1–2 | 15 | |
 | 15 | Android release build (signed APK) | medium | 1 | — | postponed (owner, 2026-10-09) |
 | 16 | Full-game tests, bug fixes, buffer | medium | 1–2 | 15 | |
 
