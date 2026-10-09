@@ -172,7 +172,7 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
   const steps: Step[] = [
     { title: '🌍 Welcome, traveller!', task: true, picture: firstTrip,
       lines: ['The idea is simple: travel the world and collect points. But your turns are limited, so make every move count. When the last turn is over, the player with the most points wins.', "Let's take your first trip!"],
-      after: { title: '🎉 Your first trip!', lines: ['Every new country you visit gives you +1 point.', 'Your points are at the top. They are also your money: you pay tickets and fees with them.'] } },
+      after: { title: '🎉 Your first trip!', lines: ['Every new country you visit gives you +1 point.', 'Your points are at the top. They are also your money: you pay tickets and fees with them.', 'In the game, tap ✔ End turn when you are done. Then the next player plays.'] } },
     { title: '💡 More points, the easy way', lines: ['Reach a new continent: +2 points.'] },
     { title: '💡 More points, the easy way', lines: ['Countries with a famous wonder 🏛️ give +1 extra.'] },
     { title: '💡 Big countries, big bonus', task: true, picture: crossCanada,

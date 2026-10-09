@@ -1,11 +1,15 @@
 // The 4 profile icons (owner-approved preview, after task 14g): shaded SVG drawings that look 3D,
-// one colour per profile. The drawings sit once in the page; every icon is a <use> of them.
+// one colour per profile, with a white border (owner's request) and a soft shadow. The drawings sit once in the page; every icon is a <use> of them.
 
 import type { Profile } from '../engine/types.ts';
 import { svg } from './maps.ts';
 
 const DEFS = `<filter id="kaj-shadow" x="-30%" y="-30%" width="160%" height="170%">
-<feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#000" flood-opacity=".45"/>
+<feMorphology in="SourceAlpha" operator="dilate" radius="5" result="grow"/>
+<feFlood flood-color="#fff"/>
+<feComposite in2="grow" operator="in" result="border"/>
+<feDropShadow in="border" dx="0" dy="5" stdDeviation="4" flood-color="#000" flood-opacity=".45" result="lifted"/>
+<feMerge><feMergeNode in="lifted"/><feMergeNode in="SourceGraphic"/></feMerge>
 </filter>
 <linearGradient id="kaj-dTop" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#bfe9ff"/><stop offset="1" stop-color="#4fb3f2"/></linearGradient>
 <linearGradient id="kaj-dL" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2f8fe0"/><stop offset="1" stop-color="#0b4fa8"/></linearGradient>

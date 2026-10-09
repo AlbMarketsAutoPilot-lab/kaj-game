@@ -32,7 +32,9 @@ const profileOf = (seat: number): Profile | null => state?.players[seat]?.profil
 const nameOf = (seat: number): string => { const p = profileOf(seat); return p ? PROFILE_LABEL[p] : `Player ${seat + 1}`; };
 const shortOf = (seat: number): string => { const p = profileOf(seat); return p ? PROFILE_SHORT[p] : `Player ${seat + 1}`; };
 const colourOf = (seat: number): string => { const p = profileOf(seat); return p ? PROFILE_COLOUR[p] : '#cfe6e2'; };
-const ROBOT_DELAY_MS = 600;
+// A calmer pace (owner's request, task 14i): robots wait longer, and a walk is shown.
+const ROBOT_DELAY_MS = 1400;
+const WALK_MS = 1500;
 const LEVEL_LABEL: Record<RobotLevel, string> = { easy: 'Easy', normal: 'Normal', hard: 'Hard' };
 const SAVE_KEY = 'kaj-save';
 const QUIZ_SECONDS = 15;
@@ -70,6 +72,11 @@ const hasRoute = (id: string, kind: RouteKind) => (map30.routes ?? []).some((r) 
 let state: GameState | null = null;
 let robotSeed = 1;
 let robotTimer = 0;
+// The end of a turn (owner's request, task 14i): the map stays on the player who just moved
+// while their piece walks there; a person then sees what the turn gave and taps "End turn"
+// (a robot's ends by itself).
+let hold: { seat: number; from: string | null; to: string | null; lines: string[]; ready: boolean; animated: boolean } | null = null;
+let holdTimer = 0;
 let quizTimer = 0;
 // What happened (other players' moves, payments, cards), shown in one popup (task 14 B2):
 // on a person's turn, or straight after a person's own move (`newsNow`).
@@ -83,8 +90,6 @@ let income: { seat: number; text: string }[] = [];
 let answered: { ok: boolean; title: string; lines: string[] } | null = null;
 // Event cards already shown in a popup (round, seat, card).
 const seenCards = new Set<string>();
-// What a person's last arrival earned, for the guide on their next turn.
-const arrivals = new Map<number, { area: string; lines: string[] }>();
 // The "Ask for citizenship" popup is open (owner's request: a button and a popup, not a tick box).
 let citizenPopup = false;
 // The citizenship test question the player said "ready" for (its clock runs only after that).
@@ -163,6 +168,8 @@ function title(tag: 'h1' | 'strong' = 'h1'): HTMLElement {
 
 function renderStart(): void {
   clearTimeout(robotTimer);
+  clearTimeout(holdTimer);
+  hold = null;
   clearInterval(quizTimer);
   stopTimer();
   setMusic('menu');
@@ -192,6 +199,8 @@ function renderStart(): void {
 
 function renderSetup(): void {
   clearTimeout(robotTimer);
+  clearTimeout(holdTimer);
+  hold = null;
   clearInterval(quizTimer);
   stopTimer();
   setMusic('menu');
@@ -338,9 +347,22 @@ function act(action: Action): void {
   if (mover.kind === 'human') {
     moveSound(action, state.payments.some((p) => p.from === mover.seat && (p.reason === 'buy' || p.reason === 'sale')));
     answered = answerResult(before, state, action);
-    // The start area gives the welcome bonus, not visit points: no arrival lines for it.
-    const arrival = action.type === 'chooseStart' ? null : arrivalLines(mover, after);
-    if (arrival) arrivals.set(mover.seat, arrival);
+  } else if (action.type === 'walk') {
+    play('walk');
+  }
+  // The turn is over: hold the map on the mover (the start area gives the welcome bonus, not
+  // visit points: no hold for choosing it).
+  if (state.phase === 'play' && action.type !== 'chooseStart' && (currentPlayer(state).seat !== mover.seat || state.round !== before.round)) {
+    const walked = action.type === 'walk' || action.type === 'goHome';
+    hold = { seat: mover.seat, from: walked ? mover.area : null, to: walked ? after.area : null, lines: arrivalLines(mover, after)?.lines ?? [], ready: false, animated: false };
+    const h = hold;
+    clearTimeout(holdTimer);
+    holdTimer = window.setTimeout(() => {
+      if (hold !== h) return;
+      if (mover.kind === 'robot') hold = null;
+      else h.ready = true;
+      render();
+    }, walked ? WALK_MS + 300 : mover.kind === 'robot' ? 600 : 200);
   }
   if (offer && action.type === 'sellAnswer' && !action.accept) {
     lines.push(`🙅 ${nameOf(offer.to)} said no to ${name}'s ${BUSINESS_NAME[offer.business]} in ${areaById.get(offer.area)!.name}.`);
@@ -574,7 +596,9 @@ function render(): void {
     if (s.phase !== 'chooseStart') side.append(renderWorld(s));
     if (detailArea) side.append(renderAreaDetails(s, detailArea));
     if (shownPlayer !== null) side.append(playerCard(s, shownPlayer));
-    if (modal?.turn) {
+    if (hold) {
+      side.append(el('section', { className: 'card turn' }, el('h2', {}, dot(hold.seat), ` ${nameOf(hold.seat)}'s turn`)));
+    } else if (modal?.turn) {
       side.append(el('section', { className: 'card turn' }, el('h2', {}, dot(actor.seat), ` ${nameOf(actor.seat)}'s turn`)));
     } else {
       side.append(renderTurn(s, actions, isRobot));
@@ -593,7 +617,7 @@ function render(): void {
   }
 
   // Robots wait while a popup is open, so nothing is missed.
-  if (isRobot && !modal) {
+  if (isRobot && !modal && !hold) {
     robotTimer = window.setTimeout(() => {
       if (state !== s) return;
       // A robot buyer accepts an offer whenever it can pay (owner's choice, task 9b).
@@ -606,7 +630,7 @@ function render(): void {
 
 // One small chip per player in the top bar; tapping it opens the full player card.
 function renderChips(s: GameState): HTMLElement {
-  const me = currentPlayer(s);
+  const me = hold ? s.players[hold.seat] : currentPlayer(s);
   return el('div', { className: 'chips' }, ...s.turnOrder.map((seat) => {
     const p = s.players[seat];
     const points = s.phase === 'finished' ? finalScore(s, p) : p.points;
@@ -1086,7 +1110,7 @@ function answerResult(before: GameState, after: GameState, action: Action): type
   return null;
 }
 
-// What an arrival earned, for the guide on the next turn ("You got +1 for visiting Greece…").
+// What an arrival earned, for the end-of-turn popup ("+1 for visiting a new area…").
 function arrivalLines(before: Player, after: Player): { area: string; lines: string[] } | null {
   const id = after.area;
   if (!id || id === before.area) return null;
@@ -1123,8 +1147,6 @@ function renderGuide(s: GameState, actions: Action[]): HTMLElement | string {
   if (guideOff || me.kind !== 'human' || s.phase !== 'play' || !me.area) return '';
   const here = areaById.get(me.area)!;
   const lines: string[] = [];
-  const arrival = arrivals.get(me.seat);
-  if (arrival && arrival.area === me.area) lines.push(...arrival.lines);
 
   for (const a of actions) {
     if (a.type !== 'buy') continue;
@@ -1222,6 +1244,20 @@ function renderModal(s: GameState, actions: Action[], isRobot: boolean): Modal |
       ...r.lines.map((t) => el('p', { textContent: t })),
       ok(() => { answered = null; render(); })), r.ok ? 'right' : 'wrong'), sound: r.ok ? 'right' : 'wrong', soundKey: r };
   }
+  // The end of a person's turn: what it gave, then "End turn" (the walk is shown first).
+  if (hold) {
+    const h = hold;
+    if (!h.ready) return null;
+    const p = s.players[h.seat];
+    const end = () => { hold = null; news = []; newsNow = false; render(); };
+    const arrived = h.lines.length > 0 ? h.lines[0].replace('📍 You arrived in ', '').replace(/\.$/, '') : '';
+    return { turn: false, node: wrap(el('div', {},
+      el('h2', {}, dot(h.seat), arrived ? ` You arrived in ${arrived}!` : ` ${nameOf(h.seat)}, your turn is over`),
+      ...h.lines.slice(1).map((t) => el('p', { textContent: t })),
+      news.length ? el('ul', {}, ...news.map((t) => el('li', { textContent: t }))) : '',
+      h.lines.length ? '' : el('p', { className: 'small', textContent: `You have ${plural(p.points, 'point')}.` }),
+      ok(end, '✔ End turn'))) };
+  }
   // Money for people: a gold popup per person (never for a robot).
   if (income.length > 0 && (newsNow || !isRobot || s.phase === 'finished')) {
     const seats = [...new Set(income.map((i) => i.seat))];
@@ -1237,6 +1273,16 @@ function renderModal(s: GameState, actions: Action[], isRobot: boolean): Modal |
       el('h2', { textContent: '📣 What happened' }),
       el('ul', {}, ...news.map((t) => el('li', { textContent: t }))),
       ok(() => { news = []; newsNow = false; render(); }))) };
+  }
+  // A person's turn begins (owner's request, task 14i): who plays now.
+  const turnKey = `turn-${s.round}-${me.seat}`;
+  if (s.phase === 'play' && me.kind === 'human' && !isRobot && !seenCards.has(turnKey)) {
+    const where = me.area ? areaById.get(me.area)!.name : me.travel ? `on the way to ${areaById.get(me.travel.to)!.name}` : '';
+    return { turn: false, node: wrap(el('div', { className: 'handover' },
+      el('div', { className: 'handover-icon' }, me.profile ? iconEl(me.profile) : dot(me.seat)),
+      el('h2', { className: 'big-title', textContent: `${nameOf(me.seat)}, it's your turn!` }),
+      el('p', { textContent: `Round ${s.round} of ${s.totalRounds}${where ? ` · 📍 ${where}` : ''} · ${plural(me.points, 'point')}` }),
+      ok(() => { seenCards.add(turnKey); render(); }, "▶ Let's go"))), sound: 'tap', soundKey: turnKey };
   }
   const key = s.card ? `${s.card.round}-${s.card.seat}-${s.card.card.text}` : '';
   if (s.phase === 'play' && me.kind === 'human' && s.card?.seat === me.seat && !seenCards.has(key)) {
@@ -1509,14 +1555,15 @@ function mapTurn(s: GameState, isRobot: boolean): boolean {
 // Left half: the current area, zoomed in, with its drawn airport, port, wonder and citizenship
 // flag; neighbours around it (tap a green one to walk there, any other for its details).
 function renderAreaView(s: GameState, isRobot: boolean): HTMLElement {
-  const me = currentPlayer(s);
+  // At the end of a turn the map stays on the player who just moved (task 14i).
+  const me = hold ? s.players[hold.seat] : currentPlayer(s);
   const focus = me.area ?? me.travel?.to ?? me.home ?? map30.areas[0].id;
   const here = areaById.get(focus)!;
   const base = pad(geo.get(focus)!.core, 0.25, 2.5);
   const k = squeeze(base);
   if (!camera || camera.focus !== focus) camera = { focus, box: base };
   const actions = legalActions(s, map30);
-  const myTurn = mapTurn(s, isRobot);
+  const myTurn = !hold && mapTurn(s, isRobot);
   const walks = new Map(myTurn ? plainActions(actions).flatMap((a) => (a.type === 'walk' ? [[a.to, a] as const] : [])) : []);
   const walkTo = (id: string) => () => go(pick(legalActions(s, map30), walks.get(id)!));
   const details = (id: string) => () => { detailArea = id; render(); };
@@ -1600,7 +1647,19 @@ function renderAreaView(s: GameState, isRobot: boolean): HTMLElement {
     const y = p.area === focus ? hy : cy;
     if (!inView(d, x, y)) continue;
     const piece = p.profile ? svg('g', { class: p === me ? 'pawn active' : 'pawn' }, iconUse(p.profile, 0, -2, 34)) : pawn(colourOf(p.seat), p === me);
-    d.labels.append(place(piece, x, y, p.area === focus ? fs * 2.8 : fs * 2.2, nameOf(p.seat)));
+    const placed = place(piece, x, y, p.area === focus ? fs * 2.8 : fs * 2.2, nameOf(p.seat));
+    // The walk that just ended this turn: the piece goes from the old area to the new one, once.
+    if (hold && hold.seat === p.seat && hold.from && hold.to === p.area && !hold.animated && geo.has(hold.from)) {
+      hold.animated = true;
+      const [fx0, fy0] = geo.get(hold.from)!.centre;
+      const walker = svg('g', {}, placed);
+      placed.setAttribute('transform', placed.getAttribute('transform')!.replace(/translate\([^)]*\)/, 'translate(0 0)'));
+      walker.append(svg('animateTransform', { attributeName: 'transform', type: 'translate', from: `${fx0 * k} ${fy0}`, to: `${x} ${y}`, dur: `${WALK_MS}ms`, fill: 'freeze', calcMode: 'spline', keySplines: '0.4 0 0.2 1', keyTimes: '0;1' }));
+      walker.setAttribute('transform', `translate(${fx0 * k} ${fy0})`);
+      d.labels.append(walker);
+      continue;
+    }
+    d.labels.append(placed);
   }
   attachZoom(d.root, k, areaNames(d, [...d.paths.keys()].filter((id) => id !== focus)));
 

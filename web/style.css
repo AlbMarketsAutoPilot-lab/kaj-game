@@ -250,3 +250,7 @@ button.link { background: none; border: none; padding: 0; text-align: left; font
 .guide-zero { fill: #fff6c8; font-weight: 700; paint-order: stroke; stroke: #062a30; stroke-width: 0.15px; }
 .guide-quiz { text-align: center; }
 .guide-inline { position: static; margin: 8px auto 0; }
+
+/* The start of a person's turn (task 14i). */
+.handover { text-align: center; }
+.handover-icon .picon { width: 84px; height: 84px; }
