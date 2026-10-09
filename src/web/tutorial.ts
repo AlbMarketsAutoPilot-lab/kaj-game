@@ -4,7 +4,7 @@
 // comes back with "📖 How to play". It is a practice board of its own: the saved game is never
 // touched.
 
-import { BUSINESS_PRICE, EXAM_FACTS, EXAM_PASS, POINTS_BIG_COUNTRY_3_PARTS, VISA_PRICE } from '../engine/constants.ts';
+import { bigCountryPoints, BUSINESS_PRICE, EXAM_FACTS, EXAM_PASS, POINTS_BIG_COUNTRY_3_PARTS, VISA_PRICE } from '../engine/constants.ts';
 import type { AreaGeo } from './maps.ts';
 import { pad, squeeze, svg, unionBox } from './maps.ts';
 import { airport, citizenFlag, pawn, place } from './props.ts';
@@ -178,9 +178,11 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
     { title: '💡 Big countries, big bonus', task: true, picture: crossCanada,
       lines: ['Big countries like Canada and Russia come in parts. Visit every part for a big bonus.', 'Try it: cross Canada!'],
       after: { title: `🎉 All of Canada! +${POINTS_BIG_COUNTRY_3_PARTS}`, lines: [`You visited all 3 parts of Canada: +${POINTS_BIG_COUNTRY_3_PARTS} points.`] } },
+    // Tasks 17 and 18: the train and the bus.
+    { title: '🚆 Trains and a bus', lines: ['Not only planes and ships: a train runs from France to Russia West or Turkey, and back (not for Luxury).', `A bus runs from Mongolia to Siberia or China West, one way, only for the Nomad and the Backpacker. It counts the whole country as visited: all of Russia (+${POINTS_BIG_COUNTRY_3_PARTS}) or all of China (+${bigCountryPoints(2)})!`] },
     { title: '💡 More points, the easy way', lines: ['Your traveller profile has its own bonuses. You will see them when you pick it.'] },
     { title: '💼 Own a business', task: true, picture: buyAirline,
-      lines: ['Want more? Own a business, and the other players pay you:', '✈️ an airline at an airport · ⚓ a ferry agency at a port · 🚆 a train ticket booth at a station · 🏛️ guided tours at a wonder.', 'Try it: buy the airline at this airport.'],
+      lines: ['Want more? Own a business, and the other players pay you:', '✈️ an airline at an airport · ⚓ a ferry agency at a port · 🚆 a train ticket booth at a station · 🚌 a bus ticket booth at the bus stop · 🏛️ guided tours at a wonder.', 'Try it: buy the airline at this airport.'],
       after: { title: '🎉 You own the airline of UK & Ireland!', picture: () => airportView(true),
         lines: ['Your flag now flies over the airport. Every time another player flies from UK & Ireland, the ticket money goes to you.'] } },
     { title: '🛂 Citizenship', task: true, picture: askCitizenship,
@@ -193,7 +195,7 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
       lines: ['Every few turns your phone buzzes with news from the country you are in. Some news brings points, some takes them away. It happens to everyone!'],
       after: { title: '🤷 That\'s travel!', lines: ['Bad luck happens. Keep going, there are many ways to earn points back.'] } },
     { title: '🧠 Use your head', task: true, picture: quiz,
-      lines: ['Short on points? An airline may give you a free ticket for a right answer: you have 15 seconds.', 'Planes and ships can take more than one turn: you travel until you land at the end of the last one.', 'On long trips, other passengers may challenge you too: +1 if you are right, −1 if you are wrong. You can always say no.'],
+      lines: ['Short on points? An airline may give you a free ticket for a right answer: you have 15 seconds.', 'Planes, ships, trains and the bus can take more than one turn: you travel until you arrive at the end of the last one.', 'On long trips, other passengers may challenge you too: +1 if you are right, −1 if you are wrong. You can always say no.'],
       after: { title: '✅ Right!', lines: ['Free ticket! If only real life worked like that!'] } },
     { title: '🏁 You are ready!', lines: ['That is all you need. The rest you will learn by playing.', 'Have a great journey! 🌍'] },
   ];

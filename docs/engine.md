@@ -520,6 +520,30 @@ Task 14f: a fair citizenship test (owner's change; `tests/citizenship.test.ts`).
   businesses. 1,000 mixed robot games: no stuck game, ~230 train rides, scores as before.
 - **Save version 9:** older saves are not continued.
 
+## The bus (task 18, approved by the owner)
+
+30-turn map only. A fourth route kind, `bus`, on a **one-way** route (`oneWay: true`: from `a` to
+`b` only).
+
+- **Route:** the only bus stop is in Mongolia. The bus goes to Siberia (`russia-east`) or China West;
+  there is no bus back (those areas have no bus stop).
+- **Who:** only the Nomad (ticket 1, or the quiz) and the Backpacker (the quiz only). Business and
+  Luxury can't take the bus (`canRide()`). After 3 wrong quiz answers the Nomad pays 1 and goes;
+  the Backpacker goes home.
+- **Travel:** 1 travel turn; the Nomad gets +1 for it; a challenge is offered.
+- **Whole country:** arriving by bus in Siberia marks all 3 parts of Russia visited and gives +5;
+  in China West both parts of China and +3. Given once, also when some parts were visited before;
+  a country already complete gives nothing more. Only areas are marked: the continent counted is
+  the one of the area really entered (Asia), never Europe for Russia West; no visa or tour fee for
+  the other parts.
+- **Fees:** as usual for the destination: visa and tour fee paid on boarding, booked areas closed.
+- **Bus ticket booth:** 1 business (`bus`) at 2 points, in Mongolia; anyone may buy it. A paid bus
+  ticket goes to its owner.
+- **Stuck-state checker:** leaves the bus out, like the train.
+- **Robots:** the Nomad and Backpacker robots value the whole country when choosing the bus.
+  1,000 mixed robot games: no stuck game, ~50 bus rides, scores as before.
+- **Save version 10.**
+
 ## Project setup
 
 - TypeScript, run directly by Node 22.18 or newer (no build step for tests).

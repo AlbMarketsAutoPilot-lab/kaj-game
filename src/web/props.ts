@@ -1,5 +1,6 @@
 // Drawn icons for the area the player stands in (task 14 B1, owner-approved): an airport with a
-// hovering plane, a port with a rocking ship, a station with a steaming train (task 17), a monument for the wonder, a citizenship flag,
+// hovering plane, a port with a rocking ship, a station with a steaming train (task 17),
+// a bus stop with its bus (task 18), a monument for the wonder, a citizenship flag,
 // and the players' pawns. Each one is drawn in a 40 × 40 box centred on (0, 0).
 
 import { svg } from './maps.ts';
@@ -87,6 +88,31 @@ export function station(owner?: string): SVGGElement {
       svg('circle', { cx: 1, cy: -11, r: 3, fill: '#f4fbf9', class: 'steam' })),
   );
   if (owner) g.append(pennant(-17, 9, owner));
+  return g;
+}
+
+// A bus stop (task 18): a round sign on a pole, a strip of road, and a little bus that bounces.
+export function busStop(owner?: string): SVGGElement {
+  const windows = [-6, -1, 4].map((x) => svg('rect', { x, y: -4, width: 4, height: 4, rx: 0.8, fill: '#bfe9ff', stroke: INK, 'stroke-width': 0.7 }));
+  const g = svg('g', {},
+    // Road with a dashed centre line.
+    svg('rect', { x: -19, y: 10, width: 38, height: 5, rx: 1.5, fill: '#3b4a4f', stroke: INK, 'stroke-width': 1 }),
+    svg('line', { x1: -16, y1: 12.5, x2: 17, y2: 12.5, stroke: '#f4f1de', 'stroke-width': 1, 'stroke-dasharray': '3 3' }),
+    // The stop sign: a pole with a round sign.
+    svg('line', { x1: -14, y1: 10, x2: -14, y2: -9, stroke: INK, 'stroke-width': 1.4 }),
+    svg('circle', { cx: -14, cy: -12, r: 5, fill: '#4aa3df', stroke: INK, 'stroke-width': 1.1 }),
+    svg('text', { x: -14, y: -12, 'font-size': 4, 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#fff', 'font-weight': 700 }, 'BUS'),
+    // The bus, bouncing on the road.
+    svg('g', { class: 'hover' },
+      svg('rect', { x: -9, y: -7, width: 26, height: 15, rx: 3, fill: '#e3cf52', stroke: INK, 'stroke-width': 1.2 }),
+      ...windows,
+      svg('rect', { x: 10, y: -4, width: 5, height: 9, rx: 0.8, fill: '#bfe9ff', stroke: INK, 'stroke-width': 0.7 }),
+      svg('line', { x1: -9, y1: 3, x2: 17, y2: 3, stroke: '#d65f4e', 'stroke-width': 1.4 }),
+      svg('circle', { cx: 16, cy: 5.5, r: 1, fill: '#fff6c8' }),
+      svg('circle', { cx: -4, cy: 8.5, r: 2.6, fill: '#3b4a4f', stroke: INK, 'stroke-width': 1 }),
+      svg('circle', { cx: 11, cy: 8.5, r: 2.6, fill: '#3b4a4f', stroke: INK, 'stroke-width': 1 })),
+  );
+  if (owner) g.append(pennant(-18, 10, owner));
   return g;
 }
 

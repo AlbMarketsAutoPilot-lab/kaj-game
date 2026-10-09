@@ -60,6 +60,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | M6 | Wonder posters for the 7 wonders of the 30-turn map (the 4 of the 50-turn map come with M4) | medium | 1 | 13 | ✅ done |
 | 15 | Android release build (signed APK) | medium | 1 | — | postponed (owner, 2026-10-09) |
 | 17 | Train France ↔ Russia West and France ↔ Turkey (30-turn map): A rules **high**, B screens medium | **high** / medium | 2 | 13–14 | done (A rules, robots, tests, save 9; B screens, sound) |
+| 18 | Bus from Mongolia to Siberia or China West (30-turn map), whole country at once | **high** | 1 | — | done (owner-approved 2026-10-09) |
 | 16 | Full-game tests, bug fixes, buffer | medium | 1–2 | 15 | |
 
 ## The tasks
@@ -376,6 +377,26 @@ Owner's rules:
   popups for buying the booth and for the train trip with its challenge, guide texts, route lines.
 - **Sound:** `assets/sounds/train.mp3` (uploaded by the owner; trim and level it, play it like the
   plane and ship sounds).
+
+### 18. The bus — 30-turn map only (owner-approved 2026-10-09, done)
+
+One session at high effort: rules, robots, stuck-state checker, tests, 1,000 robot games, saves
+version 10, rules in `docs/engine.md`, and the screens. Owner's rules:
+
+- **Route:** the only bus stop is in Mongolia; one way to Siberia or China West (no bus back).
+- **Who:** the Nomad (ticket 1, or the quiz) and the Backpacker (quiz only); not Business or Luxury.
+- **Travel:** 1 travel turn; Nomad +1; a challenge is offered.
+- **Whole country:** by bus, Siberia marks all of Russia visited (+5), China West all of China
+  (+3), once, also after some parts were visited; nothing more if already complete. No Europe.
+- **Booth:** 1 🚌 bus ticket booth in Mongolia, 2 points, anyone may buy; the ticket goes to its owner.
+- **Screens:** a drawn bus stop, 🚌 on the maps, a route line, a bus trip scene, texts, guide;
+  `assets/sounds/bus.mp3` (from the owner, Pixabay) trimmed and levelled.
+
+### 30-turn game: frozen (owner, 2026-10-09)
+
+The 30-turn game is finished: no more rule or content changes. Last changes: 7 more Backpacker
+news cards (b9–b15, all positive; 60 cards in all, the test limit) and Backpacker tips on the home
+choice (3 continents, the free quiz on every trip, the bus). Next: the 50-turn game, in a new session.
 
 ### 16. Full-game tests and fixes — day 15
 

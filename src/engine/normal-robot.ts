@@ -1,7 +1,7 @@
 import {
   bigCountryParts, blockedByMoney, canPayAfterQuiz, currentPlayer, entryFees, feeTotal, legalActions,
 } from './engine.ts';
-import { BUSINESS_PRICE, bigCountryPoints, CONTINENT_BONUS, NOMAD_MIN_CONTINENTS, QUIZ_TRIES, ticketPrice, TRAVEL_TURNS, WELCOME_BONUS } from './constants.ts';
+import { BUSINESS_PRICE, bigCountryPoints, CONTINENT_BONUS, NOMAD_MIN_CONTINENTS, QUIZ_TRIES, canRide, ticketPrice, TRAVEL_TURNS, WELCOME_BONUS } from './constants.ts';
 import { areaById } from './map.ts';
 import { nextRandom } from './rng.ts';
 import type { Action, BusinessKind, Continent, GameMap, GameState, Player, RobotLevel } from './types.ts';
@@ -33,7 +33,7 @@ export const ROBOT_NOMAD_ROUND = 18;
 const PART_PROGRESS = 0.5;
 // A trip uses extra turns, so it must give at least 1 point more than the best walk.
 const TRIP_EXTRA = 0.99;
-const BUY_ORDER: BusinessKind[] = ['tours', 'airline', 'ferry', 'train'];
+const BUY_ORDER: BusinessKind[] = ['tours', 'airline', 'ferry', 'train', 'bus'];
 
 export function robotAction(state: GameState, map: GameMap, seed: number, level?: RobotLevel): [action: Action, nextSeed: number] {
   const actions = legalActions(state, map);
@@ -160,9 +160,11 @@ function chooseMove(state: GameState, map: GameMap, moves: Action[], me: Player,
       if (lastTry && plain.some((b) => b.type === 'walk')) continue;
       const travel = TRAVEL_TURNS[me.profile!][a.kind];
       const nomad = me.profile === 'nomad' ? travel : 0;
+      // The bus counts the whole country (task 18).
+      const value = a.kind === 'bus' ? busArrivalValue(map, me, a.to) : arrivalValue(map, me, a.to);
       options.push({
         action, to: a.to, trip: true, turns: 1 + travel,
-        gain: arrivalValue(map, me, a.to) + nomad - fees - (pay ? ticket! : 0),
+        gain: value + nomad - fees - (pay ? ticket! : 0),
       });
     }
   }
@@ -210,18 +212,30 @@ export function arrivalValue(map: GameMap, me: Player, to: string): number {
   return value;
 }
 
+// Arriving by bus (task 18): the whole country at once, as the engine scores it, plus a new continent.
+function busArrivalValue(map: GameMap, me: Player, to: string): number {
+  const area = areaById(map, to);
+  if (!area.bigCountry) return arrivalValue(map, me, to);
+  const parts = bigCountryParts(map, area.bigCountry);
+  const done = parts.every((id) => me.visitedAreas.includes(id));
+  // With the area counted as visited, arrivalValue gives only the continent's points.
+  const continent = arrivalValue(map, { ...me, visitedAreas: [...me.visitedAreas, to] }, to);
+  return (done ? 0 : bigCountryPoints(parts.length)) + continent;
+}
+
 function unvisitedNext(map: GameMap, me: Player, to: string): number {
   return areaById(map, to).neighbours.filter((id) => !me.visitedAreas.includes(id)).length;
 }
 
-// Steps from every area to the nearest target area, walking, by plane, ship or train (Luxury: any
-// airport to any airport, any port to any port, and never the train).
+// Steps from every area to the nearest target area, walking, by plane, ship, train or bus (Luxury:
+// any airport to any airport, any port to any port; only the routes the profile may take).
 function distances(map: GameMap, me: Player, target: (id: string) => boolean): Map<string, number> {
   const links = new Map<string, Set<string>>(map.areas.map((a) => [a.id, new Set(a.neighbours)]));
-  const routes = (map.routes ?? []).filter((r) => !(r.kind === 'station' && me.profile === 'luxury'));
+  const routes = (map.routes ?? []).filter((r) => canRide(me.profile!, r.kind));
+  // Distances are counted backwards from the targets, so a one-way route a -> b links b to a only.
   for (const r of routes) {
-    links.get(r.a)!.add(r.b);
     links.get(r.b)!.add(r.a);
+    if (!r.oneWay) links.get(r.a)!.add(r.b);
   }
   if (me.profile === 'luxury') {
     for (const kind of ['airport', 'port'] as const) {

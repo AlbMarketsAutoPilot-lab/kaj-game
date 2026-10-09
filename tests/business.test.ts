@@ -38,7 +38,7 @@ function pass(s: GameState): GameState {
 test('the map has guided tours at each wonder, an airline at each airport and a ferry agency at each port', () => {
   const list = mapBusinesses(map).map((b) => `${b.kind} ${b.area}`).sort();
   assert.deepEqual(list, ['airline af-south', 'airline as-east', 'airline eu-west', 'ferry eu-north', 'ferry na-one', 'tours as-west', 'tours na-one']);
-  assert.deepEqual(BUSINESS_PRICE, { tours: 2, airline: 3, ferry: 2, train: 2 });
+  assert.deepEqual(BUSINESS_PRICE, { tours: 2, airline: 3, ferry: 2, train: 2, bus: 2 });
 });
 
 test('buying: the player standing there may buy; it costs the price and the turn goes on', () => {

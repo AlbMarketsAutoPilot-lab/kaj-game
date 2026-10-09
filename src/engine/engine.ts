@@ -21,6 +21,7 @@ import {
   PROFILES,
   QUIZ_TRIES,
   ROUTE_KINDS,
+  canRide,
   START_CONTINENTS,
   TICKET_BUSINESS,
   ticketPrice,
@@ -354,18 +355,19 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
   }
 }
 
-// Where a plane (airport), ship (port) or train (station) can go from an area: its fixed routes.
-// Luxury: any other airport (by plane) or any other port (by ship), and never the train (task 17).
+// Where a plane (airport), ship (port), train (station) or bus can go from an area: its fixed
+// routes (a one-way route only from a to b). Luxury: any other airport (by plane) or any other
+// port (by ship), and never the train (task 17). The bus: only the Nomad and the Backpacker (task 18).
 export function destinations(map: GameMap, from: string, kind: RouteKind, profile: Profile): string[] {
-  if (kind === 'station' && profile === 'luxury') return [];
+  if (!canRide(profile, kind)) return [];
   const routes = (map.routes ?? []).filter((r) => r.kind === kind);
-  if (!routes.some((r) => r.a === from || r.b === from)) return [];
-  if (profile === 'luxury') {
+  if (!routes.some((r) => r.a === from || (r.b === from && !r.oneWay))) return [];
+  if (profile === 'luxury' && (kind === 'airport' || kind === 'port')) {
     const all = new Set(routes.flatMap((r) => [r.a, r.b]));
     all.delete(from);
     return [...all];
   }
-  return routes.flatMap((r) => (r.a === from ? [r.b] : r.b === from ? [r.a] : []));
+  return routes.flatMap((r) => (r.a === from ? [r.b] : r.b === from && !r.oneWay ? [r.a] : []));
 }
 
 // Boarding options in the player's area: pay the ticket (if they can) or try the quiz.
@@ -419,7 +421,24 @@ function land(state: GameState, map: GameMap, me: Player): void {
   const trip = me.travel!;
   if (occupiedAreas(state, me.seat).has(trip.to)) return;
   me.travel = null;
+  if (trip.kind === 'bus') busWholeCountry(map, me, trip.to);
   arrive(state, map, me, areaById(map, trip.to));
+}
+
+// The bus (task 18, owner's rule): arriving by bus in a part of a big country (Siberia, China
+// West) counts the whole country as visited: every part is marked, and the country's points
+// (Russia +5, China +3) are given once, also when some parts were visited before. A country
+// already complete gives nothing more. Only areas are marked: no continent, wonder or visa.
+// Called just before arrive(), which scores the destination itself.
+function busWholeCountry(map: GameMap, me: Player, to: string): void {
+  const country = areaById(map, to).bigCountry;
+  if (!country) return;
+  const parts = bigCountryParts(map, country);
+  if (parts.every((id) => me.visitedAreas.includes(id))) return;
+  const destinationNew = !me.visitedAreas.includes(to);
+  for (const id of parts) if (id !== to && !me.visitedAreas.includes(id)) me.visitedAreas.push(id);
+  // A new destination completes the country in arrive(), which gives the points; otherwise here.
+  if (!destinationNew) me.points = addPoints(me.points, bigCountryPoints(parts.length));
 }
 
 // ---------- visas and citizenship (rulebook sections 7 and 8, docs/engine.md task 8) ----------
@@ -440,11 +459,12 @@ export function visaOwner(state: GameState, me: Player, from: string | null, to:
 
 // ---------- businesses, fees and "go home" (rulebook section 6, docs/engine.md task 9) ----------
 
-// One business per wonder (guided tours), airport (airline), port (ferry agency) and station
-// (train ticket booth, task 17).
+// One business per wonder (guided tours), airport (airline), port (ferry agency), station
+// (train ticket booth, task 17) and bus stop (bus ticket booth, task 18).
 export function mapBusinesses(map: GameMap): Business[] {
   const routes = map.routes ?? [];
-  const has = (id: string, kind: RouteKind) => routes.some((r) => r.kind === kind && (r.a === id || r.b === id));
+  // A one-way route (the bus) has its stop, and its booth, only where it starts.
+  const has = (id: string, kind: RouteKind) => routes.some((r) => r.kind === kind && (r.a === id || (r.b === id && !r.oneWay)));
   return map.areas.flatMap((a): Business[] => [
     ...(a.wonder ? [{ kind: 'tours' as const, area: a.id, owner: null }] : []),
     ...ROUTE_KINDS.filter((kind) => has(a.id, kind)).map((kind) => ({ kind: TICKET_BUSINESS[kind], area: a.id, owner: null })),

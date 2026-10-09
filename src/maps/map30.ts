@@ -242,6 +242,10 @@ const ROUTES: Route[] = [
   // Task 17 (owner-approved): the train from France to Russia West or Turkey, and back.
   { kind: 'station', a: 'france', b: 'russia-west' },
   { kind: 'station', a: 'france', b: 'turkey-caucasus' },
+  // Task 18 (owner-approved): the only bus stop is in Mongolia; the bus goes one way to Siberia
+  // or China West (no bus back).
+  { kind: 'bus', a: 'mongolia', b: 'russia-east', oneWay: true },
+  { kind: 'bus', a: 'mongolia', b: 'china-west', oneWay: true },
 ];
 
 function build(): GameMap {
