@@ -71,14 +71,15 @@ test('a game can start on the 30-turn map with 4 seats', () => {
   assert.doesNotThrow(() => createGame({ seats: seats(4), seed: 3 }, map30));
 });
 
-test('30-turn map: 8 airports, 9 ports, 13 connections, at most 3 destinations each', () => {
+test('30-turn map: 8 airports, 9 ports, 3 stations, 15 connections, at most 3 destinations each', () => {
   const routes = map30.routes ?? [];
   const at = (kind: string) => new Set(routes.filter((r) => r.kind === kind).flatMap((r) => [r.a, r.b])).size;
-  assert.equal(routes.length, 13);
+  assert.equal(routes.length, 15);
   assert.equal(at('airport'), 8);
   assert.equal(at('port'), 9);
+  assert.equal(at('station'), 3);
   for (const a of areas) {
-    for (const kind of ['airport', 'port']) {
+    for (const kind of ['airport', 'port', 'station']) {
       const n = routes.filter((r) => r.kind === kind && (r.a === a.id || r.b === a.id)).length;
       assert.ok(n <= 3, `${a.id} ${kind}: ${n} destinations`);
     }
@@ -99,7 +100,8 @@ const EXTRA_ROUTES = ['uk-ireland arabia', 'japan usa-west', 'australia-east new
 const ALASKA_FERRY = 'usa-west alaska';
 
 test('original 9-connection map: every connection is needed', () => {
-  const kept = (map30.routes ?? []).filter((r) => !EXTRA_ROUTES.includes(`${r.a} ${r.b}`));
+  // The train (task 17) is not counted: the stuck-state checker leaves it out.
+  const kept = (map30.routes ?? []).filter((r) => r.kind !== 'station' && !EXTRA_ROUTES.includes(`${r.a} ${r.b}`));
   const original = kept.filter((r) => `${r.a} ${r.b}` !== ALASKA_FERRY);
   assert.equal(original.length, 9);
   assert.deepEqual(stuckProblems({ ...map30, routes: kept }), []);

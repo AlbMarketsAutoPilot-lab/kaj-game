@@ -2,7 +2,7 @@
 // landscape board (left: the current area drawn; right: the world map and the turn panel).
 // Robots play with simple rules, at the level chosen for each seat (task 13).
 
-import { BUSINESS_PRICE, CHALLENGE_POINTS, CONTINENT_BONUS, EXAM_FACTS, EXAM_PASS, POINTS_NOMAD_TRAVEL_TURN, POINTS_NEW_AREA, POINTS_NEW_CONTINENT, POINTS_WONDER, GO_HOME_TURNS, NOMAD_MIN_CONTINENTS, NOMAD_PENALTY, NOMAD_WARNING_ROUND, POINTS_BUSINESS_CITIZENSHIP, QUIZ_TRIES, TICKET_PRICE, TOUR_FEE, TRAVEL_TURNS, VISA_PRICE } from '../engine/constants.ts';
+import { BUSINESS_PRICE, CHALLENGE_POINTS, CONTINENT_BONUS, EXAM_FACTS, EXAM_PASS, POINTS_NOMAD_TRAVEL_TURN, POINTS_NEW_AREA, POINTS_NEW_CONTINENT, POINTS_WONDER, GO_HOME_TURNS, NOMAD_MIN_CONTINENTS, NOMAD_PENALTY, NOMAD_WARNING_ROUND, POINTS_BUSINESS_CITIZENSHIP, QUIZ_TRIES, TICKET_BUSINESS, TICKET_PRICE, ticketPrice, TOUR_FEE, TRAVEL_TURNS, VISA_PRICE } from '../engine/constants.ts';
 import {
   apply, blockedByMoney, examPassed, bookedBy, businessAt, canPayAfterQuiz, destinations, businessValue, createGame, currentPlayer, entryFees, feeTotal, finalScore, homeFor, landTurnsToCard, legalActions, nomadPenalty,
 } from '../engine/engine.ts';
@@ -56,13 +56,15 @@ const POSTER: string = (window as unknown as { KAJ_POSTER?: string }).KAJ_POSTER
 const CREDITS = 'Country data: mledoze/countries, ODbL 1.0 · Flags: flag-icons by Panayiotis Lipiridis, MIT licence · Map shapes: Natural Earth · Lettering: Cinzel, SIL Open Font Licence · Sounds: Pixabay, Pixabay Content License';
 // Citizenship test: 15 seconds for each question (owner's choice, task 8).
 const EXAM_SECONDS = 15;
-const VEHICLE: Record<RouteKind, string> = { airport: '✈️', port: '⚓' };
-const BUSINESS_ICON: Record<BusinessKind, string> = { tours: '🏛️', airline: '✈️', ferry: '⚓' };
-const BUSINESS_NAME: Record<BusinessKind, string> = { tours: 'guided tours', airline: 'airline', ferry: 'ferry agency' };
+// Train entries (task 17): placeholders until the train screens (task 17, session B).
+const VEHICLE: Record<RouteKind, string> = { airport: '✈️', port: '⚓', station: '🚆' };
+const BUSINESS_ICON: Record<BusinessKind, string> = { tours: '🏛️', airline: '✈️', ferry: '⚓', train: '🚆' };
+const BUSINESS_NAME: Record<BusinessKind, string> = { tours: 'guided tours', airline: 'airline', ferry: 'ferry agency', train: 'train ticket booth' };
 const BUSINESS_EARNS: Record<BusinessKind, string> = {
   tours: `every other player pays you ${plural(TOUR_FEE, 'point')} to enter`,
   airline: 'every paid plane ticket from here goes to you',
   ferry: 'every paid ship ticket from here goes to you',
+  train: 'every paid train ticket from here goes to you',
 };
 
 const app = document.getElementById('app')!;
@@ -345,7 +347,7 @@ function act(action: Action): void {
   // A 3rd wrong quiz answer: pay and travel, or go home (owner's rule, task 13).
   const quiz = state.quiz;
   const lastTry = action.type === 'answer' && quiz && action.choice !== quiz.question.correct && mover.quizWrong >= QUIZ_TRIES - 1
-    ? { pays: canPayAfterQuiz(state, mover, quiz.to), home: homeFor(state, map30, mover) } : null;
+    ? { pays: canPayAfterQuiz(state, mover, quiz.kind, quiz.to), home: homeFor(state, map30, mover) } : null;
   const offer = state.offer;
   const before = state;
   state = apply(state, map30, action);
@@ -939,7 +941,7 @@ function feeLabel(s: GameState, to: string): string {
 // Who gets the ticket from this airport or port: " (to the Backpacker's airline)".
 function ticketTo(s: GameState, kind: RouteKind): string {
   const me = currentPlayer(s);
-  const business = businessAt(s, me.area!, kind === 'airport' ? 'airline' : 'ferry');
+  const business = businessAt(s, me.area!, TICKET_BUSINESS[kind]);
   if (business?.owner === undefined || business.owner === null) return '';
   return business.owner === me.seat ? ' (to yourself)' : ` (to ${nameOf(business.owner)})`;
 }
@@ -1051,8 +1053,8 @@ function challengeNote(r: ChallengeResult): string {
 // After the 3rd wrong answer a player who can pay must pay: say who gets the ticket.
 function forcedPayNote(s: GameState, kind: RouteKind, dest: string): string {
   const me = currentPlayer(s);
-  if (me.quizWrong >= QUIZ_TRIES - 1) return ` ${lastTryText(s, dest)}`;
-  const price = TICKET_PRICE[me.profile!];
+  if (me.quizWrong >= QUIZ_TRIES - 1) return ` ${lastTryText(s, kind, dest)}`;
+  const price = ticketPrice(me.profile!, kind);
   const to = ticketTo(s, kind);
   return price === null
     ? ` After ${QUIZ_TRIES} wrong answers here your trip ends and you go home.`
@@ -1074,18 +1076,17 @@ function waitingNote(s: GameState): string {
 }
 
 // Told before the 3rd quiz try in an area (owner's rule, task 13): what a wrong answer means.
-function lastTryText(s: GameState, dest: string): string {
+function lastTryText(s: GameState, kind: RouteKind, dest: string): string {
   const me = currentPlayer(s);
   const name = areaById.get(dest)!.name;
-  return canPayAfterQuiz(s, me, dest)
-    ? `⚠️ Last try here for ${name}: Attention! If wrong, you pay the ${TICKET_PRICE[me.profile!]}-point ticket with your points and travel.`
+  return canPayAfterQuiz(s, me, kind, dest)
+    ? `⚠️ Last try here for ${name}: Attention! If wrong, you pay the ${ticketPrice(me.profile!, kind)}-point ticket with your points and travel.`
     : `⚠️ Last try here for ${name}: Attention! If wrong, you go home to ${areaById.get(homeFor(s, map30, me))!.name}.`;
 }
 
 function lastTryWarning(s: GameState, actions: Action[]): string {
   if (currentPlayer(s).quizWrong < QUIZ_TRIES - 1) return '';
-  const dests = [...new Set(actions.flatMap((a) => (a.type === 'quiz' ? [a.to] : [])))];
-  return dests.map((d) => lastTryText(s, d)).join(' ');
+  return actions.flatMap((a) => (a.type === 'quiz' ? [lastTryText(s, a.kind, a.to)] : [])).join(' ');
 }
 
 function travelNote(me: Player): string {

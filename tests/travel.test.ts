@@ -201,7 +201,8 @@ test('home is the area itself: the player stays and the count starts again', () 
 // any profile, any airport or port of the 30-turn map, even with 0 points.
 test('30-turn map: the quiz is offered for every destination, for every profile, with 0 points', () => {
   for (const profile of PROFILES) {
-    for (const r of map30.routes ?? []) {
+    // Luxury can't take the train (task 17).
+    for (const r of (map30.routes ?? []).filter((x) => !(x.kind === 'station' && profile === 'luxury'))) {
       for (const [from, to] of [[r.a, r.b], [r.b, r.a]]) {
         const s = withPlayerAt(map30, profile, from);
         const offered = legalActions(s, map30).some((a) => a.type === 'quiz' && a.kind === r.kind && a.to === to);

@@ -1,10 +1,10 @@
 import {
   bigCountryParts, blockedByMoney, canPayAfterQuiz, currentPlayer, entryFees, feeTotal, legalActions,
 } from './engine.ts';
-import { BUSINESS_PRICE, bigCountryPoints, CONTINENT_BONUS, NOMAD_MIN_CONTINENTS, QUIZ_TRIES, TICKET_PRICE, TRAVEL_TURNS, WELCOME_BONUS } from './constants.ts';
+import { BUSINESS_PRICE, bigCountryPoints, CONTINENT_BONUS, NOMAD_MIN_CONTINENTS, QUIZ_TRIES, ticketPrice, TRAVEL_TURNS, WELCOME_BONUS } from './constants.ts';
 import { areaById } from './map.ts';
 import { nextRandom } from './rng.ts';
-import type { Action, BusinessKind, Continent, GameMap, GameState, Player, RobotLevel, RouteKind } from './types.ts';
+import type { Action, BusinessKind, Continent, GameMap, GameState, Player, RobotLevel } from './types.ts';
 
 // The robot (task 13): the random robot plus simple rules. It scores the legal moves and picks
 // the best one, with a hidden random tie-break. One robot, three levels (owner's change, task 13).
@@ -33,7 +33,7 @@ export const ROBOT_NOMAD_ROUND = 18;
 const PART_PROGRESS = 0.5;
 // A trip uses extra turns, so it must give at least 1 point more than the best walk.
 const TRIP_EXTRA = 0.99;
-const BUY_ORDER: BusinessKind[] = ['tours', 'airline', 'ferry'];
+const BUY_ORDER: BusinessKind[] = ['tours', 'airline', 'ferry', 'train'];
 
 export function robotAction(state: GameState, map: GameMap, seed: number, level?: RobotLevel): [action: Action, nextSeed: number] {
   const actions = legalActions(state, map);
@@ -138,7 +138,6 @@ interface Move {
 function chooseMove(state: GameState, map: GameMap, moves: Action[], me: Player, settings: LevelSettings, rnd: Rand): Action {
   const plain = moves;
   const options: Move[] = [];
-  const ticket = TICKET_PRICE[me.profile!];
   const tripsSeen = new Set<string>();
   for (const a of plain) {
     if (a.type === 'walk') {
@@ -149,6 +148,7 @@ function chooseMove(state: GameState, map: GameMap, moves: Action[], me: Player,
       if (tripsSeen.has(key)) continue;
       tripsSeen.add(key);
       const fees = feeTotal(entryFees(state, me, me.area, a.to));
+      const ticket = ticketPrice(me.profile!, a.kind);
       // Try the free quiz first; after a wrong answer pay, if that keeps the reserve.
       const quiz = plain.find((b) => b.type === 'quiz' && b.kind === a.kind && b.to === a.to);
       const board = plain.find((b) => b.type === 'board' && b.kind === a.kind && b.to === a.to);
@@ -156,9 +156,9 @@ function chooseMove(state: GameState, map: GameMap, moves: Action[], me: Player,
       const action = pay ? board : quiz;
       if (!action) continue;
       // A last try that sends it home if wrong: only when it can't walk (owner's rule, task 13).
-      const lastTry = action === quiz && me.quizWrong >= QUIZ_TRIES - 1 && !canPayAfterQuiz(state, me, a.to);
+      const lastTry = action === quiz && me.quizWrong >= QUIZ_TRIES - 1 && !canPayAfterQuiz(state, me, a.kind, a.to);
       if (lastTry && plain.some((b) => b.type === 'walk')) continue;
-      const travel = TRAVEL_TURNS[me.profile!][a.kind as RouteKind];
+      const travel = TRAVEL_TURNS[me.profile!][a.kind];
       const nomad = me.profile === 'nomad' ? travel : 0;
       options.push({
         action, to: a.to, trip: true, turns: 1 + travel,
@@ -214,11 +214,11 @@ function unvisitedNext(map: GameMap, me: Player, to: string): number {
   return areaById(map, to).neighbours.filter((id) => !me.visitedAreas.includes(id)).length;
 }
 
-// Steps from every area to the nearest target area, walking, by plane or by ship (Luxury: any
-// airport to any airport, any port to any port).
+// Steps from every area to the nearest target area, walking, by plane, ship or train (Luxury: any
+// airport to any airport, any port to any port, and never the train).
 function distances(map: GameMap, me: Player, target: (id: string) => boolean): Map<string, number> {
   const links = new Map<string, Set<string>>(map.areas.map((a) => [a.id, new Set(a.neighbours)]));
-  const routes = map.routes ?? [];
+  const routes = (map.routes ?? []).filter((r) => !(r.kind === 'station' && me.profile === 'luxury'));
   for (const r of routes) {
     links.get(r.a)!.add(r.b);
     links.get(r.b)!.add(r.a);

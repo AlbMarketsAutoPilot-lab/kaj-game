@@ -2,7 +2,7 @@ import type { GameState } from './types.ts';
 
 // Saved games carry this number. A save from another version is never continued, so a game
 // is never scored by rules that did not exist when its moves were made.
-export const SAVE_VERSION = 8;
+export const SAVE_VERSION = 9;
 
 export function saveGame(state: GameState): string {
   return JSON.stringify({ version: SAVE_VERSION, state });
