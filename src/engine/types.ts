@@ -44,6 +44,9 @@ export interface Area {
   wonder?: boolean;
   // Set on each part of a big country (USA, Canada, Russia, China, Brazil, Australia).
   bigCountry?: string;
+  // Place cards written for this area id come here (task M2: the 50-turn Peru gets the
+  // 30-turn Peru & Bolivia card). Without it, an area gets the place cards of its own id.
+  cardsFrom?: string;
 }
 
 export type RouteKind = 'airport' | 'port' | 'station' | 'bus';
@@ -60,6 +63,8 @@ export interface Route {
 
 export interface GameMap {
   id: string;
+  // The number of rounds in a game on this map (task M2): 50 on the 50-turn map; 30 if not set.
+  rounds?: number;
   areas: Area[];
   routes?: Route[];
   // Area id -> facts for the airline quiz and the citizenship exam.

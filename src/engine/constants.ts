@@ -1,7 +1,11 @@
 import type { BusinessKind, Continent, Profile, RouteKind } from './types.ts';
 
-// v1 has only the 30-turn map (KAJ-v1-scope.md section 4).
+// The 30-turn game is the default; a map may set its own length (the 50-turn map, task M2).
 export const TOTAL_ROUNDS = 30;
+
+// The game lengths to choose from in the setup (task M2), the first one by default.
+export const GAME_LENGTHS = [30, 50] as const;
+export type GameLength = (typeof GAME_LENGTHS)[number];
 
 export const MIN_SEATS = 2;
 export const MAX_SEATS = 4;
@@ -149,12 +153,20 @@ export const CONTINENT_BONUS: Readonly<Partial<Record<Profile, { continents: num
 // Digital Nomad: −5 off the final score (never below 0) with fewer than 3 continents.
 export const NOMAD_MIN_CONTINENTS = 3;
 export const NOMAD_PENALTY = 5;
-// From this round the Nomad's continent bar warns about the penalty.
+// From this round the Nomad's continent bar warns about the penalty (the last 5 turns).
 export const NOMAD_WARNING_ROUND = 25;
+export function nomadWarningRound(totalRounds: number): number {
+  return totalRounds - 5;
+}
 
 // Event cards (task 11, count changed in task 12): at the start of each player's 3rd, 6th, 9th …
 // turn that begins in an area (trip turns don't count); none in the last round.
 export const CARD_EVERY = 3;
+// The 50-turn game (owner, task M2, as in the rulebook): every 5th land turn.
+export const CARD_EVERY_50 = 5;
+export function cardEvery(totalRounds: number): number {
+  return totalRounds >= 50 ? CARD_EVERY_50 : CARD_EVERY;
+}
 
 // Travel-turn challenges (task 12): right +1, wrong −1; not offered with 0 points.
 export const CHALLENGE_POINTS = 1;

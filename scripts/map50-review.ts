@@ -52,7 +52,7 @@ const S: [string, string, string[], boolean?][] = [
  ['australia-west','Australia West',['Australia']],['australia-east','Australia East',['Australia']],['new-zealand','New Zealand',['New Zealand'],true],
 ];
 const R: [string,string,string][] = [
- ['port','Spain','UK & Ireland'],['port','UK & Ireland','Iceland'],['port','Iceland','Canada East'],
+ ['port','Portugal','UK & Ireland'],['port','UK & Ireland','Iceland'],['port','Iceland','Canada East'],
  ['port','Japan','USA West'],['port','Australia East','New Zealand'],['port','USA West','Alaska'],
  ['port','Madagascar & Islands','Tanzania, Rwanda & Burundi'],['port','West Coast','Brazil North'],
  ['airport','Gulf States','Australia West'],['airport','Australia West','Malay Islands'],['airport','Malay Islands','Japan'],
@@ -69,7 +69,7 @@ const sites = (k: string) => new Set(R.filter(r=>r[0]===k).flatMap(r=>[r[1],r[2]
 const ap = sites('airport'), pt = sites('port');
 for (const n of names) for (const k of ['airport','port']) { const d = R.filter(r=>r[0]===k&&(r[1]===n||r[2]===n)).length; if (d>3) throw new Error(n+k+d); }
 const cont = (id:string)=>a30.get(id).continent;
-let md = `# 50-turn map — area list for review (task M1)\n\nOwner-approved basis: 80–90 areas, same big-country splits as the 30-turn map, islands kept inside their bigger 30-turn areas (owner), 11 wonders, about 13 airports and 13 ports with about 21 connections, every rule and design from the 30-turn game (which stays frozen). Every 50-turn area lies inside one 30-turn area, so its facts can be sorted by country (M3).\n\n**Totals:** ${S.length} areas · ${S.filter(s=>s[3]).length} wonders (🏛️) · ${ap.size} airports · ${pt.size} ports · ${R.length} connections.\n\nWalking links come from the real borders (shapes, M2/M3) plus short sea crossings like the 30-turn map (e.g. UK & Ireland ↔ France). They are listed for review in M2.\n`;
+let md = `# 50-turn map — area list for review (task M1)\n\nOwner-approved basis: 80–90 areas, same big-country splits as the 30-turn map, islands kept inside their bigger 30-turn areas (owner), 11 wonders, about 13 airports and 13 ports with about 21 connections, every rule and design from the 30-turn game (which stays frozen). Every 50-turn area lies inside one 30-turn area, so its facts can be sorted by country (M3).\n\n**Totals:** ${S.length} areas · ${S.filter(s=>s[3]).length} wonders (🏛️) · ${ap.size} airports · ${pt.size} ports · ${R.length} connections.\n\nWalking links (owner-approved in M2, written in \`src/maps/map50.ts\`): the real land borders, the Channel Tunnel (France ↔ UK & Ireland) and one sea crossing, Madagascar & Islands ↔ Zambezi; no Spain ↔ Morocco. Owner (M2): the ship to UK & Ireland leaves from Portugal, not Spain, so a citizenship of Spain can't trap Portugal.\n`;
 for (const c of ['Europe','Asia','Africa','North America','South America','Oceania']) {
   const rows = S.filter(s=>cont(s[0])===c);
   md += `\n## ${c} (${rows.length})\n\n| Area | Countries | Inside 30-turn area | ✈️ | ⛴️ |\n|---|---|---|---|---|\n`;
