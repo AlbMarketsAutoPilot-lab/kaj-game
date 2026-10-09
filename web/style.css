@@ -131,6 +131,7 @@ main:has(.game) { max-width: none; padding: 6px; height: 100vh; height: 100dvh; 
 .map-svg .land.c0 { fill: #4f8fc0; } .map-svg .land.c1 { fill: #c98b4f; } .map-svg .land.c2 { fill: #c9b04f; }
 .map-svg .land.c3 { fill: #5fae6e; } .map-svg .land.c4 { fill: #a96fc0; } .map-svg .land.c5 { fill: #4fb3b0; }
 .map-svg .label.icons text { stroke: none; }
+.map-svg .names text { fill: rgba(244, 251, 249, 0.82); stroke: rgba(6, 41, 46, 0.85); paint-order: stroke; font-weight: 600; font-family: system-ui, sans-serif; letter-spacing: 0.02em; pointer-events: none; }
 .map-svg .visit { stroke: #fff; stroke-width: 1px; vector-effect: non-scaling-stroke; }
 .map-svg .tap { cursor: pointer; }
 .map-svg .land.tap:hover { filter: brightness(1.2); }

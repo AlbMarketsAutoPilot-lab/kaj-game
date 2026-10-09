@@ -78,11 +78,11 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
     return root;
   };
 
-  // Two neighbours: France (you are here) and Spain & Portugal (tap it to travel).
+  // Two neighbours: France (you are here) and Iberia (tap it to travel).
   const firstTrip = (done: () => void): Node => el('div', {},
     view(['france', 'iberia'], (id) => (id === 'france' ? 'here' : 'go'),
       (id) => (id === 'iberia' ? () => { play('walk'); gain(1); done(); } : null)),
-    el('p', { className: 'small', textContent: '🇫🇷 You are in France · tap 🇪🇸 Spain & Portugal' }));
+    el('p', { className: 'small', textContent: '🇫🇷 You are in France · tap 🇪🇸 Iberia' }));
 
   // Canada in three parts: start in the West, walk to Central, then East.
   const CANADA = ['canada-west', 'canada-central', 'canada-east'];
@@ -108,7 +108,7 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
     const buy = button(`✈️ Buy the airline (${BUSINESS_PRICE.airline} points)`, () => { play('coins'); gain(-BUSINESS_PRICE.airline); done(); });
     buy.className = 'primary guide-glow';
     return el('div', {}, airportView(false),
-      el('p', { className: 'small', textContent: '🇬🇧 UK & Ireland: its airport flies to the Arabian Peninsula' }),
+      el('p', { className: 'small', textContent: '🇬🇧 UK & Ireland: its airport flies to Arabia' }),
       el('div', { className: 'row' }, buy));
   };
 
@@ -149,7 +149,7 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
     const start = () => {
       tries++;
       box.replaceChildren(el('section', { className: 'card turn guide-quiz' },
-        ...kit.question('✈️ Airline promotion — answer correctly and fly free to the Arabian Peninsula!',
+        ...kit.question('✈️ Airline promotion — answer correctly and fly free to Arabia!',
           'What is the capital of France?', ['Rome', 'Paris'], 1,
           (i) => {
             kit.stopClock();
@@ -171,7 +171,7 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
 
   const steps: Step[] = [
     { title: '🌍 Welcome, traveller!', task: true, picture: firstTrip,
-      lines: ['The idea is simple: travel the world and collect points. But your turns are limited, so make every move count.', "Let's take your first trip!"],
+      lines: ['The idea is simple: travel the world and collect points. But your turns are limited, so make every move count. When the last turn is over, the player with the most points wins.', "Let's take your first trip!"],
       after: { title: '🎉 Your first trip!', lines: ['Every new country you visit gives you +1 point.', 'Your points are at the top. They are also your money: you pay tickets and fees with them.'] } },
     { title: '💡 More points, the easy way', lines: ['Reach a new continent: +2 points.'] },
     { title: '💡 More points, the easy way', lines: ['Countries with a famous wonder 🏛️ give +1 extra.'] },
