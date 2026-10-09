@@ -70,7 +70,7 @@ Walking links come from the real borders (shapes, M2/M3) plus short sea crossing
 | 🏛️ Egypt | Egypt | Egypt |  |  |
 | Sahel West | Mauritania, Mali, Burkina Faso | Sahel |  |  |
 | Sahel East | Niger, Chad | Sahel |  |  |
-| Senegal Coast | Senegal, Gambia, Guinea-Bissau, Guinea, Sierra Leone, Liberia, Cabo Verde | West Africa |  | ⛴️ |
+| West Coast | Senegal, Gambia, Guinea-Bissau, Guinea, Sierra Leone, Liberia, Cabo Verde | West Africa |  | ⛴️ |
 | Gulf of Guinea | Côte d'Ivoire, Ghana, Togo, Benin | West Africa |  |  |
 | Nigeria | Nigeria | West Africa | ✈️ |  |
 | Sudan & South Sudan | Sudan, South Sudan | Horn of Africa |  |  |
@@ -133,7 +133,7 @@ The 13 connections of the 30-turn map are kept (on the matching part), plus 8 ne
 | ⛴️ | Australia East | New Zealand |  |
 | ⛴️ | USA West | Alaska |  |
 | ⛴️ | Madagascar & Islands | Tanzania, Rwanda & Burundi | new |
-| ⛴️ | Senegal Coast | Brazil North | new |
+| ⛴️ | West Coast | Brazil North | new |
 | ✈️ | Gulf States | Australia West |  |
 | ✈️ | Australia West | Malay Islands |  |
 | ✈️ | Malay Islands | Japan |  |

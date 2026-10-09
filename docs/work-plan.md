@@ -52,7 +52,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | 14j | Trip turns: plane and ship scenes on the background painting, with who is travelling and "No thanks" | medium | 1 | 14 | ✅ done |
 | 14k | Events as phone news: the phone buzzes (only "Read"), then the card with a headline and "What this means for you"; 53 headlines to check in docs/cards.md | medium | 1 | 14 | ✅ done |
 | 14l | Every screen fits every size: the interface scales to the screen (checked at 667×375, 900×430, 1024×768, 1280×720, 1920×1080); guide line on long trips | medium | 1 | 14 | ✅ done |
-| M1 | 50-turn map: area list, wonders, airports and ports (`docs/map50.md`, made by `node scripts/map50-review.ts`) | **high** | 1 | 13 | ✅ written, owner to check |
+| M1 | 50-turn map: area list, wonders, airports and ports (`docs/map50.md`, made by `node scripts/map50-review.ts`) | **high** | 1 | 13 | ✅ done (owner-approved 2026-10-09: 84 areas, 11 wonders, 21 connections, train and bus) |
 | M2 | 50-turn map: engine (map choice, data, timing, stuck-state checker, 1,000 robot games, saves v11) | **high** | 1 | 13–14 | |
 | M3 | 50-turn map: shapes, facts sorted by country (write only the missing ones) | medium | 1 | 14 | |
 | M4 | 50-turn map: screens (turn picker, home country, world map, guide), web and APK | medium | 1 | 15 | |

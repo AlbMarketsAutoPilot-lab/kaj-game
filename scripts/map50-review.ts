@@ -32,7 +32,7 @@ const S: [string, string, string[], boolean?][] = [
  ['north-africa','Morocco & Western Sahara',['Morocco','Western Sahara']],['north-africa','Algeria',['Algeria']],['north-africa','Tunisia & Libya',['Tunisia','Libya']],
  ['egypt','Egypt',['Egypt'],true],
  ['sahel','Sahel West',['Mauritania','Mali','Burkina Faso']],['sahel','Sahel East',['Niger','Chad']],
- ['west-africa','Senegal Coast',['Senegal','Gambia','Guinea-Bissau','Guinea','Sierra Leone','Liberia','Cabo Verde']],
+ ['west-africa','West Coast',['Senegal','Gambia','Guinea-Bissau','Guinea','Sierra Leone','Liberia','Cabo Verde']],
  ['west-africa','Gulf of Guinea',["Côte d'Ivoire",'Ghana','Togo','Benin']],['west-africa','Nigeria',['Nigeria']],
  ['horn-of-africa','Sudan & South Sudan',['Sudan','South Sudan']],['horn-of-africa','Horn of Africa',['Ethiopia','Eritrea','Djibouti','Somalia']],
  ['central-africa','Central Africa',['Cameroon','Central African Republic','Equatorial Guinea','Gabon','Republic of the Congo','São Tomé and Príncipe']],
@@ -54,7 +54,7 @@ const S: [string, string, string[], boolean?][] = [
 const R: [string,string,string][] = [
  ['port','Spain','UK & Ireland'],['port','UK & Ireland','Iceland'],['port','Iceland','Canada East'],
  ['port','Japan','USA West'],['port','Australia East','New Zealand'],['port','USA West','Alaska'],
- ['port','Madagascar & Islands','Tanzania, Rwanda & Burundi'],['port','Senegal Coast','Brazil North'],
+ ['port','Madagascar & Islands','Tanzania, Rwanda & Burundi'],['port','West Coast','Brazil North'],
  ['airport','Gulf States','Australia West'],['airport','Australia West','Malay Islands'],['airport','Malay Islands','Japan'],
  ['airport','Japan','New Zealand'],['airport','New Zealand','Chile'],['airport','South Africa','Chile'],['airport','UK & Ireland','Gulf States'],
  ['airport','UK & Ireland','USA East'],['airport','USA East','Brazil South'],['airport','Brazil South','Nigeria'],
@@ -76,7 +76,7 @@ for (const c of ['Europe','Asia','Africa','North America','South America','Ocean
   for (const [id,n,cs,w] of rows) md += `| ${w?'🏛️ ':''}${n} | ${cs.join(', ')} | ${a30.get(id).name} | ${ap.has(n)?'✈️':''} | ${pt.has(n)?'⛴️':''} |\n`;
 }
 md += `\n## Connections (${R.length})\n\nThe 13 connections of the 30-turn map are kept (on the matching part), plus 8 new ones (marked new).\n\n| | From | To | |\n|---|---|---|---|\n`;
-R.forEach((r,i)=>{ const isNew = ['Madagascar & Islands','Senegal Coast','USA East','Brazil South','India'].includes(r[1]) || r[2]==='USA East'; md += `| ${r[0]==='airport'?'✈️':'⛴️'} | ${r[1]} | ${r[2]} | ${isNew?'new':''} |\n`; });
+R.forEach((r,i)=>{ const isNew = ['Madagascar & Islands','West Coast','USA East','Brazil South','India'].includes(r[1]) || r[2]==='USA East'; md += `| ${r[0]==='airport'?'✈️':'⛴️'} | ${r[1]} | ${r[2]} | ${isNew?'new':''} |\n`; });
 md += `\n## Train and bus (owner, not counted in the 21)\n\n| | From | To | |\n|---|---|---|---|\n| 🚆 | France | Russia West | both ways |\n| 🚆 | France | Turkey | both ways |\n| 🚌 | Mongolia | Siberia | one way, whole of Russia |\n| 🚌 | Mongolia | China West | one way, whole of China |\n\nSame rules as the 30-turn map (tickets, booths, Luxury can't take the train, bus only for Nomad and Backpacker). The Caucasus has no train.\n`;
 md += `\n## Wonders (11)\n\nEurope 2 (Italy, Greece) · Asia 4 (Jordan, India, Cambodia, Japan) · Africa 2 (Egypt, Tanzania) · North America 1 (Mexico) · South America 1 (Peru) · Oceania 1 (New Zealand). From the rulebook's list of 15; left out: France, Turkey, Morocco, Chile.\n\n## Questions for the owner\n\n1. Are the groupings OK (names and countries)?\n2. Are the 8 new connections OK?\n3. Are the 11 wonders OK?\n`;
 writeFileSync(new URL('../docs/map50.md', import.meta.url), md);
