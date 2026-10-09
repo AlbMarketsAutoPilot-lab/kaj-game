@@ -1,4 +1,7 @@
 import type { Area, GameMap, Route } from '../engine/types.ts';
+import type { Fact } from '../facts/types.ts';
+import { FACTS_50_NEW } from '../facts/new50.ts';
+import { SORT_50 } from '../facts/sort50.ts';
 import { map30 } from './map30.ts';
 
 // The 50-turn map (task M2, from the owner-approved list in docs/map50.md): 84 areas, 11 wonders,
@@ -6,7 +9,8 @@ import { map30 } from './map30.ts';
 // area of the 30-turn map (`inside`), whose continent it keeps. An area that is the same place as
 // on the 30-turn map keeps its id, so its place cards and wonder drawing still work.
 // Each walking link is written once in BORDERS below (owner-approved in M2); neighbours are built from it.
-// Facts come in task M3; until then the quiz and the exam use placeholder questions.
+// Facts (task M3): sorted by country from the 30-turn facts (src/facts/sort50.ts), plus new ones
+// (src/facts/new50.ts) so every area has at least 12.
 
 interface AreaInfo {
   id: string;
@@ -219,6 +223,18 @@ const ROUTES: Route[] = [
 // 50-turn area id -> the 30-turn area it lies inside (for sorting the facts by country, M3).
 export const INSIDE_30: Readonly<Record<string, string>> = Object.fromEntries(AREAS.map((a) => [a.id, a.inside]));
 
+// Same place as on the 30-turn map: all its facts. A split area: the facts sorted to it, then its new ones.
+function facts50(): Record<string, Fact[]> {
+  const facts: Record<string, Fact[]> = {};
+  for (const a of AREAS) {
+    const old = map30.facts?.[a.inside] ?? [];
+    const sort = SORT_50[a.inside];
+    const kept = sort ? old.filter((_, i) => sort[i].split('+').includes(a.id)) : old;
+    facts[a.id] = [...kept, ...(FACTS_50_NEW[a.id] ?? [])];
+  }
+  return facts;
+}
+
 function build(): GameMap {
   const areas: Area[] = AREAS.map(({ inside, ...a }) => {
     const continent = map30.areas.find((x) => x.id === inside)?.continent;
@@ -233,7 +249,7 @@ function build(): GameMap {
     from.neighbours.push(b);
     to.neighbours.push(a);
   }
-  return { id: 'map50', rounds: 50, areas, routes: ROUTES, facts: {} };
+  return { id: 'map50', rounds: 50, areas, routes: ROUTES, facts: facts50() };
 }
 
 export const map50: GameMap = build();

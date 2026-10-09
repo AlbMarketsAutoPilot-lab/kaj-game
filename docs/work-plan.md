@@ -54,7 +54,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | 14l | Every screen fits every size: the interface scales to the screen (checked at 667×375, 900×430, 1024×768, 1280×720, 1920×1080); guide line on long trips | medium | 1 | 14 | ✅ done |
 | M1 | 50-turn map: area list, wonders, airports and ports (`docs/map50.md`, made by `node scripts/map50-review.ts`) | **high** | 1 | 13 | ✅ done (owner-approved 2026-10-09: 84 areas, 11 wonders, 21 connections, train and bus) |
 | M2 | 50-turn map: engine (map choice, data, timing, stuck-state checker, 1,000 robot games, saves v11) | **high** | 1 | 13–14 | ✅ done (owner-approved 2026-10-09: 151 walking links, ship from Portugal, Madagascar ↔ Zambezi, cards every 5 turns, v10 30-turn saves still load) |
-| M3 | 50-turn map: shapes, facts sorted by country (write only the missing ones) | medium | 1 | 14 | |
+| M3 | 50-turn map: shapes, facts sorted by country (write only the missing ones) | medium | 1 | 14 | ✅ done (owner-approved 2026-10-09: 12 facts per area, 330 new) |
 | M4 | 50-turn map: screens (turn picker, home country, world map, guide), web and APK | medium | 1 | 15 | |
 | M5 | 50-turn map: full test games and fixes | medium | 1 | 15 | |
 | M6 | Wonder posters for the 7 wonders of the 30-turn map (the 4 of the 50-turn map come with M4) | medium | 1 | 13 | ✅ done |
@@ -346,6 +346,11 @@ or 50). Walking links: the real land borders, the Channel Tunnel and Madagascar 
 (no Spain ↔ Morocco); the ship to UK & Ireland leaves from Portugal. Event cards every 5 land turns;
 robots and the Nomad warning scaled to 50 turns; "Thin mountain air" in Peru only; saves version 11,
 version-10 saves of 30-turn games still load. Rules in `docs/engine.md`. Screens wait for M4.
+
+**M3 done (owner-approved 2026-10-09):** shapes for the 84 areas (`src/maps/shapes50.ts`, same data and
+splits; the 30-turn shapes unchanged). Facts: 12 per area (owner). The 30-turn facts sorted by country
+(`src/facts/sort50.ts`) plus 330 new ones (`src/facts/new50.ts`, Europe, Asia, Africa, South America),
+to be checked by the owner.
 
 **M6 done (owner-approved drawings and rules, 2026-10-09):** `node scripts/wonders-make.ts` draws the 7
 wonders (`assets/wonders/<area id>.svg`) over the game's background painting; the build inlines them.
