@@ -148,6 +148,17 @@ The 13 connections of the 30-turn map are kept (on the matching part), plus 8 ne
 | ✈️ | India | Malay Islands | new |
 | ✈️ | India | Kenya & Uganda | new |
 
+## Train and bus (owner, not counted in the 21)
+
+| | From | To | |
+|---|---|---|---|
+| 🚆 | France | Russia West | both ways |
+| 🚆 | France | Turkey | both ways |
+| 🚌 | Mongolia | Siberia | one way, whole of Russia |
+| 🚌 | Mongolia | China West | one way, whole of China |
+
+Same rules as the 30-turn map (tickets, booths, Luxury can't take the train, bus only for Nomad and Backpacker). The Caucasus has no train.
+
 ## Wonders (11)
 
 Europe 2 (Italy, Greece) · Asia 4 (Jordan, India, Cambodia, Japan) · Africa 2 (Egypt, Tanzania) · North America 1 (Mexico) · South America 1 (Peru) · Oceania 1 (New Zealand). From the rulebook's list of 15; left out: France, Turkey, Morocco, Chile.

@@ -77,6 +77,7 @@ for (const c of ['Europe','Asia','Africa','North America','South America','Ocean
 }
 md += `\n## Connections (${R.length})\n\nThe 13 connections of the 30-turn map are kept (on the matching part), plus 8 new ones (marked new).\n\n| | From | To | |\n|---|---|---|---|\n`;
 R.forEach((r,i)=>{ const isNew = ['Madagascar & Islands','Senegal Coast','USA East','Brazil South','India'].includes(r[1]) || r[2]==='USA East'; md += `| ${r[0]==='airport'?'✈️':'⛴️'} | ${r[1]} | ${r[2]} | ${isNew?'new':''} |\n`; });
+md += `\n## Train and bus (owner, not counted in the 21)\n\n| | From | To | |\n|---|---|---|---|\n| 🚆 | France | Russia West | both ways |\n| 🚆 | France | Turkey | both ways |\n| 🚌 | Mongolia | Siberia | one way, whole of Russia |\n| 🚌 | Mongolia | China West | one way, whole of China |\n\nSame rules as the 30-turn map (tickets, booths, Luxury can't take the train, bus only for Nomad and Backpacker). The Caucasus has no train.\n`;
 md += `\n## Wonders (11)\n\nEurope 2 (Italy, Greece) · Asia 4 (Jordan, India, Cambodia, Japan) · Africa 2 (Egypt, Tanzania) · North America 1 (Mexico) · South America 1 (Peru) · Oceania 1 (New Zealand). From the rulebook's list of 15; left out: France, Turkey, Morocco, Chile.\n\n## Questions for the owner\n\n1. Are the groupings OK (names and countries)?\n2. Are the 8 new connections OK?\n3. Are the 11 wonders OK?\n`;
 writeFileSync(new URL('../docs/map50.md', import.meta.url), md);
 console.log(S.length, S.filter(s=>s[3]).length, ap.size, pt.size, R.length);
