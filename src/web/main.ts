@@ -43,8 +43,8 @@ const POSTER: string = (window as unknown as { KAJ_POSTER?: string }).KAJ_POSTER
 const CREDITS = 'Country data: mledoze/countries, ODbL 1.0 · Flags: flag-icons by Panayiotis Lipiridis, MIT licence · Map shapes: Natural Earth · Lettering: Cinzel, SIL Open Font Licence · Sounds: Pixabay, Pixabay Content License';
 // Citizenship test: 15 seconds for each question (owner's choice, task 8).
 const EXAM_SECONDS = 15;
-const VEHICLE: Record<RouteKind, string> = { airport: '✈️', port: '⛴️' };
-const BUSINESS_ICON: Record<BusinessKind, string> = { tours: '🏛️', airline: '✈️', ferry: '⛴️' };
+const VEHICLE: Record<RouteKind, string> = { airport: '✈️', port: '⚓' };
+const BUSINESS_ICON: Record<BusinessKind, string> = { tours: '🏛️', airline: '✈️', ferry: '⚓' };
 const BUSINESS_NAME: Record<BusinessKind, string> = { tours: 'guided tours', airline: 'airline', ferry: 'ferry agency' };
 const BUSINESS_EARNS: Record<BusinessKind, string> = {
   tours: `every other player pays you ${plural(TOUR_FEE, 'point')} to enter`,
@@ -425,7 +425,7 @@ function incomeLine(s: GameState, p: Payment): { seat: number; text: string } | 
   switch (p.reason) {
     case 'visa': return { seat: p.to, text: `🛂 ${from} just paid you a ${pts} visa to enter ${where}, your citizenship country!` };
     case 'tour': return { seat: p.to, text: `🏛️ ${from} just paid you ${pts} to visit your Guided Tours of ${WONDER_NAME[p.area] ?? where}!` };
-    case 'ticket': return { seat: p.to, text: `${p.business === 'ferry' ? '⛴️' : '✈️'} ${from} just ${p.business === 'ferry' ? 'sailed with your ferry agency' : 'flew with your airline'} from ${where}: +${pts} for you!` };
+    case 'ticket': return { seat: p.to, text: `${p.business === 'ferry' ? '⚓' : '✈️'} ${from} just ${p.business === 'ferry' ? 'sailed with your ferry agency' : 'flew with your airline'} from ${where}: +${pts} for you!` };
     default: return null;
   }
 }
@@ -1300,7 +1300,7 @@ const inView = (d: Drawn, x: number, y: number) => x >= d.vb.x && x <= d.vb.x + 
 function areaIcons(s: GameState, id: string): string {
   const a = areaById.get(id)!;
   const citizen = s.players.some((p) => p.citizenship?.includes(id));
-  return `${a.wonder ? '⭐' : ''}${hasRoute(id, 'airport') ? '✈️' : ''}${hasRoute(id, 'port') ? '⛴️' : ''}${citizen ? '🛂' : ''}`;
+  return `${a.wonder ? '⭐' : ''}${hasRoute(id, 'airport') ? '✈️' : ''}${hasRoute(id, 'port') ? '⚓' : ''}${citizen ? '🛂' : ''}`;
 }
 
 // Visited marks (owner's request): one small dot per player who has been there.
@@ -1629,7 +1629,7 @@ function renderAreaDetails(s: GameState, id: string): HTMLElement {
     a.wonder ? `⭐ ${capital(WONDER_NAME[id] ?? 'a wonder')}: the first visit gives +1 point more` : '',
     a.bigCountry ? `🧩 Part of ${a.bigCountry}: ${me.profile ? `you have visited ${parts.filter((x) => me.visitedAreas.includes(x.id)).length}/${parts.length} parts` : `${parts.length} parts`}` : '',
     routes('airport').length ? `✈️ Airport: flights to ${routes('airport').join(', ')}` : '',
-    routes('port').length ? `⛴️ Port: ships to ${routes('port').join(', ')}` : '',
+    routes('port').length ? `⚓ Port: ships to ${routes('port').join(', ')}` : '',
     `🚶 Walk to: ${a.neighbours.map((n) => areaById.get(n)!.name).join(', ') || 'nowhere (plane or ship only)'}`,
     ...s.businesses.filter((b) => b.area === id).map((b) => `${BUSINESS_ICON[b.kind]} ${capital(BUSINESS_NAME[b.kind])}: ${b.owner === null ? `for sale, ${plural(BUSINESS_PRICE[b.kind], 'point')}` : `owned by ${COLOUR_NAMES[b.owner]}`}`),
     ...s.players.filter((p) => p.citizenship?.includes(id)).map((p) => `🛂 ${COLOUR_NAMES[p.seat]} is a citizen here: others pay a ${VISA_PRICE}-point visa`),
