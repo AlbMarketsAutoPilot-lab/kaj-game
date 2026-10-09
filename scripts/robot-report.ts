@@ -1,29 +1,33 @@
 // Robot report (task 13): games on the 30-turn map, each level alone and head to head.
-// Run: node scripts/robot-report.ts [games]   (default 1,000 per line)
+// Run: node scripts/robot-report.ts [games] [30|50]   (default 1,000 per line, 30-turn map;
+// 50: the 50-turn map, task M2)
 import { apply, createGame, currentPlayer, finalScore, legalActions } from '../src/engine/engine.ts';
 import { robotAction } from '../src/engine/normal-robot.ts';
 import { randomRobotAction } from '../src/engine/robot.ts';
 import type { Action, GameState, RobotLevel } from '../src/engine/types.ts';
-import { map30 } from '../src/maps/map30.ts';
+import type { GameLength } from '../src/engine/constants.ts';
+import { mapFor } from '../src/maps/index.ts';
 
 type Driver = RobotLevel | 'random';
 const GAMES = Number(process.argv[2] ?? 1000);
+const map = mapFor(Number(process.argv[3] ?? 30) as GameLength);
+if (!map) throw new Error('Game length: 30 or 50');
 const COLOURS = ['red', 'blue', 'green', 'yellow'];
 
 function play(drivers: Driver[], seed: number): GameState {
   // Seat 0 is a "human" seat (a game needs one), played here by its robot.
   const seats = drivers.map((d, i) => ({ kind: i === 0 ? 'human' as const : 'robot' as const, colour: COLOURS[i], ...(d === 'random' ? {} : { level: d }) }));
-  let s = createGame({ seats, seed }, map30);
+  let s = createGame({ seats, seed }, map);
   let robotSeed = seed ^ 0x5bd1e995;
   let steps = 0;
   while (s.phase !== 'finished') {
-    if (legalActions(s, map30).length === 0) throw new Error(`seed ${seed}: stuck`);
+    if (legalActions(s, map).length === 0) throw new Error(`seed ${seed}: stuck`);
     const seat = s.offer ? s.offer.to : currentPlayer(s).seat;
     const d = drivers[seat];
     let action: Action;
-    [action, robotSeed] = d === 'random' ? randomRobotAction(s, map30, robotSeed) : robotAction(s, map30, robotSeed, d);
-    s = apply(s, map30, action);
-    if (++steps > 5000) throw new Error(`seed ${seed}: never ends`);
+    [action, robotSeed] = d === 'random' ? randomRobotAction(s, map, robotSeed) : robotAction(s, map, robotSeed, d);
+    s = apply(s, map, action);
+    if (++steps > 10000) throw new Error(`seed ${seed}: never ends`);
   }
   return s;
 }

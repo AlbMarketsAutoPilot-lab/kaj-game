@@ -544,6 +544,38 @@ Task 14f: a fair citizenship test (owner's change; `tests/citizenship.test.ts`).
   1,000 mixed robot games: no stuck game, ~50 bus rides, scores as before.
 - **Save version 10.**
 
+## The 50-turn game (task M2, approved by the owner)
+
+The 30-turn game is frozen and unchanged. The 50-turn game uses all its rules; only the map and
+the timing below differ. Engine only: the screens come in M4 (until then the web game is 30 turns).
+
+- **Map choice:** `mapFor(turns)` in `src/maps/index.ts`, 30 (default) or 50 (`GAME_LENGTHS`);
+  `mapById()` finds the map of a saved game. A map sets its own length (`GameMap.rounds`: 50 on
+  `map50`; 30 when not set), so `createGame()` makes a 50-round game on the 50-turn map.
+- **Map (`src/maps/map50.ts`, from `docs/map50.md`):** 84 areas, 11 wonders, 13 airports and 13
+  ports (21 connections), the train (France ↔ Russia West or Turkey; the Caucasus has none) and the
+  bus (Mongolia → Siberia or China West, whole country). Each area lies inside one 30-turn area
+  (`INSIDE_30`) and keeps its continent; the same big countries in the same parts. An area that is
+  the same place as on the 30-turn map keeps its id (place cards, wonder drawings).
+- **Walking links (owner-approved):** 151: the real land borders, the Channel Tunnel (France ↔
+  UK & Ireland) and one sea crossing, Madagascar & Islands ↔ Zambezi. No Spain ↔ Morocco. The ship
+  to UK & Ireland leaves from Portugal (not Spain). Without these two fixes a citizenship of Spain
+  trapped Portugal, and one of Tanzania trapped Madagascar.
+- **Event cards:** every 5th land turn (`cardEvery()`; every 3rd in the 30-turn game), none in the
+  last round.
+- **Place cards:** the 30-turn place cards come in the area with the same id. "Thin mountain air"
+  (Peru & Bolivia) comes in Peru only (`Area.cardsFrom`).
+- **Timing scaled to 50 turns:** robots ask for citizenship before round 17 (10 in 30 turns), the
+  robot Nomad heads for a 3rd continent from round 30 (18) (`robotRound()`); the Nomad's warning
+  starts 5 turns before the end, round 45 (`nomadWarningRound()`). Mini missions are not in v1.
+- **Facts:** come in M3. Until then the quiz and the exam use the placeholder questions made from
+  the map data.
+- **Checks:** the map check and the stuck-state checker pass. Robot report
+  (`node scripts/robot-report.ts 1000 50`, 10,000 games): no stuck or endless game; average scores
+  easy 59, normal 67, hard 71, random 25 (30 turns: 39, 44, 47, 17); hard beats normal 66%.
+- **Save version 11.** Owner: a version-10 save of a 30-turn game still loads (its rules did not
+  change); other older saves are not continued.
+
 ## Project setup
 
 - TypeScript, run directly by Node 22.18 or newer (no build step for tests).

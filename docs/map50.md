@@ -4,14 +4,14 @@ Owner-approved basis: 80–90 areas, same big-country splits as the 30-turn map,
 
 **Totals:** 84 areas · 11 wonders (🏛️) · 13 airports · 13 ports · 21 connections.
 
-Walking links come from the real borders (shapes, M2/M3) plus short sea crossings like the 30-turn map (e.g. UK & Ireland ↔ France). They are listed for review in M2.
+Walking links (owner-approved in M2, written in `src/maps/map50.ts`): the real land borders, the Channel Tunnel (France ↔ UK & Ireland) and one sea crossing, Madagascar & Islands ↔ Zambezi; no Spain ↔ Morocco. Owner (M2): the ship to UK & Ireland leaves from Portugal, not Spain, so a citizenship of Spain can't trap Portugal.
 
 ## Europe (19)
 
 | Area | Countries | Inside 30-turn area | ✈️ | ⛴️ |
 |---|---|---|---|---|
-| Spain | Spain, Andorra | Iberia |  | ⛴️ |
-| Portugal | Portugal | Iberia |  |  |
+| Spain | Spain, Andorra | Iberia |  |  |
+| Portugal | Portugal | Iberia |  | ⛴️ |
 | France | France, Monaco | France |  |  |
 | UK & Ireland | United Kingdom, Ireland | UK & Ireland | ✈️ | ⛴️ |
 | Germany | Germany | Germanic Europe |  |  |
@@ -126,7 +126,7 @@ The 13 connections of the 30-turn map are kept (on the matching part), plus 8 ne
 
 | | From | To | |
 |---|---|---|---|
-| ⛴️ | Spain | UK & Ireland |  |
+| ⛴️ | Portugal | UK & Ireland |  |
 | ⛴️ | UK & Ireland | Iceland |  |
 | ⛴️ | Iceland | Canada East |  |
 | ⛴️ | Japan | USA West |  |

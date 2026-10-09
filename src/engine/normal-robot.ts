@@ -29,6 +29,12 @@ export const ROBOT_LEVELS: Readonly<Record<RobotLevel, LevelSettings>> = {
 export const ROBOT_CITIZENSHIP_BEFORE = 10;
 // From this round the Nomad heads for a 3rd continent.
 export const ROBOT_NOMAD_ROUND = 18;
+
+// Both rounds are for the 30-turn game; a longer game scales them (owner, task M2: 17 and 30 in
+// the 50-turn game).
+export function robotRound(round30: number, totalRounds: number): number {
+  return Math.round((round30 * totalRounds) / 30);
+}
 // A new part of a big country gives 0 now, but it is progress: worth more than a visited area.
 const PART_PROGRESS = 0.5;
 // A trip uses extra turns, so it must give at least 1 point more than the best walk.
@@ -99,7 +105,7 @@ function choose(state: GameState, map: GameMap, actions: Action[], me: Player, s
   // Citizenship: once, in the first area where it can ask, before round 10 (task 14d: asked in
   // the area it stands in; the engine never offers it to the Nomad or in the home country).
   const ask = actions.find((a) => a.type === 'askCitizenship');
-  if (ask && state.round < ROBOT_CITIZENSHIP_BEFORE) return ask;
+  if (ask && state.round < robotRound(ROBOT_CITIZENSHIP_BEFORE, state.totalRounds)) return ask;
 
   const moves = actions.filter((a) => a.type === 'walk' || a.type === 'board' || a.type === 'quiz');
   if (moves.length === 0) {
@@ -170,7 +176,7 @@ function chooseMove(state: GameState, map: GameMap, moves: Action[], me: Player,
   }
 
   let chosen: Move;
-  const nomadTarget = me.profile === 'nomad' && state.round >= ROBOT_NOMAD_ROUND && me.visitedContinents.length < NOMAD_MIN_CONTINENTS;
+  const nomadTarget = me.profile === 'nomad' && state.round >= robotRound(ROBOT_NOMAD_ROUND, state.totalRounds) && me.visitedContinents.length < NOMAD_MIN_CONTINENTS;
   if (nomadTarget) {
     // Nomad from round 18 with fewer than 3 continents: the quickest way to a new continent.
     const dist = distances(map, me, (id) => !me.visitedContinents.includes(areaById(map, id).continent));

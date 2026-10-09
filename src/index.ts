@@ -5,3 +5,4 @@ export { validateMap, walkingGroups, areaById } from './engine/map.ts';
 export { randomRobotAction } from './engine/robot.ts';
 export { stuckProblems, travelGroups, visaUnits } from './engine/stuck-check.ts';
 export { saveGame, loadGame, SAVE_VERSION } from './engine/save.ts';
+export { mapFor, mapById } from './maps/index.ts';

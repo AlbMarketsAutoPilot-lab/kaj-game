@@ -1,6 +1,7 @@
 import {
   BUSINESS_PRICE,
   CARD_EVERY,
+  cardEvery,
   CHALLENGE_POINTS,
   CONTINENT_BONUS,
   EXAM_FACTS,
@@ -111,7 +112,7 @@ export function createGame(config: GameConfig, map: GameMap): GameState {
     turnOrder,
     current: 0,
     round: 0,
-    totalRounds: TOTAL_ROUNDS,
+    totalRounds: map.rounds ?? TOTAL_ROUNDS,
     quiz: null,
     businesses: mapBusinesses(map),
     payments: [],
@@ -215,12 +216,12 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
   switch (action.type) {
     case 'chooseProfile': {
       me.profile = action.profile;
-      advanceSetup(next);
+      advanceSetup(next, map);
       // The last player to choose gets the one profile left.
       const left = PROFILES.filter((p) => !next.players.some((q) => q.profile === p));
       if (next.phase === 'chooseProfile' && next.current === next.players.length - 1 && left.length === 1) {
         currentPlayer(next).profile = left[0];
-        advanceSetup(next);
+        advanceSetup(next, map);
       }
       return next;
     }
@@ -234,7 +235,7 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
       me.visitedAreas.push(area.id);
       me.visitedContinents.push(area.continent);
       me.points = addPoints(me.points, WELCOME_BONUS[area.continent]);
-      advanceSetup(next);
+      advanceSetup(next, map);
       return next;
     }
     case 'walk': {
@@ -642,7 +643,7 @@ function grantCitizenship(map: GameMap, me: Player): void {
 // answers) or refused (fewer).
 function startTurn(state: GameState, map: GameMap): void {
   const me = currentPlayer(state);
-  countLandTurn(state, me);
+  countLandTurn(state, map, me);
   const exam = me.exam;
   if (!exam) return;
   if (exam.stage !== 'result') return;
@@ -703,26 +704,28 @@ function pickChallenge(state: GameState): Challenge {
 
 // ---------- event cards (rulebook section 10, docs/engine.md tasks 11 and 12) ----------
 
-// Turns begun in an area are counted per player; every 3rd one has a card (none in the last
-// round). The number of land turns to go before the next card (0: this turn is a card turn).
-export function landTurnsToCard(me: Player): number {
-  return (CARD_EVERY - (me.landTurns % CARD_EVERY)) % CARD_EVERY;
+// Turns begun in an area are counted per player; every 3rd one has a card (every 5th in the
+// 50-turn game, see cardEvery; none in the last round). The number of land turns to go before
+// the next card (0: this turn is a card turn).
+export function landTurnsToCard(me: Player, every: number = CARD_EVERY): number {
+  return (every - (me.landTurns % every)) % every;
 }
 
 // Start of a turn: a turn begun in an area counts (also a lost or blocked turn, and a
 // citizenship turn); a trip turn doesn't. Every 3rd one draws a card, except during a citizenship
 // request (the exam is the event; the card is skipped, not moved) and in the last round.
-function countLandTurn(state: GameState, me: Player): void {
+function countLandTurn(state: GameState, map: GameMap, me: Player): void {
   if (state.phase !== 'play' || me.travel || me.area === null) return;
   me.landTurns += 1;
-  if (me.exam || landTurnsToCard(me) !== 0 || state.round >= state.totalRounds) return;
-  scheduledCard(state, me);
+  if (me.exam || landTurnsToCard(me, cardEvery(state.totalRounds)) !== 0 || state.round >= state.totalRounds) return;
+  scheduledCard(state, map, me);
 }
 
-function scheduledCard(state: GameState, me: Player): void {
+function scheduledCard(state: GameState, map: GameMap, me: Player): void {
   if (!state.eventCards) return;
   const decks: Deck[] = me.profile === 'backpacker' ? ['country', 'backpacker'] : ['country'];
-  const card = pickCard(state, decks, me.area);
+  // An area may take the place cards of another id (Area.cardsFrom, task M2).
+  const card = pickCard(state, decks, areaById(map, me.area!).cardsFrom ?? me.area);
   state.card = applyCard(state, me, card);
   if (card.loseTurn) me.loseTurn = true;
 }
@@ -789,7 +792,7 @@ export function bookedBy(state: GameState, area: string): Player | undefined {
   return state.players.find((p) => p.travel?.to === area);
 }
 
-function advanceSetup(state: GameState): void {
+function advanceSetup(state: GameState, map: GameMap): void {
   state.current += 1;
   if (state.current < state.players.length) return;
   state.current = 0;
@@ -798,7 +801,7 @@ function advanceSetup(state: GameState): void {
   } else {
     state.phase = 'play';
     state.round = 1;
-    countLandTurn(state, currentPlayer(state)); // the first player's first turn
+    countLandTurn(state, map, currentPlayer(state)); // the first player's first turn
   }
 }
 
