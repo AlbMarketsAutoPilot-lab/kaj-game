@@ -23,12 +23,12 @@ const S: [string, string, string[], boolean?][] = [
  ['iran','Iran',['Iran']],
  ['central-asia','Kazakhstan',['Kazakhstan']],['central-asia','Central Asia',['Uzbekistan','Turkmenistan','Kyrgyzstan','Tajikistan']],
  ['pakistan-afghanistan','Pakistan & Afghanistan',['Pakistan','Afghanistan']],
- ['india','India',['India'],true],['india','Nepal, Bhutan & Bangladesh',['Nepal','Bhutan','Bangladesh']],['india','Sri Lanka & Maldives',['Sri Lanka','Maldives']],
+ ['india','India',['India','Sri Lanka','Maldives'],true],['india','Nepal, Bhutan & Bangladesh',['Nepal','Bhutan','Bangladesh']],
  ['china-west','China West',['China']],['china-east','China East',['China']],
  ['mongolia','Mongolia',['Mongolia']],['korea','Korea',['South Korea','North Korea']],['japan','Japan',['Japan'],true],
  ['southeast-asia','Myanmar',['Myanmar']],['southeast-asia','Thailand',['Thailand']],
  ['southeast-asia','Cambodia, Laos & Vietnam',['Cambodia','Laos','Vietnam'],true],['southeast-asia','Malaysia, Singapore & Brunei',['Malaysia','Singapore','Brunei']],
- ['maritime-asia','Indonesia & New Guinea',['Indonesia','Timor-Leste','Papua New Guinea']],['maritime-asia','Philippines',['Philippines']],
+ ['maritime-asia','Malay Islands',['Indonesia','Timor-Leste','Papua New Guinea','Philippines']],
  ['north-africa','Morocco & Western Sahara',['Morocco','Western Sahara']],['north-africa','Algeria',['Algeria']],['north-africa','Tunisia & Libya',['Tunisia','Libya']],
  ['egypt','Egypt',['Egypt'],true],
  ['sahel','Sahel West',['Mauritania','Mali','Burkina Faso']],['sahel','Sahel East',['Niger','Chad']],
@@ -44,8 +44,7 @@ const S: [string, string, string[], boolean?][] = [
  ['canada-west','Canada West',['Canada']],['canada-central','Canada Central',['Canada']],['canada-east','Canada East',['Canada']],
  ['usa-west','USA West',['United States']],['alaska','Alaska',['United States']],['usa-east','USA East',['United States']],
  ['mexico','Mexico',['Mexico'],true],
- ['central-america','Central America',['Guatemala','Belize','Honduras','El Salvador','Nicaragua','Costa Rica','Panama']],
- ['central-america','Caribbean',['Cuba','Jamaica','Haiti','Dominican Republic','Bahamas']],
+ ['central-america','Central America',['Guatemala','Belize','Honduras','El Salvador','Nicaragua','Costa Rica','Panama','Cuba','Jamaica','Haiti','Dominican Republic','Bahamas']],
  ['northern-andes','Colombia',['Colombia']],['northern-andes','Venezuela & Guianas',['Venezuela','Guyana','Suriname']],['northern-andes','Ecuador',['Ecuador']],
  ['peru-bolivia','Peru',['Peru'],true],['peru-bolivia','Bolivia',['Bolivia']],['chile','Chile',['Chile']],
  ['brazil-north','Brazil North',['Brazil']],['brazil-south','Brazil South',['Brazil']],
@@ -56,10 +55,10 @@ const R: [string,string,string][] = [
  ['port','Spain','UK & Ireland'],['port','UK & Ireland','Iceland'],['port','Iceland','Canada East'],
  ['port','Japan','USA West'],['port','Australia East','New Zealand'],['port','USA West','Alaska'],
  ['port','Madagascar & Islands','Tanzania, Rwanda & Burundi'],['port','Senegal Coast','Brazil North'],
- ['airport','Gulf States','Australia West'],['airport','Australia West','Indonesia & New Guinea'],['airport','Indonesia & New Guinea','Japan'],
+ ['airport','Gulf States','Australia West'],['airport','Australia West','Malay Islands'],['airport','Malay Islands','Japan'],
  ['airport','Japan','New Zealand'],['airport','New Zealand','Chile'],['airport','South Africa','Chile'],['airport','UK & Ireland','Gulf States'],
  ['airport','UK & Ireland','USA East'],['airport','USA East','Brazil South'],['airport','Brazil South','Nigeria'],
- ['airport','India','Gulf States'],['airport','India','Indonesia & New Guinea'],['airport','India','Kenya & Uganda'],
+ ['airport','India','Gulf States'],['airport','India','Malay Islands'],['airport','India','Kenya & Uganda'],
 ];
 const a30 = new Map((map30.areas as any[]).map(a => [a.id, a]));
 const names = new Set(S.map(s => s[1]));
@@ -70,7 +69,7 @@ const sites = (k: string) => new Set(R.filter(r=>r[0]===k).flatMap(r=>[r[1],r[2]
 const ap = sites('airport'), pt = sites('port');
 for (const n of names) for (const k of ['airport','port']) { const d = R.filter(r=>r[0]===k&&(r[1]===n||r[2]===n)).length; if (d>3) throw new Error(n+k+d); }
 const cont = (id:string)=>a30.get(id).continent;
-let md = `# 50-turn map — area list for review (task M1)\n\nOwner-approved basis: 80–90 areas, same big-country splits as the 30-turn map, 11 wonders, about 13 airports and 13 ports with about 21 connections, every rule and design from the 30-turn game (which stays frozen). Every 50-turn area lies inside one 30-turn area, so its facts can be sorted by country (M3).\n\n**Totals:** ${S.length} areas · ${S.filter(s=>s[3]).length} wonders (🏛️) · ${ap.size} airports · ${pt.size} ports · ${R.length} connections.\n\nWalking links come from the real borders (shapes, M2/M3) plus short sea crossings like the 30-turn map (e.g. UK & Ireland ↔ France). They are listed for review in M2.\n`;
+let md = `# 50-turn map — area list for review (task M1)\n\nOwner-approved basis: 80–90 areas, same big-country splits as the 30-turn map, islands kept inside their bigger 30-turn areas (owner), 11 wonders, about 13 airports and 13 ports with about 21 connections, every rule and design from the 30-turn game (which stays frozen). Every 50-turn area lies inside one 30-turn area, so its facts can be sorted by country (M3).\n\n**Totals:** ${S.length} areas · ${S.filter(s=>s[3]).length} wonders (🏛️) · ${ap.size} airports · ${pt.size} ports · ${R.length} connections.\n\nWalking links come from the real borders (shapes, M2/M3) plus short sea crossings like the 30-turn map (e.g. UK & Ireland ↔ France). They are listed for review in M2.\n`;
 for (const c of ['Europe','Asia','Africa','North America','South America','Oceania']) {
   const rows = S.filter(s=>cont(s[0])===c);
   md += `\n## ${c} (${rows.length})\n\n| Area | Countries | Inside 30-turn area | ✈️ | ⛴️ |\n|---|---|---|---|---|\n`;

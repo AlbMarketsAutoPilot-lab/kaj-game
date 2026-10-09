@@ -336,7 +336,7 @@ Things the owner noted that are still open (for task 16 if not done earlier): th
 Owner's decisions: 80–90 areas; the 30-turn game stays **frozen**, and the 50-turn game uses its
 rules and design; the same big-country splits; facts reused by country (only missing ones written);
 about 13 airports, 13 ports and 21 connections (the rulebook's 8 and 4–5 were too few for 80–90
-areas); 11 wonders. Task 15 is postponed. M1 proposal: 87 areas in `docs/map50.md`.
+areas); 11 wonders. Task 15 is postponed. M1 proposal: 84 areas in `docs/map50.md` (87 before the owner kept the Philippines, Sri Lanka & Maldives and the Caribbean inside their bigger 30-turn areas).
 Owner (2026-10-09, M1 review): the train is kept on the 50-turn map, France ↔ Russia West and
 France ↔ Turkey (the Caucasus is its own area and gets no train); 50-turn saves are version 11.
 The bus is kept too (Mongolia → Siberia or China West, whole country at once, as on the 30-turn map).
