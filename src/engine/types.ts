@@ -243,6 +243,8 @@ export interface ChallengeResult {
 export interface EventCard {
   id: string;
   deck: Deck;
+  // The news headline on the phone and the card (task 14k).
+  title: string;
   text: string;
   // The change in points (points never go below 0).
   points: number;

@@ -6,72 +6,73 @@ When: at the start of each player's 3rd, 6th, 9th … turn that begins in an are
 not during a citizenship request; none in the last round). No cards on trips since task 12 (challenges instead).
 Points never go below 0.
 
-To report a problem, give the id (for example "c7: too harsh").
+To report a problem, give the id (for example "c7: too harsh", or "c7 headline: …").
+Headlines (task 14k) were written by Claude and need the owner's check.
 
 ## Country cards: anywhere
 
-| Id | Card | Effect |
-|---|---|---|
-| c1 | A street musician teaches you a local song. | +1 |
-| c2 | A family invites you to dinner and shows you old photos of their town. | +1 |
-| c3 | You find a shortcut on an old map in the market. | +1 |
-| c4 | You help a lost tourist find the museum. They thank you with a postcard. | +1 |
-| c5 | Rain all day! Your shoes are soaked and you buy new socks. | -1 |
-| c6 | You forgot your water bottle and must buy a new one. | -1 |
-| c7 | Your phone battery dies and you pay for a charger. | -1 |
-| c8 | A local newspaper writes a story about your journey. | +2 |
-| c9 | Your backpack strap breaks. A new bag costs extra. | -2 |
-| c10 | A big festival fills every street. You stay and watch the parade. | lose a turn |
-| c11 | A museum hires you for a day to guide visitors from your country. | +5 |
-| c12 | You leave your wallet on a bench and never see it again. | -5 |
-| c13 | A farmer invites you to pick fresh fruit from her trees. | +1 |
-| c14 | You climb a hill and get a great view of the whole valley. | +1 |
-| c15 | A friendly walker on the road tells you the best places to visit. | +1 |
-| c16 | A café owner gives you a free lunch for your stories. | +1 |
-| c17 | Wild horses run next to the path you are walking on. | +1 |
-| c18 | A shepherd teaches you how to call the sheep home. | +1 |
-| c19 | You see a rainbow over the mountains and take a great photo. | +1 |
-| c20 | You trip on a stone and spill juice on your map. You buy a new one. | -1 |
-| c21 | Your headphones break on a long walk. | -1 |
-| c22 | Your bag is too heavy, so you pay to send some things home. | -1 |
-| c23 | Too much sun! You buy a hat and sun cream. | -1 |
-| c24 | The wind blows your hat into a river. | -1 |
-| c25 | A noisy night in a cheap hotel. You pay for a quieter room. | -1 |
-| c26 | The town gives you a travel badge for walking so far. | +2 |
-| c27 | You help a village after a storm. The mayor thanks you. | +2 |
-| c28 | You lose your suitcase at the bus station and buy new clothes. | -2 |
-| c29 | Monkeys steal your lunch, and the only café is expensive. | -2 |
-| c30 | Thick fog on the road. You wait a day until you can see the path. | lose a turn |
-| c31 | Strong winds close the mountain road for a day. | lose a turn |
-| c32 | Your shoes need repairs. You wait one day at the shoemaker. | lose a turn |
-| c33 | A sneaky thief takes part of your money before the police chase him away. | -5 |
+| Id | Headline | Card | Effect |
+|---|---|---|---|
+| c1 | 🎶 A song in the street | A street musician teaches you a local song. | +1 |
+| c2 | 🍲 Dinner with a family | A family invites you to dinner and shows you old photos of their town. | +1 |
+| c3 | 🗺️ A secret shortcut | You find a shortcut on an old map in the market. | +1 |
+| c4 | 📮 A thank-you postcard | You help a lost tourist find the museum. They thank you with a postcard. | +1 |
+| c5 | 🌧️ Soaked to the socks | Rain all day! Your shoes are soaked and you buy new socks. | -1 |
+| c6 | 💧 Thirsty traveller | You forgot your water bottle and must buy a new one. | -1 |
+| c7 | 🔋 Phone battery dead | Your phone battery dies and you pay for a charger. | -1 |
+| c8 | 📰 You made the news! | A local newspaper writes a story about your journey. | +2 |
+| c9 | 🎒 Broken backpack strap | Your backpack strap breaks. A new bag costs extra. | -2 |
+| c10 | 🎉 Festival in town | A big festival fills every street. You stay and watch the parade. | lose a turn |
+| c11 | 🏛️ Museum guide for a day | A museum hires you for a day to guide visitors from your country. | +5 |
+| c12 | 👛 Wallet lost | You leave your wallet on a bench and never see it again. | -5 |
+| c13 | 🍑 Fresh fruit picking | A farmer invites you to pick fresh fruit from her trees. | +1 |
+| c14 | ⛰️ A view from the top | You climb a hill and get a great view of the whole valley. | +1 |
+| c15 | 🚶 Tips from a walker | A friendly walker on the road tells you the best places to visit. | +1 |
+| c16 | ☕ Lunch for a story | A café owner gives you a free lunch for your stories. | +1 |
+| c17 | 🐎 Wild horses run by | Wild horses run next to the path you are walking on. | +1 |
+| c18 | 🐑 The shepherd’s call | A shepherd teaches you how to call the sheep home. | +1 |
+| c19 | 🌈 Rainbow over the hills | You see a rainbow over the mountains and take a great photo. | +1 |
+| c20 | 🧃 Juice on the map | You trip on a stone and spill juice on your map. You buy a new one. | -1 |
+| c21 | 🎧 Headphones broken | Your headphones break on a long walk. | -1 |
+| c22 | 📦 Bag too heavy | Your bag is too heavy, so you pay to send some things home. | -1 |
+| c23 | ☀️ Too much sun | Too much sun! You buy a hat and sun cream. | -1 |
+| c24 | 🌬️ Hat in the river | The wind blows your hat into a river. | -1 |
+| c25 | 🌙 A noisy night | A noisy night in a cheap hotel. You pay for a quieter room. | -1 |
+| c26 | 🏅 A travel badge | The town gives you a travel badge for walking so far. | +2 |
+| c27 | ⛈️ Helping after a storm | You help a village after a storm. The mayor thanks you. | +2 |
+| c28 | 🧳 Suitcase lost | You lose your suitcase at the bus station and buy new clothes. | -2 |
+| c29 | 🐒 Monkeys steal lunch | Monkeys steal your lunch, and the only café is expensive. | -2 |
+| c30 | 🌫️ Thick fog | Thick fog on the road. You wait a day until you can see the path. | lose a turn |
+| c31 | 💨 Mountain road closed | Strong winds close the mountain road for a day. | lose a turn |
+| c32 | 👞 At the shoemaker | Your shoes need repairs. You wait one day at the shoemaker. | lose a turn |
+| c33 | 🚨 A sneaky thief | A sneaky thief takes part of your money before the police chase him away. | -5 |
 
 ## Country cards: one area only
 
-| Id | Card | Effect | Area |
-|---|---|---|---|
-| a1 | You find a treasure near the pyramids of Egypt and give it to the museum. They reward you. | +5 | Egypt |
-| a2 | You throw a coin in a fountain in Rome. A friendly guide gives you a free tour. | +1 | Italy |
-| a3 | You watch the sunrise at the Taj Mahal with no crowds. | +1 | India & South Asia |
-| a4 | You ride the bullet train in Japan and arrive early everywhere. | +2 | Japan |
-| a5 | You climb a pyramid at Chichén Itzá and hear its echo clap back. | +1 | Mexico |
-| a6 | The mountains are high. You rest a day to get used to the thin air. | lose a turn | Peru & Bolivia |
-| a7 | You walk through the hobbit village used in the films. | +1 | New Zealand |
-| a8 | A volcano puffs ash. Your bus tour is cancelled. | -1 | Iceland |
-| a9 | A baker in Paris gives you a warm croissant for free. | +1 | France |
-| a10 | Mosquitoes in the Amazon! You buy a net and some cream. | -1 | Brazil North |
-| a11 | You see the northern lights dance across the sky. | +2 | Scandinavia |
-| a12 | You walk along the Great Wall on a clear day. | +1 | China East |
+| Id | Headline | Card | Effect | Area |
+|---|---|---|---|---|
+| a1 | 🏺 Treasure near the pyramids | You find a treasure near the pyramids of Egypt and give it to the museum. They reward you. | +5 | Egypt |
+| a2 | ⛲ A coin in the fountain | You throw a coin in a fountain in Rome. A friendly guide gives you a free tour. | +1 | Italy |
+| a3 | 🌅 Sunrise at the Taj Mahal | You watch the sunrise at the Taj Mahal with no crowds. | +1 | India |
+| a4 | 🚄 Bullet train ride | You ride the bullet train in Japan and arrive early everywhere. | +2 | Japan |
+| a5 | 👏 The pyramid’s echo | You climb a pyramid at Chichén Itzá and hear its echo clap back. | +1 | Mexico |
+| a6 | 🏔️ Thin mountain air | The mountains are high. You rest a day to get used to the thin air. | lose a turn | Peru & Bolivia |
+| a7 | 🏡 The hobbit village | You walk through the hobbit village used in the films. | +1 | New Zealand |
+| a8 | 🌋 The volcano puffs | A volcano puffs ash. Your bus tour is cancelled. | -1 | Iceland |
+| a9 | 🥐 A free croissant | A baker in Paris gives you a warm croissant for free. | +1 | France |
+| a10 | 🦟 Amazon mosquitoes | Mosquitoes in the Amazon! You buy a net and some cream. | -1 | Brazil North |
+| a11 | 🌌 Northern lights | You see the northern lights dance across the sky. | +2 | Scandinavia |
+| a12 | 🧱 On the Great Wall | You walk along the Great Wall on a clear day. | +1 | China East |
 
 ## Backpacker cards (only the Backpacker, drawn with the country cards)
 
-| Id | Card | Effect |
-|---|---|---|
-| b1 | A truck driver takes you further down the road for free. | +2 |
-| b2 | A friend you met on the road pays your next bus ticket. | +2 |
-| b3 | You work a week on a farm and get free food and a bed. | +2 |
-| b4 | A hostel gives you a free night for fixing their sign. | +1 |
-| b5 | Other backpackers share their dinner with you. | +1 |
-| b6 | You find a free walking tour of the old town. | +1 |
-| b7 | You sell your old guidebook to another traveller. | +1 |
-| b8 | A local lends you a bike for the day. | +1 |
+| Id | Headline | Card | Effect |
+|---|---|---|---|
+| b1 | 🚚 A free ride | A truck driver takes you further down the road for free. | +2 |
+| b2 | 🎟️ A friend pays the bus | A friend you met on the road pays your next bus ticket. | +2 |
+| b3 | 🌾 A week on a farm | You work a week on a farm and get free food and a bed. | +2 |
+| b4 | 🛏️ A free night | A hostel gives you a free night for fixing their sign. | +1 |
+| b5 | 🍝 Shared dinner | Other backpackers share their dinner with you. | +1 |
+| b6 | 🗺️ Free walking tour | You find a free walking tour of the old town. | +1 |
+| b7 | 📘 Guidebook sold | You sell your old guidebook to another traveller. | +1 |
+| b8 | 🚲 A borrowed bike | A local lends you a bike for the day. | +1 |

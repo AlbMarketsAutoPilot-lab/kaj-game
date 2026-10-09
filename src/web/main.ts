@@ -458,15 +458,40 @@ function renderCard(c: DrawnCard): HTMLElement {
 }
 
 // The event card in its popup: a big golden card (owner's request: "it must look like an event").
+// Where the news comes from: the area the player is in (Backpacker tips come from the road).
+function newsFrom(c: DrawnCard): string {
+  const area = state?.players[c.seat].area;
+  if (c.card.deck === 'backpacker') return 'Backpacker news';
+  return area ? `News from ${areaById.get(area)!.name}` : 'News';
+}
+
+// The phone that buzzes before an event card (owner's request, task 14k): only "Read".
+function phoneNews(c: DrawnCard, onRead: () => void): HTMLElement {
+  const read = button('📱 Read', onRead);
+  read.className = 'primary';
+  const area = state?.players[c.seat].area;
+  return el('div', { className: 'phone-wrap' },
+    el('div', { className: 'phone' }, el('div', { className: 'phone-screen' },
+      el('div', { className: 'phone-notch' }),
+      el('div', { className: 'phone-time', textContent: new Date().toTimeString().slice(0, 5) }),
+      el('div', { className: 'phone-date', textContent: `Round ${state?.round} of ${state?.totalRounds}` }),
+      el('div', { className: 'phone-note' },
+        el('div', { className: 'phone-app' }, el('span', { className: 'phone-badge', textContent: 'K' }), 'KAJ News', el('span', { className: 'phone-now', textContent: 'now' })),
+        el('h4', {}, dot(c.seat), ` ${nameOf(c.seat)}, breaking news!`),
+        el('p', { textContent: area ? `📍 From ${areaById.get(area)!.name}, where you are now…` : '📍 Where you are now…' })),
+      el('div', { className: 'phone-read' }, read))));
+}
+
 function eventCard(c: DrawnCard): HTMLElement {
   const { points, loseTurn } = c.card;
   const badge = loseTurn ? '⏸️ Lose a turn' : points > 0 ? `+${plural(points, 'point')}` : `−${plural(Math.abs(points), 'point')}`;
   return el('div', { className: 'event-card' },
     el('div', { className: 'event-rays' }),
-    el('div', { className: 'event-deck', textContent: DECK_ICON[c.card.deck] }),
-    el('div', { className: 'event-kind', textContent: `${c.card.deck === 'backpacker' ? 'Backpacker' : 'Country'} event card` }),
+    el('div', { className: 'event-kind' }, dot(c.seat), ` ${nameOf(c.seat)} · 📰 ${newsFrom(c)}`),
+    el('h2', { className: 'event-title', textContent: c.card.title }),
     el('p', { className: 'event-text', textContent: `“${c.card.text}”` }),
-    el('div', { className: `event-badge ${loseTurn || points < 0 ? 'bad' : 'good'}`, textContent: badge }),
+    el('div', { className: 'event-meaning' }, 'What this means for you: ',
+      el('span', { className: `event-badge ${loseTurn || points < 0 ? 'bad' : 'good'}`, textContent: badge })),
     // Only when it says more than the badge (e.g. "only 1 to lose").
     !loseTurn && c.change !== points ? el('p', { className: 'small', textContent: cardEffect(c) }) : '');
 }
@@ -1300,7 +1325,11 @@ function renderModal(s: GameState, actions: Action[], isRobot: boolean): Modal |
   const key = s.card ? `${s.card.round}-${s.card.seat}-${s.card.card.text}` : '';
   if (s.phase === 'play' && me.kind === 'human' && s.card?.seat === me.seat && !seenCards.has(key)) {
     const bad = s.card.card.loseTurn || s.card.card.points < 0;
-    return { turn: false, node: wrap(el('div', {}, eventCard(s.card), ok(() => { seenCards.add(key); render(); }, 'Continue')), 'event'), sound: bad ? 'card-bad' : 'card-good', soundKey: key };
+    // Two steps (task 14k): the phone buzzes, then the news and what it means.
+    if (!seenCards.has(`${key}-phone`)) {
+      return { turn: false, node: wrap(phoneNews(s.card, () => { seenCards.add(`${key}-phone`); render(); }), 'phone-modal'), sound: 'tap', soundKey: `${key}-phone` };
+    }
+    return { turn: false, node: wrap(el('div', {}, eventCard(s.card), ok(() => { seenCards.add(key); render(); })), 'event'), sound: bad ? 'card-bad' : 'card-good', soundKey: key };
   }
   // Halfway and the last five turns, on a person's turn.
   if (s.phase === 'play' && !isRobot && me.kind === 'human') {
