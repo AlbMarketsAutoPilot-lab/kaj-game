@@ -68,4 +68,12 @@ export const CARDS: readonly EventCard[] = [
   { id: 'b6', title: '🗺️ Free walking tour', deck: 'backpacker', points: 1, text: 'You find a free walking tour of the old town.' },
   { id: 'b7', title: '📘 Guidebook sold', deck: 'backpacker', points: 1, text: 'You sell your old guidebook to another traveller.' },
   { id: 'b8', title: '🚲 A borrowed bike', deck: 'backpacker', points: 1, text: 'A local lends you a bike for the day.' },
+  // More Backpacker news (owner, after task 18): a small boost for the Backpacker, no rule change.
+  { id: 'b9', title: '🎸 Street music', deck: 'backpacker', points: 2, text: 'You play guitar in the square, and people fill your hat with coins.' },
+  { id: 'b10', title: '🏕️ Free camping', deck: 'backpacker', points: 1, text: 'A family lets you pitch your tent in their garden.' },
+  { id: 'b11', title: '📸 Photo prize', deck: 'backpacker', points: 2, text: 'Your sunrise photo wins a small travel blog prize.' },
+  { id: 'b12', title: '🧭 A shortcut', deck: 'backpacker', points: 1, text: 'A shepherd shows you a shortcut over the hills.' },
+  { id: 'b13', title: '🍎 Fruit picking', deck: 'backpacker', points: 2, text: 'You help with the harvest and get paid in cash and apples.' },
+  { id: 'b14', title: '🗣️ Language swap', deck: 'backpacker', points: 1, text: 'You teach English for a day and get free lunches all week.' },
+  { id: 'b15', title: '🚐 A camper van lift', deck: 'backpacker', points: 2, text: 'Travellers in a camper van give you a lift and share their food.' },
 ];

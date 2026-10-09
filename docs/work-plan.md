@@ -392,6 +392,12 @@ version 10, rules in `docs/engine.md`, and the screens. Owner's rules:
 - **Screens:** a drawn bus stop, 🚌 on the maps, a route line, a bus trip scene, texts, guide;
   `assets/sounds/bus.mp3` (from the owner, Pixabay) trimmed and levelled.
 
+### 30-turn game: frozen (owner, 2026-10-09)
+
+The 30-turn game is finished: no more rule or content changes. Last changes: 7 more Backpacker
+news cards (b9–b15, all positive; 60 cards in all, the test limit) and Backpacker tips on the home
+choice (3 continents, the free quiz on every trip, the bus). Next: the 50-turn game, in a new session.
+
 ### 16. Full-game tests and fixes — day 15
 
 - The owner plays full games on a phone (2, 3 and 4 players, with robots).

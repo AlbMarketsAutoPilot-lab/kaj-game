@@ -849,7 +849,7 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
         : 'Tap a continent on the map. Each player starts on a different continent. Welcome bonus: Europe, Asia, Africa +3 · Americas +4 · Oceania +5.' }),
       zoom ? el('p', { className: 'small', textContent: `🏛️ Areas with this sign have a wonder: your first visit there gives +${plural(POINTS_WONDER, 'point')} more. Each wonder has Guided Tours that one player can buy for ${plural(BUSINESS_PRICE.tours, 'point')}; after that, every other player who visits pays the owner a ${TOUR_FEE}-point tour fee.` }) : '',
       me.profile === 'backpacker'
-        ? el('p', { className: 'small', textContent: '🎒 Tip: from Europe, Asia or Africa you can walk to 3 continents (+3 Backpacker bonus).' })
+        ? el('p', { className: 'small', textContent: `🎒 Tip: from Europe, Asia or Africa you can walk to 3 continents (+${CONTINENT_BONUS.backpacker!.points} Backpacker bonus). Your free quiz works on every plane, ship, train and bus: a right answer is a free trip. In Mongolia, the bus gives you all of Russia (+5) or all of China (+3) at once.` })
         : '');
   } else if (s.quiz) {
     renderQuiz(box, s, who);
