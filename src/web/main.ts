@@ -43,8 +43,8 @@ const POSTER: string = (window as unknown as { KAJ_POSTER?: string }).KAJ_POSTER
 const CREDITS = 'Country data: mledoze/countries, ODbL 1.0 · Flags: flag-icons by Panayiotis Lipiridis, MIT licence · Map shapes: Natural Earth · Lettering: Cinzel, SIL Open Font Licence · Sounds: Pixabay, Pixabay Content License';
 // Citizenship test: 15 seconds for each question (owner's choice, task 8).
 const EXAM_SECONDS = 15;
-const VEHICLE: Record<RouteKind, string> = { airport: '✈️', port: '⛴️' };
-const BUSINESS_ICON: Record<BusinessKind, string> = { tours: '🏛️', airline: '✈️', ferry: '⛴️' };
+const VEHICLE: Record<RouteKind, string> = { airport: '✈️', port: '⚓' };
+const BUSINESS_ICON: Record<BusinessKind, string> = { tours: '🏛️', airline: '✈️', ferry: '⚓' };
 const BUSINESS_NAME: Record<BusinessKind, string> = { tours: 'guided tours', airline: 'airline', ferry: 'ferry agency' };
 const BUSINESS_EARNS: Record<BusinessKind, string> = {
   tours: `every other player pays you ${plural(TOUR_FEE, 'point')} to enter`,
@@ -152,7 +152,12 @@ function renderStart(): void {
   state = null;
   const saved = readSave();
   // The guide starts by itself on the very first ▶ Play (owner's request).
-  const guide = (after: () => void) => runGuide({ app, geo, areaColour, el, button }, after);
+  const guide = (after: () => void) => runGuide({
+    app, geo, areaColour, el, button,
+    flag: (country) => { const code = countryFlag(country); return code && FLAGS[code] ? el('img', { className: 'mini-flag', src: FLAGS[code], alt: '' }) : ''; },
+    question: (title, text, options, correct, onAnswer, key, note) => timedQuestion([title], text, options, correct, onAnswer, QUIZ_SECONDS, key, note),
+    stopClock: () => { clearInterval(quizTimer); stopTimer(); },
+  }, after);
   const play = button('▶ Play', () => (guideSeen() ? renderSetup() : guide(renderSetup)));
   play.className = 'primary big';
   const howTo = button('📖 How to play', () => guide(renderStart));
@@ -425,7 +430,7 @@ function incomeLine(s: GameState, p: Payment): { seat: number; text: string } | 
   switch (p.reason) {
     case 'visa': return { seat: p.to, text: `🛂 ${from} just paid you a ${pts} visa to enter ${where}, your citizenship country!` };
     case 'tour': return { seat: p.to, text: `🏛️ ${from} just paid you ${pts} to visit your Guided Tours of ${WONDER_NAME[p.area] ?? where}!` };
-    case 'ticket': return { seat: p.to, text: `${p.business === 'ferry' ? '⛴️' : '✈️'} ${from} just ${p.business === 'ferry' ? 'sailed with your ferry agency' : 'flew with your airline'} from ${where}: +${pts} for you!` };
+    case 'ticket': return { seat: p.to, text: `${p.business === 'ferry' ? '⚓' : '✈️'} ${from} just ${p.business === 'ferry' ? 'sailed with your ferry agency' : 'flew with your airline'} from ${where}: +${pts} for you!` };
     default: return null;
   }
 }
@@ -848,17 +853,26 @@ function renderBigCountries(me: GameState['players'][number]): HTMLElement {
   return el('p', { className: 'small', textContent: started.length ? `🧩 Big countries: ${started.join(' · ')}` : '' });
 }
 
+// The timed a/b question box (airline quiz, also used by the guide): the question, the answer
+// buttons, the 15-second clock and a note. Time out = the wrong answer.
+function timedQuestion(title: (Node | string)[], text: string, options: string[], correct: number, onAnswer: (i: number) => void, seconds: number, key: string, note: string): HTMLElement[] {
+  const clock = el('div', { className: 'clock' }, el('span', { className: 'secs', textContent: `⏱️ ${seconds} s` }), el('div', { className: 'timebar' }, el('span')));
+  const nodes = [el('h2', {}, ...title),
+    el('p', { textContent: text }),
+    el('div', { className: 'row' }, ...options.map((o, i) => button(o, () => onAnswer(i)))),
+    clock,
+    el('p', { className: 'small', textContent: note })];
+  startCountdown(key, seconds, clock, () => onAnswer(1 - correct));
+  return nodes;
+}
+
 // Airline quiz: one a/b question about the destination, 15 seconds. Time out = wrong answer.
 function renderQuiz(box: HTMLElement, s: GameState, who: HTMLElement): void {
   const { question, to, kind } = s.quiz!;
-  const left = QUIZ_SECONDS;
-  const clock = el('div', { className: 'clock' }, el('span', { className: 'secs', textContent: `⏱️ ${left} s` }), el('div', { className: 'timebar' }, el('span')));
-  box.append(el('h2', {}, who, `: Airline promotion — answer correctly and ${kind === 'airport' ? 'fly' : 'sail'} free to ${areaById.get(to)!.name}!`),
-    el('p', { textContent: question.text }),
-    el('div', { className: 'row' }, ...question.options.map((o, i) => button(o, () => act({ type: 'answer', choice: i as 0 | 1 })))),
-    clock,
-    el('p', { className: 'small', textContent: `Wrong answers here so far: ${currentPlayer(s).quizWrong}. A wrong answer uses this turn.${forcedPayNote(s, kind, to)}` }));
-  startCountdown(`answer-${s.round}-${currentPlayer(s).seat}-${question.text}-${currentPlayer(s).quizWrong}`, left, clock, () => act({ type: 'answer', choice: (1 - question.correct) as 0 | 1 }));
+  box.append(...timedQuestion([who, `: Airline promotion — answer correctly and ${kind === 'airport' ? 'fly' : 'sail'} free to ${areaById.get(to)!.name}!`],
+    question.text, question.options, question.correct, (i) => act({ type: 'answer', choice: i as 0 | 1 }), QUIZ_SECONDS,
+    `answer-${s.round}-${currentPlayer(s).seat}-${question.text}-${currentPlayer(s).quizWrong}`,
+    `Wrong answers here so far: ${currentPlayer(s).quizWrong}. A wrong answer uses this turn.${forcedPayNote(s, kind, to)}`));
 }
 
 // Travel-turn challenge: one a/b question, 15 seconds. Time out = wrong answer.
@@ -1300,7 +1314,7 @@ const inView = (d: Drawn, x: number, y: number) => x >= d.vb.x && x <= d.vb.x + 
 function areaIcons(s: GameState, id: string): string {
   const a = areaById.get(id)!;
   const citizen = s.players.some((p) => p.citizenship?.includes(id));
-  return `${a.wonder ? '⭐' : ''}${hasRoute(id, 'airport') ? '✈️' : ''}${hasRoute(id, 'port') ? '⛴️' : ''}${citizen ? '🛂' : ''}`;
+  return `${a.wonder ? '⭐' : ''}${hasRoute(id, 'airport') ? '✈️' : ''}${hasRoute(id, 'port') ? '⚓' : ''}${citizen ? '🛂' : ''}`;
 }
 
 // Visited marks (owner's request): one small dot per player who has been there.
@@ -1629,7 +1643,7 @@ function renderAreaDetails(s: GameState, id: string): HTMLElement {
     a.wonder ? `⭐ ${capital(WONDER_NAME[id] ?? 'a wonder')}: the first visit gives +1 point more` : '',
     a.bigCountry ? `🧩 Part of ${a.bigCountry}: ${me.profile ? `you have visited ${parts.filter((x) => me.visitedAreas.includes(x.id)).length}/${parts.length} parts` : `${parts.length} parts`}` : '',
     routes('airport').length ? `✈️ Airport: flights to ${routes('airport').join(', ')}` : '',
-    routes('port').length ? `⛴️ Port: ships to ${routes('port').join(', ')}` : '',
+    routes('port').length ? `⚓ Port: ships to ${routes('port').join(', ')}` : '',
     `🚶 Walk to: ${a.neighbours.map((n) => areaById.get(n)!.name).join(', ') || 'nowhere (plane or ship only)'}`,
     ...s.businesses.filter((b) => b.area === id).map((b) => `${BUSINESS_ICON[b.kind]} ${capital(BUSINESS_NAME[b.kind])}: ${b.owner === null ? `for sale, ${plural(BUSINESS_PRICE[b.kind], 'point')}` : `owned by ${COLOUR_NAMES[b.owner]}`}`),
     ...s.players.filter((p) => p.citizenship?.includes(id)).map((p) => `🛂 ${COLOUR_NAMES[p.seat]} is a citizen here: others pay a ${VISA_PRICE}-point visa`),
