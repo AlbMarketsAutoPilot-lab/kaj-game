@@ -180,7 +180,7 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
       after: { title: `🎉 All of Canada! +${POINTS_BIG_COUNTRY_3_PARTS}`, lines: [`You visited all 3 parts of Canada: +${POINTS_BIG_COUNTRY_3_PARTS} points.`] } },
     { title: '💡 More points, the easy way', lines: ['Your traveller profile has its own bonuses. You will see them when you pick it.'] },
     { title: '💼 Own a business', task: true, picture: buyAirline,
-      lines: ['Want more? Own a business, and the other players pay you:', '✈️ an airline at an airport · ⚓ a ferry agency at a port · 🏛️ guided tours at a wonder.', 'Try it: buy the airline at this airport.'],
+      lines: ['Want more? Own a business, and the other players pay you:', '✈️ an airline at an airport · ⚓ a ferry agency at a port · 🚆 a train ticket booth at a station · 🏛️ guided tours at a wonder.', 'Try it: buy the airline at this airport.'],
       after: { title: '🎉 You own the airline of UK & Ireland!', picture: () => airportView(true),
         lines: ['Your flag now flies over the airport. Every time another player flies from UK & Ireland, the ticket money goes to you.'] } },
     { title: '🛂 Citizenship', task: true, picture: askCitizenship,

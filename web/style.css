@@ -145,6 +145,8 @@ main:has(.game) { max-width: none; padding: 6px; height: calc(100 * var(--vh)); 
 .map-svg .piece { stroke: #fff; stroke-width: 1.5px; vector-effect: non-scaling-stroke; }
 .map-svg .route { stroke: rgba(255, 255, 255, 0.45); stroke-width: 1px; stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
 .map-svg .route.port { stroke: rgba(140, 200, 255, 0.6); }
+/* Task 17: the train, a solid rail line with sleepers. */
+.map-svg .route.station { stroke: rgba(255, 214, 140, 0.85); stroke-width: 2px; stroke-dasharray: 1 3; }
 .map-svg .trip { stroke-width: 2.5px; stroke-dasharray: 6 4; vector-effect: non-scaling-stroke; }
 
 /* Task 14 B1: drawn props, pawns, zoom, popup, details */
@@ -154,12 +156,16 @@ main:has(.game) { max-width: none; padding: 6px; height: calc(100 * var(--vh)); 
 .prop .hover { animation: hover 2.4s ease-in-out infinite; }
 .prop .rock { transform-box: fill-box; transform-origin: 50% 100%; animation: rock 3s ease-in-out infinite; }
 .prop .wave { animation: wave 2s ease-in-out infinite; }
+.prop .chug { animation: chug 2.6s ease-in-out infinite; }
+.prop .steam { transform-box: fill-box; transform-origin: center; animation: steam 2.6s ease-out infinite; }
 .prop .twinkle { transform-box: fill-box; transform-origin: center; animation: twinkle 2.8s ease-in-out infinite; }
 .prop .wave-flag { transform-box: fill-box; transform-origin: 0 50%; animation: flag 2.2s ease-in-out infinite; }
 .pawn.active { filter: drop-shadow(0 0 4px #fff6c8); }
 @keyframes hover { 50% { transform: translateY(-3px); } }
 @keyframes rock { 25% { transform: rotate(-4deg); } 75% { transform: rotate(4deg); } }
 @keyframes wave { 50% { transform: translateX(2px); } }
+@keyframes chug { 50% { transform: translateX(-2px); } }
+@keyframes steam { 0% { opacity: 0.8; transform: translate(0, 0) scale(0.6); } 100% { opacity: 0; transform: translate(-4px, -6px) scale(1.3); } }
 @keyframes twinkle { 0%, 70%, 100% { opacity: 0.2; transform: scale(0.6); } 85% { opacity: 1; transform: scale(1.15); } }
 @keyframes flag { 50% { transform: skewY(-4deg) scaleX(0.94); } }
 @media (prefers-reduced-motion: reduce) {
@@ -265,6 +271,7 @@ button.link { background: none; border: none; padding: 0; text-align: left; font
 .trip-scene { border-radius: 12px; overflow: hidden; background: #0a3a40 var(--bg-art) no-repeat; }
 .trip-scene.plane { background-size: 141% auto; background-position: 35% 18%; }
 .trip-scene.ship { background-size: 155% auto; background-position: 55% 40%; }
+.trip-scene.train { background-size: 150% auto; background-position: 45% 55%; }
 .trip-scene svg { display: block; width: 100%; height: auto; }
 /* Wonder posters (task M6): the drawing on the background painting, the name in the poster's lettering. */
 .wonder-scene { border-radius: 12px; overflow: hidden; background: #0a3a40 var(--bg-art) center 40% / cover no-repeat; }
