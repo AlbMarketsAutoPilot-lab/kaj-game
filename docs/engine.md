@@ -584,8 +584,8 @@ the timing below differ. Engine only: the screens come in M4 (until then the web
   `src/web/main.ts`); a saved game continues on its own map; the guide plays on the 30-turn map.
   "Halfway there!" and "The last five turns!" come at rounds 26 and 46 of 50, the Nomad warning at
   45, the card countdown every 5. Wonder names (owner): the Parthenon, Petra, Angkor Wat, Mount
-  Kilimanjaro; Peru shows the Machu Picchu drawing. The 4 new wonders show their poster without a
-  drawing until session B.
+  Kilimanjaro; Peru shows the Machu Picchu drawing. Session B: their drawings, made by
+  `node scripts/wonders-make.ts` in the style of the M6 posters.
 - **Save version 11.** Owner: a version-10 save of a 30-turn game still loads (its rules did not
   change); other older saves are not continued.
 
