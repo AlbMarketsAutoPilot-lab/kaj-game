@@ -14,6 +14,7 @@ import { shapes30 } from '../maps/shapes30.ts';
 import { countryCapital, countryFlag, WONDER_NAME } from './countries.ts';
 import { buildGeo, colourAreas, continentBox, pad, squeeze, svg, unionBox, type Box } from './maps.ts';
 import { airport, citizenFlag, monument, pawn, place, port } from './props.ts';
+import { guideSeen, runGuide } from './tutorial.ts';
 import { play, setMusic, soundOn, startTimer, stopTimer, toggleSound, type SoundName } from './sound.ts';
 
 const COLOURS = ['#e4572e', '#2e86de', '#29a36a', '#e0a100'];
@@ -150,15 +151,18 @@ function renderStart(): void {
   setMusic('menu');
   state = null;
   const saved = readSave();
-  const play = button('▶ Play', renderSetup);
+  // The guide starts by itself on the very first ▶ Play (owner's request).
+  const guide = (after: () => void) => runGuide({ app, geo, areaColour, el, button }, after);
+  const play = button('▶ Play', () => (guideSeen() ? renderSetup() : guide(renderSetup)));
   play.className = 'primary big';
+  const howTo = button('📖 How to play', () => guide(renderStart));
   const resume = saved && 'state' in saved
     ? button(`Continue (round ${saved.state.round} / ${saved.state.totalRounds})`, () => { state = saved.state; render(); })
     : null;
   app.replaceChildren(
     el('section', { className: 'poster' },
       POSTER ? el('img', { src: POSTER, alt: "Kris Ann's Journey" }) : title(),
-      el('div', { className: 'poster-buttons' }, play, resume ?? '', soundButton())),
+      el('div', { className: 'poster-buttons' }, play, resume ?? '', howTo, soundButton())),
   );
 }
 
