@@ -480,7 +480,7 @@ Task 14f: a fair citizenship test (owner's change; `tests/citizenship.test.ts`).
 7. **Fair answers:** "bigger" pairs differ at least 1.5×; wrong capital, neighbour and currency from
    the same continent; flags that look alike never asked together; land borders only.
 8. **Robots** pick a challenge or not at random and answer at random (task 13 makes them smarter).
-9. **The train** (France ↔ Russia West, France ↔ Turkey) is deferred: maybe later, if time allows.
+9. **The train** (France ↔ Russia West, France ↔ Turkey) was deferred here; added in task 17.
 
 ## Choices made in task 13 (approved by the owner)
 
@@ -496,6 +496,29 @@ Task 14f: a fair citizenship test (owner's change; `tests/citizenship.test.ts`).
 9. **3 quiz tries for everyone**; after the 3rd wrong answer: pay and travel, or (no money) go home.
 10. **Booked areas:** closed to walking and boarding while someone travels there; no boarding for an
     area where someone stands.
+
+## The train (task 17, approved by the owner)
+
+30-turn map only. The train is a third route kind, `station`, next to `airport` and `port`.
+
+- **Routes:** France ↔ Russia West and France ↔ Turkey & Caucasus (`turkey-caucasus`). In France the
+  player chooses one of the two; from Russia West or Turkey the train goes only back to France.
+- **Travel:** 1 travel turn for every profile (Business and Luxury too, unlike planes and ships).
+  The Digital Nomad gets +1 for the train turn, and a challenge is offered as on planes and ships.
+- **Ticket:** 2 points for Business and for the Nomad (`TRAIN_TICKET_PRICE`, `ticketPrice()`).
+  The Backpacker never pays: the quiz only. Business and Nomad may also try the quiz (3 tries;
+  after the 3rd wrong answer they pay the 2-point train ticket and go, or with no money go home).
+- **Luxury can't take the train:** no train destinations for Luxury, ever.
+- **Fees:** as on planes and ships: visa and tour fee paid on boarding, booked areas closed,
+  no money, no entry.
+- **Train ticket booths:** 3 businesses (`train`) at 2 points, in France, Russia West and Turkey.
+  Bought like the airline and ferry agency (Luxury may buy one too, owner's answer). A paid train
+  ticket goes to the owner of the booth at the departure station; with no owner, to nobody.
+- **Stuck-state checker:** leaves the train out (Luxury can't take it), so the map must work
+  without it. All three train areas can be reached on foot.
+- **Robots:** use the train like planes and ships (Luxury never), and buy booths after the other
+  businesses. 1,000 mixed robot games: no stuck game, ~230 train rides, scores as before.
+- **Save version 9:** older saves are not continued.
 
 ## Project setup
 

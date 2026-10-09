@@ -239,6 +239,9 @@ const ROUTES: Route[] = [
   { kind: 'port', a: 'australia-east', b: 'new-zealand' },
   // Task 14b (owner-approved): Alaska's ferry to USA West, so a Canadian citizenship can't trap it.
   { kind: 'port', a: 'usa-west', b: 'alaska' },
+  // Task 17 (owner-approved): the train from France to Russia West or Turkey, and back.
+  { kind: 'station', a: 'france', b: 'russia-west' },
+  { kind: 'station', a: 'france', b: 'turkey-caucasus' },
 ];
 
 function build(): GameMap {

@@ -43,10 +43,13 @@ export function bigCountryPoints(parts: number): number {
   return parts >= 3 ? POINTS_BIG_COUNTRY_3_PARTS : POINTS_BIG_COUNTRY_AREA + parts;
 }
 
+// The ways to travel beyond walking: plane, ship and train (task 17).
+export const ROUTE_KINDS: readonly RouteKind[] = ['airport', 'port', 'station'];
+
 // An airport or port has 1 to 3 fixed destinations (v1 scope section 4).
 export const MAX_DESTINATIONS = 3;
 
-// Ticket price per trip (rulebook sections 5 and 12). The Backpacker never pays: quiz only.
+// Ticket price per plane or ship trip (rulebook sections 5 and 12). The Backpacker never pays: quiz only.
 export const TICKET_PRICE: Readonly<Record<Profile, number | null>> = {
   backpacker: null,
   business: 2,
@@ -54,18 +57,32 @@ export const TICKET_PRICE: Readonly<Record<Profile, number | null>> = {
   nomad: 1,
 };
 
-// Travel turns: plane 1, ship 3; Business and Luxury: plane 0, ship 1.
+// Train ticket (task 17, owner's rule): 2 for Business and Nomad; the Backpacker never pays
+// (quiz only); Luxury can't take the train.
+export const TRAIN_TICKET_PRICE: Readonly<Record<Profile, number | null>> = {
+  backpacker: null,
+  business: 2,
+  luxury: null,
+  nomad: 2,
+};
+
+// The ticket for a trip of this kind; null: quiz only (or, for Luxury on the train, no trip at all).
+export function ticketPrice(profile: Profile, kind: RouteKind): number | null {
+  return kind === 'station' ? TRAIN_TICKET_PRICE[profile] : TICKET_PRICE[profile];
+}
+
+// Travel turns: plane 1, ship 3; Business and Luxury: plane 0, ship 1. Train: 1 for everyone (task 17).
 export const TRAVEL_TURNS: Readonly<Record<Profile, Readonly<Record<RouteKind, number>>>> = {
-  backpacker: { airport: 1, port: 3 },
-  business: { airport: 0, port: 1 },
-  luxury: { airport: 0, port: 1 },
-  nomad: { airport: 1, port: 3 },
+  backpacker: { airport: 1, port: 3, station: 1 },
+  business: { airport: 0, port: 1, station: 1 },
+  luxury: { airport: 0, port: 1, station: 1 },
+  nomad: { airport: 1, port: 3, station: 1 },
 };
 
 // After this many wrong quiz answers in one area, a player who can pay must pay and board.
 export const QUIZ_TRIES = 3;
 
-// Digital Nomad: +1 for every turn on a plane or ship.
+// Digital Nomad: +1 for every turn on a plane, ship or train.
 export const POINTS_NOMAD_TRAVEL_TURN = 1;
 
 // Visa: paid to the citizen each time another player enters their area (rulebook section 7).
@@ -85,6 +102,14 @@ export const BUSINESS_PRICE: Readonly<Record<BusinessKind, number>> = {
   tours: 2,
   airline: 3,
   ferry: 2,
+  train: 2,
+};
+
+// The business that sells the tickets at each kind of departure point.
+export const TICKET_BUSINESS: Readonly<Record<RouteKind, BusinessKind>> = {
+  airport: 'airline',
+  port: 'ferry',
+  station: 'train',
 };
 
 // Guided tours: 1 point to the owner each time another player enters the wonder area.

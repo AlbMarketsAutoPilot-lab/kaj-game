@@ -2,7 +2,7 @@
 // quiet background music. The files (assets/sounds) are put into the page by the build as data
 // URIs; a missing one stays silent. The 🔊 button turns everything on or off, kept on the device.
 
-export type SoundName = 'tap' | 'walk' | 'plane' | 'ship' | 'right' | 'wrong' | 'card-good' | 'card-bad'
+export type SoundName = 'tap' | 'walk' | 'plane' | 'ship' | 'train' | 'right' | 'wrong' | 'card-good' | 'card-bad'
   | 'coins' | 'citizenship' | 'milestone' | 'win';
 
 const FILES: Record<string, string> = (window as unknown as { KAJ_SOUNDS?: Record<string, string> }).KAJ_SOUNDS ?? {};

@@ -20,8 +20,10 @@ import {
   POINTS_WONDER,
   PROFILES,
   QUIZ_TRIES,
+  ROUTE_KINDS,
   START_CONTINENTS,
-  TICKET_PRICE,
+  TICKET_BUSINESS,
+  ticketPrice,
   TOTAL_ROUNDS,
   TOUR_FEE,
   TRAVEL_TURNS,
@@ -163,7 +165,7 @@ export function legalActions(state: GameState, map: GameMap): Action[] {
       if (me.travel) {
         return me.points >= CHALLENGE_POINTS ? [{ type: 'travel' }, { type: 'travel', challenge: true }] : [{ type: 'travel' }];
       }
-      // Booked areas (owner's rule, task 13): an area someone is travelling to by plane or ship
+      // Booked areas (owner's rule, task 13): an area someone is travelling to by plane, ship or train
       // is closed, as if they were already there.
       const occupied = closedAreas(state, me.seat);
       const moves: Action[] = [];
@@ -249,7 +251,7 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
       return next;
     }
     case 'board':
-      depart(next, map, me, action.kind, action.to, TICKET_PRICE[me.profile!]!);
+      depart(next, map, me, action.kind, action.to, ticketPrice(me.profile!, action.kind)!);
       endTurn(next, map);
       return next;
     case 'quiz': {
@@ -269,8 +271,8 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
         // After the 3rd wrong answer a player who can pay (ticket and any fees) must pay and
         // board now; a player who can't (always the Backpacker) goes home (owner's rule, task 13).
         if (me.quizWrong >= QUIZ_TRIES) {
-          if (canPayAfterQuiz(next, me, quiz.to)) {
-            depart(next, map, me, quiz.kind, quiz.to, TICKET_PRICE[me.profile!]!);
+          if (canPayAfterQuiz(next, me, quiz.kind, quiz.to)) {
+            depart(next, map, me, quiz.kind, quiz.to, ticketPrice(me.profile!, quiz.kind)!);
           } else {
             goHome(next, map, me);
           }
@@ -352,9 +354,10 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
   }
 }
 
-// Where a plane (airport) or ship (port) can go from an area: its fixed routes.
-// Luxury: any other airport (by plane) or any other port (by ship).
+// Where a plane (airport), ship (port) or train (station) can go from an area: its fixed routes.
+// Luxury: any other airport (by plane) or any other port (by ship), and never the train (task 17).
 export function destinations(map: GameMap, from: string, kind: RouteKind, profile: Profile): string[] {
+  if (kind === 'station' && profile === 'luxury') return [];
   const routes = (map.routes ?? []).filter((r) => r.kind === kind);
   if (!routes.some((r) => r.a === from || r.b === from)) return [];
   if (profile === 'luxury') {
@@ -366,15 +369,15 @@ export function destinations(map: GameMap, from: string, kind: RouteKind, profil
 }
 
 // Boarding options in the player's area: pay the ticket (if they can) or try the quiz.
-// Every profile may always try the quiz, so a trip is always possible from an airport or port,
-// except to an area whose fees (visa, tour fee) the player can't pay: the fees are due even
-// with a free ticket.
+// Every profile may always try the quiz, so a trip is always possible from an airport, port or
+// station (Luxury: never the train), except to an area whose fees (visa, tour fee) the player
+// can't pay: the fees are due even with a free ticket.
 function tripActions(state: GameState, me: Player, map: GameMap): Action[] {
   const out: Action[] = [];
-  const price = TICKET_PRICE[me.profile!];
   // No trip to an area where someone stands or that someone has booked (owner's rule, task 13).
   const closed = closedAreas(state, me.seat);
-  for (const kind of ['airport', 'port'] as const) {
+  for (const kind of ROUTE_KINDS) {
+    const price = ticketPrice(me.profile!, kind);
     for (const to of destinations(map, me.area!, kind, me.profile!)) {
       if (closed.has(to)) continue;
       const fees = feeTotal(entryFees(state, me, me.area, to));
@@ -390,11 +393,11 @@ function tripActions(state: GameState, me: Player, map: GameMap): Action[] {
 function depart(
   state: GameState, map: GameMap, me: Player, kind: RouteKind, to: string, ticket: number,
 ): void {
-  // The ticket goes to the owner of the departure airline or ferry agency (the owner pays
-  // their own ticket to themselves); with no owner it goes to nobody (there is no bank).
-  // A free quiz ticket pays nobody.
+  // The ticket goes to the owner of the departure airline, ferry agency or train ticket booth
+  // (the owner pays their own ticket to themselves); with no owner it goes to nobody (there is
+  // no bank). A free quiz ticket pays nobody.
   if (ticket > 0) {
-    const business: BusinessKind = kind === 'airport' ? 'airline' : 'ferry';
+    const business: BusinessKind = TICKET_BUSINESS[kind];
     const owner = businessAt(state, me.area!, business)?.owner ?? null;
     me.points = addPoints(me.points, -ticket);
     if (owner !== null) state.players[owner].points = addPoints(state.players[owner].points, ticket);
@@ -409,7 +412,7 @@ function depart(
   if (me.travel.turnsLeft === 0) land(state, map, me);
 }
 
-// Two players are never in one area: if the destination is taken, the plane or ship
+// Two players are never in one area: if the destination is taken, the plane, ship or train
 // waits and tries again at the end of the next travel turn. The fees were paid at boarding.
 // Since task 13 a booked area can't be entered, so this is only a safety net.
 function land(state: GameState, map: GameMap, me: Player): void {
@@ -437,14 +440,14 @@ export function visaOwner(state: GameState, me: Player, from: string | null, to:
 
 // ---------- businesses, fees and "go home" (rulebook section 6, docs/engine.md task 9) ----------
 
-// One business per wonder (guided tours), airport (airline) and port (ferry agency).
+// One business per wonder (guided tours), airport (airline), port (ferry agency) and station
+// (train ticket booth, task 17).
 export function mapBusinesses(map: GameMap): Business[] {
   const routes = map.routes ?? [];
-  const has = (id: string, kind: 'airport' | 'port') => routes.some((r) => r.kind === kind && (r.a === id || r.b === id));
+  const has = (id: string, kind: RouteKind) => routes.some((r) => r.kind === kind && (r.a === id || r.b === id));
   return map.areas.flatMap((a): Business[] => [
     ...(a.wonder ? [{ kind: 'tours' as const, area: a.id, owner: null }] : []),
-    ...(has(a.id, 'airport') ? [{ kind: 'airline' as const, area: a.id, owner: null }] : []),
-    ...(has(a.id, 'port') ? [{ kind: 'ferry' as const, area: a.id, owner: null }] : []),
+    ...ROUTE_KINDS.filter((kind) => has(a.id, kind)).map((kind) => ({ kind: TICKET_BUSINESS[kind], area: a.id, owner: null })),
   ]);
 }
 
@@ -533,11 +536,11 @@ export function blockedByMoney(state: GameState, map: GameMap, me: Player): bool
   const occupied = closedAreas(state, me.seat);
   const tooDear = (to: string) => !occupied.has(to) && me.points < feeTotal(entryFees(state, me, me.area, to));
   if (areaById(map, me.area).neighbours.some(tooDear)) return true;
-  return (['airport', 'port'] as const).some((kind) => destinations(map, me.area!, kind, me.profile!).some(tooDear));
+  return ROUTE_KINDS.some((kind) => destinations(map, me.area!, kind, me.profile!).some(tooDear));
 }
 
 // Where "go home" sends a player: the starting area, or if someone stands there, the nearest
-// free area to it (walking, planes and ships), never the area the player is leaving.
+// free area to it (walking, planes, ships and trains), never the area the player is leaving.
 export function homeFor(state: GameState, map: GameMap, me: Player): string {
   const occupied = closedAreas(state, me.seat);
   const home = me.home!;
@@ -558,9 +561,9 @@ export function homeFor(state: GameState, map: GameMap, me: Player): string {
   return me.area!;
 }
 
-// Whether a 3rd wrong quiz answer for `to` means paying the ticket (true) or going home (false).
-export function canPayAfterQuiz(state: GameState, me: Player, to: string): boolean {
-  const price = TICKET_PRICE[me.profile!];
+// Whether a 3rd wrong quiz answer for a trip to `to` means paying the ticket (true) or going home (false).
+export function canPayAfterQuiz(state: GameState, me: Player, kind: RouteKind, to: string): boolean {
+  const price = ticketPrice(me.profile!, kind);
   return price !== null && me.points >= price + feeTotal(entryFees(state, me, me.area, to));
 }
 
@@ -754,7 +757,7 @@ function occupiedAreas(state: GameState, exceptSeat: number): Set<string> {
   );
 }
 
-// Areas another player stands in or has booked (is travelling to by plane or ship).
+// Areas another player stands in or has booked (is travelling to by plane, ship or train).
 export function closedAreas(state: GameState, exceptSeat: number): Set<string> {
   const closed = occupiedAreas(state, exceptSeat);
   for (const p of state.players) if (p.seat !== exceptSeat && p.travel) closed.add(p.travel.to);

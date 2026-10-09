@@ -59,7 +59,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | M5 | 50-turn map: full test games and fixes | medium | 1 | 15 | |
 | M6 | Wonder posters for the 7 wonders of the 30-turn map (the 4 of the 50-turn map come with M4) | medium | 1 | 13 | ✅ done |
 | 15 | Android release build (signed APK) | medium | 1 | — | postponed (owner, 2026-10-09) |
-| 17 | Train France ↔ Russia West and France ↔ Turkey (30-turn map): A rules **high**, B screens medium | **high** / medium | 2 | 13–14 | owner-approved, not started |
+| 17 | Train France ↔ Russia West and France ↔ Turkey (30-turn map): A rules **high**, B screens medium | **high** / medium | 2 | 13–14 | done (A rules, robots, tests, save 9; B screens, sound) |
 | 16 | Full-game tests, bug fixes, buffer | medium | 1–2 | 15 | |
 
 ## The tasks
@@ -354,8 +354,13 @@ answer, fees, citizenship) open at once. Order: M6 is merged first, then the 50-
 
 ### 17. The train — 30-turn map only (owner-approved 2026-10-09; the 50-turn work waits)
 
-Session A (**high**): rules in the engine, robots, stuck-state checker, tests, 1,000 robot games, saves
-version 7, rules written in `docs/engine.md`. Session B (medium): screens. Owner's rules:
+Session A (**high**, done): rules in the engine, robots, stuck-state checker (leaves the train out:
+Luxury can't take it), tests, 1,000 robot games, saves version 9, rules written in `docs/engine.md`;
+Luxury may buy a booth (owner). Session B (medium, done): station drawing and popup, 🚆 on the maps,
+rail route lines, train trip scene, texts, guide, sound (trimmed to 2 s, levelled). Also (owner,
+2026-10-09): robots' event cards and challenges are no longer told to people; robots' trips are
+("🚆 Robot 2 took the train to Turkey"); business, citizenship and visa news stay.
+Owner's rules:
 
 - **Routes:** France ↔ Russia West and France ↔ Turkey & Caucasus (`turkey-caucasus`). In France the
   player chooses one of the two; Russia West and Turkey go only back to France (never to each other).

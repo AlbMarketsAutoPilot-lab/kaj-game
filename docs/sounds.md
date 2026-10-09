@@ -11,6 +11,7 @@ them to the game with a 🔊 on/off button (kept on the device).
 | 2 | `walk.mp3` | Walking into a new area (footsteps) | ≤ 1 s |
 | 3 | `plane.mp3` | Boarding a plane | ≤ 2 s |
 | 4 | `ship.mp3` | Boarding a ship (horn or waves) | ≤ 2 s |
+| 4b | `train.mp3` | Boarding a train (task 17, from the owner) | 2 s |
 | 5 | `right.mp3` | A right answer (quiz, test, challenge) | ≤ 1 s |
 | 6 | `wrong.mp3` | A wrong answer | ≤ 1 s |
 | 7 | `card-good.mp3` / `card-bad.mp3` | An event card appears (good: points won; bad: points or a turn lost) | ≤ 3 s |

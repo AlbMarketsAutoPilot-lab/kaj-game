@@ -46,10 +46,10 @@ export interface Area {
   bigCountry?: string;
 }
 
-export type RouteKind = 'airport' | 'port';
+export type RouteKind = 'airport' | 'port' | 'station';
 
-// A fixed two-way route between two airports (or two ports): a <-> b.
-// One airport or port can be in up to 3 routes (a hub).
+// A fixed two-way route between two airports (or two ports, or two train stations): a <-> b.
+// One airport, port or station can be in up to 3 routes (a hub).
 export interface Route {
   kind: RouteKind;
   a: string;
@@ -77,7 +77,7 @@ export interface Player {
   points: number;
   visitedAreas: string[];
   visitedContinents: Continent[];
-  // On a plane or ship (area is null while travelling).
+  // On a plane, ship or train (area is null while travelling).
   travel: Travel | null;
   // Wrong airline-quiz answers in the current area; back to 0 when the player leaves.
   quizWrong: number;
@@ -99,8 +99,9 @@ export interface Player {
 }
 
 // Businesses (rulebook section 6): guided tours at a wonder, an airline at an airport,
-// a ferry agency at a port. Bought by the player standing in the area; no selling yet.
-export type BusinessKind = 'tours' | 'airline' | 'ferry';
+// a ferry agency at a port, a train ticket booth at a station (task 17).
+// Bought by the player standing in the area.
+export type BusinessKind = 'tours' | 'airline' | 'ferry' | 'train';
 
 export interface Business {
   kind: BusinessKind;
@@ -129,7 +130,7 @@ export interface Payment {
   to: number | null;
   amount: number;
   area: string;
-  // The business involved: the one bought, or the airline or ferry agency a ticket went to.
+  // The business involved: the one bought, or the airline, ferry agency or train booth a ticket went to.
   business?: BusinessKind;
 }
 
@@ -274,6 +275,7 @@ export type Action =
   | { type: 'chooseStart'; area: string }
   | { type: 'walk'; to: string }
   // Pay the ticket and board. Not for the Backpacker, who travels only with the quiz.
+  // Luxury never takes the train (task 17).
   | { type: 'board'; kind: RouteKind; to: string }
   // Try the airline quiz for this trip; the next move is the answer.
   | { type: 'quiz'; kind: RouteKind; to: string }
@@ -284,7 +286,7 @@ export type Action =
   | { type: 'answer'; choice: 0 | 1 }
   // One answer in the citizenship test (turn 2); the turn ends after the 3rd.
   | { type: 'examAnswer'; choice: 0 | 1 }
-  // A turn in the air or at sea. With `challenge` the player plays a challenge: the turn goes
+  // A turn in the air, at sea or on the train. With `challenge` the player plays a challenge: the turn goes
   // on, and the next move is the answer (task 12). Without it nothing happens.
   | { type: 'travel'; challenge?: true }
   // The answer to the challenge; the trip then goes on as on any travel turn.

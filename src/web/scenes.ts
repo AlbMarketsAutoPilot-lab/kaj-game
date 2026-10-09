@@ -1,5 +1,6 @@
 // The trip scenes (owner-approved preview, task 14j): drawn over the game's own background
-// painting (set by CSS, .trip-scene). No people: a plane in the night sky, or a liner at sea.
+// painting (set by CSS, .trip-scene). No people: a plane in the night sky, a liner at sea, or a
+// night train (task 17).
 
 import type { RouteKind } from '../engine/types.ts';
 
@@ -98,11 +99,59 @@ const SHIP = `<rect width="440" height="230" fill="#062a30" opacity=".1"/>
 <path d="M-150 6 Q-120 2 -90 6 T-30 6 T30 6 T90 6 T150 6" stroke="#bfeee2" stroke-width="1.2" fill="none" opacity=".6"/>
 </g>`;
 
-// The scene for a plane ('airport') or ship ('port') trip.
+// A night train (task 17): a locomotive and two lit carriages on a rail embankment, with steam.
+const CARRIAGE = (x: number) => `<g transform="translate(${x} 0)">
+<rect x="0" y="-34" width="92" height="30" rx="5" fill="url(#trip-car)"/>
+<rect x="0" y="-36" width="92" height="5" rx="2.5" fill="#1d3d44"/>
+<g fill="#ffe08a" filter="url(#trip-glow)">
+<rect x="8" y="-27" width="12" height="9" rx="1.5"/><rect x="26" y="-27" width="12" height="9" rx="1.5"/>
+<rect x="44" y="-27" width="12" height="9" rx="1.5"/><rect x="62" y="-27" width="12" height="9" rx="1.5"/>
+</g>
+<path d="M0 -12 H92" stroke="#f4cf6a" stroke-width="1.4"/>
+<circle cx="16" cy="-2" r="5" fill="#1a1a1a" stroke="#5f8583" stroke-width="1.2"/><circle cx="76" cy="-2" r="5" fill="#1a1a1a" stroke="#5f8583" stroke-width="1.2"/>
+</g>`;
+
+const TRAIN = `<rect width="440" height="230" fill="#062a30" opacity=".12"/>
+<path d="M0 182 Q110 168 220 174 T440 170 V230 H0 Z" fill="#0b2f2a" opacity=".85"/>
+<path d="M0 202 H440" stroke="#4d3a2c" stroke-width="7"/>
+<g stroke="#2a1f17" stroke-width="3">${Array.from({ length: 23 }, (_, i) => `<path d="M${i * 20 + 4} 198 V206"/>`).join('')}</g>
+<path d="M0 199 H440" stroke="#b9c9c7" stroke-width="1.6"/>
+<g transform="translate(24 195) scale(1.3)">
+${CARRIAGE(0)}${CARRIAGE(98)}
+<g transform="translate(196 0)">
+<rect x="0" y="-30" width="96" height="26" rx="5" fill="url(#trip-loco)"/>
+<rect x="58" y="-50" width="38" height="46" rx="4" fill="url(#trip-loco)"/>
+<rect x="64" y="-44" width="12" height="11" rx="1.5" fill="#ffe08a" filter="url(#trip-glow)"/>
+<rect x="56" y="-53" width="42" height="5" rx="2" fill="#1d3d44"/>
+<rect x="18" y="-46" width="10" height="16" rx="2" fill="#1d3d44"/>
+<path d="M96 -12 L108 -2 L96 -2 Z" fill="#c0392b"/>
+<circle cx="96" cy="-22" r="3.2" fill="#fff6c8" filter="url(#trip-glow)"/>
+<path d="M0 -12 H96" stroke="#f4cf6a" stroke-width="1.4"/>
+<circle cx="16" cy="-2" r="5" fill="#1a1a1a" stroke="#5f8583" stroke-width="1.2"/><circle cx="44" cy="-2" r="7" fill="#1a1a1a" stroke="#5f8583" stroke-width="1.2"/><circle cx="74" cy="-2" r="7" fill="#1a1a1a" stroke="#5f8583" stroke-width="1.2"/>
+<path d="M16 -2 H74" stroke="#9fbdbb" stroke-width="1.6"/>
+</g>
+</g>
+<g fill="#e9fff8" filter="url(#trip-blur6)">
+<ellipse cx="304" cy="122" rx="14" ry="9" opacity=".45"/><ellipse cx="276" cy="106" rx="20" ry="11" opacity=".35"/>
+<ellipse cx="238" cy="94" rx="26" ry="13" opacity=".25"/><ellipse cx="192" cy="86" rx="30" ry="14" opacity=".15"/>
+</g>
+<path d="M320 186 Q380 182 440 178" stroke="#fff6c8" stroke-width="10" opacity=".12" filter="url(#trip-blur6)"/>
+<rect width="440" height="230" fill="url(#trip-moonglow)" opacity=".25"/>`;
+
+const TRAIN_DEFS = `<linearGradient id="trip-car" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2fb39a"/><stop offset="1" stop-color="#0f6a5c"/></linearGradient>
+<linearGradient id="trip-loco" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e2574a"/><stop offset="1" stop-color="#7d1f16"/></linearGradient>`;
+
+const SCENES: Record<RouteKind, { className: string; art: string }> = {
+  airport: { className: 'plane', art: PLANE },
+  port: { className: 'ship', art: SHIP },
+  station: { className: 'train', art: TRAIN },
+};
+
+// The scene for a plane ('airport'), ship ('port') or train ('station') trip.
 export function tripScene(kind: RouteKind): HTMLElement {
   const box = document.createElement('div');
-  box.className = `trip-scene ${kind === 'airport' ? 'plane' : 'ship'}`;
-  box.innerHTML = `<svg viewBox="0 0 440 230" aria-hidden="true"><defs>${DEFS}</defs>${kind === 'airport' ? PLANE : SHIP}</svg>`;
+  box.className = `trip-scene ${SCENES[kind].className}`;
+  box.innerHTML = `<svg viewBox="0 0 440 230" aria-hidden="true"><defs>${DEFS}${TRAIN_DEFS}</defs>${SCENES[kind].art}</svg>`;
   return box;
 }
 
