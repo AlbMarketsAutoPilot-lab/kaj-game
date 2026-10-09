@@ -26,6 +26,12 @@ export const WONDER_NAME: Record<string, string> = {
   mexico: 'Chichén Itzá',
   'peru-bolivia': 'Machu Picchu',
   'new-zealand': 'Milford Sound',
+  // The 50-turn map (task M4, owner-approved names).
+  greece: 'the Parthenon',
+  jordan: 'Petra',
+  'cambodia-laos-vietnam': 'Angkor Wat',
+  tanzania: 'Mount Kilimanjaro',
+  peru: 'Machu Picchu',
 };
 
 // Where each wonder is, under its name on the wonder poster (task M6).
@@ -37,4 +43,12 @@ export const WONDER_PLACE: Record<string, string> = {
   mexico: 'Yucatán · Mexico',
   'peru-bolivia': 'Cusco · Peru',
   'new-zealand': 'Fiordland · New Zealand',
+  greece: 'Athens · Greece',
+  jordan: 'Wadi Musa · Jordan',
+  'cambodia-laos-vietnam': 'Siem Reap · Cambodia',
+  tanzania: 'Kilimanjaro · Tanzania',
+  peru: 'Cusco · Peru',
 };
+
+// The 50-turn Peru shows the Machu Picchu drawing of the 30-turn Peru & Bolivia (task M4).
+export const WONDER_ART: Record<string, string> = { peru: 'peru-bolivia' };

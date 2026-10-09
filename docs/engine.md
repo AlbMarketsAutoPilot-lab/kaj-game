@@ -579,6 +579,13 @@ the timing below differ. Engine only: the screens come in M4 (until then the web
 - **Checks:** the map check and the stuck-state checker pass. Robot report
   (`node scripts/robot-report.ts 1000 50`, 10,000 games): no stuck or endless game; average scores
   easy 59, normal 67, hard 71, random 25 (30 turns: 39, 44, 47, 17); hard beats normal 66%.
+- **Screens (M4, session A):** the setup screen has a "Journey: 30 turns / 50 turns" picker
+  (30 by default). The screens use the map of the game on screen (`useMap()` in
+  `src/web/main.ts`); a saved game continues on its own map; the guide plays on the 30-turn map.
+  "Halfway there!" and "The last five turns!" come at rounds 26 and 46 of 50, the Nomad warning at
+  45, the card countdown every 5. Wonder names (owner): the Parthenon, Petra, Angkor Wat, Mount
+  Kilimanjaro; Peru shows the Machu Picchu drawing. The 4 new wonders show their poster without a
+  drawing until session B.
 - **Save version 11.** Owner: a version-10 save of a 30-turn game still loads (its rules did not
   change); other older saves are not continued.
 
