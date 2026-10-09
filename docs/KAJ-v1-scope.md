@@ -56,15 +56,15 @@ Target: a complete, playable v1 within about 15 days of work.
   | Which currency? | "Japan pays with…" Yen / Won |
 
 - **Airline quiz** (free ticket): one **text** a/b question about the destination (no drawings in v1).
-- **Citizenship exam:** 6 facts, 3 a/b questions, all correct to pass.
+- **Citizenship exam:** read 6 facts, then 3 a/b questions about them, in the same turn; **2 of 3 right to pass**, fewer: no citizenship (owner's change, task 14f).
 
 ### Timers (offline)
 
 | What | Time limit | If time runs out |
 |---|---|---|
 | Challenges and airline quiz | 15 s | Wrong answer |
-| Exam: studying 6 facts | 45 s | Moves on to the questions |
-| Exam: 3 questions | 30 s | Unanswered = wrong |
+| Exam: reading 6 facts | **No timer** (owner's change, task 14f): "I'm ready" | — |
+| Exam: each of the 3 questions | 15 s, started by the player ("Start") | Unanswered = wrong |
 | Moves and decisions | **No timer** | — |
 
 ## 7. Content
@@ -108,6 +108,7 @@ Target: a complete, playable v1 within about 15 days of work.
 | One robot level in v1 (this scope's first version) | **Easy, normal and hard** (owner's change, task 13) |
 | 30-turn map: every big country in 2 parts | **Canada, Russia and the USA (with Alaska) in 3 parts, +5 when complete** (owner's changes, tasks 14a and 14b); 53 areas |
 | "Ask for citizenship here?" on arrival | **A button in the area you stand in** (any area but your home country); the turn ends, test next turn; Luxury: granted at once, and the turn goes on (owner's change, task 14d) |
+| Any wrong answer: one learning turn, then granted anyway | **2 of 3 right to pass**, after reading 6 facts in the test turn; fewer: no citizenship, and the one request of the game is used up (owner's change, task 14f) |
 
 ## 10. Deferred (after v1, only with the owner's agreement)
 

@@ -2,9 +2,9 @@
 // landscape board (left: the current area drawn; right: the world map and the turn panel).
 // Robots play with simple rules, at the level chosen for each seat (task 13).
 
-import { BUSINESS_PRICE, CHALLENGE_POINTS, CONTINENT_BONUS, POINTS_NOMAD_TRAVEL_TURN, POINTS_NEW_AREA, POINTS_NEW_CONTINENT, POINTS_WONDER, GO_HOME_TURNS, NOMAD_MIN_CONTINENTS, NOMAD_PENALTY, NOMAD_WARNING_ROUND, POINTS_BUSINESS_CITIZENSHIP, QUIZ_TRIES, TICKET_PRICE, TOUR_FEE, TRAVEL_TURNS, VISA_PRICE } from '../engine/constants.ts';
+import { BUSINESS_PRICE, CHALLENGE_POINTS, CONTINENT_BONUS, EXAM_FACTS, EXAM_PASS, POINTS_NOMAD_TRAVEL_TURN, POINTS_NEW_AREA, POINTS_NEW_CONTINENT, POINTS_WONDER, GO_HOME_TURNS, NOMAD_MIN_CONTINENTS, NOMAD_PENALTY, NOMAD_WARNING_ROUND, POINTS_BUSINESS_CITIZENSHIP, QUIZ_TRIES, TICKET_PRICE, TOUR_FEE, TRAVEL_TURNS, VISA_PRICE } from '../engine/constants.ts';
 import {
-  apply, blockedByMoney, bookedBy, businessAt, canPayAfterQuiz, destinations, businessValue, createGame, currentPlayer, entryFees, feeTotal, finalScore, homeFor, landTurnsToCard, legalActions, nomadPenalty,
+  apply, blockedByMoney, examPassed, bookedBy, businessAt, canPayAfterQuiz, destinations, businessValue, createGame, currentPlayer, entryFees, feeTotal, finalScore, homeFor, landTurnsToCard, legalActions, nomadPenalty,
 } from '../engine/engine.ts';
 import { robotAction } from '../engine/normal-robot.ts';
 import { loadGame, saveGame } from '../engine/save.ts';
@@ -80,6 +80,8 @@ const seenCards = new Set<string>();
 const arrivals = new Map<number, { area: string; lines: string[] }>();
 // The "Ask for citizenship" popup is open (owner's request: a button and a popup, not a tick box).
 let citizenPopup = false;
+// The citizenship test question the player said "ready" for (its clock runs only after that).
+let examReady: string | null = null;
 // One countdown per question, kept across redraws.
 let countdown: { key: string; deadline: number } | null = null;
 // The popup that last played its sound (task 14C).
@@ -335,13 +337,23 @@ function act(action: Action): void {
       if (mover.kind !== 'human') lines.push(`💎 ${name} is now a citizen of ${citizenshipName(after.citizenship!)}: entering it costs a ${VISA_PRICE}-point visa to ${name}.`);
     } else {
       lines.push(mover.kind === 'human'
-        ? `🛂 ${name}: your citizenship request for ${where} has been approved! Your turn ends now. Next turn: the citizenship test, ${after.exam.questions.length} questions, ${EXAM_SECONDS} seconds each. No looking things up! You stay in ${where} until citizenship is granted.`
+        ? `🛂 ${name}: your citizenship request for ${where} has been approved! Your turn ends now. Next turn: read ${EXAM_FACTS} facts about ${where}, then answer ${after.exam.questions.length} questions about them, ${EXAM_SECONDS} seconds each. ${EXAM_PASS} right answers or more: citizenship is yours. You stay in ${where} until then.`
         : `🛂 ${name} asked for citizenship of ${where} and stays there for the test.`);
     }
   }
   const bonus = mover.profile ? CONTINENT_BONUS[mover.profile] : undefined;
   if (bonus && mover.visitedContinents.length < bonus.continents && after.visitedContinents.length >= bonus.continents) {
     lines.push(`${PROFILE_LABEL[mover.profile!]} bonus: ${name} has visited ${bonus.continents} continents, +${bonus.points}!`);
+  }
+  // A robot's citizenship test result, at the start of its turn 3.
+  for (const p of state.players) {
+    const was = before.players[p.seat].exam;
+    if (p.kind === 'human' || was?.stage !== 'result' || !p.exam || p.exam.stage === 'result') continue;
+    const who = COLOUR_NAMES[p.seat];
+    const where = areaById.get(p.exam.area)!.name;
+    lines.push(p.exam.stage === 'granted'
+      ? `🛂 ${who} passed the citizenship test and is now a citizen of ${citizenshipName(p.citizenship!)}: entering it costs a ${VISA_PRICE}-point visa to ${who}.`
+      : `🛂 ${who} failed the citizenship test: no citizenship of ${where}.`);
   }
   if (home) lines.push(`🏠 ${name} ran out of money, so the trip ends here: ${name} goes home to ${areaById.get(home)!.name}, free of any fees.`);
   if (lastTry && answered) {
@@ -815,17 +827,30 @@ function citizenshipName(areas: string[]): string {
   return areas.length > 1 && first.bigCountry ? first.bigCountry : first.name;
 }
 
-// The citizenship turns when the player stays (owner's timeline, docs/engine.md task 8):
-// the test (turn 2) and, after a wrong answer, the learning turn (turn 3).
-// "Granted" and "the right answers" are shown above the moves (renderTurn).
+// The citizenship test turn (turn 2): read the facts, then one question at a time. Each
+// question waits for "Start", so its clock never runs while the last answer is on show.
+// "Granted" and "not granted" are shown on turn 3, above the moves (renderTurn).
 function renderCitizenship(box: HTMLElement, s: GameState, who: HTMLElement): void {
-  const exam = currentPlayer(s).exam!;
-  if (exam.stage === 'test') {
+  const me = currentPlayer(s);
+  const exam = me.exam!;
+  const n = exam.answers.length;
+  const key = `${s.round}-${me.seat}-${exam.area}-${n}`;
+  if (examReady === key || me.kind !== 'human') {
     renderExamQuestion(box, s, who);
+    return;
+  }
+  const where = areaById.get(exam.area)!.name;
+  const ready = () => { examReady = key; render(); };
+  if (n === 0) {
+    box.append(el('h2', {}, who, `: citizenship test for ${where}`),
+      el('p', { textContent: `To become a citizen of ${where}, read these ${exam.study.length} facts. ${exam.questions.length} questions will be asked about them, ${EXAM_SECONDS} seconds each. ${EXAM_PASS} right answers or more: citizenship is yours. Fewer: no citizenship, and you can't ask again in this game.` }),
+      el('ol', { className: 'facts' }, ...exam.study.map((t) => el('li', { textContent: t }))),
+      el('p', { className: 'small', textContent: 'Take your time. Tap "I\'m ready" when done.' }),
+      el('div', { className: 'row' }, button('📖 I\'m ready', ready)));
   } else {
-    box.append(el('h2', {}, who, ': you did not pass the citizenship test this time.'),
-      el('p', { textContent: 'You will spend one more turn learning the right answers. Then citizenship is yours.' }),
-      el('div', { className: 'row' }, button('Continue', () => act({ type: 'exam' }))));
+    box.append(el('h2', {}, who, `: question ${n + 1} of ${exam.questions.length}`),
+      el('p', { textContent: `Ready for the next question? The ${EXAM_SECONDS}-second clock starts when you tap Start.` }),
+      el('div', { className: 'row' }, button('▶ Start', ready)));
   }
 }
 
@@ -995,6 +1020,17 @@ function challengeFact(c: Challenge): string {
 }
 
 // Right or wrong, the right answer and its fact, after a person's answer (owner's request).
+// After the last test answer: passed or not (citizenship itself comes on the next turn).
+function examVerdict(after: Player): string {
+  const exam = after.exam;
+  if (exam?.stage !== 'result') return '';
+  const right = exam.questions.filter((q, i) => exam.answers[i] === q.correct).length;
+  const where = areaById.get(exam.area)!.name;
+  return examPassed(exam)
+    ? `🎉 ${right} of ${exam.questions.length} right: you passed! Citizenship of ${where} is yours at the start of your next turn.`
+    : `😞 ${right} of ${exam.questions.length} right (${EXAM_PASS} needed): you failed the test, and citizenship of ${where} was not granted.`;
+}
+
 function answerResult(before: GameState, after: GameState, action: Action): typeof answered {
   const me = currentPlayer(before);
   if (action.type === 'answer' && before.quiz) {
@@ -1020,7 +1056,7 @@ function answerResult(before: GameState, after: GameState, action: Action): type
     return {
       ok,
       title: `${ok ? '✅ Right!' : '❌ Wrong answer'} (question ${n + 1} of ${me.exam.questions.length})`,
-      lines: [`${q.text} The answer is: ${q.options[q.correct]}.`, factFor(me.exam.area, q.text)].filter((t) => t !== ''),
+      lines: [`${q.text} The answer is: ${q.options[q.correct]}.`, factFor(me.exam.area, q.text), examVerdict(after.players[me.seat])].filter((t) => t !== ''),
     };
   }
   if (action.type === 'challengeAnswer' && before.challenge) {
@@ -1126,7 +1162,7 @@ function renderGuide(s: GameState, actions: Action[]): HTMLElement | string {
       price === null ? 'Backpacker: only with the free quiz.' : `Ticket ${plural(price, 'point')}, or try the free quiz.`} ${turns ? plural(turns, 'travel turn') : 'You arrive right away'}. Tap the ${kind === 'airport' ? 'plane' : 'ship'}.`);
   }
   if (asksOffered(actions).length > 0) {
-    lines.push(`🛂 You can ask for citizenship here (the button above). ${me.profile === 'luxury' ? 'Luxury: granted at once, and you can still move this turn.' : 'Your turn ends; next turn a short test, then citizenship is yours.'} Then every other player pays you ${plural(VISA_PRICE, 'point')} to enter.`);
+    lines.push(`🛂 You can ask for citizenship here (the button above). ${me.profile === 'luxury' ? 'Luxury: granted at once, and you can still move this turn.' : `Your turn ends; next turn you read ${EXAM_FACTS} facts and answer 3 questions about them: ${EXAM_PASS} right answers or more, and citizenship is yours.`} Then every other player pays you ${plural(VISA_PRICE, 'point')} to enter.`);
   }
 
   const off = el('input', { type: 'checkbox' });
@@ -1229,24 +1265,34 @@ function renderModal(s: GameState, actions: Action[], isRobot: boolean): Modal |
       el('h2', { textContent: `🛂 Ask for citizenship of ${where}` }),
       el('p', { textContent: me.profile === 'luxury'
         ? `Luxury Traveler: no test. Citizenship of ${where} is granted at once, and you can still move this turn.`
-        : `Your turn ends now and you stay in ${where}. Next turn: a short test (${EXAM_SECONDS} seconds a question). Then citizenship is yours and you can move on.` }),
+        : `Your turn ends now and you stay in ${where}. Next turn: a citizenship test. You read ${EXAM_FACTS} facts about ${where}, then answer 3 questions about them (${EXAM_SECONDS} seconds a question). ${EXAM_PASS} right answers or more: citizenship is yours. Fewer: no citizenship. Either way you move on the turn after.` }),
       el('p', { textContent: `As a citizen, every other player pays you a ${VISA_PRICE}-point visa each time they enter that area${me.profile === 'business' ? `, and you get +${plural(POINTS_BUSINESS_CITIZENSHIP, 'point')} (Business Traveler)` : ''}. You can ask only once per game.` }),
       el('div', { className: 'row' }, yes, button('Not now', () => { citizenPopup = false; render(); })))) };
   }
-  if (s.phase === 'play' && me.kind === 'human' && me.exam && (me.exam.stage === 'granted' || me.exam.stage === 'learning')) {
+  if (s.phase === 'play' && me.kind === 'human' && me.exam && (me.exam.stage === 'granted' || me.exam.stage === 'failed')) {
     const ek = `exam-${me.seat}-${me.exam.area}-${me.exam.stage}`;
     if (!seenCards.has(ek)) {
       const exam = me.exam;
+      const done = () => { seenCards.add(ek); render(); };
+      // The answers, for a test that was taken (Luxury takes none).
+      const answers = exam.questions.length === 0 ? '' : el('ol', {}, ...exam.questions.map((q, i) => {
+        const mine = exam.answers[i];
+        return el('li', { textContent: mine === q.correct ? `${q.text} ✅ ${q.options[q.correct]}` : `${q.text} ❌ ${q.options[mine]} → ✅ ${q.options[q.correct]}` });
+      }));
+      if (exam.stage === 'failed') {
+        return { turn: false, node: wrap(el('div', {},
+          el('h2', { textContent: `😞 Citizenship not granted: ${areaById.get(exam.area)!.name}` }),
+          el('p', { textContent: `You failed the citizenship test: fewer than ${EXAM_PASS} right answers. The right answers 📖:` }),
+          answers,
+          el('p', { textContent: 'You can\'t ask for citizenship again in this game. You may travel on.' }),
+          ok(done)), 'wrong'), sound: 'wrong', soundKey: ek };
+      }
       const bonus = me.profile === 'business' ? ` 💼 Business Traveler: +${plural(POINTS_BUSINESS_CITIZENSHIP, 'point')}.` : '';
       return { turn: false, node: wrap(el('div', {},
         el('h2', { textContent: `🎉 Citizenship granted: ${citizenshipName(me.citizenship!)}!` }),
-        exam.stage === 'learning' ? el('p', { textContent: 'You learned the right answers 📖:' }) : '',
-        exam.stage === 'learning' ? el('ol', {}, ...exam.questions.map((q, i) => {
-          const mine = exam.answers[i];
-          return el('li', {}, `${q.text} ✅ ${q.options[q.correct]}`, mine === q.correct ? '' : ` (you said: ${q.options[mine]})`);
-        })) : '',
+        answers,
         el('p', { textContent: `Every other player now pays you a ${VISA_PRICE}-point visa to enter.${bonus} You may travel on.` }),
-        ok(() => { seenCards.add(ek); render(); })), 'right'), sound: 'citizenship', soundKey: ek };
+        ok(done)), 'right'), sound: 'citizenship', soundKey: ek };
     }
   }
   // Every call to action is a popup (owner's request): quiz, test, challenge, fees, an offer,

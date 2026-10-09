@@ -135,16 +135,19 @@ export interface Payment {
 
 // Citizenship steps (docs/engine.md, tasks 8 and 14d). Turn 1: the player asks in the area they
 // stand in ("askCitizenship"), and the turn ends: "request approved, the test is next turn".
-// - test: turn 2, 3 a/b questions; the player stays;
-// - result: turn 3 after a wrong answer: "one more turn learning"; the player stays;
-// - learning: turn 4: the right answers are shown, citizenship is granted, the player moves;
-// - granted: citizenship was granted and the player moves (turn 3 after all right answers;
-//   Luxury: at once when asking, no test, and the turn goes on).
-export type ExamStage = 'test' | 'result' | 'learning' | 'granted';
+// - test: turn 2: read 6 facts, then 3 a/b questions about them; the player stays;
+// - result: the answers are in, until the player's next turn;
+// - granted: 2 or more right: citizenship was granted and the player moves (turn 3;
+//   Luxury: at once when asking, no test, and the turn goes on);
+// - failed: fewer than 2 right: no citizenship, and the player moves (turn 3). The one request
+//   of the game is used up (owner's change, after task 14e).
+export type ExamStage = 'test' | 'result' | 'granted' | 'failed';
 
 export interface Exam {
   area: string;
   stage: ExamStage;
+  // The facts to read before the questions (turn 2).
+  study: string[];
   questions: QuizQuestion[];
   // The answers given so far, in question order.
   answers: (0 | 1)[];
@@ -277,8 +280,6 @@ export type Action =
   // Luxury: granted at once and the turn goes on. Others: the turn ends, the test is next turn.
   | { type: 'askCitizenship' }
   | { type: 'answer'; choice: 0 | 1 }
-  // A citizenship turn with nothing to choose ("approved", "granted", "learn the answers").
-  | { type: 'exam' }
   // One answer in the citizenship test (turn 2); the turn ends after the 3rd.
   | { type: 'examAnswer'; choice: 0 | 1 }
   // A turn in the air or at sea. With `challenge` the player plays a challenge: the turn goes

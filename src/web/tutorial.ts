@@ -4,7 +4,7 @@
 // comes back with "📖 How to play". It is a practice board of its own: the saved game is never
 // touched.
 
-import { BUSINESS_PRICE, POINTS_BIG_COUNTRY_3_PARTS, VISA_PRICE } from '../engine/constants.ts';
+import { BUSINESS_PRICE, EXAM_FACTS, EXAM_PASS, POINTS_BIG_COUNTRY_3_PARTS, VISA_PRICE } from '../engine/constants.ts';
 import type { AreaGeo } from './maps.ts';
 import { pad, squeeze, svg, unionBox } from './maps.ts';
 import { airport, citizenFlag, pawn, place } from './props.ts';
@@ -184,7 +184,7 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
       after: { title: '🎉 You own the airline of UK & Ireland!', picture: () => airportView(true),
         lines: ['Your flag now flies over the airport. Every time another player flies from UK & Ireland, the ticket money goes to you.'] } },
     { title: '🛂 Citizenship', task: true, picture: askCitizenship,
-      lines: ['One more trick: become a citizen of one country. Try it!'],
+      lines: ['One more trick: become a citizen of one country. Try it!', `In the game there is a short test first: read ${EXAM_FACTS} facts about the country, then answer 3 questions. ${EXAM_PASS} right answers or more, and citizenship is yours.`],
       after: { title: '🎉 Citizenship granted!', picture: citizenView,
         lines: [`Now every other player pays you a ${VISA_PRICE}-point visa to enter France.`, 'Choose a country that people pass through a lot. Choose wisely!'] } },
     { title: '🤔 Sounds too easy?', lines: ['Here is the catch: everything you can own, the other players can own too.', 'Then you pay: tickets, tour fees, visas. Be smart about where you go!'] },

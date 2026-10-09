@@ -37,10 +37,10 @@ function pass(s: GameState): GameState {
   return go(s, legalActions(s, map).find((a) => a.type !== 'askCitizenship')!);
 }
 
-// Answers the 3 test questions: all right, or the first one wrong.
-function answerTest(s: GameState, allRight: boolean): GameState {
+// Answers the 3 test questions, `wrong` of them wrong (the first ones).
+function answerTest(s: GameState, wrong: number): GameState {
   for (const [i, q] of me(s).exam!.questions.entries()) {
-    const right = allRight || i > 0;
+    const right = i >= wrong;
     s = go(s, { type: 'examAnswer', choice: right ? q.correct : ((1 - q.correct) as 0 | 1) });
   }
   return s;
@@ -87,7 +87,8 @@ test('all answers right: asking ends the turn, test next turn, granted and moves
   s = pass(s);
 
   assert.deepEqual(types(s), ['examAnswer']); // turn 2: the 3 questions, in one turn; stays
-  s = answerTest(s, true);
+  assert.equal(me(s).exam!.study.length, 3); // the test map has no facts: a study line per question
+  s = answerTest(s, 0);
   assert.equal(me(s).exam!.stage, 'result');
   assert.equal(me(s).citizenship, null);
   s = pass(s);
@@ -99,26 +100,38 @@ test('all answers right: asking ends the turn, test next turn, granted and moves
   assert.equal(me(s).exam, null);
 });
 
-test('a wrong answer: one more turn learning, then granted and moves on turn 4', () => {
+test('one wrong answer of 3: still passed, granted on turn 3', () => {
   let s = game(['eu-west', 'af-south'], 'backpacker');
   s = go(s, { type: 'walk', to: 'eu-north' });
   s = pass(s);
   s = ask(s);
   s = pass(s);
-  s = answerTest(s, false);
+  s = answerTest(s, 1);
   s = pass(s);
 
-  assert.equal(me(s).citizenship, null); // turn 3: not passed, stays
-  assert.deepEqual(types(s), ['exam']);
-  s = go(s, { type: 'exam' });
-  assert.equal(me(s).exam!.stage, 'learning');
-  s = pass(s);
-
-  assert.deepEqual(me(s).citizenship, ['eu-north']); // turn 4: answers shown, granted, moves
-  assert.equal(me(s).exam!.stage, 'learning');
+  assert.deepEqual(me(s).citizenship, ['eu-north']);
+  assert.equal(me(s).exam!.stage, 'granted');
   assert.ok(types(s).includes('walk'));
+});
+
+test('two wrong answers of 3: no citizenship, moves on turn 3, and no second request', () => {
+  let s = game(['eu-west', 'af-south'], 'backpacker');
+  s = go(s, { type: 'walk', to: 'eu-north' });
+  s = pass(s);
+  s = ask(s);
+  s = pass(s);
+  s = answerTest(s, 2);
+  s = pass(s);
+
+  assert.equal(me(s).citizenship, null); // turn 3: refused, and moves
+  assert.equal(me(s).exam!.stage, 'failed');
+  assert.ok(types(s).includes('walk'));
+  assert.equal(canAsk(s), false);
   s = pass(s); // its first move
   assert.equal(me(s).exam, null);
+  assert.equal(me(s).citizenship, null);
+  s = pass(s);
+  assert.equal(canAsk(s), false); // the one request of the game is used up
 });
 
 test('Luxury: no test; granted at once, and the turn goes on', () => {
@@ -140,7 +153,7 @@ test('Business: +3 when citizenship is granted', () => {
   s = pass(s);
   s = ask(s);
   s = pass(s);
-  s = answerTest(s, true);
+  s = answerTest(s, 0);
   const before = me(s).points;
   s = pass(s);
   assert.equal(me(s).points, before + POINTS_BUSINESS_CITIZENSHIP);
@@ -163,7 +176,7 @@ test('one citizen per area: nobody else can ask there, also during the test', ()
   s = ask(s);
   assert.equal(canAskCitizenship(s, map, other(s), 'eu-east'), false); // during the request
   s = pass(s);
-  s = answerTest(s, true);
+  s = answerTest(s, 0);
   s = pass(s);
   assert.equal(canAskCitizenship(s, map, other(s), 'eu-east'), false); // held
 });
@@ -265,15 +278,19 @@ test('citizenship granted during a trip: no visa on landing', () => {
   assert.ok(me(t).points >= points);
 });
 
-test('the test questions come from 3 different facts of the area', () => {
+test('6 facts to read, in the area\'s order; the 3 questions come from 3 different ones of them', () => {
   let seed = 7;
   for (const area of ['france', 'japan', 'chile']) {
-    const [questions, next] = makeExam(map30, area, 3, seed);
+    const [{ questions, study }, next] = makeExam(map30, area, 3, 6, seed);
     seed = next;
     const facts = map30.facts![area];
+    assert.equal(new Set(study).size, 6);
+    const order = study.map((t) => facts.findIndex((f) => f.text === t));
+    assert.ok(order.every((i, k) => i >= 0 && (k === 0 || i > order[k - 1])));
     assert.equal(new Set(questions.map((q) => q.text)).size, 3);
     for (const q of questions) {
       const fact = facts.find((f) => f.question === q.text)!;
+      assert.ok(study.includes(fact.text));
       assert.equal(q.options[q.correct], fact.right);
       assert.equal(q.options[1 - q.correct], fact.wrong);
     }

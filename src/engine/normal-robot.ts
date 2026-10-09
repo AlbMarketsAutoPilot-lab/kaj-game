@@ -108,7 +108,7 @@ function choose(state: GameState, map: GameMap, actions: Action[], me: Player, s
     if (sells.length > 0 && blockedByMoney(state, map, me)) {
       return rnd.best(sells, (a) => a.type === 'sell' ? [BUSINESS_PRICE[a.business], state.players[a.to].points] : []);
     }
-    return actions.find((a) => a.type === 'goHome' || a.type === 'blocked' || a.type === 'lostTurn' || a.type === 'exam') ?? first;
+    return actions.find((a) => a.type === 'goHome' || a.type === 'blocked' || a.type === 'lostTurn') ?? first;
   }
   return chooseMove(state, map, moves, me, settings, rnd);
 }
