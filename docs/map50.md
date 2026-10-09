@@ -141,7 +141,7 @@ The 13 connections of the 30-turn map are kept (on the matching part), plus 8 ne
 | ✈️ | New Zealand | Chile |  |
 | ✈️ | South Africa | Chile |  |
 | ✈️ | UK & Ireland | Gulf States |  |
-| ✈️ | UK & Ireland | USA East |  |
+| ✈️ | UK & Ireland | USA East | new |
 | ✈️ | USA East | Brazil South | new |
 | ✈️ | Brazil South | Nigeria | new |
 | ✈️ | India | Gulf States | new |
