@@ -52,7 +52,13 @@ Every task also adds its part to the test board, so there is **always a playable
 | 14j | Trip turns: plane and ship scenes on the background painting, with who is travelling and "No thanks" | medium | 1 | 14 | ✅ done |
 | 14k | Events as phone news: the phone buzzes (only "Read"), then the card with a headline and "What this means for you"; 53 headlines to check in docs/cards.md | medium | 1 | 14 | ✅ done |
 | 14l | Every screen fits every size: the interface scales to the screen (checked at 667×375, 900×430, 1024×768, 1280×720, 1920×1080); guide line on long trips | medium | 1 | 14 | ✅ done |
-| 15 | Android release build (signed APK) | medium | 1 | 14 | |
+| M1 | 50-turn map: area list, wonders, airports and ports (`docs/map50.md`, made by `node scripts/map50-review.ts`) | **high** | 1 | 13 | ✅ written, owner to check |
+| M2 | 50-turn map: engine (map choice, data, timing, stuck-state checker, 1,000 robot games, saves v7) | **high** | 1 | 13–14 | |
+| M3 | 50-turn map: shapes, facts sorted by country (write only the missing ones) | medium | 1 | 14 | |
+| M4 | 50-turn map: screens (turn picker, home country, world map, guide), web and APK | medium | 1 | 15 | |
+| M5 | 50-turn map: full test games and fixes | medium | 1 | 15 | |
+| M6 | Wonder posters for the 7 wonders of the 30-turn map (the 4 of the 50-turn map come with M4) | medium | 1 | 13 | ✅ done |
+| 15 | Android release build (signed APK) | medium | 1 | — | postponed (owner, 2026-10-09) |
 | 16 | Full-game tests, bug fixes, buffer | medium | 1–2 | 15 | |
 
 ## The tasks
@@ -323,7 +329,24 @@ time (`CLAUDE.md` rule 1), medium effort:
 Things the owner noted that are still open (for task 16 if not done earlier): the income popup
 ("Great news, Red!") was checked by reading the code only, not seen in a test game.
 
-### 15. Android release build — day 14
+### M. The 50-turn map — part of v1 (owner, 2026-10-09)
+
+Owner's decisions: 80–90 areas; the 30-turn game stays **frozen**, and the 50-turn game uses its
+rules and design; the same big-country splits; facts reused by country (only missing ones written);
+about 13 airports, 13 ports and 21 connections (the rulebook's 8 and 4–5 were too few for 80–90
+areas); 11 wonders. Task 15 is postponed. M1 proposal: 87 areas in `docs/map50.md`.
+
+**M6 done (owner-approved drawings and rules, 2026-10-09):** `node scripts/wonders-make.ts` draws the 7
+wonders (`assets/wonders/<area id>.svg`) over the game's background painting; the build inlines them.
+The poster opens at the **start of a person's next turn** in the wonder area (when buying is allowed,
+so no rule changes): the name in the poster's lettering, "+1 point just for
+visiting…", and the Guided Tours offer (Buy / Not now) when nobody owns them. Once per wonder per game,
+never for robots, never in the home area. Not kept in the save: after "Continue" it may show once more.
+**Calm popups (owner, all popups):** after a popup is closed (OK, Let's go, End turn…), the board shows
+for 2 seconds with a turning ⌛ before the next popup opens (a tap opens it at once); popups that answer the player's own tap (quiz,
+answer, fees, citizenship) open at once. Order: M6 is merged first, then the 50-turn work starts at high effort (owner).
+
+### 15. Android release build — postponed
 
 - Signed APK from GitHub Actions; app icon, name, splash, screen orientation.
 - Owner steps: create the signing key and add it to GitHub secrets (one step at a time).
