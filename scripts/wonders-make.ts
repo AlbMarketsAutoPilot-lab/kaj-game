@@ -1,4 +1,4 @@
-// Makes the wonder posters (task M6): one SVG per wonder in assets/wonders/<area id>.svg.
+// Makes the wonder posters (task M6; the 4 of the 50-turn map in task M4): one SVG per wonder in assets/wonders/<area id>.svg.
 // Each drawing has no sky: it sits on the game's own background painting (like the trip scenes),
 // in the same night light (teal, moonlit from the left, warm lights). Run: node scripts/wonders-make.ts
 import { mkdirSync, writeFileSync } from 'node:fs';
@@ -304,7 +304,146 @@ function milfordSound(): string {
   return s;
 }
 
-// The 30-turn map's wonders by area id (src/maps/map30.ts).
+// ---------- The 50-turn map (task M4, owner-approved names) ----------
+
+// The Parthenon (Greece): the temple on the Acropolis rock, floodlit gold, Athens below.
+function parthenon(): string {
+  const rnd = seeded(19);
+  const lit = '#efd59e', mid = '#d2b47a', shade = '#8e7450', dark = '#5e4a32';
+  let s = `<ellipse cx="450" cy="300" rx="340" ry="170" fill="url(#w-halo)"/>`;
+  // The Acropolis rock, with the city's lights at its foot.
+  s += `<path d="M0 560V470Q90 440 160 420L210 372Q260 360 330 362L600 360Q680 362 720 380L760 420Q840 440 900 452V560Z" fill="#3c5552"/>`;
+  s += `<path d="M600 360Q680 362 720 380L760 420Q840 440 900 452V560H620Q660 470 600 360Z" fill="#26403f"/>`;
+  s += `<path d="M210 372Q260 360 330 362L600 360Q680 362 720 380" stroke="#c9a46a" stroke-opacity=".35" stroke-width="3" fill="none"/>`;
+  for (let i = 0; i < 90; i++) { const x = rnd() * 900, y = 495 + rnd() * 60; s += `<circle cx="${f(x)}" cy="${f(y)}" r="${f(1 + rnd() * 1.6)}" fill="${rnd() < 0.7 ? '#ffd27a' : '#fff3d0'}" opacity="${f(0.5 + rnd() * 0.5)}"/>`; }
+  // The side colonnade, going back to the right (seen from the north-west corner).
+  s += poly([[600, 352], [716, 330], [716, 338], [600, 362]], mid);
+  for (let i = 1; i <= 7; i++) { const x = 600 + i * 15, y = 352 - i * 2.9; s += `<rect x="${f(x - 4)}" y="${f(y - 104 + i * 1.5)}" width="8" height="${f(104 - i * 1.5)}" fill="${i % 2 ? shade : mid}"/>`; }
+  s += poly([[600, 222], [716, 214], [716, 232], [600, 244]], shade); // the side entablature
+  s += poly([[600, 222], [716, 214], [716, 206], [600, 212]], dark, ' opacity=".7"');
+  // The steps and the front: eight columns, the light glowing between them.
+  for (let k = 0; k < 3; k++) s += `<rect x="${280 - k * 8}" y="${360 + k * 7}" width="${f(330 + k * 16)}" height="7" fill="${k % 2 ? mid : lit}"/>`;
+  s += `<rect x="300" y="244" width="300" height="116" fill="url(#w-glow)" opacity=".75"/>`;
+  s += `<rect x="300" y="244" width="300" height="116" fill="#3b2a20" opacity=".35"/>`;
+  for (let i = 0; i < 8; i++) {
+    const x = 304 + i * 41.5, w = 24;
+    s += `<rect x="${f(x)}" y="244" width="${w}" height="116" fill="${lit}"/><rect x="${f(x + w * 0.6)}" y="244" width="${f(w * 0.4)}" height="116" fill="${mid}"/>`;
+    for (let k = 1; k < 4; k++) s += `<path d="M${f(x + k * 6)} 248V358" stroke="${shade}" stroke-opacity=".45" stroke-width="1"/>`;
+    s += `<rect x="${f(x - 3)}" y="238" width="${w + 6}" height="7" fill="${lit}"/>`; // the capital
+  }
+  s += `<rect x="294" y="222" width="312" height="16" fill="${mid}"/><rect x="294" y="212" width="312" height="10" fill="${lit}"/>`;
+  for (let x = 300; x < 600; x += 13) s += `<rect x="${x}" y="214" width="5" height="7" fill="${shade}"/>`; // the triglyphs
+  // The pediment, its right corner broken off.
+  s += `<path d="M288 212L450 170L560 196L572 204L582 200L612 212Z" fill="${lit}"/><path d="M304 208L450 178L552 202L566 207L574 204L596 208Z" fill="${shade}" opacity=".55"/>`;
+  s += `<path d="M450 170L560 196" stroke="#fff6dc" stroke-opacity=".5" stroke-width="2"/>`;
+  // Olive trees on the slope.
+  for (const [x, y] of [[110, 440], [170, 425], [760, 438], [830, 450], [250, 470], [690, 470]] as const) {
+    s += `<path d="M${x} ${y}v14" stroke="#1b2a26" stroke-width="3"/>`;
+    for (let i = 0; i < 5; i++) s += `<ellipse cx="${f(x + (rnd() - 0.5) * 26)}" cy="${f(y - 6 + (rnd() - 0.5) * 12)}" rx="${f(10 + rnd() * 6)}" ry="${f(7 + rnd() * 4)}" fill="#22423b"/>`;
+  }
+  return s + people(rnd, 6, 320, 600, 376);
+}
+
+// Petra (Jordan): the Treasury carved in rose rock at the end of the Siq, with "Petra by Night" candles.
+function petra(): string {
+  const rnd = seeded(23);
+  const lit = '#dc9a7c', mid = '#b9765e', shade = '#7d4a3c', dark = '#4d2a24';
+  let s = '';
+  // The cliff around the facade, and the dark canyon walls on both sides.
+  s += `<path d="M150 560V0H750V560Z" fill="#8a5446"/>`;
+  for (let i = 0; i < 14; i++) s += `<path d="M150 ${f(30 + i * 38 + rnd() * 10)}Q450 ${f(20 + i * 38 + rnd() * 20)} 750 ${f(36 + i * 38 + rnd() * 10)}" stroke="#a7685a" stroke-opacity=".35" stroke-width="${f(3 + rnd() * 4)}" fill="none"/>`;
+  s += `<ellipse cx="450" cy="330" rx="260" ry="230" fill="url(#w-halo)"/>`;
+  // Lower storey: six columns under a pediment, the door glowing.
+  s += `<rect x="270" y="320" width="360" height="170" fill="${mid}"/>`;
+  s += `<rect x="420" y="372" width="60" height="118" fill="url(#w-glow)"/><rect x="420" y="372" width="60" height="10" fill="${shade}"/>`;
+  for (const x of [282, 334, 386, 494, 546, 598]) { s += `<rect x="${x}" y="336" width="20" height="154" fill="${lit}"/><rect x="${x + 12}" y="336" width="8" height="154" fill="${mid}"/><rect x="${x - 4}" y="328" width="28" height="10" fill="${lit}"/>`; }
+  s += `<rect x="262" y="306" width="376" height="22" fill="${lit}"/><rect x="262" y="320" width="376" height="5" fill="${shade}"/>`;
+  s += `<path d="M370 306L450 270L530 306Z" fill="${lit}"/><path d="M386 302L450 280L514 302Z" fill="${shade}" opacity=".5"/>`;
+  // Upper storey: the round kiosk (tholos) with its urn, between two half-pediments.
+  s += `<rect x="290" y="210" width="320" height="60" fill="${shade}" opacity=".6"/>`;
+  s += `<path d="M290 214L350 186L350 214Z" fill="${lit}"/><path d="M610 214L550 186L550 214Z" fill="${lit}"/>`;
+  for (const x of [296, 330, 556, 590]) s += `<rect x="${x}" y="214" width="14" height="92" fill="${lit}"/>`;
+  s += `<rect x="404" y="176" width="92" height="130" fill="${mid}"/>`;
+  for (const x of [404, 432, 460, 482]) s += `<rect x="${x}" y="176" width="13" height="130" fill="${lit}"/>`;
+  s += `<rect x="398" y="166" width="104" height="12" fill="${lit}"/><path d="M402 166Q450 128 498 166Z" fill="${mid}"/>`;
+  s += `<path d="M440 130Q450 112 460 130L456 142H444Z" fill="${lit}"/><rect x="446" y="142" width="8" height="10" fill="${lit}"/>`; // the urn
+  s += `<rect x="350" y="236" width="40" height="70" fill="${dark}" opacity=".55"/><rect x="510" y="236" width="40" height="70" fill="${dark}" opacity=".55"/>`;
+  // The dark walls of the Siq framing the view.
+  s += `<path d="M0 0H200Q170 120 190 260Q160 400 210 560H0Z" fill="#2a1a18"/><path d="M900 0H700Q740 140 712 280Q750 420 690 560H900Z" fill="#2a1a18"/>`;
+  s += `<path d="M200 0Q170 120 190 260Q160 400 210 560" stroke="#7d4a3c" stroke-width="3" fill="none" opacity=".6"/><path d="M700 0Q740 140 712 280Q750 420 690 560" stroke="#7d4a3c" stroke-width="3" fill="none" opacity=".6"/>`;
+  // The sandy floor with rows of candles.
+  s += `<path d="M150 490H750L800 560H100Z" fill="#a8775e"/>`;
+  for (let r = 0; r < 4; r++) for (let i = 0; i < 18 + r * 4; i++) {
+    const t = (i + 0.5) / (18 + r * 4), x = 220 - r * 40 + t * (460 + r * 80), y = 500 + r * 15;
+    s += `<circle cx="${f(x)}" cy="${f(y)}" r="${f(5 + r)}" fill="#ffcf85" opacity=".25"/><rect x="${f(x - 2 - r * 0.5)}" y="${f(y - 3 - r)}" width="${f(4 + r)}" height="${f(5 + r)}" rx="1" fill="#ffe2a0"/>`;
+  }
+  return s + people(rnd, 6, 300, 600, 486);
+}
+
+// Angkor Wat (Cambodia): the five lotus-bud towers over the galleries, mirrored in the pond, sugar palms.
+function angkorWat(): string {
+  const rnd = seeded(29);
+  const lit = '#b9b08d', mid = '#968d6c', shade = '#5f5a46';
+  const tower = (x: number, base: number, w: number, h: number) => { // a lotus-bud tower: stacked tiers
+    let s = '';
+    const n = 9;
+    for (let i = 0; i < n; i++) {
+      const t = i / n, ww = w * (1 - t * 0.78) * (i === 0 ? 1.1 : 1), y = base - h * t, hh = h / n + 1;
+      s += `<path d="M${f(x - ww / 2)} ${f(y)}Q${f(x - ww / 2 - 4)} ${f(y - hh * 0.6)} ${f(x - ww / 2 + 3)} ${f(y - hh)}H${f(x + ww / 2 - 3)}Q${f(x + ww / 2 + 4)} ${f(y - hh * 0.6)} ${f(x + ww / 2)} ${f(y)}Z" fill="${i % 2 ? mid : lit}"/>`;
+      s += `<path d="M${f(x + ww * 0.1)} ${f(y)}V${f(y - hh)}H${f(x + ww / 2 - 3)}Q${f(x + ww / 2 + 4)} ${f(y - hh * 0.6)} ${f(x + ww / 2)} ${f(y)}Z" fill="${shade}" opacity=".45"/>`;
+    }
+    return s + `<path d="M${f(x)} ${f(base - h)}L${f(x - 4)} ${f(base - h + 6)}L${f(x + 4)} ${f(base - h + 6)}Z" fill="${lit}"/>`;
+  };
+  const temple = () => {
+    let s = '';
+    s += tower(250, 360, 54, 120) + tower(650, 360, 54, 120); // the far corner towers
+    s += `<rect x="160" y="330" width="580" height="40" fill="${mid}"/><rect x="160" y="326" width="580" height="6" fill="${lit}"/>`;
+    s += tower(330, 330, 64, 150) + tower(570, 330, 64, 150); // the near corner towers
+    s += tower(450, 300, 86, 210); // the central tower
+    s += `<rect x="90" y="370" width="720" height="44" fill="${lit}"/><rect x="90" y="366" width="720" height="6" fill="#d3cba7"/>`; // the outer gallery
+    for (let x = 100; x < 800; x += 18) s += `<rect x="${x}" y="380" width="8" height="30" fill="${x > 420 && x < 480 ? 'url(#w-glow)' : shade}"/>`;
+    s += `<path d="M410 414V380Q450 352 490 380V414Z" fill="url(#w-glow)"/>`; // the lit entrance
+    return s;
+  };
+  let s = `<ellipse cx="450" cy="270" rx="320" ry="190" fill="url(#w-mist)" opacity=".4"/>` + temple();
+  s += `<rect x="0" y="414" width="900" height="16" fill="#2f5a4a"/>`;
+  s += `<rect x="0" y="430" width="900" height="130" fill="url(#w-water)"/>`;
+  s += `<clipPath id="w-pond"><rect x="0" y="430" width="900" height="130"/></clipPath><g clip-path="url(#w-pond)" opacity=".35"><g transform="translate(0 844) scale(1 -1)">${temple()}</g></g>`;
+  for (let i = 0; i < 10; i++) s += `<path d="M${f(380 + rnd() * 60)} ${448 + i * 10}h${f(40 + rnd() * 60)}" stroke="#ffe2a0" stroke-opacity="${f(0.3 - i * 0.02)}" stroke-width="1.5"/>`;
+  // Sugar palms on both sides: thin trunks with round crowns of fronds.
+  for (const [x, y, h] of [[40, 430, 190], [92, 432, 150], [800, 432, 170], [858, 430, 210], [140, 434, 110]] as const) {
+    s += `<path d="M${x} ${y}Q${x + 6} ${y - h / 2} ${x + 2} ${y - h}" stroke="#0e2b27" stroke-width="4" fill="none"/>`;
+    for (let k = 0; k < 12; k++) { const a = (k / 12) * Math.PI * 2, r = 26; s += `<path d="M${x + 2} ${y - h}l${f(Math.cos(a) * r)} ${f(Math.sin(a) * r * 0.7)}" stroke="#0e2b27" stroke-width="5" stroke-linecap="round"/>`; }
+  }
+  for (let i = 0; i < 4; i++) s += `<ellipse cx="${f(240 + i * 150 + rnd() * 30)}" cy="${f(470 + rnd() * 50)}" rx="10" ry="4" fill="#e597b3" opacity=".75"/>`; // lotus flowers
+  return s + people(rnd, 6, 260, 640, 426);
+}
+
+// Mount Kilimanjaro (Tanzania): the flat snowy top of Kibo over the savanna, acacias and elephants.
+function kilimanjaro(): string {
+  const rnd = seeded(31);
+  let s = `<ellipse cx="450" cy="250" rx="380" ry="170" fill="url(#w-mist)" opacity=".35"/>`;
+  s += `<path d="M0 430Q160 360 300 250Q350 196 380 182L560 176Q600 186 650 240Q760 350 900 410V470H0Z" fill="#3f6a74"/>`; // Kibo
+  s += `<path d="M470 178L560 176Q600 186 650 240Q760 350 900 410V470H620Q560 300 470 178Z" fill="#284e58" opacity=".85"/>`;
+  s += `<path d="M380 182L560 176Q590 184 612 208L596 204L584 224L566 206L552 230L534 210L516 236L500 212L482 238L466 214L448 236L432 212L414 232L400 208L384 226L362 206Q370 190 380 182Z" fill="#eef7f6"/>`; // the snow
+  s += `<path d="M500 178L560 176Q590 184 612 208L596 204L584 224L566 206L552 230L534 210L516 236L500 212Z" fill="#b4d0d4"/>`;
+  s += `<path d="M640 280L700 300L690 316L660 304Z" fill="#dfeeee" opacity=".7"/><path d="M290 270L320 258L314 276Z" fill="#dfeeee" opacity=".6"/>`; // glaciers
+  s += `<path d="M120 400Q190 350 240 330Q270 320 300 336Q340 360 380 400Z" fill="#335c64"/>`; // Mawenzi's shoulder
+  s += `<ellipse cx="450" cy="380" rx="420" ry="26" fill="url(#w-mist)" filter="url(#w-blur)"/>`;
+  s += `<path d="M0 440Q300 410 520 430T900 420V560H0Z" fill="#3f5236"/><path d="M0 480Q260 460 480 482T900 470V560H0Z" fill="#2c3d27"/>`; // the savanna
+  for (let i = 0; i < 70; i++) { const x = rnd() * 900, y = 446 + rnd() * 100; s += `<path d="M${f(x)} ${f(y)}l2 -7l2 7" stroke="#6d8253" stroke-width="1" fill="none" opacity=".6"/>`; }
+  const acacia = (x: number, y: number, k: number) => // an umbrella thorn tree
+    `<path d="M${x} ${y}L${x + 3 * k} ${y - 34 * k}M${x + 2 * k} ${y - 22 * k}L${x - 14 * k} ${y - 36 * k}M${x + 3 * k} ${y - 30 * k}L${x + 18 * k} ${y - 40 * k}" stroke="#14231c" stroke-width="${f(3 * k)}" fill="none"/>`
+    + `<ellipse cx="${x + 2 * k}" cy="${f(y - 40 * k)}" rx="${f(42 * k)}" ry="${f(9 * k)}" fill="#14231c"/>`;
+  s += acacia(120, 500, 1.6) + acacia(700, 488, 1.2) + acacia(820, 506, 1.8) + acacia(330, 470, 0.8);
+  const elephant = (x: number, y: number, k: number) => // a walking elephant, facing left
+    `<g fill="#1a2620" transform="translate(${x} ${y}) scale(${k})"><path d="M0 -30Q4 -46 24 -48Q46 -50 58 -36Q64 -26 60 -14L58 0H50L48 -12H22L20 0H12L10 -14Q2 -14 -4 -8L-6 4L-12 4L-10 -10Q-12 -22 0 -30Z"/><path d="M14 -40Q6 -44 4 -32Q10 -26 18 -30Z" fill="#26352d"/></g>`;
+  s += elephant(430, 512, 1.1) + elephant(500, 516, 0.9) + elephant(560, 518, 0.55);
+  return s;
+}
+
+// The wonders by area id: the 30-turn map's (src/maps/map30.ts) and the 4 new ones of the 50-turn map
+// (src/maps/map50.ts; its Peru uses the Machu Picchu drawing of peru-bolivia).
 const WONDERS: Record<string, () => string> = {
   italy: colosseum,
   india: tajMahal,
@@ -313,6 +452,10 @@ const WONDERS: Record<string, () => string> = {
   mexico: chichenItza,
   'peru-bolivia': machuPicchu,
   'new-zealand': milfordSound,
+  greece: parthenon,
+  jordan: petra,
+  'cambodia-laos-vietnam': angkorWat,
+  tanzania: kilimanjaro,
 };
 
 const dir = new URL('../assets/wonders/', import.meta.url);

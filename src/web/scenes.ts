@@ -3,6 +3,7 @@
 // night train (task 17), or a bus on the steppe (task 18).
 
 import type { RouteKind } from '../engine/types.ts';
+import { WONDER_ART } from './countries.ts';
 
 const DEFS = `<filter id="trip-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
 <filter id="trip-soft"><feGaussianBlur stdDeviation="1.2"/></filter>
@@ -192,11 +193,11 @@ export function tripScene(kind: RouteKind): HTMLElement {
 // drawn over the background painting, like the trip scenes.
 const WONDERS: Record<string, string> = (window as unknown as { KAJ_WONDERS?: Record<string, string> }).KAJ_WONDERS ?? {};
 
-export const hasWonderScene = (area: string): boolean => area in WONDERS;
-
+// A wonder without a drawing yet (the 4 new ones of the 50-turn map, task M4) shows only the
+// background painting.
 export function wonderScene(area: string): HTMLElement {
   const box = document.createElement('div');
   box.className = 'wonder-scene';
-  box.innerHTML = WONDERS[area] ?? '';
+  box.innerHTML = WONDERS[WONDER_ART[area] ?? area] ?? '';
   return box;
 }
