@@ -233,3 +233,13 @@ button.link { background: none; border: none; padding: 0; text-align: left; font
 @media (prefers-reduced-motion: reduce) {
   .event-rays, .event-deck, .finish .trophy, .income .coins, .modal.event, .modal.gold { animation: none !important; }
 }
+
+/* The guide for new players (2026-10-09). */
+.guide { max-width: 520px; text-align: center; }
+.guide-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.guide-points { font-weight: 700; color: #ffe08a; }
+.guide-points.bump { animation: pop-in 0.5s ease-out; }
+.guide-map { width: 100%; max-height: 38vh; }
+.guide-prop { width: 160px; max-height: 26vh; }
+.guide-glow { animation: glow 1.2s ease-in-out infinite; }
+@keyframes glow { 50% { filter: brightness(1.35) drop-shadow(0 0 6px #fff6c8); } }
