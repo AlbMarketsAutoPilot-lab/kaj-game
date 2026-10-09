@@ -7,3 +7,6 @@ made mono and set to the same loudness for the game.
 right.mp3: https://pixabay.com/sound-effects/technology-glock-correct-answer-504462/
 tap, walk, plane, ship, wrong, card-good, card-bad, coins, citizenship, milestone, win,
 timer (15-second answer loop), music: Pixabay, individual links not kept (owner's choice).
+
+train.mp3: uploaded by the owner (2026-10-09) for the train (task 17); source and licence to be confirmed by the owner,
+and the file still to be trimmed and levelled like the others.

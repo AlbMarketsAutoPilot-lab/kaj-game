@@ -59,6 +59,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | M5 | 50-turn map: full test games and fixes | medium | 1 | 15 | |
 | M6 | Wonder posters for the 7 wonders of the 30-turn map (the 4 of the 50-turn map come with M4) | medium | 1 | 13 | ✅ done |
 | 15 | Android release build (signed APK) | medium | 1 | — | postponed (owner, 2026-10-09) |
+| 17 | Train France ↔ Russia West and France ↔ Turkey (30-turn map): A rules **high**, B screens medium | **high** / medium | 2 | 13–14 | owner-approved, not started |
 | 16 | Full-game tests, bug fixes, buffer | medium | 1–2 | 15 | |
 
 ## The tasks
@@ -350,6 +351,26 @@ answer, fees, citizenship) open at once. Order: M6 is merged first, then the 50-
 
 - Signed APK from GitHub Actions; app icon, name, splash, screen orientation.
 - Owner steps: create the signing key and add it to GitHub secrets (one step at a time).
+
+### 17. The train — 30-turn map only (owner-approved 2026-10-09; the 50-turn work waits)
+
+Session A (**high**): rules in the engine, robots, stuck-state checker, tests, 1,000 robot games, saves
+version 7, rules written in `docs/engine.md`. Session B (medium): screens. Owner's rules:
+
+- **Routes:** France ↔ Russia West and France ↔ Turkey & Caucasus (`turkey-caucasus`). In France the
+  player chooses one of the two; Russia West and Turkey go only back to France (never to each other).
+- **Travel:** 1 turn for every profile (Business too). Digital Nomad +1 for the train turn. A travel
+  challenge is offered, as on planes and ships.
+- **Ticket:** 2 points for Business and Nomad. Backpacker never pays: the quiz only (as on planes).
+  **Luxury can't take the train.** Others may also try the quiz, as with planes (3 tries).
+- **Fees:** all the usual rules: visa and tour fees on entering, booked areas, no money means no entry.
+- **Booths:** 3 🚆 train ticket booths for sale at **2 points**: France, Russia West, Turkey. Bought like
+  the airline and ferry agency; the ticket money goes to the owner of the departure booth.
+- **Screens (B):** a drawn station on the area view (style of the airport and port props), 🚆 on the
+  continent and world maps, a train scene on the background painting (like the plane and ship),
+  popups for buying the booth and for the train trip with its challenge, guide texts, route lines.
+- **Sound:** `assets/sounds/train.mp3` (uploaded by the owner; trim and level it, play it like the
+  plane and ship sounds).
 
 ### 16. Full-game tests and fixes — day 15
 
