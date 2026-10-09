@@ -15,6 +15,7 @@ import { countryCapital, countryFlag, WONDER_NAME } from './countries.ts';
 import { buildGeo, colourAreas, continentBox, pad, squeeze, svg, unionBox, type Box } from './maps.ts';
 import { airport, citizenFlag, monument, pawn, place, port } from './props.ts';
 import { iconEl, iconUse, installIcons, PROFILE_COLOUR } from './icons.ts';
+import { tripScene } from './scenes.ts';
 import { guideSeen, runGuide } from './tutorial.ts';
 import { play, setMusic, soundOn, startTimer, stopTimer, toggleSound, type SoundName } from './sound.ts';
 
@@ -760,18 +761,30 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
     box.append(el('h2', {}, who, ', you lose this turn'),
       el('div', { className: 'row' }, button('⏸️ Lose this turn', () => act({ type: 'lostTurn' }))));
   } else if (me.travel) {
+    // A trip turn: the plane or ship scene (owner-approved, task 14j), with who is travelling.
     const trip = me.travel;
     const to = areaById.get(trip.to)!.name;
-    const where = trip.kind === 'airport' ? 'in the air' : 'at sea';
-    box.append(el('h2', {}, who, `, you are ${where} ${VEHICLE[trip.kind]} to ${to}`),
-      el('p', { className: 'small', textContent: trip.turnsLeft > 0
-        ? `${plural(trip.turnsLeft, 'travel turn')} left; you land at the end of the last one.`
-        : `${to} is taken, so you wait one more turn and try to land again.` }),
-      el('p', { className: 'small', textContent: `❓ Another passenger would like to play a geography challenge with you: one question, ${CHALLENGE_SECONDS} seconds. Right +${CHALLENGE_POINTS}, wrong −${CHALLENGE_POINTS}. You don't have to play.${me.profile === 'nomad' ? ' 💻 Digital Nomad: +1 for this travel turn either way.' : ''}` }),
-      me.points < CHALLENGE_POINTS ? el('p', { className: 'small', textContent: `A challenge needs at least ${plural(CHALLENGE_POINTS, 'point')}, so there is none this turn.` }) : '',
-      el('div', { className: 'row' },
-        ...(actions.some((a) => a.type === 'travel' && a.challenge) ? [button(`❓ Play the challenge (+${CHALLENGE_POINTS} / −${CHALLENGE_POINTS})`, () => act({ type: 'travel', challenge: true }))] : []),
-        button('Continue the journey (no challenge)', () => act({ type: 'travel' }))));
+    const plane = trip.kind === 'airport';
+    const total = me.profile ? TRAVEL_TURNS[me.profile][trip.kind] : trip.turnsLeft;
+    const step = trip.turnsLeft > 0
+      ? ` · ${plane ? 'flight' : 'day'} ${total - trip.turnsLeft + 1} of ${total}`
+      : ` · waiting to land (${to} is taken)`;
+    const challenge = actions.some((a) => a.type === 'travel' && a.challenge);
+    const offer = plane
+      ? `The seat-belt sign goes off. A fellow passenger leans over: "Long flight… fancy a geography challenge? Right +${CHALLENGE_POINTS}, wrong −${CHALLENGE_POINTS}."`
+      : `Calm water, a sky full of stars. In the ship's lounge someone sets up a quiz table: "A geography challenge? Right +${CHALLENGE_POINTS}, wrong −${CHALLENGE_POINTS}."`;
+    const play = button('🌍 Play the challenge', () => act({ type: 'travel', challenge: true }));
+    play.className = 'primary';
+    box.classList.add('trip-turn');
+    box.append(tripScene(trip.kind), el('div', { className: 'trip-text' },
+      el('h2', {}, who, ` ${plane ? 'is flying' : 'is at sea'} to ${to}${step}`),
+      el('p', { className: 'small', textContent: challenge
+        ? `${offer} One question, ${CHALLENGE_SECONDS} seconds. You don't have to play.`
+        : `A challenge needs at least ${plural(CHALLENGE_POINTS, 'point')}, so there is none this turn.` }),
+      me.profile === 'nomad' ? el('p', { className: 'small', textContent: '💻 Digital Nomad: +1 for this travel turn either way.' }) : '',
+      el('div', { className: 'row' }, ...(challenge
+        ? [play, button(plane ? '😴 No thanks' : '🌅 No thanks', () => act({ type: 'travel' }))]
+        : [button('Continue the trip', () => act({ type: 'travel' }))]))));
   } else {
     const here = areaById.get(me.area!)!;
     if (pendingFees && (pendingFees.type === 'walk' || pendingFees.type === 'board' || pendingFees.type === 'quiz')) {
@@ -1361,7 +1374,11 @@ function renderModal(s: GameState, actions: Action[], isRobot: boolean): Modal |
     && (s.offer || s.quiz || s.challenge || pendingFees || me.travel || me.loseTurn
       || actions.some((a) => a.type === 'blocked' || a.type === 'goHome')
       || (me.exam && (me.exam.stage === 'test' || me.exam.stage === 'result')));
-  if (main) return { turn: true, node: wrap(renderTurn(s, actions, isRobot)) };
+  if (main) {
+    // A trip turn sounds its plane or ship once.
+    const trip = me.travel && !s.challenge ? { sound: (me.travel.kind === 'port' ? 'ship' : 'plane') as SoundName, soundKey: `trip-${s.round}-${me.seat}` } : {};
+    return { turn: true, node: wrap(renderTurn(s, actions, isRobot), me.travel && !s.challenge ? 'trip' : ''), ...trip };
+  }
   return null;
 }
 
