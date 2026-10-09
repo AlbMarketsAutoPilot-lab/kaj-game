@@ -3,13 +3,10 @@ import { test } from 'node:test';
 import { FACT_BATCHES } from '../src/facts/index.ts';
 import { FACTS_50_NEW } from '../src/facts/new50.ts';
 import { SORT_50 } from '../src/facts/sort50.ts';
-import type { Continent } from '../src/engine/types.ts';
 import { INSIDE_30, map50 } from '../src/maps/map50.ts';
 
 // The 50-turn map's facts (task M3): the 30-turn facts sorted by country, plus new ones.
 
-// Continents whose new facts are written (owner: one continent per session).
-const DONE: Continent[] = ['Europe', 'Asia', 'Africa', 'North America', 'Oceania'];
 
 test('the sort sends each fact of a split area to one or more of its own parts', () => {
   const old = Object.assign({}, ...FACT_BATCHES);
@@ -38,10 +35,10 @@ test('new facts only for split areas, each complete, and no text or question rep
   }
 });
 
-test('every area of a finished continent has at least 12 facts, and no more new ones than needed', () => {
+test('every area has at least 12 facts (owner), and no more new ones than needed', () => {
   for (const a of map50.areas) {
     const n = map50.facts![a.id].length;
-    if (DONE.includes(a.continent)) assert.ok(n >= 12, `${a.id}: ${n} facts`);
+    assert.ok(n >= 12, `${a.id}: ${n} facts`);
     if (FACTS_50_NEW[a.id]) assert.equal(n, 12, `${a.id}: ${n} facts`);
   }
 });

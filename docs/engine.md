@@ -568,8 +568,14 @@ the timing below differ. Engine only: the screens come in M4 (until then the web
 - **Timing scaled to 50 turns:** robots ask for citizenship before round 17 (10 in 30 turns), the
   robot Nomad heads for a 3rd continent from round 30 (18) (`robotRound()`); the Nomad's warning
   starts 5 turns before the end, round 45 (`nomadWarningRound()`). Mini missions are not in v1.
-- **Facts:** come in M3. Until then the quiz and the exam use the placeholder questions made from
-  the map data.
+- **Facts (M3, owner-approved):** 12 for every area. Areas that are the same place as on the
+  30-turn map keep its 12 facts; the facts of the 22 split areas are sorted by country
+  (`src/facts/sort50.ts`; a fact about two parts goes to both), and 330 new facts fill each area to
+  12 (`src/facts/new50.ts`: Europe 82, Asia 96, Africa 111, South America 41).
+- **Shapes (M3):** `node scripts/map-shapes.ts --from <file> --map 50` makes `src/maps/shapes50.ts`
+  and `docs/map-shapes50.md` from the same Natural Earth data. Every walking link touches on the
+  drawing except the Channel Tunnel and Madagascar ↔ Zambezi; China West touches Myanmar without a
+  link (as on the 30-turn map).
 - **Checks:** the map check and the stuck-state checker pass. Robot report
   (`node scripts/robot-report.ts 1000 50`, 10,000 games): no stuck or endless game; average scores
   easy 59, normal 67, hard 71, random 25 (30 turns: 39, 44, 47, 17); hard beats normal 66%.
