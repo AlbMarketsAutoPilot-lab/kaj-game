@@ -339,6 +339,7 @@ about 13 airports, 13 ports and 21 connections (the rulebook's 8 and 4–5 were 
 areas); 11 wonders. Task 15 is postponed. M1 proposal: 87 areas in `docs/map50.md`.
 Owner (2026-10-09, M1 review): the train is kept on the 50-turn map, France ↔ Russia West and
 France ↔ Turkey (the Caucasus is its own area and gets no train); 50-turn saves are version 11.
+The bus is kept too (Mongolia → Siberia or China West, whole country at once, as on the 30-turn map).
 
 **M6 done (owner-approved drawings and rules, 2026-10-09):** `node scripts/wonders-make.ts` draws the 7
 wonders (`assets/wonders/<area id>.svg`) over the game's background painting; the build inlines them.
