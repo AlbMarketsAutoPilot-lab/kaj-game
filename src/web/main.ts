@@ -708,7 +708,7 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
       el('p', { className: 'small', textContent: zoom
         ? `Tap an area in ${zoom} to choose it as your home country.`
         : 'Tap a continent on the map. Each player starts on a different continent. Welcome bonus: Europe, Asia, Africa +3 · Americas +4 · Oceania +5.' }),
-      zoom ? el('p', { className: 'small', textContent: `⭐ Areas with a star have a wonder: your first visit there gives +${plural(POINTS_WONDER, 'point')} more. Each wonder has Guided Tours that one player can buy for ${plural(BUSINESS_PRICE.tours, 'point')}; after that, every other player who visits pays the owner a ${TOUR_FEE}-point tour fee.` }) : '',
+      zoom ? el('p', { className: 'small', textContent: `🏛️ Areas with this sign have a wonder: your first visit there gives +${plural(POINTS_WONDER, 'point')} more. Each wonder has Guided Tours that one player can buy for ${plural(BUSINESS_PRICE.tours, 'point')}; after that, every other player who visits pays the owner a ${TOUR_FEE}-point tour fee.` }) : '',
       me.profile === 'backpacker'
         ? el('p', { className: 'small', textContent: '🎒 Tip: from Europe, Asia or Africa you can walk to 3 continents (+3 Backpacker bonus).' })
         : '');
@@ -1116,7 +1116,7 @@ function renderGuide(s: GameState, actions: Action[]): HTMLElement | string {
     if (a.type !== 'buy') continue;
     const price = plural(BUSINESS_PRICE[a.business], 'point');
     lines.push(a.business === 'tours'
-      ? `⭐ You can buy the Guided Tours of ${WONDER_NAME[here.id] ?? 'the wonder'}: it costs ${price}, and every other player who visits pays you ${plural(TOUR_FEE, 'point')}. Tap the monument.`
+      ? `🏛️ You can buy the Guided Tours of ${WONDER_NAME[here.id] ?? 'the wonder'}: it costs ${price}, and every other player who visits pays you ${plural(TOUR_FEE, 'point')}. Tap the monument.`
       : `${BUSINESS_ICON[a.business]} You can buy the ${BUSINESS_NAME[a.business]} here for ${price}: every paid ${a.business === 'airline' ? 'plane' : 'ship'} ticket from here goes to you. Tap the ${a.business === 'airline' ? 'plane' : 'ship'}.`);
   }
 
@@ -1307,7 +1307,7 @@ function renderModal(s: GameState, actions: Action[], isRobot: boolean): Modal |
 
 // ---------- drawn maps (task 14 A2, B1) ----------
 
-interface Drawn { root: SVGSVGElement; labels: SVGGElement; paths: Map<string, SVGPathElement>; vb: Box; k: number; fs: number }
+interface Drawn { root: SVGSVGElement; names: SVGGElement; labels: SVGGElement; paths: Map<string, SVGPathElement>; vb: Box; k: number; fs: number; px: number }
 
 const overlaps = (a: Box, b: Box) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
 
@@ -1332,12 +1332,13 @@ function drawMap(view: Box, k: number, cls: (id: string) => string, onTap: (id: 
     paths.set(a.id, path);
     shapes.append(path);
   }
+  const names = svg('g', { class: 'names' });
   const labels = svg('g');
-  root.append(shapes, labels);
+  root.append(shapes, names, labels);
   const w = window.innerWidth / 2 - 12;
   const h = pane === 'left' ? window.innerHeight - 115 : w / 2.6;
   const scale = Math.min(w / vb.w, h / vb.h);
-  return { root, labels, paths, vb, k, fs: px / scale };
+  return { root, names, labels, paths, vb, k, fs: px / scale, px };
 }
 
 // Text at (x, y) in view units; a tappable one gets a pill behind it.
@@ -1354,13 +1355,55 @@ function label(d: Drawn, x: number, y: number, text: string, cls: string, size =
   d.labels.append(g);
 }
 
+// Area names on the map (owner's request): a name shows only where it fits inside its area
+// without touching another name, at a fixed size on screen. So zooming in shows more names
+// (small areas like Europe's only when there is room). Biggest areas first. Returns the update
+// for a zoom (view units per screen pixel). `shift` moves a name down (below a drawn icon).
+const NAME_PX = 11;
+function areaNames(d: Drawn, ids: string[], shift: (id: string) => number = () => 0): (unit: number) => void {
+  const items = ids.map((id) => {
+    const g = geo.get(id)!;
+    const y = g.centre[1] + shift(id);
+    const text = svg('text', { x: g.centre[0] * d.k, y, 'text-anchor': 'middle', 'dominant-baseline': 'central' }, areaById.get(id)!.name);
+    d.names.append(text);
+    return { id, text, chars: [...areaById.get(id)!.name].length, x: g.centre[0] * d.k, y, w: g.core.w * d.k, h: g.core.h };
+  }).sort((a, b) => b.w * b.h - a.w * a.h);
+  // Never over another area (a long thin area like Chile): the ends of the name are tested.
+  const overOthers = (id: string, x: number, y: number, w: number) => [-0.5, -0.25, 0.25, 0.5].some((f) => {
+    const pt = new DOMPoint((x + f * w) / d.k, y);
+    return [...d.paths].some(([other, path]) => other !== id && path.isPointInFill(pt));
+  });
+  const update = (unit: number) => {
+    const fs = NAME_PX * unit;
+    const placed: { x: number; y: number; w: number; h: number }[] = [];
+    for (const it of items) {
+      const w = it.chars * fs * 0.58;
+      const h = fs * 1.2;
+      // The centre first, then a little higher or lower.
+      const y = w <= it.w && h <= it.h * 0.8 ? [0, 1, -1, 2, -2].map((n) => it.y + n * h).find((y) =>
+        !placed.some((b) => Math.abs(b.x - it.x) < (b.w + w) / 2 && Math.abs(b.y - y) < (b.h + h) / 2)
+        && !overOthers(it.id, it.x, y, w)) : undefined;
+      it.text.setAttribute('font-size', String(fs));
+      it.text.setAttribute('stroke-width', String(fs * 0.22));
+      it.text.style.display = y === undefined ? 'none' : '';
+      if (y !== undefined) {
+        it.text.setAttribute('y', String(y));
+        placed.push({ x: it.x, y, w, h });
+      }
+    }
+  };
+  // The fill test needs the map on the page: names are placed on the next frame.
+  requestAnimationFrame(() => update(d.fs / d.px));
+  return update;
+}
+
 const inView = (d: Drawn, x: number, y: number) => x >= d.vb.x && x <= d.vb.x + d.vb.w && y >= d.vb.y && y <= d.vb.y + d.vb.h;
 
 // Small icons on an area (neighbours and the world map): wonder, airport, port, citizenship.
 function areaIcons(s: GameState, id: string): string {
   const a = areaById.get(id)!;
   const citizen = s.players.some((p) => p.citizenship?.includes(id));
-  return `${a.wonder ? '⭐' : ''}${hasRoute(id, 'airport') ? '✈️' : ''}${hasRoute(id, 'port') ? '⚓' : ''}${citizen ? '🛂' : ''}`;
+  return `${a.wonder ? '🏛️' : ''}${hasRoute(id, 'airport') ? '✈️' : ''}${hasRoute(id, 'port') ? '⚓' : ''}${citizen ? '🛂' : ''}`;
 }
 
 // Visited marks (owner's request): one small dot per player who has been there.
@@ -1373,7 +1416,7 @@ function visitedDots(d: Drawn, s: GameState, id: string, x: number, y: number, r
 
 // Pinch to zoom and drag to move (owner's request, task 14 B1); a mouse wheel zooms too.
 // The view is kept in `camera` until the player's area changes.
-function attachZoom(root: SVGSVGElement, k: number): void {
+function attachZoom(root: SVGSVGElement, k: number, onZoom?: (unit: number) => void): void {
   const pts = new Map<number, { x: number; y: number }>();
   let moved = false;
   let start: { box: Box; dist: number; mid: { x: number; y: number }; x: number; y: number } | null = null;
@@ -1386,6 +1429,7 @@ function attachZoom(root: SVGSVGElement, k: number): void {
     const h = (b.h * w) / b.w;
     camera!.box = { x: b.x + (b.w - w) / 2, y: b.y + (b.h - h) / 2, w, h };
     root.setAttribute('viewBox', `${camera!.box.x * k} ${camera!.box.y} ${camera!.box.w * k} ${camera!.box.h}`);
+    onZoom?.(unit());
   };
   const begin = () => {
     const p = [...pts.values()];
@@ -1537,7 +1581,7 @@ function renderAreaView(s: GameState, isRobot: boolean): HTMLElement {
     if (!inView(d, x, y)) continue;
     d.labels.append(place(pawn(COLOURS[p.seat], p === me), x, y, p.area === focus ? fs * 2.8 : fs * 2.2, `${COLOUR_NAMES[p.seat]}${p.profile ? ` · ${PROFILE_LABEL[p.profile]}` : ''}`));
   }
-  attachZoom(d.root, k);
+  attachZoom(d.root, k, areaNames(d, [...d.paths.keys()].filter((id) => id !== focus)));
 
   const caption = me.travel
     ? `${VEHICLE[me.travel.kind]} ${COLOUR_NAMES[me.seat]} is on the way to ${here.name}`
@@ -1573,7 +1617,7 @@ function renderPopup(s: GameState, p: { kind: PopupKind; area: string }, myTurn:
   };
 
   if (p.kind === 'wonder') {
-    box.append(el('div', { className: 'row spread' }, el('h3', { textContent: `⭐ ${capital(WONDER_NAME[p.area] ?? 'the wonder')}` }), close),
+    box.append(el('div', { className: 'row spread' }, el('h3', { textContent: `🏛️ ${capital(WONDER_NAME[p.area] ?? 'the wonder')}` }), close),
       el('p', { className: 'small', textContent: `A wonder of ${area.name}: the first visit gives +1 point more.` }),
       businessLine('tours'),
       el('div', { className: 'row' }, buyButton('tours')));
@@ -1686,7 +1730,7 @@ function renderAreaDetails(s: GameState, id: string): HTMLElement {
   const parts = a.bigCountry ? map30.areas.filter((x) => x.bigCountry === a.bigCountry) : [];
   const lines = [
     a.continent,
-    a.wonder ? `⭐ ${capital(WONDER_NAME[id] ?? 'a wonder')}: the first visit gives +1 point more` : '',
+    a.wonder ? `🏛️ ${capital(WONDER_NAME[id] ?? 'a wonder')}: the first visit gives +1 point more` : '',
     a.bigCountry ? `🧩 Part of ${a.bigCountry}: ${me.profile ? `you have visited ${parts.filter((x) => me.visitedAreas.includes(x.id)).length}/${parts.length} parts` : `${parts.length} parts`}` : '',
     routes('airport').length ? `✈️ Airport: flights to ${routes('airport').join(', ')}` : '',
     routes('port').length ? `⚓ Port: ships to ${routes('port').join(', ')}` : '',
@@ -1704,8 +1748,8 @@ function renderAreaDetails(s: GameState, id: string): HTMLElement {
     ...lines.map((t) => el('p', { className: 'small', textContent: t })));
 }
 
-// Choosing the home country: the 6 continents first, then a zoom into one (no names on the map:
-// the tapped area's name and details show on the right).
+// Choosing the home country: the 6 continents first, then a zoom into one (area names where
+// they fit; the tapped area's details show on the right).
 function renderStartMap(s: GameState, isRobot: boolean): HTMLElement {
   const legal = new Set(isRobot ? [] : legalActions(s, map30).flatMap((a) => (a.type === 'chooseStart' ? [a.area] : [])));
   const homes = new Map(s.players.flatMap((p) => (p.area ? [[p.area, p] as const] : [])));
@@ -1742,9 +1786,10 @@ function renderStartMap(s: GameState, isRobot: boolean): HTMLElement {
   const d = drawMap(view, k,
     (id) => (id === pickedStart ? 'here' : legal.has(id) ? 'go' : areaById.get(id)!.continent === c ? 'far' : 'dim'),
     (id) => (legal.has(id) ? pickArea(id) : null));
+  areaNames(d, [...d.paths.keys()].filter((id) => areaById.get(id)!.continent === c), (id) => (areaById.get(id)!.wonder ? d.fs * 1.4 : 0));
   for (const a of map30.areas.filter((x) => x.continent === c)) {
     const [x, y] = geo.get(a.id)!.centre;
-    if (a.wonder) label(d, x * k, y, '⭐', 'icons', 1.1);
+    if (a.wonder) label(d, x * k, y, '🏛️', 'icons', 1.1);
   }
   wrap.append(el('div', { className: 'where' }, button('← All continents', () => { zoom = null; pickedStart = null; detailArea = null; render(); }), ` ${c}: tap an area`), d.root);
   return wrap;

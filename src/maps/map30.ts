@@ -17,11 +17,11 @@ interface AreaInfo {
 
 const AREAS: AreaInfo[] = [
   // Europe (12)
-  { id: 'iberia', name: 'Spain & Portugal', continent: 'Europe', countries: ['Spain', 'Portugal', 'Andorra'] },
+  { id: 'iberia', name: 'Iberia', continent: 'Europe', countries: ['Spain', 'Portugal', 'Andorra'] },
   { id: 'france', name: 'France', continent: 'Europe', countries: ['France', 'Monaco'] },
   { id: 'uk-ireland', name: 'UK & Ireland', continent: 'Europe', countries: ['United Kingdom', 'Ireland'] },
   {
-    id: 'central-europe', name: 'Germany, Alps & Benelux', continent: 'Europe',
+    id: 'central-europe', name: 'Germanic Europe', continent: 'Europe',
     countries: ['Germany', 'Austria', 'Switzerland', 'Liechtenstein', 'Belgium', 'Netherlands', 'Luxembourg'],
   },
   { id: 'italy', name: 'Italy', continent: 'Europe', countries: ['Italy', 'San Marino', 'Vatican City', 'Malta'], wonder: true },
@@ -30,9 +30,9 @@ const AREAS: AreaInfo[] = [
     countries: ['Norway', 'Sweden', 'Denmark', 'Finland', 'Greenland'],
   },
   { id: 'iceland', name: 'Iceland', continent: 'Europe', countries: ['Iceland'] },
-  { id: 'poland-hungary', name: 'Poland, Czechia, Slovakia & Hungary', continent: 'Europe', countries: ['Poland', 'Czechia', 'Slovakia', 'Hungary'] },
+  { id: 'poland-hungary', name: 'Central Europe', continent: 'Europe', countries: ['Poland', 'Czechia', 'Slovakia', 'Hungary'] },
   {
-    id: 'eastern-europe', name: 'Baltics, Belarus & Ukraine', continent: 'Europe',
+    id: 'eastern-europe', name: 'Eastern Europe', continent: 'Europe',
     countries: ['Estonia', 'Latvia', 'Lithuania', 'Belarus', 'Ukraine', 'Moldova'],
   },
   {
@@ -45,13 +45,13 @@ const AREAS: AreaInfo[] = [
   // Asia (16)
   { id: 'russia-east', name: 'Siberia', continent: 'Asia', countries: ['Russia'], bigCountry: 'Russia' },
   { id: 'russia-far-east', name: 'Russia Far East', continent: 'Asia', countries: ['Russia'], bigCountry: 'Russia' },
-  { id: 'turkey-caucasus', name: 'Turkey & Caucasus', continent: 'Asia', countries: ['Turkey', 'Georgia', 'Armenia', 'Azerbaijan'] },
+  { id: 'turkey-caucasus', name: 'Turkey', continent: 'Asia', countries: ['Turkey', 'Georgia', 'Armenia', 'Azerbaijan'] },
   {
     id: 'middle-east', name: 'Middle East', continent: 'Asia',
     countries: ['Israel', 'Palestine', 'Lebanon', 'Syria', 'Jordan', 'Iraq'],
   },
   {
-    id: 'arabia', name: 'Arabian Peninsula', continent: 'Asia',
+    id: 'arabia', name: 'Arabia', continent: 'Asia',
     countries: ['Saudi Arabia', 'Yemen', 'Oman', 'United Arab Emirates', 'Qatar', 'Bahrain', 'Kuwait'],
   },
   { id: 'iran', name: 'Iran', continent: 'Asia', countries: ['Iran'] },
@@ -59,9 +59,9 @@ const AREAS: AreaInfo[] = [
     id: 'central-asia', name: 'Central Asia', continent: 'Asia',
     countries: ['Kazakhstan', 'Uzbekistan', 'Turkmenistan', 'Kyrgyzstan', 'Tajikistan'],
   },
-  { id: 'pakistan-afghanistan', name: 'Pakistan & Afghanistan', continent: 'Asia', countries: ['Pakistan', 'Afghanistan'] },
+  { id: 'pakistan-afghanistan', name: 'Pakistan', continent: 'Asia', countries: ['Pakistan', 'Afghanistan'] },
   {
-    id: 'india', name: 'India & South Asia', continent: 'Asia',
+    id: 'india', name: 'India', continent: 'Asia',
     countries: ['India', 'Sri Lanka', 'Nepal', 'Bhutan', 'Bangladesh', 'Maldives'], wonder: true,
   },
   { id: 'china-west', name: 'China West', continent: 'Asia', countries: ['China'], bigCountry: 'China' },
@@ -70,11 +70,11 @@ const AREAS: AreaInfo[] = [
   { id: 'korea', name: 'Korea', continent: 'Asia', countries: ['South Korea', 'North Korea'] },
   { id: 'japan', name: 'Japan', continent: 'Asia', countries: ['Japan'], wonder: true },
   {
-    id: 'southeast-asia', name: 'Mainland Southeast Asia', continent: 'Asia',
+    id: 'southeast-asia', name: 'Indochina', continent: 'Asia',
     countries: ['Myanmar', 'Thailand', 'Laos', 'Cambodia', 'Vietnam', 'Malaysia', 'Singapore', 'Brunei'],
   },
   {
-    id: 'maritime-asia', name: 'Maritime Southeast Asia', continent: 'Asia',
+    id: 'maritime-asia', name: 'Malay Islands', continent: 'Asia',
     countries: ['Indonesia', 'Philippines', 'Timor-Leste', 'Papua New Guinea'],
   },
 
@@ -87,7 +87,7 @@ const AREAS: AreaInfo[] = [
     countries: ['Senegal', 'Gambia', 'Guinea-Bissau', 'Guinea', 'Sierra Leone', 'Liberia', "Côte d'Ivoire", 'Ghana', 'Togo', 'Benin', 'Nigeria', 'Cabo Verde'],
   },
   {
-    id: 'horn-of-africa', name: 'Sudan & Horn of Africa', continent: 'Africa',
+    id: 'horn-of-africa', name: 'Horn of Africa', continent: 'Africa',
     countries: ['Sudan', 'South Sudan', 'Ethiopia', 'Eritrea', 'Djibouti', 'Somalia'],
   },
   {
@@ -112,20 +112,20 @@ const AREAS: AreaInfo[] = [
   { id: 'usa-east', name: 'USA East', continent: 'North America', countries: ['United States'], bigCountry: 'United States' },
   { id: 'mexico', name: 'Mexico', continent: 'North America', countries: ['Mexico'], wonder: true },
   {
-    id: 'central-america', name: 'Central America & Caribbean', continent: 'North America',
+    id: 'central-america', name: 'Central America', continent: 'North America',
     countries: ['Guatemala', 'Belize', 'Honduras', 'El Salvador', 'Nicaragua', 'Costa Rica', 'Panama', 'Cuba', 'Jamaica', 'Haiti', 'Dominican Republic', 'Bahamas'],
   },
 
   // South America (6)
   {
-    id: 'northern-andes', name: 'Colombia, Venezuela & Guianas', continent: 'South America',
+    id: 'northern-andes', name: 'Gran Colombia', continent: 'South America',
     countries: ['Colombia', 'Venezuela', 'Ecuador', 'Guyana', 'Suriname'],
   },
   { id: 'peru-bolivia', name: 'Peru & Bolivia', continent: 'South America', countries: ['Peru', 'Bolivia'], wonder: true },
   { id: 'chile', name: 'Chile', continent: 'South America', countries: ['Chile'] },
   { id: 'brazil-north', name: 'Brazil North', continent: 'South America', countries: ['Brazil'], bigCountry: 'Brazil' },
   { id: 'brazil-south', name: 'Brazil South', continent: 'South America', countries: ['Brazil'], bigCountry: 'Brazil' },
-  { id: 'southern-cone', name: 'Argentina, Uruguay & Paraguay', continent: 'South America', countries: ['Argentina', 'Uruguay', 'Paraguay'] },
+  { id: 'southern-cone', name: 'Río de la Plata', continent: 'South America', countries: ['Argentina', 'Uruguay', 'Paraguay'] },
 
   // Oceania (3)
   { id: 'australia-west', name: 'Australia West', continent: 'Oceania', countries: ['Australia'], bigCountry: 'Australia' },

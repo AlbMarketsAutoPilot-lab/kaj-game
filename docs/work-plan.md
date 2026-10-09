@@ -45,7 +45,8 @@ Every task also adds its part to the test board, so there is **always a playable
 | 14b | Ships Australia East ↔ New Zealand and USA West ↔ Alaska; Alaska as a 3rd USA part (+5) | **high** | 1 | 12 | ✅ done (12 facts to check) |
 | 14d | Citizenship asked in the area you stand in (button) | **high** | 1 | 12 | ✅ done |
 | 14e | Guide for new players (owner's script, first ▶ Play + 📖 How to play) | medium | 1 | 14 | ✅ done |
-| 14f | Fair citizenship test: read 6 facts, 2 of 3 right to pass, "Start" before each question | **high** | 1 | 14 | built (pull request open) |
+| 14f | Fair citizenship test: read 6 facts, 2 of 3 right to pass, "Start" before each question | **high** | 1 | 14 | ✅ done |
+| 14g | Short area names, shown on the maps where they fit; 🏛️ for wonders; the guide says who wins | medium | 1 | 14 | built (pull request open) |
 | 15 | Android release build (signed APK) | medium | 1 | 14 | |
 | 16 | Full-game tests, bug fixes, buffer | medium | 1–2 | 15 | |
 
