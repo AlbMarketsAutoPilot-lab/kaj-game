@@ -1465,7 +1465,7 @@ function label(d: Drawn, x: number, y: number, text: string, cls: string, size =
 // Area names on the map (owner's request): a name shows only where it fits inside its area
 // without touching another name, at a fixed size on screen. So zooming in shows more names
 // (small areas like Europe's only when there is room). Biggest areas first. Returns the update
-// for a zoom (view units per screen pixel). `shift` moves a name down (below a drawn icon).
+// for a zoom (view units per screen pixel; the page zoom makes a page pixel uiZoom screen pixels). `shift` moves a name down (below a drawn icon).
 const NAME_PX = 11;
 function areaNames(d: Drawn, ids: string[], shift: (id: string) => number = () => 0): (unit: number) => void {
   const items = ids.map((id) => {
@@ -1500,7 +1500,7 @@ function areaNames(d: Drawn, ids: string[], shift: (id: string) => number = () =
     }
   };
   // The fill test needs the map on the page: names are placed on the next frame.
-  requestAnimationFrame(() => update(d.fs / d.px));
+  requestAnimationFrame(() => update(d.fs / d.px / uiZoom));
   return update;
 }
 
@@ -1923,10 +1923,10 @@ function renderStartMap(s: GameState, isRobot: boolean): HTMLElement {
 }
 
 // One layout for every screen (owner's request, task 14l): it was made for a landscape phone
-// (about 900 × 430); bigger screens zoom it up, the smallest phones a little down.
+// (about 820–900 × 430); bigger screens, tablets too, zoom it up, the smallest phones a little down.
 let uiZoom = 1;
 function applyZoom(): void {
-  uiZoom = Math.min(2.4, Math.max(0.8, Math.min(window.innerWidth / 900, window.innerHeight / 430)));
+  uiZoom = Math.min(2.4, Math.max(0.8, Math.min(window.innerWidth / 820, window.innerHeight / 430)));
   document.documentElement.style.setProperty('zoom', String(uiZoom));
   // Screen units for the CSS (style.css uses var(--vh) and var(--vw)): a zoomed page would
   // otherwise make 100vh taller than the screen.
