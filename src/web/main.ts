@@ -36,8 +36,9 @@ const colourOf = (seat: number): string => { const p = profileOf(seat); return p
 // A calmer pace (owner's request, task 14i): robots wait longer, and a walk is shown.
 const ROBOT_DELAY_MS = 1400;
 const WALK_MS = 1500;
-// The pause on the board before a wonder poster opens (owner's request, task M6).
-const WONDER_WAIT_MS = 2000;
+// A calm game (owner's request): after a popup is closed, the board shows for a moment before the
+// next popup opens. Popups that answer the player's own tap (a quiz, an answer, fees) open at once.
+const POPUP_PAUSE_MS = 2000;
 const LEVEL_LABEL: Record<RobotLevel, string> = { easy: 'Easy', normal: 'Normal', hard: 'Hard' };
 const SAVE_KEY = 'kaj-save';
 const QUIZ_SECONDS = 15;
@@ -95,8 +96,10 @@ let answered: { ok: boolean; title: string; lines: string[] } | null = null;
 const seenCards = new Set<string>();
 // The "Ask for citizenship" popup is open (owner's request: a button and a popup, not a tick box).
 let citizenPopup = false;
-// The wonder poster waiting to open (task M6): its key, and when it opens.
-let wonderWait: { key: string; at: number } | null = null;
+// Until when the next popup waits (POPUP_PAUSE_MS after a popup was closed).
+let pauseUntil = 0;
+let pauseTimer = 0;
+const pauseNext = () => { pauseUntil = Date.now() + POPUP_PAUSE_MS; };
 // The citizenship test question the player said "ready" for (its clock runs only after that).
 let examReady: string | null = null;
 // One countdown per question, kept across redraws.
@@ -550,7 +553,7 @@ function wonderPoster(s: GameState, me: Player, actions: Action[], seen: () => v
   const tours = s.businesses.find((b) => b.area === area && b.kind === 'tours');
   const buy = actions.find((a) => a.type === 'buy' && a.business === 'tours');
   const price = plural(BUSINESS_PRICE.tours, 'point');
-  const close = () => { seen(); render(); };
+  const close = () => { seen(); pauseNext(); render(); };
   let offer: string;
   let buttons: HTMLElement[];
   if (buy) {
@@ -641,7 +644,13 @@ function render(): void {
   setMusic('game');
 
   // The popup over the board (task 14 B2): main events show here, the right side is for info.
-  const modal = renderModal(s, actions, isRobot);
+  let modal = renderModal(s, actions, isRobot);
+  // The pause after a closed popup: the board shows, and taps wait until the next popup opens.
+  clearTimeout(pauseTimer);
+  if (modal && Date.now() < pauseUntil) {
+    pauseTimer = window.setTimeout(() => { if (state === s) render(); }, pauseUntil - Date.now());
+    modal = { turn: false, node: el('div', { className: 'modal-back wait' }) };
+  }
   // Each popup sounds once, not on every redraw.
   if (modal?.sound && modal.soundKey !== lastSound) play(modal.sound);
   lastSound = modal?.soundKey;
@@ -1308,8 +1317,9 @@ type Modal = { node: HTMLElement; turn: boolean; sound?: SoundName; soundKey?: u
 function renderModal(s: GameState, actions: Action[], isRobot: boolean): Modal | null {
   const me = currentPlayer(s);
   const wrap = (content: HTMLElement, cls = '') => el('div', { className: 'modal-back' }, el('div', { className: `modal card ${cls}` }, content));
+  // Closing a popup gives the next one a pause (POPUP_PAUSE_MS).
   const ok = (onClick: () => void, text = 'OK') => {
-    const b = button(text, onClick);
+    const b = button(text, () => { pauseNext(); onClick(); });
     b.className = 'primary';
     return el('div', { className: 'row' }, b);
   };
@@ -1377,12 +1387,6 @@ function renderModal(s: GameState, actions: Action[], isRobot: boolean): Modal |
   if (s.phase === 'play' && me.kind === 'human' && !isRobot && here && here !== me.home && !seenCards.has(wonderKey)
     && areaById.get(here)!.wonder && hasWonderScene(here) && me.visitedAreas.includes(here)
     && !s.quiz && !s.challenge && !s.offer && !me.exam && !me.loseTurn && !pendingFees) {
-    if (wonderWait?.key !== wonderKey) {
-      wonderWait = { key: wonderKey, at: Date.now() + WONDER_WAIT_MS };
-      window.setTimeout(() => { if (state === s) render(); }, WONDER_WAIT_MS);
-    }
-    // The board shows for a moment first; taps wait until the poster opens.
-    if (Date.now() < wonderWait.at) return { turn: false, node: el('div', { className: 'modal-back wait' }) };
     return { turn: false, node: wrap(wonderPoster(s, me, actions, () => { seenCards.add(wonderKey); }), 'trip'), sound: 'milestone', soundKey: wonderKey };
   }
   // Halfway and the last five turns, on a person's turn.

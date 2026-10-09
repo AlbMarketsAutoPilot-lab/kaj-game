@@ -339,10 +339,12 @@ areas); 11 wonders. Task 15 is postponed. M1 proposal: 87 areas in `docs/map50.m
 **M6 done (owner-approved drawings and rules, 2026-10-09):** `node scripts/wonders-make.ts` draws the 7
 wonders (`assets/wonders/<area id>.svg`) over the game's background painting; the build inlines them.
 The poster opens at the **start of a person's next turn** in the wonder area (when buying is allowed,
-so no rule changes), 2 seconds after "Let's go": the name in the poster's lettering, "+1 point just for
+so no rule changes): the name in the poster's lettering, "+1 point just for
 visiting…", and the Guided Tours offer (Buy / Not now) when nobody owns them. Once per wonder per game,
 never for robots, never in the home area. Not kept in the save: after "Continue" it may show once more.
-Order: M6 is merged first, then the 50-turn work starts at high effort (owner).
+**Calm popups (owner, all popups):** after a popup is closed (OK, Let's go, End turn…), the board shows
+for 2 seconds (taps wait) before the next popup opens; popups that answer the player's own tap (quiz,
+answer, fees, citizenship) open at once. Order: M6 is merged first, then the 50-turn work starts at high effort (owner).
 
 ### 15. Android release build — postponed
 
