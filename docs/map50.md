@@ -1,8 +1,8 @@
 # 50-turn map — area list for review (task M1)
 
-Owner-approved basis: 80–90 areas, same big-country splits as the 30-turn map, 11 wonders, about 13 airports and 13 ports with about 21 connections, every rule and design from the 30-turn game (which stays frozen). Every 50-turn area lies inside one 30-turn area, so its facts can be sorted by country (M3).
+Owner-approved basis: 80–90 areas, same big-country splits as the 30-turn map, islands kept inside their bigger 30-turn areas (owner), 11 wonders, about 13 airports and 13 ports with about 21 connections, every rule and design from the 30-turn game (which stays frozen). Every 50-turn area lies inside one 30-turn area, so its facts can be sorted by country (M3).
 
-**Totals:** 87 areas · 11 wonders (🏛️) · 13 airports · 13 ports · 21 connections.
+**Totals:** 84 areas · 11 wonders (🏛️) · 13 airports · 13 ports · 21 connections.
 
 Walking links come from the real borders (shapes, M2/M3) plus short sea crossings like the 30-turn map (e.g. UK & Ireland ↔ France). They are listed for review in M2.
 
@@ -30,7 +30,7 @@ Walking links come from the real borders (shapes, M2/M3) plus short sea crossing
 | 🏛️ Greece | Greece | Greece |  |  |
 | Russia West | Russia | Russia West |  |  |
 
-## Asia (27)
+## Asia (25)
 
 | Area | Countries | Inside 30-turn area | ✈️ | ⛴️ |
 |---|---|---|---|---|
@@ -47,9 +47,8 @@ Walking links come from the real borders (shapes, M2/M3) plus short sea crossing
 | Kazakhstan | Kazakhstan | Central Asia |  |  |
 | Central Asia | Uzbekistan, Turkmenistan, Kyrgyzstan, Tajikistan | Central Asia |  |  |
 | Pakistan & Afghanistan | Pakistan, Afghanistan | Pakistan |  |  |
-| 🏛️ India | India | India | ✈️ |  |
+| 🏛️ India | India, Sri Lanka, Maldives | India | ✈️ |  |
 | Nepal, Bhutan & Bangladesh | Nepal, Bhutan, Bangladesh | India |  |  |
-| Sri Lanka & Maldives | Sri Lanka, Maldives | India |  |  |
 | China West | China | China West |  |  |
 | China East | China | China East |  |  |
 | Mongolia | Mongolia | Mongolia |  |  |
@@ -59,8 +58,7 @@ Walking links come from the real borders (shapes, M2/M3) plus short sea crossing
 | Thailand | Thailand | Indochina |  |  |
 | 🏛️ Cambodia, Laos & Vietnam | Cambodia, Laos, Vietnam | Indochina |  |  |
 | Malaysia, Singapore & Brunei | Malaysia, Singapore, Brunei | Indochina |  |  |
-| Indonesia & New Guinea | Indonesia, Timor-Leste, Papua New Guinea | Malay Islands | ✈️ |  |
-| Philippines | Philippines | Malay Islands |  |  |
+| Malay Islands | Indonesia, Timor-Leste, Papua New Guinea, Philippines | Malay Islands | ✈️ |  |
 
 ## Africa (19)
 
@@ -72,7 +70,7 @@ Walking links come from the real borders (shapes, M2/M3) plus short sea crossing
 | 🏛️ Egypt | Egypt | Egypt |  |  |
 | Sahel West | Mauritania, Mali, Burkina Faso | Sahel |  |  |
 | Sahel East | Niger, Chad | Sahel |  |  |
-| Senegal Coast | Senegal, Gambia, Guinea-Bissau, Guinea, Sierra Leone, Liberia, Cabo Verde | West Africa |  | ⛴️ |
+| West Coast | Senegal, Gambia, Guinea-Bissau, Guinea, Sierra Leone, Liberia, Cabo Verde | West Africa |  | ⛴️ |
 | Gulf of Guinea | Côte d'Ivoire, Ghana, Togo, Benin | West Africa |  |  |
 | Nigeria | Nigeria | West Africa | ✈️ |  |
 | Sudan & South Sudan | Sudan, South Sudan | Horn of Africa |  |  |
@@ -86,7 +84,7 @@ Walking links come from the real borders (shapes, M2/M3) plus short sea crossing
 | Zambezi | Zambia, Malawi, Mozambique, Zimbabwe | Southern Africa |  |  |
 | South Africa | South Africa, Botswana, Lesotho, Eswatini | Southern Africa | ✈️ |  |
 
-## North America (9)
+## North America (8)
 
 | Area | Countries | Inside 30-turn area | ✈️ | ⛴️ |
 |---|---|---|---|---|
@@ -97,8 +95,7 @@ Walking links come from the real borders (shapes, M2/M3) plus short sea crossing
 | Alaska | United States | Alaska |  | ⛴️ |
 | USA East | United States | USA East | ✈️ |  |
 | 🏛️ Mexico | Mexico | Mexico |  |  |
-| Central America | Guatemala, Belize, Honduras, El Salvador, Nicaragua, Costa Rica, Panama | Central America |  |  |
-| Caribbean | Cuba, Jamaica, Haiti, Dominican Republic, Bahamas | Central America |  |  |
+| Central America | Guatemala, Belize, Honduras, El Salvador, Nicaragua, Costa Rica, Panama, Cuba, Jamaica, Haiti, Dominican Republic, Bahamas | Central America |  |  |
 
 ## South America (10)
 
@@ -136,20 +133,31 @@ The 13 connections of the 30-turn map are kept (on the matching part), plus 8 ne
 | ⛴️ | Australia East | New Zealand |  |
 | ⛴️ | USA West | Alaska |  |
 | ⛴️ | Madagascar & Islands | Tanzania, Rwanda & Burundi | new |
-| ⛴️ | Senegal Coast | Brazil North | new |
+| ⛴️ | West Coast | Brazil North | new |
 | ✈️ | Gulf States | Australia West |  |
-| ✈️ | Australia West | Indonesia & New Guinea |  |
-| ✈️ | Indonesia & New Guinea | Japan |  |
+| ✈️ | Australia West | Malay Islands |  |
+| ✈️ | Malay Islands | Japan |  |
 | ✈️ | Japan | New Zealand |  |
 | ✈️ | New Zealand | Chile |  |
 | ✈️ | South Africa | Chile |  |
 | ✈️ | UK & Ireland | Gulf States |  |
-| ✈️ | UK & Ireland | USA East |  |
+| ✈️ | UK & Ireland | USA East | new |
 | ✈️ | USA East | Brazil South | new |
 | ✈️ | Brazil South | Nigeria | new |
 | ✈️ | India | Gulf States | new |
-| ✈️ | India | Indonesia & New Guinea | new |
+| ✈️ | India | Malay Islands | new |
 | ✈️ | India | Kenya & Uganda | new |
+
+## Train and bus (owner, not counted in the 21)
+
+| | From | To | |
+|---|---|---|---|
+| 🚆 | France | Russia West | both ways |
+| 🚆 | France | Turkey | both ways |
+| 🚌 | Mongolia | Siberia | one way, whole of Russia |
+| 🚌 | Mongolia | China West | one way, whole of China |
+
+Same rules as the 30-turn map (tickets, booths, Luxury can't take the train, bus only for Nomad and Backpacker). The Caucasus has no train.
 
 ## Wonders (11)
 
