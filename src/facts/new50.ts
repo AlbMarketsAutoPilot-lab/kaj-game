@@ -1,5 +1,115 @@
-import type { FactBatch } from './types.ts';
+import { f, type FactBatch } from './types.ts';
 
 // New facts for the 50-turn map (task M3), only for the areas that have fewer than 12 after
 // sorting the 30-turn facts by country. Drafted by Claude, to be checked by the owner.
-export const FACTS_50_NEW: FactBatch = {};
+export const FACTS_50_NEW: FactBatch = {
+  // ---------- Europe (82) ----------
+  spain: [
+    f('Don Quixote, one of the most famous novels ever written, is by the Spanish writer Miguel de Cervantes.', 'Who wrote Don Quixote?', 'Miguel de Cervantes', 'William Shakespeare'),
+    f('At La Tomatina, a festival in the town of Buñol, people throw tomatoes at each other.', 'What do people throw at each other at La Tomatina?', 'Tomatoes', 'Snowballs'),
+    f('Mount Teide, the highest mountain in Spain, is a volcano on Tenerife in the Canary Islands.', 'Spain\'s highest mountain, Mount Teide, is on which islands?', 'The Canary Islands', 'The Faroe Islands'),
+    f('Spanish is spoken by more than 500 million people around the world.', 'About how many people around the world speak Spanish?', 'More than 500 million', 'About 10 million'),
+    f('A football match between Real Madrid and FC Barcelona is called "El Clásico".', 'What is a football match between Real Madrid and FC Barcelona called?', 'El Clásico', 'The Grand Prix'),
+  ],
+  portugal: [
+    f('Lisbon, the capital of Portugal, is said to be built on seven hills.', 'Lisbon is said to be built on how many hills?', 'Seven', 'Two'),
+    f('Pastéis de nata are small custard tarts first made by monks in Lisbon.', 'A pastel de nata is a…', 'custard tart', 'fish soup'),
+    f('At Nazaré in Portugal, surfers ride some of the biggest waves ever surfed.', 'Nazaré in Portugal is famous for…', 'giant waves for surfing', 'snowy mountains'),
+    f('The Portuguese explorer Ferdinand Magellan led the first expedition to sail all the way around the world.', 'Magellan\'s expedition was the first to sail…', 'around the world', 'to Antarctica'),
+    f('Portugal ruled Brazil for about 300 years, so Portuguese is the main language of Brazil.', 'Because of Portugal, which language is spoken in Brazil?', 'Portuguese', 'French'),
+    f('The Azores and Madeira, islands in the Atlantic Ocean, belong to Portugal.', 'The Azores islands belong to which country?', 'Portugal', 'Norway'),
+    f('The name Portugal comes from Portus Cale, an old name of the city of Porto.', 'Portugal\'s name comes from an old name of which city?', 'Porto', 'Madrid'),
+  ],
+  germany: [
+    f('The composer Ludwig van Beethoven was born in Bonn in 1770. He kept writing music after he became deaf.', 'Which composer born in Bonn kept writing music after he became deaf?', 'Ludwig van Beethoven', 'Antonio Vivaldi'),
+    f('Germany is famous for its sausages: there are more than 1,000 kinds.', 'Germany has more than 1,000 kinds of…', 'sausage', 'rice'),
+    f('The Brothers Grimm collected fairy tales such as Hansel and Gretel and Snow White.', 'The Brothers Grimm collected…', 'fairy tales', 'recipes'),
+    f('The scientist Albert Einstein was born in Ulm, Germany, in 1879.', 'Albert Einstein was born in which country?', 'Germany', 'Canada'),
+    f('The Black Forest in south-west Germany is famous for its cuckoo clocks.', 'The Black Forest is famous for which kind of clock?', 'Cuckoo clocks', 'Sundials'),
+    f('Cologne Cathedral was started in 1248 and finished in 1880, more than 600 years later.', 'How long did it take to finish Cologne Cathedral?', 'More than 600 years', 'Six years'),
+    f('Decorating a Christmas tree is an old German tradition that spread around the world.', 'The Christmas tree tradition began in…', 'Germany', 'Australia'),
+    f('The Brandenburg Gate in Berlin is a symbol of Germany becoming one country again in 1990.', 'In which city is the Brandenburg Gate?', 'Berlin', 'Munich'),
+  ],
+  benelux: [
+    f('The Netherlands has more bicycles than people.', 'The Netherlands has more of which of these than people?', 'Bicycles', 'Camels'),
+    f('Every spring, millions of tulips bloom in the Keukenhof gardens in the Netherlands.', 'Keukenhof in the Netherlands is famous for…', 'tulips', 'cacti'),
+    f('Anne Frank wrote her famous diary while hiding in a secret annex in Amsterdam.', 'In which city did Anne Frank hide while writing her diary?', 'Amsterdam', 'Rome'),
+    f('The painter Vincent van Gogh, famous for his sunflower paintings, was born in the Netherlands.', 'Vincent van Gogh was born in…', 'the Netherlands', 'Spain'),
+    f('The Atomium in Brussels is shaped like an iron crystal, made 165 billion times bigger.', 'The Atomium in Brussels is shaped like…', 'an iron crystal', 'a giant shoe'),
+    f('Tintin, the young reporter of the comic books, was created by Hergé from Belgium.', 'Tintin was created by an artist from…', 'Belgium', 'Japan'),
+    f('The Peace Palace in The Hague, in the Netherlands, is home to the world court of the United Nations.', 'In which Dutch city is the Peace Palace?', 'The Hague', 'Rotterdam'),
+    f('Rotterdam, in the Netherlands, has the biggest seaport in Europe.', 'Which city has the biggest seaport in Europe?', 'Rotterdam', 'Vienna'),
+  ],
+  alps: [
+    f('Switzerland is famous for making fine watches.', 'Switzerland is famous for making…', 'watches', 'surfboards'),
+    f('The Gotthard Base Tunnel under the Swiss Alps is the longest railway tunnel in the world, 57 km long.', 'The longest railway tunnel in the world runs under…', 'the Swiss Alps', 'the Sahara'),
+    f('Sachertorte is a famous chocolate cake from Vienna, the capital of Austria.', 'Sachertorte from Vienna is a…', 'chocolate cake', 'cheese'),
+    f('The film The Sound of Music is set in and around Salzburg, Austria.', 'The film The Sound of Music is set in…', 'Austria', 'Brazil'),
+    f('The Red Cross was founded in Geneva, Switzerland, in 1863.', 'The Red Cross was founded in which Swiss city?', 'Geneva', 'Zurich'),
+    f('The white Lipizzaner horses perform at the Spanish Riding School in Vienna.', 'Where do the Lipizzaner horses of the Spanish Riding School perform?', 'Vienna', 'Lisbon'),
+    f('Switzerland is neutral: it has not taken sides in a war for more than 200 years.', 'Switzerland is known for being…', 'neutral in wars', 'ruled by a king'),
+    f('Saint Bernard dogs were trained by monks to rescue travellers lost in the snow of the Swiss Alps.', 'Saint Bernard dogs rescued travellers in…', 'the Swiss Alps', 'the Amazon'),
+  ],
+  scandinavia: [
+    f('ABBA, one of the most famous pop groups ever, comes from Sweden.', 'The pop group ABBA comes from…', 'Sweden', 'Mexico'),
+    f('A small bronze statue of the Little Mermaid sits by the harbour in Copenhagen, Denmark.', 'In which city is the Little Mermaid statue?', 'Copenhagen', 'Oslo'),
+  ],
+  finland: [
+    f('Rovaniemi, a town in Finnish Lapland on the Arctic Circle, calls itself the hometown of Santa Claus.', 'Which town calls itself the hometown of Santa Claus?', 'Rovaniemi', 'Madrid'),
+    f('The Moomins, the round white trolls of the books, were created by the Finnish writer Tove Jansson.', 'The Moomins were created by a writer from…', 'Finland', 'Egypt'),
+    f('Nokia, from Finland, was once the biggest maker of mobile phones in the world.', 'Which Finnish company was once the biggest maker of mobile phones?', 'Nokia', 'Toyota'),
+    f('The game Angry Birds was made in Finland.', 'The game Angry Birds was made in…', 'Finland', 'Brazil'),
+    f('Finland has two official languages: Finnish and Swedish.', 'Finland\'s two official languages are Finnish and…', 'Swedish', 'Spanish'),
+    f('About three quarters of Finland is covered by forest.', 'About how much of Finland is covered by forest?', 'About three quarters', 'Almost none'),
+    f('In Finnish Lapland there are about as many reindeer as people.', 'Which animals live in large numbers in Finnish Lapland?', 'Reindeer', 'Kangaroos'),
+    f('Children in Finland usually start school at the age of 7.', 'At what age do children in Finland usually start school?', '7', '3'),
+    f('Suomenlinna, near Helsinki, is an old sea fortress built on a group of islands.', 'Suomenlinna near Helsinki is…', 'a sea fortress on islands', 'a desert oasis'),
+  ],
+  poland: [
+    f('Pierogi are Polish dumplings filled with potato, cheese, meat or fruit.', 'Pierogi are Polish…', 'dumplings', 'hats'),
+    f('Malbork Castle in Poland is the largest castle in the world built of brick.', 'Malbork Castle is the largest castle in the world built of…', 'brick', 'ice'),
+    f('The Old Town of Warsaw was destroyed in the Second World War and carefully rebuilt as it was.', 'After the war, Warsaw\'s Old Town was…', 'rebuilt as it was', 'left in ruins'),
+    f('Every hour, a trumpeter plays a tune from the tower of St Mary\'s Church in Kraków.', 'Which instrument is played every hour from a church tower in Kraków?', 'A trumpet', 'A drum'),
+    f('Pope John Paul II, who led the Catholic Church from 1978 to 2005, came from Poland.', 'Pope John Paul II came from…', 'Poland', 'Brazil'),
+    f('The Vistula, Poland\'s longest river, flows through Kraków and Warsaw.', 'Which river flows through Kraków and Warsaw?', 'The Vistula', 'The Thames'),
+  ],
+  'czechia-slovakia-hungary': [
+    f('The sugar cube was invented in the Czech town of Dačice in 1843.', 'What was invented in a Czech town in 1843?', 'The sugar cube', 'The telephone'),
+    f('The word "robot" was first used in a play by the Czech writer Karel Čapek, in 1920.', 'The word "robot" first appeared in a play written in…', 'Czech', 'Japanese'),
+    f('Budapest has more than 100 hot springs and is famous for its thermal baths.', 'Budapest is famous for its…', 'hot spring baths', 'glaciers'),
+    f('Spiš Castle in Slovakia is one of the largest castles in Central Europe.', 'Spiš Castle, one of the largest castles in Central Europe, is in…', 'Slovakia', 'Portugal'),
+    f('The ballpoint pen was invented by László Bíró, from Hungary.', 'The ballpoint pen was invented by László Bíró from…', 'Hungary', 'Canada'),
+  ],
+  baltics: [
+    f('The video-call program Skype was created in Estonia in 2003.', 'The video-call program Skype was created in…', 'Estonia', 'Chile'),
+    f('The Hill of Crosses in Lithuania is covered with more than 100,000 crosses.', 'Lithuania\'s Hill of Crosses is covered with…', 'crosses', 'statues of lions'),
+    f('Basketball is the most popular sport in Lithuania.', 'The most popular sport in Lithuania is…', 'basketball', 'cricket'),
+    f('At Estonia\'s Song Festival, tens of thousands of singers sing together on one big stage.', 'Estonia\'s Song Festival brings together tens of thousands of…', 'singers', 'runners'),
+    f('Tallinn, the capital of Estonia, has an old town with walls and towers from the Middle Ages.', 'Tallinn\'s old town was built in the…', 'Middle Ages', '2000s'),
+    f('Riga, the capital of Latvia, is the largest city of the three Baltic countries.', 'The largest city of the Baltic countries is…', 'Riga', 'Tallinn'),
+  ],
+  'belarus-ukraine-moldova': [
+    f('Borscht is a bright red soup made with beetroot, popular in Ukraine.', 'Borscht is a soup made with…', 'beetroot', 'coconut'),
+    f('Saint Sophia\'s Cathedral in Kyiv, Ukraine, is about 1,000 years old.', 'How old is Saint Sophia\'s Cathedral in Kyiv?', 'About 1,000 years', 'About 50 years'),
+    f('Ukraine is one of the world\'s biggest growers of sunflowers, used to make sunflower oil.', 'Ukraine is one of the world\'s biggest growers of…', 'sunflowers', 'bananas'),
+    f('Mir Castle in Belarus, with its red brick towers, is a World Heritage Site.', 'Mir Castle, a World Heritage Site, is in…', 'Belarus', 'Ireland'),
+    f('Hoverla, the highest mountain in Ukraine, is in the Carpathian Mountains.', 'Ukraine\'s highest mountain, Hoverla, is in the…', 'Carpathian Mountains', 'Andes'),
+    f('The official language of Moldova is Romanian.', 'The official language of Moldova is…', 'Romanian', 'Portuguese'),
+  ],
+  'western-balkans': [
+    f('Lake Bled in Slovenia has a tiny island with a church on it.', 'The tiny island in Lake Bled, Slovenia, has a…', 'church', 'lighthouse'),
+    f('The tennis champion Novak Djokovic comes from Serbia.', 'The tennis champion Novak Djokovic comes from…', 'Serbia', 'Sweden'),
+    f('Albania has thousands of small concrete bunkers, built long ago in case of war.', 'Albania has thousands of small concrete…', 'bunkers', 'pyramids'),
+  ],
+  'romania-bulgaria': [
+    f('The Cyrillic alphabet was developed in medieval Bulgaria, more than 1,000 years ago.', 'Which alphabet was developed in medieval Bulgaria?', 'Cyrillic', 'Latin'),
+    f('One of the bacteria used to make yogurt is named after Bulgaria: Lactobacillus bulgaricus.', 'A bacterium used to make yogurt is named after…', 'Bulgaria', 'Peru'),
+    f('The Palace of the Parliament in Bucharest, Romania, is one of the heaviest buildings in the world.', 'Bucharest\'s Palace of the Parliament is one of the world\'s…', 'heaviest buildings', 'smallest buildings'),
+    f('The monasteries of Bucovina in Romania have colourful pictures painted on their outside walls.', 'Where are the pictures on the monasteries of Bucovina painted?', 'On the outside walls', 'Only on the floor'),
+    f('The Transfăgărășan is a famous winding road high in Romania\'s Carpathian Mountains.', 'The Transfăgărășan is a famous winding…', 'mountain road', 'river'),
+    f('In Bulgaria, nodding your head usually means "no", and shaking it means "yes".', 'In Bulgaria, nodding your head usually means…', '"no"', '"yes"'),
+    f('The Rila Monastery, the largest monastery in Bulgaria, lies in the Rila Mountains.', 'Bulgaria\'s largest monastery is in the…', 'Rila Mountains', 'Alps'),
+    f('In 1976 the Romanian gymnast Nadia Comăneci scored the first perfect 10 at the Olympic Games.', 'Nadia Comăneci was the first Olympic gymnast to score a perfect…', '10', '100'),
+    f('Romanian comes from Latin, the language of ancient Rome, like Italian and Spanish.', 'The Romanian language comes from…', 'Latin', 'Chinese'),
+  ],
+};
