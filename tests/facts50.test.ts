@@ -9,7 +9,7 @@ import { INSIDE_30, map50 } from '../src/maps/map50.ts';
 // The 50-turn map's facts (task M3): the 30-turn facts sorted by country, plus new ones.
 
 // Continents whose new facts are written (owner: one continent per session).
-const DONE: Continent[] = ['Europe', 'Asia', 'North America', 'Oceania'];
+const DONE: Continent[] = ['Europe', 'Asia', 'Africa', 'North America', 'Oceania'];
 
 test('the sort sends each fact of a split area to one or more of its own parts', () => {
   const old = Object.assign({}, ...FACT_BATCHES);
