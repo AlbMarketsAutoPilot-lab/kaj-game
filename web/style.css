@@ -243,3 +243,8 @@ button.link { background: none; border: none; padding: 0; text-align: left; font
 .guide-prop { width: 160px; max-height: 26vh; }
 .guide-glow { animation: glow 1.2s ease-in-out infinite; }
 @keyframes glow { 50% { filter: brightness(1.35) drop-shadow(0 0 6px #fff6c8); } }
+.guide-badge { font-weight: 700; color: #ffe08a; }
+.guide-badge img { height: 1em; vertical-align: -2px; }
+.guide-zero { fill: #fff6c8; font-weight: 700; paint-order: stroke; stroke: #062a30; stroke-width: 0.15px; }
+.guide-quiz { text-align: center; }
+.guide-inline { position: static; margin: 8px auto 0; }

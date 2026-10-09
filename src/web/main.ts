@@ -152,7 +152,12 @@ function renderStart(): void {
   state = null;
   const saved = readSave();
   // The guide starts by itself on the very first ▶ Play (owner's request).
-  const guide = (after: () => void) => runGuide({ app, geo, areaColour, el, button }, after);
+  const guide = (after: () => void) => runGuide({
+    app, geo, areaColour, el, button,
+    flag: (country) => { const code = countryFlag(country); return code && FLAGS[code] ? el('img', { className: 'mini-flag', src: FLAGS[code], alt: '' }) : ''; },
+    question: (title, text, options, correct, onAnswer, key, note) => timedQuestion([title], text, options, correct, onAnswer, QUIZ_SECONDS, key, note),
+    stopClock: () => { clearInterval(quizTimer); stopTimer(); },
+  }, after);
   const play = button('▶ Play', () => (guideSeen() ? renderSetup() : guide(renderSetup)));
   play.className = 'primary big';
   const howTo = button('📖 How to play', () => guide(renderStart));
@@ -848,17 +853,26 @@ function renderBigCountries(me: GameState['players'][number]): HTMLElement {
   return el('p', { className: 'small', textContent: started.length ? `🧩 Big countries: ${started.join(' · ')}` : '' });
 }
 
+// The timed a/b question box (airline quiz, also used by the guide): the question, the answer
+// buttons, the 15-second clock and a note. Time out = the wrong answer.
+function timedQuestion(title: (Node | string)[], text: string, options: string[], correct: number, onAnswer: (i: number) => void, seconds: number, key: string, note: string): HTMLElement[] {
+  const clock = el('div', { className: 'clock' }, el('span', { className: 'secs', textContent: `⏱️ ${seconds} s` }), el('div', { className: 'timebar' }, el('span')));
+  const nodes = [el('h2', {}, ...title),
+    el('p', { textContent: text }),
+    el('div', { className: 'row' }, ...options.map((o, i) => button(o, () => onAnswer(i)))),
+    clock,
+    el('p', { className: 'small', textContent: note })];
+  startCountdown(key, seconds, clock, () => onAnswer(1 - correct));
+  return nodes;
+}
+
 // Airline quiz: one a/b question about the destination, 15 seconds. Time out = wrong answer.
 function renderQuiz(box: HTMLElement, s: GameState, who: HTMLElement): void {
   const { question, to, kind } = s.quiz!;
-  const left = QUIZ_SECONDS;
-  const clock = el('div', { className: 'clock' }, el('span', { className: 'secs', textContent: `⏱️ ${left} s` }), el('div', { className: 'timebar' }, el('span')));
-  box.append(el('h2', {}, who, `: Airline promotion — answer correctly and ${kind === 'airport' ? 'fly' : 'sail'} free to ${areaById.get(to)!.name}!`),
-    el('p', { textContent: question.text }),
-    el('div', { className: 'row' }, ...question.options.map((o, i) => button(o, () => act({ type: 'answer', choice: i as 0 | 1 })))),
-    clock,
-    el('p', { className: 'small', textContent: `Wrong answers here so far: ${currentPlayer(s).quizWrong}. A wrong answer uses this turn.${forcedPayNote(s, kind, to)}` }));
-  startCountdown(`answer-${s.round}-${currentPlayer(s).seat}-${question.text}-${currentPlayer(s).quizWrong}`, left, clock, () => act({ type: 'answer', choice: (1 - question.correct) as 0 | 1 }));
+  box.append(...timedQuestion([who, `: Airline promotion — answer correctly and ${kind === 'airport' ? 'fly' : 'sail'} free to ${areaById.get(to)!.name}!`],
+    question.text, question.options, question.correct, (i) => act({ type: 'answer', choice: i as 0 | 1 }), QUIZ_SECONDS,
+    `answer-${s.round}-${currentPlayer(s).seat}-${question.text}-${currentPlayer(s).quizWrong}`,
+    `Wrong answers here so far: ${currentPlayer(s).quizWrong}. A wrong answer uses this turn.${forcedPayNote(s, kind, to)}`));
 }
 
 // Travel-turn challenge: one a/b question, 15 seconds. Time out = wrong answer.
