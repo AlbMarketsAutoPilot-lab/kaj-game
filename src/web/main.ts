@@ -1441,8 +1441,9 @@ function drawMap(view: Box, k: number, cls: (id: string) => string, onTap: (id: 
   const names = svg('g', { class: 'names' });
   const labels = svg('g');
   root.append(shapes, names, labels);
-  const w = window.innerWidth / 2 - 12;
-  const h = pane === 'left' ? window.innerHeight - 115 : w / 2.6;
+  // The page is zoomed to the screen (uiZoom): sizes here are in page pixels.
+  const w = window.innerWidth / uiZoom / 2 - 12;
+  const h = pane === 'left' ? window.innerHeight / uiZoom - 115 : w / 2.6;
   const scale = Math.min(w / vb.w, h / vb.h);
   return { root, names, labels, paths, vb, k, fs: px / scale, px };
 }
@@ -1480,7 +1481,7 @@ function areaNames(d: Drawn, ids: string[], shift: (id: string) => number = () =
     return [...d.paths].some(([other, path]) => other !== id && path.isPointInFill(pt));
   });
   const update = (unit: number) => {
-    const fs = NAME_PX * unit;
+    const fs = NAME_PX * uiZoom * unit;
     const placed: { x: number; y: number; w: number; h: number }[] = [];
     for (const it of items) {
       const w = it.chars * fs * 0.58;
@@ -1920,6 +1921,20 @@ function renderStartMap(s: GameState, isRobot: boolean): HTMLElement {
   wrap.append(el('div', { className: 'where' }, button('← All continents', () => { zoom = null; pickedStart = null; detailArea = null; render(); }), ` ${c}: tap an area`), d.root);
   return wrap;
 }
+
+// One layout for every screen (owner's request, task 14l): it was made for a landscape phone
+// (about 900 × 430); bigger screens zoom it up, the smallest phones a little down.
+let uiZoom = 1;
+function applyZoom(): void {
+  uiZoom = Math.min(2.4, Math.max(0.8, Math.min(window.innerWidth / 900, window.innerHeight / 430)));
+  document.documentElement.style.setProperty('zoom', String(uiZoom));
+}
+applyZoom();
+let resizeTimer = 0;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = window.setTimeout(() => { applyZoom(); if (state) render(); }, 150);
+});
 
 installIcons();
 renderStart();
