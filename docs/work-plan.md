@@ -55,7 +55,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | M1 | 50-turn map: area list, wonders, airports and ports (`docs/map50.md`, made by `node scripts/map50-review.ts`) | **high** | 1 | 13 | ✅ done (owner-approved 2026-10-09: 84 areas, 11 wonders, 21 connections, train and bus) |
 | M2 | 50-turn map: engine (map choice, data, timing, stuck-state checker, 1,000 robot games, saves v11) | **high** | 1 | 13–14 | ✅ done (owner-approved 2026-10-09: 151 walking links, ship from Portugal, Madagascar ↔ Zambezi, cards every 5 turns, v10 30-turn saves still load) |
 | M3 | 50-turn map: shapes, facts sorted by country (write only the missing ones) | medium | 1 | 14 | ✅ done (owner-approved 2026-10-09: 12 facts per area, 330 new) |
-| M4 | 50-turn map: screens (turn picker, home country, world map, guide), web and APK | medium | 1 | 15 | A ✅ screens (owner-approved 2026-10-09); B: the 4 new wonder drawings (drafts, waiting for the owner) |
+| M4 | 50-turn map: screens (turn picker, home country, world map, guide), web and APK | medium | 1 | 15 | ✅ done (owner-approved 2026-10-09: screens, and the 4 new wonder drawings) |
 | M5 | 50-turn map: full test games and fixes | medium | 1 | 15 | |
 | M6 | Wonder posters for the 7 wonders of the 30-turn map (the 4 of the 50-turn map come with M4) | medium | 1 | 13 | ✅ done |
 | 15 | Android release build (signed APK) | medium | 1 | — | postponed (owner, 2026-10-09) |
