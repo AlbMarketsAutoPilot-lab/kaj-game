@@ -147,6 +147,8 @@ main:has(.game) { max-width: none; padding: 6px; height: calc(100 * var(--vh)); 
 .map-svg .route.port { stroke: rgba(140, 200, 255, 0.6); }
 /* Task 17: the train, a solid rail line with sleepers. */
 .map-svg .route.station { stroke: rgba(255, 214, 140, 0.85); stroke-width: 2px; stroke-dasharray: 1 3; }
+/* Task 18: the bus, a one-way dashed yellow line. */
+.map-svg .route.bus { stroke: rgba(240, 210, 90, 0.9); stroke-width: 1.5px; stroke-dasharray: 4 2; }
 .map-svg .trip { stroke-width: 2.5px; stroke-dasharray: 6 4; vector-effect: non-scaling-stroke; }
 
 /* Task 14 B1: drawn props, pawns, zoom, popup, details */
@@ -272,6 +274,7 @@ button.link { background: none; border: none; padding: 0; text-align: left; font
 .trip-scene.plane { background-size: 141% auto; background-position: 35% 18%; }
 .trip-scene.ship { background-size: 155% auto; background-position: 55% 40%; }
 .trip-scene.train { background-size: 150% auto; background-position: 45% 55%; }
+.trip-scene.bus { background-size: 150% auto; background-position: 60% 60%; }
 .trip-scene svg { display: block; width: 100%; height: auto; }
 /* Wonder posters (task M6): the drawing on the background painting, the name in the poster's lettering. */
 .wonder-scene { border-radius: 12px; overflow: hidden; background: #0a3a40 var(--bg-art) center 40% / cover no-repeat; }

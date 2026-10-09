@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { apply, destinations, legalActions } from '../src/engine/engine.ts';
 import type { Action, GameMap, GameState, Profile } from '../src/engine/types.ts';
-import { PROFILES } from '../src/engine/constants.ts';
+import { canRide, PROFILES } from '../src/engine/constants.ts';
 import { placeholderQuestion } from '../src/engine/quiz.ts';
 import { map30 } from '../src/maps/map30.ts';
 import { travelMap } from './fixtures/test-map.ts';
@@ -201,9 +201,9 @@ test('home is the area itself: the player stays and the count starts again', () 
 // any profile, any airport or port of the 30-turn map, even with 0 points.
 test('30-turn map: the quiz is offered for every destination, for every profile, with 0 points', () => {
   for (const profile of PROFILES) {
-    // Luxury can't take the train (task 17).
-    for (const r of (map30.routes ?? []).filter((x) => !(x.kind === 'station' && profile === 'luxury'))) {
-      for (const [from, to] of [[r.a, r.b], [r.b, r.a]]) {
+    // Luxury can't take the train (task 17); only the Nomad and Backpacker take the bus, one way (task 18).
+    for (const r of (map30.routes ?? []).filter((x) => canRide(profile, x.kind))) {
+      for (const [from, to] of r.oneWay ? [[r.a, r.b]] : [[r.a, r.b], [r.b, r.a]]) {
         const s = withPlayerAt(map30, profile, from);
         const offered = legalActions(s, map30).some((a) => a.type === 'quiz' && a.kind === r.kind && a.to === to);
         assert.ok(offered, `${profile} at ${from}: no quiz to ${to}`);

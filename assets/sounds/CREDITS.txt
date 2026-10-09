@@ -8,5 +8,7 @@ right.mp3: https://pixabay.com/sound-effects/technology-glock-correct-answer-504
 tap, walk, plane, ship, wrong, card-good, card-bad, coins, citizenship, milestone, win,
 timer (15-second answer loop), music: Pixabay, individual links not kept (owner's choice).
 
+bus.mp3 (task 18): Pixabay (https://pixabay.com/sound-effects/), Pixabay Content License (owner, 2026-10-09).
+Trimmed to 0.9 s, made mono and set to the loudness of the other sounds.
 train.mp3 (task 17): Pixabay (https://pixabay.com/sound-effects/), Pixabay Content License, like the others (owner, 2026-10-09).
 Trimmed to 2 s (fade-out), made mono and set to the loudness of plane.mp3 and ship.mp3.

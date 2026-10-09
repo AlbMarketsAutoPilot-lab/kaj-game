@@ -1,6 +1,6 @@
 // The trip scenes (owner-approved preview, task 14j): drawn over the game's own background
 // painting (set by CSS, .trip-scene). No people: a plane in the night sky, a liner at sea, or a
-// night train (task 17).
+// night train (task 17), or a bus on the steppe (task 18).
 
 import type { RouteKind } from '../engine/types.ts';
 
@@ -138,16 +138,49 @@ ${CARRIAGE(0)}${CARRIAGE(98)}
 <path d="M320 186 Q380 182 440 178" stroke="#fff6c8" stroke-width="10" opacity=".12" filter="url(#trip-blur6)"/>
 <rect width="440" height="230" fill="url(#trip-moonglow)" opacity=".25"/>`;
 
-const TRAIN_DEFS = `<linearGradient id="trip-car" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2fb39a"/><stop offset="1" stop-color="#0f6a5c"/></linearGradient>
+// A bus at dusk on the steppe (task 18): hills, two yurts, a road, the bus with lit windows, dust.
+const BUS = `<rect width="440" height="230" fill="#062a30" opacity=".12"/>
+<path d="M0 150 Q80 120 170 138 T340 128 T440 140 V230 H0 Z" fill="#1d4a3a" opacity=".75"/>
+<path d="M0 170 Q120 158 240 166 T440 160 V230 H0 Z" fill="#0b2f2a" opacity=".9"/>
+<g transform="translate(330 150)" opacity=".85">
+<path d="M0 0 H22 V-9 Q11 -20 0 -9 Z" fill="#f1e6c4"/><path d="M8 0 V-6 H14 V0 Z" fill="#9a6b44"/>
+<path d="M30 2 H46 V-5 Q38 -13 30 -5 Z" fill="#e9dcb5"/>
+</g>
+<path d="M0 204 H440" stroke="#3b4a4f" stroke-width="22"/>
+<path d="M0 204 H440" stroke="#f4f1de" stroke-width="1.6" stroke-dasharray="14 12" opacity=".7"/>
+<g fill="#e9dcb5" filter="url(#trip-blur6)">
+<ellipse cx="96" cy="190" rx="22" ry="8" opacity=".35"/><ellipse cx="60" cy="184" rx="28" ry="10" opacity=".25"/><ellipse cx="20" cy="178" rx="30" ry="11" opacity=".15"/>
+</g>
+<g transform="translate(116 200) scale(1.25)">
+<rect x="0" y="-52" width="150" height="46" rx="8" fill="url(#trip-bus)"/>
+<rect x="0" y="-52" width="150" height="7" rx="3.5" fill="#f4cf6a"/>
+<g fill="#ffe08a" filter="url(#trip-glow)">
+<rect x="10" y="-40" width="20" height="14" rx="2"/><rect x="36" y="-40" width="20" height="14" rx="2"/>
+<rect x="62" y="-40" width="20" height="14" rx="2"/><rect x="88" y="-40" width="20" height="14" rx="2"/>
+</g>
+<rect x="116" y="-40" width="28" height="18" rx="3" fill="#163e46"/>
+<rect x="114" y="-24" width="8" height="18" rx="1" fill="#163e46" opacity=".6"/>
+<path d="M0 -18 H150" stroke="#c0392b" stroke-width="3"/>
+<circle cx="146" cy="-12" r="3" fill="#fff6c8" filter="url(#trip-glow)"/>
+<rect x="-2" y="-12" width="4" height="5" fill="#ff5a4a"/>
+<circle cx="30" cy="-4" r="9" fill="#1a1a1a" stroke="#5f8583" stroke-width="2"/><circle cx="30" cy="-4" r="3" fill="#9fbdbb"/>
+<circle cx="120" cy="-4" r="9" fill="#1a1a1a" stroke="#5f8583" stroke-width="2"/><circle cx="120" cy="-4" r="3" fill="#9fbdbb"/>
+</g>
+<path d="M310 196 Q380 192 440 188" stroke="#fff6c8" stroke-width="12" opacity=".12" filter="url(#trip-blur6)"/>
+<rect width="440" height="230" fill="url(#trip-moonglow)" opacity=".25"/>`;
+
+const TRAIN_DEFS = `<linearGradient id="trip-bus" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f2d65c"/><stop offset="1" stop-color="#c79a22"/></linearGradient>
+<linearGradient id="trip-car" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2fb39a"/><stop offset="1" stop-color="#0f6a5c"/></linearGradient>
 <linearGradient id="trip-loco" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e2574a"/><stop offset="1" stop-color="#7d1f16"/></linearGradient>`;
 
 const SCENES: Record<RouteKind, { className: string; art: string }> = {
   airport: { className: 'plane', art: PLANE },
   port: { className: 'ship', art: SHIP },
   station: { className: 'train', art: TRAIN },
+  bus: { className: 'bus', art: BUS },
 };
 
-// The scene for a plane ('airport'), ship ('port') or train ('station') trip.
+// The scene for a plane ('airport'), ship ('port'), train ('station') or bus trip.
 export function tripScene(kind: RouteKind): HTMLElement {
   const box = document.createElement('div');
   box.className = `trip-scene ${SCENES[kind].className}`;

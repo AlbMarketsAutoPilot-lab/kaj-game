@@ -2,7 +2,7 @@
 // landscape board (left: the current area drawn; right: the world map and the turn panel).
 // Robots play with simple rules, at the level chosen for each seat (task 13).
 
-import { BUSINESS_PRICE, CHALLENGE_POINTS, CONTINENT_BONUS, EXAM_FACTS, EXAM_PASS, POINTS_NOMAD_TRAVEL_TURN, POINTS_NEW_AREA, POINTS_NEW_CONTINENT, POINTS_WONDER, GO_HOME_TURNS, NOMAD_MIN_CONTINENTS, NOMAD_PENALTY, NOMAD_WARNING_ROUND, POINTS_BUSINESS_CITIZENSHIP, QUIZ_TRIES, ROUTE_KINDS, TICKET_BUSINESS, TICKET_PRICE, ticketPrice, TOUR_FEE, TRAVEL_TURNS, VISA_PRICE } from '../engine/constants.ts';
+import { BUSINESS_PRICE, CHALLENGE_POINTS, CONTINENT_BONUS, EXAM_FACTS, EXAM_PASS, POINTS_NOMAD_TRAVEL_TURN, POINTS_NEW_AREA, POINTS_NEW_CONTINENT, POINTS_WONDER, GO_HOME_TURNS, NOMAD_MIN_CONTINENTS, NOMAD_PENALTY, NOMAD_WARNING_ROUND, POINTS_BUSINESS_CITIZENSHIP, QUIZ_TRIES, ROUTE_KINDS, bigCountryPoints, canRide, TICKET_BUSINESS, TICKET_PRICE, ticketPrice, TOUR_FEE, TRAVEL_TURNS, VISA_PRICE } from '../engine/constants.ts';
 import {
   apply, blockedByMoney, examPassed, bookedBy, businessAt, canPayAfterQuiz, destinations, businessValue, createGame, currentPlayer, entryFees, feeTotal, finalScore, homeFor, landTurnsToCard, legalActions, nomadPenalty,
 } from '../engine/engine.ts';
@@ -13,7 +13,7 @@ import { map30 } from '../maps/map30.ts';
 import { shapes30 } from '../maps/shapes30.ts';
 import { countryCapital, countryFlag, WONDER_NAME, WONDER_PLACE } from './countries.ts';
 import { buildGeo, colourAreas, continentBox, pad, squeeze, svg, unionBox, type Box } from './maps.ts';
-import { airport, citizenFlag, monument, pawn, place, port, station } from './props.ts';
+import { airport, busStop, citizenFlag, monument, pawn, place, port, station } from './props.ts';
 import { iconEl, iconUse, installIcons, PROFILE_COLOUR } from './icons.ts';
 import { hasWonderScene, tripScene, wonderScene } from './scenes.ts';
 import { guideSeen, runGuide } from './tutorial.ts';
@@ -56,20 +56,27 @@ const POSTER: string = (window as unknown as { KAJ_POSTER?: string }).KAJ_POSTER
 const CREDITS = 'Country data: mledoze/countries, ODbL 1.0 · Flags: flag-icons by Panayiotis Lipiridis, MIT licence · Map shapes: Natural Earth · Lettering: Cinzel, SIL Open Font Licence · Sounds: Pixabay, Pixabay Content License';
 // Citizenship test: 15 seconds for each question (owner's choice, task 8).
 const EXAM_SECONDS = 15;
-const VEHICLE: Record<RouteKind, string> = { airport: '✈️', port: '⚓', station: '🚆' };
+const VEHICLE: Record<RouteKind, string> = { airport: '✈️', port: '⚓', station: '🚆', bus: '🚌' };
 // Words for each way to travel (the train: task 17).
 const TRAVEL_WORDS: Readonly<Record<RouteKind, { verb: string; vehicle: string; place: string; a: string; sound: SoundName; promo: string }>> = {
   airport: { verb: 'fly', vehicle: 'plane', place: 'airport', a: 'a plane', sound: 'plane', promo: 'Airline' },
   port: { verb: 'sail', vehicle: 'ship', place: 'port', a: 'a ship', sound: 'ship', promo: 'Airline' },
   station: { verb: 'ride the train', vehicle: 'train', place: 'station', a: 'the train', sound: 'train', promo: 'Railway' },
+  bus: { verb: 'take the bus', vehicle: 'bus', place: 'bus stop', a: 'the bus', sound: 'bus', promo: 'Bus' },
 };
-const BUSINESS_ICON: Record<BusinessKind, string> = { tours: '🏛️', airline: '✈️', ferry: '⚓', train: '🚆' };
-const BUSINESS_NAME: Record<BusinessKind, string> = { tours: 'guided tours', airline: 'airline', ferry: 'ferry agency', train: 'train ticket booth' };
+// Who can't take a trip of this kind (see canRide), as told on the screens.
+const NO_RIDE: Partial<Record<RouteKind, string>> = {
+  station: 'Luxury can\'t take the train',
+  bus: 'Only the Nomad and the Backpacker take the bus',
+};
+const BUSINESS_ICON: Record<BusinessKind, string> = { tours: '🏛️', airline: '✈️', ferry: '⚓', train: '🚆', bus: '🚌' };
+const BUSINESS_NAME: Record<BusinessKind, string> = { tours: 'guided tours', airline: 'airline', ferry: 'ferry agency', train: 'train ticket booth', bus: 'bus ticket booth' };
 const BUSINESS_EARNS: Record<BusinessKind, string> = {
   tours: `every other player pays you ${plural(TOUR_FEE, 'point')} to enter`,
   airline: 'every paid plane ticket from here goes to you',
   ferry: 'every paid ship ticket from here goes to you',
   train: 'every paid train ticket from here goes to you',
+  bus: 'every paid bus ticket from here goes to you',
 };
 
 const app = document.getElementById('app')!;
@@ -78,7 +85,10 @@ const continents = [...new Set(map30.areas.map((a) => a.continent))];
 const geo = buildGeo(map30, shapes30);
 const worldBox = unionBox([...geo.values()].map((g) => g.box));
 const areaColour = colourAreas(map30, geo);
-const hasRoute = (id: string, kind: RouteKind) => (map30.routes ?? []).some((r) => r.kind === kind && (r.a === id || r.b === id));
+// Where the routes of this kind go from an area (a one-way route, the bus, only from its start).
+const routeEnds = (id: string, kind: RouteKind) => (map30.routes ?? []).filter((r) => r.kind === kind)
+  .flatMap((r) => (r.a === id ? [r.b] : r.b === id && !r.oneWay ? [r.a] : []));
+const hasRoute = (id: string, kind: RouteKind) => routeEnds(id, kind).length > 0;
 
 let state: GameState | null = null;
 let robotSeed = 1;
@@ -302,15 +312,15 @@ function profileNote(p: Profile, who = ''): HTMLElement {
   const ship = TRAVEL_TURNS[p].port;
   const trips = `planes ${plane ? plural(plane, 'travel turn') : 'arrive right away'}, ships ${plural(ship, 'travel turn')}`;
   const good: Record<Profile, string[]> = {
-    backpacker: ['Never pays for a ticket: always the free quiz.', `+${CONTINENT_BONUS.backpacker!.points} for visiting ${CONTINENT_BONUS.backpacker!.continents} continents.`, 'Its own Backpacker event cards.'],
+    backpacker: ['Never pays for a ticket: always the free quiz.', 'Can take the bus from Mongolia: all of Russia or China at once.', `+${CONTINENT_BONUS.backpacker!.points} for visiting ${CONTINENT_BONUS.backpacker!.continents} continents.`, 'Its own Backpacker event cards.'],
     business: [`+${plural(POINTS_BUSINESS_CITIZENSHIP, 'point')} when you get citizenship (any area).`, `Fast: ${trips}.`],
     luxury: ['Can fly or sail to any airport or port.', 'Citizenship at once, with no test.', `+${CONTINENT_BONUS.luxury!.points} for visiting ${CONTINENT_BONUS.luxury!.continents} continents.`, `Fast: ${trips}.`],
-    nomad: [`Cheapest plane and ship ticket: ${plural(price ?? 0, 'point')}.`, `+${POINTS_NOMAD_TRAVEL_TURN} for every turn on a plane, ship or train.`],
+    nomad: [`Cheapest plane and ship ticket: ${plural(price ?? 0, 'point')}.`, `+${POINTS_NOMAD_TRAVEL_TURN} for every turn on a plane, ship, train or bus.`, 'Can take the bus from Mongolia: all of Russia or China at once.'],
   };
   const bad: Record<Profile, string[]> = {
-    backpacker: ['Travels by plane, ship or train only with the quiz (one try per turn).', `Slow: ${trips}.`],
-    business: [`Ticket ${plural(price ?? 0, 'point')}.`],
-    luxury: [`The highest ticket: ${plural(price ?? 0, 'point')}.`, 'Can\'t take the train.'],
+    backpacker: ['Travels by plane, ship, train or bus only with the quiz (one try per turn).', `Slow: ${trips}.`],
+    business: [`Ticket ${plural(price ?? 0, 'point')}.`, 'Can\'t take the bus.'],
+    luxury: [`The highest ticket: ${plural(price ?? 0, 'point')}.`, 'Can\'t take the train or the bus.'],
     nomad: [`Train ticket ${plural(ticketPrice('nomad', 'station') ?? 0, 'point')}.`, 'Can never ask for citizenship.', `−${NOMAD_PENALTY} at the end with fewer than ${NOMAD_MIN_CONTINENTS} continents.`, `Slow: ${trips}.`],
   };
   return el('div', { className: 'note profile-note' },
@@ -856,13 +866,16 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
     const to = areaById.get(trip.to)!.name;
     const plane = trip.kind === 'airport';
     const train = trip.kind === 'station';
+    const bus = trip.kind === 'bus';
     const total = me.profile ? TRAVEL_TURNS[me.profile][trip.kind] : trip.turnsLeft;
     const step = trip.turnsLeft > 0
-      ? ` · ${plane ? 'flight' : train ? 'journey' : 'day'} ${total - trip.turnsLeft + 1} of ${total}`
+      ? ` · ${plane ? 'flight' : train || bus ? 'journey' : 'day'} ${total - trip.turnsLeft + 1} of ${total}`
       : ` · waiting to land (${to} is taken)`;
     const challenge = actions.some((a) => a.type === 'travel' && a.challenge);
     const offer = plane
       ? `The seat-belt sign goes off. A fellow passenger leans over: "Long flight… fancy a geography challenge? Right +${CHALLENGE_POINTS}, wrong −${CHALLENGE_POINTS}."`
+      : bus
+      ? `The bus rolls across the steppe. The passenger next to you pulls out a quiz book: "A geography challenge? Right +${CHALLENGE_POINTS}, wrong −${CHALLENGE_POINTS}."`
       : train
       ? `Clickety-clack through the night. In the dining car someone unfolds a map: "A geography challenge? Right +${CHALLENGE_POINTS}, wrong −${CHALLENGE_POINTS}."`
       : `Calm water, a sky full of stars. In the ship's lounge someone sets up a quiz table: "A geography challenge? Right +${CHALLENGE_POINTS}, wrong −${CHALLENGE_POINTS}."`;
@@ -870,13 +883,13 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
     play.className = 'primary';
     box.classList.add('trip-turn');
     box.append(tripScene(trip.kind), el('div', { className: 'trip-text' },
-      el('h2', {}, who, ` ${plane ? 'is flying' : train ? 'is on the train' : 'is at sea'} to ${to}${step}`),
+      el('h2', {}, who, ` ${plane ? 'is flying' : train ? 'is on the train' : bus ? 'is on the bus' : 'is at sea'} to ${to}${step}`),
       el('p', { className: 'small', textContent: challenge
         ? `${offer} One question, ${CHALLENGE_SECONDS} seconds. You don't have to play.`
         : `A challenge needs at least ${plural(CHALLENGE_POINTS, 'point')}, so there is none this turn.` }),
       me.profile === 'nomad' ? el('p', { className: 'small', textContent: '💻 Digital Nomad: +1 for this travel turn either way.' }) : '',
       el('div', { className: 'row' }, ...(challenge
-        ? [play, button(plane || train ? '😴 No thanks' : '🌅 No thanks', () => act({ type: 'travel' }))]
+        ? [play, button(plane || train || bus ? '😴 No thanks' : '🌅 No thanks', () => act({ type: 'travel' }))]
         : [button('Continue the trip', () => act({ type: 'travel' }))]))));
   } else {
     const here = areaById.get(me.area!)!;
@@ -931,7 +944,7 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
         button('Cancel', () => { selling = false; render(); })));
     }
     box.append(
-      guideOff ? el('p', { className: 'small', textContent: 'Tap a green area to walk there. Tap the plane, ship, train or monument on your area for travel and tours. Tap any area for its details.' }) : '',
+      guideOff ? el('p', { className: 'small', textContent: 'Tap a green area to walk there. Tap the plane, ship, train, bus or monument on your area for travel and tours. Tap any area for its details.' }) : '',
       renderGuide(s, actions),
       renderBigCountries(me));
   }
@@ -1106,11 +1119,11 @@ function lastTryWarning(s: GameState, actions: Action[]): string {
 }
 
 function travelNote(me: Player): string {
-  const has = (kind: RouteKind) => (map30.routes ?? []).some((r) => r.kind === kind && (r.a === me.area || r.b === me.area));
+  const has = (kind: RouteKind) => hasRoute(me.area!, kind);
   const price = TICKET_PRICE[me.profile!];
   const notes = ROUTE_KINDS.filter(has).map((kind) => {
     const vehicle = capital(TRAVEL_WORDS[kind].vehicle);
-    if (kind === 'station' && me.profile === 'luxury') return `${VEHICLE[kind]} ${vehicle}: Luxury can't take the train`;
+    if (!canRide(me.profile!, kind)) return `${VEHICLE[kind]} ${vehicle}: ${NO_RIDE[kind]}`;
     const ticketCost = ticketPrice(me.profile!, kind);
     const turns = TRAVEL_TURNS[me.profile!][kind];
     return `${VEHICLE[kind]} ${vehicle}: ${ticketCost === null ? 'you travel only with the quiz' : `ticket ${ticketCost}`}, ${plural(turns, 'travel turn')}`;
@@ -1237,6 +1250,14 @@ function arrivalLines(before: Player, after: Player): { area: string; lines: str
         : `🧩 ${a.bigCountry}: ${done} of ${parts.length} parts visited. Its points come when you have visited every part.`;
     }
   }
+  // The bus (task 18): the whole country counts as visited.
+  const country = before.travel?.kind === 'bus' ? a.bigCountry : undefined;
+  if (country) {
+    const parts = map30.areas.filter((x) => x.bigCountry === country);
+    if (!parts.every((x) => before.visitedAreas.includes(x.id))) {
+      lines[0] = `🚌 The bus counts all of ${country}: all ${parts.length} parts visited, +${bigCountryPoints(parts.length)}!`;
+    }
+  }
   const delta = after.points - before.points;
   lines.push(`In all: ${delta >= 0 ? '+' : '−'}${plural(Math.abs(delta), 'point')} (fees included). You have ${plural(after.points, 'point')}.`);
   return { area: id, lines: [`📍 You arrived in ${a.name}.`, ...lines] };
@@ -1260,7 +1281,7 @@ function renderGuide(s: GameState, actions: Action[]): HTMLElement | string {
     const price = plural(BUSINESS_PRICE[a.business], 'point');
     lines.push(a.business === 'tours'
       ? `🏛️ You can buy the Guided Tours of ${WONDER_NAME[here.id] ?? 'the wonder'}: it costs ${price}, and every other player who visits pays you ${plural(TOUR_FEE, 'point')}. Tap the monument.`
-      : `${BUSINESS_ICON[a.business]} You can buy the ${BUSINESS_NAME[a.business]} here for ${price}: ${BUSINESS_EARNS[a.business]}. Tap the ${a.business === 'airline' ? 'plane' : a.business === 'train' ? 'train' : 'ship'}.`);
+      : `${BUSINESS_ICON[a.business]} You can buy the ${BUSINESS_NAME[a.business]} here for ${price}: ${BUSINESS_EARNS[a.business]}. Tap the ${a.business === 'airline' ? 'plane' : a.business === 'train' ? 'train' : a.business === 'bus' ? 'bus' : 'ship'}.`);
   }
 
   const walks = plainActions(actions).flatMap((a) => (a.type === 'walk' ? [a] : []));
@@ -1300,15 +1321,16 @@ function renderGuide(s: GameState, actions: Action[]): HTMLElement | string {
     if (!hasRoute(here.id, kind)) continue;
     const words = TRAVEL_WORDS[kind];
     const placeName = kind === 'airport' ? 'an airport' : `a ${words.place}`;
-    if (kind === 'station' && me.profile === 'luxury') {
-      lines.push(`${VEHICLE[kind]} There is ${placeName} here, but Luxury can't take the train. You may still buy its ticket booth.`);
+    if (!canRide(me.profile!, kind)) {
+      lines.push(`${VEHICLE[kind]} There is ${placeName} here, but ${NO_RIDE[kind]![0].toLowerCase()}${NO_RIDE[kind]!.slice(1)}. You may still buy its ticket booth.`);
       continue;
     }
     const to = destinations(map30, here.id, kind, me.profile!).map((t) => areaById.get(t)!.name);
     const price = ticketPrice(me.profile!, kind);
     const turns = TRAVEL_TURNS[me.profile!][kind];
     lines.push(`${VEHICLE[kind]} There is ${placeName} here: ${words.verb} to ${to.join(' or ')}. ${
-      price === null ? 'Backpacker: only with the free quiz.' : `Ticket ${plural(price, 'point')}, or try the free quiz.`} ${turns ? plural(turns, 'travel turn') : 'You arrive right away'}. Tap the ${words.vehicle}.`);
+      price === null ? 'Backpacker: only with the free quiz.' : `Ticket ${plural(price, 'point')}, or try the free quiz.`} ${turns ? plural(turns, 'travel turn') : 'You arrive right away'}.${
+      kind === 'bus' ? ' The bus counts the whole country as visited: all of Russia (+5) or all of China (+3).' : ''} Tap the ${words.vehicle}.`);
   }
   if (asksOffered(actions).length > 0) {
     lines.push(`🛂 You can ask for citizenship here (the button above). ${me.profile === 'luxury' ? 'Luxury: granted at once, and you can still move this turn.' : `Your turn ends; next turn you read ${EXAM_FACTS} facts and answer 3 questions about them: ${EXAM_PASS} right answers or more, and citizenship is yours.`} Then every other player pays you ${plural(VISA_PRICE, 'point')} to enter.`);
@@ -1602,7 +1624,7 @@ const inView = (d: Drawn, x: number, y: number) => x >= d.vb.x && x <= d.vb.x + 
 function areaIcons(s: GameState, id: string): string {
   const a = areaById.get(id)!;
   const citizen = s.players.some((p) => p.citizenship?.includes(id));
-  return `${a.wonder ? '🏛️' : ''}${hasRoute(id, 'airport') ? '✈️' : ''}${hasRoute(id, 'port') ? '⚓' : ''}${hasRoute(id, 'station') ? '🚆' : ''}${citizen ? '🛂' : ''}`;
+  return `${a.wonder ? '🏛️' : ''}${hasRoute(id, 'airport') ? '✈️' : ''}${hasRoute(id, 'port') ? '⚓' : ''}${hasRoute(id, 'station') ? '🚆' : ''}${hasRoute(id, 'bus') ? '🚌' : ''}${citizen ? '🛂' : ''}`;
 }
 
 // Visited marks (owner's request): one small dot per player who has been there.
@@ -1770,10 +1792,15 @@ function renderAreaView(s: GameState, isRobot: boolean): HTMLElement {
   if (citizen) d.labels.append(place(citizenFlag(colourOf(citizen.seat)), both ? hx + P * 0.6 : hx, hy - P * 0.95, P * 0.9, `${nameOf(citizen.seat)}'s citizenship`, open('citizen')));
   if (hasRoute(focus, 'airport')) d.labels.append(place(airport(owner('airline')), hx - P * 1.2, hy, P, 'Airport', open('airport')));
   if (hasRoute(focus, 'port')) d.labels.append(place(port(owner('ferry')), hx + P * 1.2, hy, P, 'Port', open('port')));
-  // The station (task 17): in the first free side slot, else under the pawn.
+  // The station (task 17) and the bus stop (task 18): in the first free side slot, else under the pawn.
+  const slots = [...(hasRoute(focus, 'airport') ? [] : [[hx - P * 1.2, hy]]), ...(hasRoute(focus, 'port') ? [] : [[hx + P * 1.2, hy]]), [hx, hy + P * 1.1]];
   if (hasRoute(focus, 'station')) {
-    const [sx, sy] = !hasRoute(focus, 'airport') ? [hx - P * 1.2, hy] : !hasRoute(focus, 'port') ? [hx + P * 1.2, hy] : [hx, hy + P * 1.1];
+    const [sx, sy] = slots.shift()!;
     d.labels.append(place(station(owner('train')), sx, sy, P, 'Station', open('station')));
+  }
+  if (hasRoute(focus, 'bus')) {
+    const [sx, sy] = slots.shift()!;
+    d.labels.append(place(busStop(owner('bus')), sx, sy, P, 'Bus stop', open('bus')));
   }
   visitedDots(d, s, focus, hx, hy + P * 0.75, fs * 0.32);
 
@@ -1813,7 +1840,7 @@ function renderAreaView(s: GameState, isRobot: boolean): HTMLElement {
     popup ? renderPopup(s, popup, myTurn) : '');
 }
 
-// The popup menus of the drawn props (planes, ships, trains, wonder, citizenship).
+// The popup menus of the drawn props (planes, ships, trains, the bus, wonder, citizenship).
 type PopupKind = RouteKind | 'wonder' | 'citizen';
 
 function renderPopup(s: GameState, p: { kind: PopupKind; area: string }, myTurn: boolean): HTMLElement {
@@ -1853,11 +1880,10 @@ function renderPopup(s: GameState, p: { kind: PopupKind; area: string }, myTurn:
   const kind: RouteKind = p.kind;
   const price = me.profile ? ticketPrice(me.profile, kind) : null;
   const turns = me.profile ? TRAVEL_TURNS[me.profile][kind] : 0;
-  const noTrain = kind === 'station' && me.profile === 'luxury';
-  const dests = me.profile && me.area === p.area ? destinations(map30, p.area, kind, me.profile)
-    : (map30.routes ?? []).filter((r) => r.kind === kind && (r.a === p.area || r.b === p.area)).map((r) => (r.a === p.area ? r.b : r.a));
+  const noRide = me.profile !== null && !canRide(me.profile, kind);
+  const dests = me.profile && me.area === p.area ? destinations(map30, p.area, kind, me.profile) : routeEnds(p.area, kind);
   box.append(el('div', { className: 'row spread' }, el('h3', { textContent: `${VEHICLE[kind]} ${capital(TRAVEL_WORDS[kind].place)} of ${area.name}` }), close),
-    el('p', { className: 'small', textContent: noTrain ? 'Luxury can\'t take the train, but may buy the ticket booth.'
+    el('p', { className: 'small', textContent: noRide ? `${NO_RIDE[kind]}; you may still buy the ticket booth.`
       : `${price === null ? 'Backpacker: you travel only with the quiz.' : `Ticket ${plural(price, 'point')}${ticketTo(s, kind)}.`} ${plural(turns, 'travel turn')}. The quiz is free; a wrong answer uses the turn.` }),
     businessLine(TICKET_BUSINESS[kind]),
     el('div', { className: 'row' }, buyButton(TICKET_BUSINESS[kind])));
@@ -1938,8 +1964,7 @@ function citizenshipAreasOf(id: string): string[] {
 function renderAreaDetails(s: GameState, id: string): HTMLElement {
   const a = areaById.get(id)!;
   const me = currentPlayer(s);
-  const routes = (kind: RouteKind) => (map30.routes ?? []).filter((r) => r.kind === kind && (r.a === id || r.b === id))
-    .map((r) => areaById.get(r.a === id ? r.b : r.a)!.name);
+  const routes = (kind: RouteKind) => routeEnds(id, kind).map((t) => areaById.get(t)!.name);
   const countries = (a.countries ?? []).map((c) => {
     const code = countryFlag(c);
     const cap = countryCapital(c);
@@ -1955,6 +1980,7 @@ function renderAreaDetails(s: GameState, id: string): HTMLElement {
     routes('airport').length ? `✈️ Airport: flights to ${routes('airport').join(', ')}` : '',
     routes('port').length ? `⚓ Port: ships to ${routes('port').join(', ')}` : '',
     routes('station').length ? `🚆 Station: trains to ${routes('station').join(', ')} (not for Luxury)` : '',
+    routes('bus').length ? `🚌 Bus stop: buses to ${routes('bus').join(' or ')}, one way (Nomad and Backpacker only): the whole country counts as visited` : '',
     `🚶 Walk to: ${a.neighbours.map((n) => areaById.get(n)!.name).join(', ') || 'nowhere (plane or ship only)'}`,
     ...s.businesses.filter((b) => b.area === id).map((b) => `${BUSINESS_ICON[b.kind]} ${capital(BUSINESS_NAME[b.kind])}: ${b.owner === null ? `for sale, ${plural(BUSINESS_PRICE[b.kind], 'point')}` : `owned by ${nameOf(b.owner)}`}`),
     ...s.players.filter((p) => p.citizenship?.includes(id)).map((p) => `🛂 ${nameOf(p.seat)} is a citizen here: others pay a ${VISA_PRICE}-point visa`),

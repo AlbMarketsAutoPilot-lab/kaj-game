@@ -46,14 +46,16 @@ export interface Area {
   bigCountry?: string;
 }
 
-export type RouteKind = 'airport' | 'port' | 'station';
+export type RouteKind = 'airport' | 'port' | 'station' | 'bus';
 
 // A fixed two-way route between two airports (or two ports, or two train stations): a <-> b.
 // One airport, port or station can be in up to 3 routes (a hub).
+// A one-way route goes only from a to b (the bus, task 18: there is a bus stop only in a).
 export interface Route {
   kind: RouteKind;
   a: string;
   b: string;
+  oneWay?: true;
 }
 
 export interface GameMap {
@@ -99,9 +101,9 @@ export interface Player {
 }
 
 // Businesses (rulebook section 6): guided tours at a wonder, an airline at an airport,
-// a ferry agency at a port, a train ticket booth at a station (task 17).
-// Bought by the player standing in the area.
-export type BusinessKind = 'tours' | 'airline' | 'ferry' | 'train';
+// a ferry agency at a port, a train ticket booth at a station (task 17), a bus ticket booth at
+// the bus stop (task 18). Bought by the player standing in the area.
+export type BusinessKind = 'tours' | 'airline' | 'ferry' | 'train' | 'bus';
 
 export interface Business {
   kind: BusinessKind;

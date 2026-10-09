@@ -9,7 +9,8 @@ import type { GameMap } from './types.ts';
 // (walking + airports + ports) after that visa area is taken out.
 // Every single area is checked this way, so this also covers a guided-tours area whose 1-point
 // fee the player can't pay (task 9). Anything worse ends with "go home" (docs/engine.md).
-// The train is left out (task 17): Luxury can't take it, so the map must work without it.
+// The train and the bus are left out (tasks 17 and 18): not every profile can take them, so the
+// map must work without them.
 
 // Every citizenship that can exist on the map, as a list of area ids.
 export function visaUnits(map: GameMap): string[][] {
@@ -23,11 +24,11 @@ export function visaUnits(map: GameMap): string[][] {
 }
 
 // Groups of areas that can reach each other without entering `blocked`,
-// by walking, airports and ports (never the train, see above).
+// by walking, airports and ports (never the train or the bus, see above).
 export function travelGroups(map: GameMap, blocked: ReadonlySet<string> = new Set()): string[][] {
   const links = new Map<string, string[]>(map.areas.map((a) => [a.id, [...a.neighbours]]));
   for (const r of map.routes ?? []) {
-    if (r.kind === 'station') continue;
+    if (r.kind === 'station' || r.kind === 'bus') continue;
     links.get(r.a)!.push(r.b);
     links.get(r.b)!.push(r.a);
   }

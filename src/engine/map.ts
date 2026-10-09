@@ -40,7 +40,7 @@ export function validateMap(map: GameMap): string[] {
   const destinations = new Map<string, string[]>();
   for (const r of map.routes ?? []) {
     if (r.a === r.b) problems.push(`${r.kind} ${r.a}: route to itself`);
-    for (const [from, to] of [[r.a, r.b], [r.b, r.a]]) {
+    for (const [from, to] of r.oneWay ? [[r.a, r.b]] : [[r.a, r.b], [r.b, r.a]]) {
       if (!byId.has(from)) problems.push(`${r.kind}: unknown area ${from}`);
       const key = `${from} ${r.kind}`;
       const list = destinations.get(key) ?? [];
