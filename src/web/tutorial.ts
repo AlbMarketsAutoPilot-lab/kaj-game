@@ -193,7 +193,7 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
       lines: ['Every few turns your phone buzzes with news from the country you are in. Some news brings points, some takes them away. It happens to everyone!'],
       after: { title: '🤷 That\'s travel!', lines: ['Bad luck happens. Keep going, there are many ways to earn points back.'] } },
     { title: '🧠 Use your head', task: true, picture: quiz,
-      lines: ['Short on points? An airline may give you a free ticket for a right answer: you have 15 seconds.', 'On long trips, other passengers may challenge you too: +1 if you are right, −1 if you are wrong. You can always say no.'],
+      lines: ['Short on points? An airline may give you a free ticket for a right answer: you have 15 seconds.', 'Planes and ships can take more than one turn: you travel until you land at the end of the last one.', 'On long trips, other passengers may challenge you too: +1 if you are right, −1 if you are wrong. You can always say no.'],
       after: { title: '✅ Right!', lines: ['Free ticket! If only real life worked like that!'] } },
     { title: '🏁 You are ready!', lines: ['That is all you need. The rest you will learn by playing.', 'Have a great journey! 🌍'] },
   ];

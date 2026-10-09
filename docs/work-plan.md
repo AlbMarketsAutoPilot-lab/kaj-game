@@ -50,7 +50,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | 14h | Players named by profile (no Red/Blue), with 4 shaded profile icons as map pieces and in the top bar | medium | 1 | 14 | ✅ done |
 | 14i | Calmer turns: the walk is shown with footsteps, "You arrived…" and ✔ End turn, "It's your turn" hand-over, slower robots; white border on the icons | medium | 1 | 14 | ✅ done |
 | 14j | Trip turns: plane and ship scenes on the background painting, with who is travelling and "No thanks" | medium | 1 | 14 | ✅ done |
-| 14k | Events as phone news: the phone buzzes (only "Read"), then the card with a headline and "What this means for you"; 53 headlines to check in docs/cards.md | medium | 1 | 14 | built (pull request open) |
+| 14k | Events as phone news: the phone buzzes (only "Read"), then the card with a headline and "What this means for you"; 53 headlines to check in docs/cards.md | medium | 1 | 14 | ✅ done |
 | 15 | Android release build (signed APK) | medium | 1 | 14 | |
 | 16 | Full-game tests, bug fixes, buffer | medium | 1–2 | 15 | |
 
