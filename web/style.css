@@ -265,3 +265,26 @@ button.link { background: none; border: none; padding: 0; text-align: left; font
 .trip-scene.plane { background-size: 141% auto; background-position: 35% 18%; }
 .trip-scene.ship { background-size: 155% auto; background-position: 55% 40%; }
 .trip-scene svg { display: block; width: 100%; height: auto; }
+
+/* Event news (task 14k): the phone that buzzes, then the golden card with a headline. */
+.modal.phone-modal { background: transparent; border: none; box-shadow: none; width: auto; }
+.phone-wrap { display: flex; justify-content: center; }
+.phone { width: clamp(150px, 46vh, 210px); height: clamp(300px, 92vh, 420px); max-height: 92vh; border-radius: 30px; padding: 9px; background: linear-gradient(145deg, #2b3439, #0d1316);
+  box-shadow: 0 18px 40px #000a, inset 0 0 0 2px #59666c; animation: buzz 0.5s ease-in-out 4; }
+@keyframes buzz { 0%, 100% { transform: rotate(-3deg); } 25% { transform: rotate(-3deg) translateX(-3px); } 75% { transform: rotate(-3deg) translateX(3px); } }
+.phone-screen { height: 100%; border-radius: 22px; overflow: hidden; background: #0a3a40 var(--bg-art) 38% 30% / 300% auto;
+  display: flex; flex-direction: column; align-items: center; padding: 8px 7px 12px; gap: 4px; }
+.phone-notch { width: 30%; height: 12px; flex: none; border-radius: 10px; background: #06090b; }
+.phone-time { font-size: clamp(26px, 9vh, 42px); font-weight: 300; line-height: 1.1; text-shadow: 0 2px 8px #0008; }
+.phone-date { font-size: 11px; opacity: 0.85; }
+.phone-note { margin-top: 4px; align-self: stretch; background: rgba(240, 248, 246, 0.9); color: #10272b; border-radius: 14px; padding: 7px 9px; box-shadow: 0 6px 18px #0006; text-align: left; }
+.phone-app { display: flex; align-items: center; gap: 6px; font-size: 10px; color: #3d5a5e; font-weight: 600; }
+.phone-badge { width: 15px; height: 15px; border-radius: 4px; background: linear-gradient(135deg, #2fb39a, #0f6a5c); display: grid; place-items: center; color: #fff; font-size: 9px; }
+.phone-now { margin-left: auto; font-weight: 400; }
+.phone-note h4 { margin: 4px 0 2px; font-size: 12px; }
+.phone-note p { margin: 0; font-size: 11px; }
+.phone-read { margin-top: auto; }
+.event-title { font-family: "Cinzel", Georgia, serif; color: #fff3c4; margin: 6px 0 2px; }
+.event-meaning { margin: 6px 0; }
+.event-meaning .event-badge { font-size: 1.15rem; padding: 4px 14px; margin: 0 0 0 6px; }
+@media (prefers-reduced-motion: reduce) { .phone { animation: none; } }

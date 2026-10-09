@@ -22,12 +22,13 @@ const lines = [
   'not during a citizenship request; none in the last round). No cards on trips since task 12 (challenges instead).',
   'Points never go below 0.',
   '',
-  'To report a problem, give the id (for example "c7: too harsh").',
+  'To report a problem, give the id (for example "c7: too harsh", or "c7 headline: …").',
+  'Headlines (task 14k) were written by Claude and need the owner\'s check.',
 ];
 for (const g of groups) {
-  lines.push('', `## ${g.title}`, '', '| Id | Card | Effect |' + (g.cards.some((c) => c.area) ? ' Area |' : ''), '|---|---|---|' + (g.cards.some((c) => c.area) ? '---|' : ''));
+  lines.push('', `## ${g.title}`, '', '| Id | Headline | Card | Effect |' + (g.cards.some((c) => c.area) ? ' Area |' : ''), '|---|---|---|---|' + (g.cards.some((c) => c.area) ? '---|' : ''));
   for (const c of g.cards) {
-    lines.push(`| ${c.id} | ${c.text} | ${effect(c.points, c.loseTurn)} |` + (c.area ? ` ${name.get(c.area)} |` : ''));
+    lines.push(`| ${c.id} | ${c.title} | ${c.text} | ${effect(c.points, c.loseTurn)} |` + (c.area ? ` ${name.get(c.area)} |` : ''));
   }
 }
 writeFileSync('docs/cards.md', lines.join('\n') + '\n');
