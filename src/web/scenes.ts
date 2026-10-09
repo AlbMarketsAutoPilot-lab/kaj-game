@@ -105,3 +105,16 @@ export function tripScene(kind: RouteKind): HTMLElement {
   box.innerHTML = `<svg viewBox="0 0 440 230" aria-hidden="true"><defs>${DEFS}</defs>${kind === 'airport' ? PLANE : SHIP}</svg>`;
   return box;
 }
+
+// The wonder posters (task M6, owner-approved drawings in assets/wonders/, inlined by the build):
+// drawn over the background painting, like the trip scenes.
+const WONDERS: Record<string, string> = (window as unknown as { KAJ_WONDERS?: Record<string, string> }).KAJ_WONDERS ?? {};
+
+export const hasWonderScene = (area: string): boolean => area in WONDERS;
+
+export function wonderScene(area: string): HTMLElement {
+  const box = document.createElement('div');
+  box.className = 'wonder-scene';
+  box.innerHTML = WONDERS[area] ?? '';
+  return box;
+}

@@ -57,7 +57,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | M3 | 50-turn map: shapes, facts sorted by country (write only the missing ones) | medium | 1 | 14 | |
 | M4 | 50-turn map: screens (turn picker, home country, world map, guide), web and APK | medium | 1 | 15 | |
 | M5 | 50-turn map: full test games and fixes | medium | 1 | 15 | |
-| M6 | Wonder posters: one realistic SVG drawing per wonder (11), in the style of the poster and background, shown as a popup the first time any player reaches that wonder (+1 for the wonder; offer to buy its guided tours if nobody owns them). SVGs go to the owner for approval first | medium | 1–2 | 15 | |
+| M6 | Wonder posters for the 7 wonders of the 30-turn map (the 4 of the 50-turn map come with M4) | medium | 1 | 13 | ✅ done |
 | 15 | Android release build (signed APK) | medium | 1 | — | postponed (owner, 2026-10-09) |
 | 16 | Full-game tests, bug fixes, buffer | medium | 1–2 | 15 | |
 
@@ -335,6 +335,14 @@ Owner's decisions: 80–90 areas; the 30-turn game stays **frozen**, and the 50-
 rules and design; the same big-country splits; facts reused by country (only missing ones written);
 about 13 airports, 13 ports and 21 connections (the rulebook's 8 and 4–5 were too few for 80–90
 areas); 11 wonders. Task 15 is postponed. M1 proposal: 87 areas in `docs/map50.md`.
+
+**M6 done (owner-approved drawings and rules, 2026-10-09):** `node scripts/wonders-make.ts` draws the 7
+wonders (`assets/wonders/<area id>.svg`) over the game's background painting; the build inlines them.
+The poster opens at the **start of a person's next turn** in the wonder area (when buying is allowed,
+so no rule changes), 2 seconds after "Let's go": the name in the poster's lettering, "+1 point just for
+visiting…", and the Guided Tours offer (Buy / Not now) when nobody owns them. Once per wonder per game,
+never for robots, never in the home area. Not kept in the save: after "Continue" it may show once more.
+Order: M6 is merged first, then the 50-turn work starts at high effort (owner).
 
 ### 15. Android release build — postponed
 

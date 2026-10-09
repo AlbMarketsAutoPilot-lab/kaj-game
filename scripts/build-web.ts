@@ -29,6 +29,13 @@ const flags = Object.fromEntries(
     .map((f) => [f.slice(0, -4), `data:image/svg+xml;base64,${read(`assets/flags/${f}`).toString('base64')}`]),
 );
 
+// Wonder posters (task M6), as SVG text keyed by area id.
+const wonders = Object.fromEntries(
+  readdirSync(new URL('assets/wonders/', root))
+    .filter((f) => f.endsWith('.svg'))
+    .map((f) => [f.slice(0, -4), read(`assets/wonders/${f}`).toString()]),
+);
+
 // Sounds (task 14C), as data URIs keyed by file name.
 const sounds = Object.fromEntries(
   readdirSync(new URL('assets/sounds/', root))
@@ -41,6 +48,7 @@ const html = read('web/index.html')
   .replace('/*STYLE*/', () => css)
   .replace('/*FLAGS*/', () => JSON.stringify(flags))
   .replace('/*SOUNDS*/', () => JSON.stringify(sounds))
+  .replace('/*WONDERS*/', () => JSON.stringify(wonders).replace(/<\/script/gi, '<\\/script'))
   .replace('/*POSTER*/', () => dataUri('assets/art/poster.webp'))
   .replace('/*SCRIPT*/', () => js);
 

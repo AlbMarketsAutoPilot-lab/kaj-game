@@ -27,3 +27,14 @@ export const WONDER_NAME: Record<string, string> = {
   'peru-bolivia': 'Machu Picchu',
   'new-zealand': 'Milford Sound',
 };
+
+// Where each wonder is, under its name on the wonder poster (task M6).
+export const WONDER_PLACE: Record<string, string> = {
+  italy: 'Rome · Italy',
+  india: 'Agra · India',
+  japan: 'Honshu · Japan',
+  egypt: 'Giza · Egypt',
+  mexico: 'Yucatán · Mexico',
+  'peru-bolivia': 'Cusco · Peru',
+  'new-zealand': 'Fiordland · New Zealand',
+};

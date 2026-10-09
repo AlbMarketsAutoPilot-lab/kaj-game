@@ -266,6 +266,13 @@ button.link { background: none; border: none; padding: 0; text-align: left; font
 .trip-scene.plane { background-size: 141% auto; background-position: 35% 18%; }
 .trip-scene.ship { background-size: 155% auto; background-position: 55% 40%; }
 .trip-scene svg { display: block; width: 100%; height: auto; }
+/* Wonder posters (task M6): the drawing on the background painting, the name in the poster's lettering. */
+.wonder-scene { border-radius: 12px; overflow: hidden; background: #0a3a40 var(--bg-art) center 40% / cover no-repeat; }
+.wonder-scene svg { display: block; width: 100%; height: auto; }
+.wonder-name { font-size: 2rem; margin: 0; line-height: 1.1; }
+.wonder-where { color: var(--muted); margin: 0 0 8px; font-family: "Cinzel", Georgia, serif; }
+.wonder-points { color: #ffe08a; font-weight: 700; }
+.modal-back.wait { background: transparent; }
 
 /* Event news (task 14k): the phone that buzzes, then the golden card with a headline. */
 .modal.phone-modal { background: transparent; border: none; box-shadow: none; width: auto; }

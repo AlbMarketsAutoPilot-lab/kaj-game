@@ -11,11 +11,11 @@ import { loadGame, saveGame } from '../engine/save.ts';
 import type { Action, Area, BusinessKind, Challenge, ChallengeResult, ChallengeType, Continent, Deck, DrawnCard, GameState, Payment, Player, Profile, RobotLevel, RouteKind, SeatKind } from '../engine/types.ts';
 import { map30 } from '../maps/map30.ts';
 import { shapes30 } from '../maps/shapes30.ts';
-import { countryCapital, countryFlag, WONDER_NAME } from './countries.ts';
+import { countryCapital, countryFlag, WONDER_NAME, WONDER_PLACE } from './countries.ts';
 import { buildGeo, colourAreas, continentBox, pad, squeeze, svg, unionBox, type Box } from './maps.ts';
 import { airport, citizenFlag, monument, pawn, place, port } from './props.ts';
 import { iconEl, iconUse, installIcons, PROFILE_COLOUR } from './icons.ts';
-import { tripScene } from './scenes.ts';
+import { hasWonderScene, tripScene, wonderScene } from './scenes.ts';
 import { guideSeen, runGuide } from './tutorial.ts';
 import { play, setMusic, soundOn, startTimer, stopTimer, toggleSound, type SoundName } from './sound.ts';
 
@@ -36,6 +36,8 @@ const colourOf = (seat: number): string => { const p = profileOf(seat); return p
 // A calmer pace (owner's request, task 14i): robots wait longer, and a walk is shown.
 const ROBOT_DELAY_MS = 1400;
 const WALK_MS = 1500;
+// The pause on the board before a wonder poster opens (owner's request, task M6).
+const WONDER_WAIT_MS = 2000;
 const LEVEL_LABEL: Record<RobotLevel, string> = { easy: 'Easy', normal: 'Normal', hard: 'Hard' };
 const SAVE_KEY = 'kaj-save';
 const QUIZ_SECONDS = 15;
@@ -93,6 +95,8 @@ let answered: { ok: boolean; title: string; lines: string[] } | null = null;
 const seenCards = new Set<string>();
 // The "Ask for citizenship" popup is open (owner's request: a button and a popup, not a tick box).
 let citizenPopup = false;
+// The wonder poster waiting to open (task M6): its key, and when it opens.
+let wonderWait: { key: string; at: number } | null = null;
 // The citizenship test question the player said "ready" for (its clock runs only after that).
 let examReady: string | null = null;
 // One countdown per question, kept across redraws.
@@ -536,6 +540,40 @@ function finishPopup(s: GameState, close: () => void): HTMLElement {
       return el('li', {}, dot(seat), ` ${name(seat)}: `, el('b', { textContent: plural(finalScore(s, p), 'point') }), ` (${detail})`);
     })),
     el('div', { className: 'row' }, again, button('See the map', close)));
+}
+
+// The wonder poster (task M6): the drawing, the name in the poster's lettering, the wonder point
+// earned on arrival, and the Guided Tours offer when the player may buy them.
+function wonderPoster(s: GameState, me: Player, actions: Action[], seen: () => void): HTMLElement {
+  const area = me.area!;
+  const name = WONDER_NAME[area] ?? areaById.get(area)!.name;
+  const tours = s.businesses.find((b) => b.area === area && b.kind === 'tours');
+  const buy = actions.find((a) => a.type === 'buy' && a.business === 'tours');
+  const price = plural(BUSINESS_PRICE.tours, 'point');
+  const close = () => { seen(); render(); };
+  let offer: string;
+  let buttons: HTMLElement[];
+  if (buy) {
+    offer = `Nobody runs its Guided Tours yet. Buy them now for ${price}: every other player who visits ${name} pays you a ${TOUR_FEE}-point tour fee, and the tours count ${price} at the end. Or leave them and travel on.`;
+    const yes = button(`🏛️ Buy the tours · ${price}`, () => { seen(); act(buy); });
+    yes.className = 'primary';
+    buttons = [yes, button('Not now', close)];
+  } else {
+    offer = tours && tours.owner !== null
+      ? `Its Guided Tours belong to ${nameOf(tours.owner)}.`
+      : `Nobody runs its Guided Tours yet. They cost ${price}, and you have ${plural(me.points, 'point')}.`;
+    const ok = button('OK', close);
+    ok.className = 'primary';
+    buttons = [ok];
+  }
+  const title = name.replace(/^the /, '');
+  return el('div', { className: 'trip-turn' }, wonderScene(area), el('div', { className: 'trip-text' },
+    el('h1', { className: 'title wonder-name', textContent: title }),
+    el('p', { className: 'wonder-where', textContent: WONDER_PLACE[area] ?? '' }),
+    el('h2', { textContent: `🏛️ ${nameOf(me.seat)}, you reached a wonder!` }),
+    el('p', {}, el('span', { className: 'wonder-points', textContent: `+${plural(POINTS_WONDER, 'point')}` }), ` just for visiting ${name}!`),
+    el('p', { className: 'small', textContent: offer }),
+    el('div', { className: 'row' }, ...buttons)));
 }
 
 // Halfway and the last five turns (owner's request): one popup each per game.
@@ -1330,6 +1368,22 @@ function renderModal(s: GameState, actions: Action[], isRobot: boolean): Modal |
       return { turn: false, node: wrap(phoneNews(s.card, () => { seenCards.add(`${key}-phone`); render(); }), 'phone-modal'), sound: 'tap', soundKey: `${key}-phone` };
     }
     return { turn: false, node: wrap(el('div', {}, eventCard(s.card), ok(() => { seenCards.add(key); render(); })), 'event'), sound: bad ? 'card-bad' : 'card-good', soundKey: key };
+  }
+  // A wonder poster (task M6, owner's rules): a person's turn begins in a wonder area they
+  // reached on their last turn; shown once per wonder per game, never for robots and never for
+  // the home area (no wonder point there). Buying the tours is allowed now (the turn begins here).
+  const here = me.area;
+  const wonderKey = `wonder-${here}`;
+  if (s.phase === 'play' && me.kind === 'human' && !isRobot && here && here !== me.home && !seenCards.has(wonderKey)
+    && areaById.get(here)!.wonder && hasWonderScene(here) && me.visitedAreas.includes(here)
+    && !s.quiz && !s.challenge && !s.offer && !me.exam && !me.loseTurn && !pendingFees) {
+    if (wonderWait?.key !== wonderKey) {
+      wonderWait = { key: wonderKey, at: Date.now() + WONDER_WAIT_MS };
+      window.setTimeout(() => { if (state === s) render(); }, WONDER_WAIT_MS);
+    }
+    // The board shows for a moment first; taps wait until the poster opens.
+    if (Date.now() < wonderWait.at) return { turn: false, node: el('div', { className: 'modal-back wait' }) };
+    return { turn: false, node: wrap(wonderPoster(s, me, actions, () => { seenCards.add(wonderKey); }), 'trip'), sound: 'milestone', soundKey: wonderKey };
   }
   // Halfway and the last five turns, on a person's turn.
   if (s.phase === 'play' && !isRobot && me.kind === 'human') {
