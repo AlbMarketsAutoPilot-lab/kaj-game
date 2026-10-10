@@ -121,11 +121,23 @@ main:has(.game) { max-width: none; padding: 6px; height: calc(100 * var(--vh)); 
 .map-svg { width: 100%; height: 100%; min-height: 0; display: block; background: rgba(4, 40, 52, 0.55); }
 .world { background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
 .world { aspect-ratio: 2.6; flex-shrink: 0; }
+.world { position: relative; }
+.world-full-btn { position: absolute; right: 6px; top: 6px; padding: 2px 10px; min-height: 0; font-size: 1.1rem; z-index: 2; }
+.world.full { position: fixed; inset: 0; z-index: 40; aspect-ratio: auto; border-radius: 0; display: flex; align-items: center; justify-content: center; background: #062a30; }
+.world.full .map-svg { width: 100%; height: 100%; }
 /* Slim solid borders: the colours already tell the areas apart (owner's request). */
 .map-svg .land { fill: #2f6f6a; stroke: rgba(10, 40, 46, 0.7); stroke-width: 0.7px; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
 .map-svg .land.far { filter: saturate(0.55) brightness(0.75); }
 .map-svg .land.near { filter: saturate(0.8) brightness(0.9); }
 .map-svg .land.go { stroke: #eafff6; stroke-width: 1.2px; }
+.map-svg.turn .land.far, .map-svg.turn .land.near { filter: saturate(0.35) brightness(0.55); }
+.walk-lines line { stroke: #eafff6; stroke-opacity: 0.8; stroke-linecap: round; pointer-events: none; }
+.areaview { position: relative; }
+.map-note, .map-ask { position: absolute; left: 50%; top: 52px; transform: translateX(-50%); width: min(88%, 440px); z-index: 5;
+  background: rgba(8, 40, 44, 0.94); border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; font-size: 0.95rem; box-shadow: 0 6px 18px rgba(0,0,0,0.4); }
+.map-note { pointer-events: none; animation: note-fade 5s ease forwards; }
+.map-ask p { margin: 0 0 6px; }
+@keyframes note-fade { 0% { opacity: 0; } 6% { opacity: 1; } 85% { opacity: 1; } 100% { opacity: 0; } }
 .map-svg .land.here { stroke: #fff6c8; stroke-width: 2px; filter: drop-shadow(0 0 4px rgba(255, 240, 180, 0.8)); }
 .map-svg .land.dim { filter: saturate(0.3) brightness(0.55); }
 .map-svg .land.booked { stroke-width: 1.5px; }

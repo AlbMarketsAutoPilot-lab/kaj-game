@@ -17,7 +17,7 @@ import type { Shapes } from '../maps/shapes.ts';
 import { shapes30 } from '../maps/shapes30.ts';
 import { shapes50 } from '../maps/shapes50.ts';
 import { countryCapital, countryFlag, WONDER_NAME, WONDER_PLACE } from './countries.ts';
-import { buildGeo, colourAreas, continentBox, pad, squeeze, svg, unionBox, type Box } from './maps.ts';
+import { buildGeo, colourAreas, continentBox, pad, propSpots, squeeze, svg, unionBox, type Box, type PropKind } from './maps.ts';
 import { airport, busStop, citizenFlag, monument, pawn, place, port, station } from './props.ts';
 import { iconEl, iconUse, installIcons, PROFILE_COLOUR } from './icons.ts';
 import { tripScene, wonderScene } from './scenes.ts';
@@ -157,6 +157,13 @@ let zoom: Continent | null = null;
 let pickedStart: string | null = null;
 // The area tapped on the world map (its details show in the side panel), and the player card opened.
 let detailArea: string | null = null;
+// A small note on the area map (owner, M5): why a tapped area can't be reached; it fades away.
+let mapNote: { text: string; until: number } | null = null;
+const NOTE_MS = 5000;
+// The visited area the player tapped: asked "Go anyway?" first (owner, M5).
+let confirmWalk: string | null = null;
+// The world map shown full screen (owner, M5).
+let worldFull = false;
 let shownPlayer: number | null = null;
 // The open popup menu of a drawn prop, and the zoomed view of the area map (kept while the
 // player's area stays the same).
@@ -1016,7 +1023,7 @@ function gainLabel(s: GameState, action: Action, to: Area): string {
 }
 
 // What a walk badge means, in words (owner, M5): shown on hover, and as the legend under the map.
-const WALK_LEGEND = '🚶 walk there · +1 points you get · +0 visited already · 🧩 part of a big country · 💰 fees to pay';
+const WALK_LEGEND = '🚶 walk · +1 points · +0 visited · 🧩 big-country part · 💰 fee';
 function walkHint(text: string, name: string): string {
   const parts = [`Walk to ${name} (uses your turn).`];
   const gain = /\+(\d+)/.exec(text);
@@ -1790,11 +1797,25 @@ function renderAreaView(s: GameState, isRobot: boolean): HTMLElement {
   const actions = legalActions(s, gameMap);
   const myTurn = !hold && mapTurn(s, isRobot);
   const walks = new Map(myTurn ? plainActions(actions).flatMap((a) => (a.type === 'walk' ? [[a.to, a] as const] : [])) : []);
-  const walkTo = (id: string) => () => go(pick(legalActions(s, gameMap), walks.get(id)!));
-  const details = (id: string) => () => { detailArea = id; render(); };
+  const walkNow = (id: string) => go(pick(legalActions(s, gameMap), walks.get(id)!));
+  // Owner (M5): going back to a visited area asks first (no points, and the turn is used).
+  const walkTo = (id: string) => () => {
+    if (me.visitedAreas.includes(id)) { confirmWalk = id; render(); } else walkNow(id);
+  };
+  // Owner (M5): tapping an area you can't walk to says why, in a small note on the map; its
+  // details still open beside it.
+  const details = (id: string) => () => {
+    detailArea = id;
+    mapNote = myTurn && id !== focus ? { text: noWalkReason(s, me, here, id), until: Date.now() + NOTE_MS } : null;
+    render();
+  };
   const d = drawMap(camera.box, k,
     (id) => (id === focus ? 'here' : walks.has(id) ? 'go' : here.neighbours.includes(id) ? 'near' : 'far'),
     (id) => (walks.has(id) ? walkTo(id) : details(id)));
+  // On your turn, the areas you can't walk to are dimmed more, so the ones you can stand out.
+  if (myTurn && walks.size > 0) d.root.classList.add('turn');
+  const lines = svg('g', { class: 'walk-lines' });
+  d.labels.append(lines);
 
   const { fs } = d;
   // Walk badges (owner's report, Russia West's neighbours): each one sits just across the border
@@ -1834,13 +1855,17 @@ function renderAreaView(s: GameState, isRobot: boolean): HTMLElement {
       const icons = areaIcons(s, id);
       if (icons) label(d, x, cy - fs * 1.4, icons, 'icons', 0.95);
       if (!walk && bookedBy(s, id)) label(d, x, cy + fs * 1.4, '⏳', 'icons', 0.9);
-      visitedDots(d, s, id, x, cy + fs * 1.5, fs * 0.28);
     }
+    // Visited dots on every drawn area, also outside the first view (owner, M5: they were missing
+    // after zooming or moving the map); drawn on top at the end.
+    visitedDots(d, s, id, x, cy + fs * 1.5, fs * 0.28);
     if (walk) {
       const fees = feeTotal(entryFees(s, me, me.area, id));
       const text = `🚶${gainLabel(s, walk, areaById.get(id)!) || ' +0'}${fees ? ` 💰−${fees}` : ''}`;
       const w = ([...text].length * fs * 0.62 + fs) * 0.9;
       const [bx, by] = badgeSpot(id, w, fs * 1.6 * 0.9);
+      // A dashed line from the pawn to each place you can walk to (owner, M5).
+      lines.append(svg('line', { x1: fx * k, y1: fy, x2: bx, y2: by, 'stroke-width': fs * 0.18, 'stroke-dasharray': `${fs * 0.5} ${fs * 0.35}` }));
       label(d, bx, by, text, 'go', 0.9, walkTo(id), walkHint(text, areaById.get(id)!.name));
     }
   }
@@ -1857,21 +1882,21 @@ function renderAreaView(s: GameState, isRobot: boolean): HTMLElement {
   // The pawn stands in the middle of the area; the props sit around it.
   // Top row, centred over the pawn: the wonder and the citizenship flag (side by side if both).
   const citizen = s.players.find((p) => p.citizenship?.includes(focus));
-  const both = here.wonder && citizen;
-  if (here.wonder) d.labels.append(place(monument(owner('tours')), both ? hx - P * 0.6 : hx, hy - P * 0.95, P, `Wonder: ${WONDER_NAME[focus] ?? here.name}`, open('wonder')));
-  if (citizen) d.labels.append(place(citizenFlag(colourOf(citizen.seat)), both ? hx + P * 0.6 : hx, hy - P * 0.95, P * 0.9, `${nameOf(citizen.seat)}'s citizenship`, open('citizen')));
-  if (hasRoute(focus, 'airport')) d.labels.append(place(airport(owner('airline')), hx - P * 1.2, hy, P, 'Airport', open('airport')));
-  if (hasRoute(focus, 'port')) d.labels.append(place(port(owner('ferry')), hx + P * 1.2, hy, P, 'Port', open('port')));
-  // The station (task 17) and the bus stop (task 18): in the first free side slot, else under the pawn.
-  const slots = [...(hasRoute(focus, 'airport') ? [] : [[hx - P * 1.2, hy]]), ...(hasRoute(focus, 'port') ? [] : [[hx + P * 1.2, hy]]), [hx, hy + P * 1.1]];
-  if (hasRoute(focus, 'station')) {
-    const [sx, sy] = slots.shift()!;
-    d.labels.append(place(station(owner('train')), sx, sy, P, 'Station', open('station')));
-  }
-  if (hasRoute(focus, 'bus')) {
-    const [sx, sy] = slots.shift()!;
-    d.labels.append(place(busStop(owner('bus')), sx, sy, P, 'Bus stop', open('bus')));
-  }
+  // Each prop inside its own area, or a port in the sea next to it, never over another area
+  // (owner, M5: Portugal's port over Spain looked like Spain's): see propSpots.
+  const kinds = ([...(here.wonder ? ['wonder'] : []), ...(citizen ? ['citizen'] : []),
+    ...(['airport', 'port', 'station', 'bus'] as const).filter((kind) => hasRoute(focus, kind))]) as PropKind[];
+  const spot = propSpots(geo, focus, kinds, P, k);
+  const put = (kind: PropKind, prop: SVGGElement, size: number, title: string) => {
+    const [x, y] = spot.get(kind)!;
+    d.labels.append(place(prop, x, y, size, title, open(kind)));
+  };
+  if (here.wonder) put('wonder', monument(owner('tours')), P, `Wonder: ${WONDER_NAME[focus] ?? here.name}`);
+  if (citizen) put('citizen', citizenFlag(colourOf(citizen.seat)), P * 0.9, `${nameOf(citizen.seat)}'s citizenship`);
+  if (hasRoute(focus, 'airport')) put('airport', airport(owner('airline')), P, 'Airport');
+  if (hasRoute(focus, 'port')) put('port', port(owner('ferry')), P, 'Port');
+  if (hasRoute(focus, 'station')) put('station', station(owner('train')), P, 'Station');
+  if (hasRoute(focus, 'bus')) put('bus', busStop(owner('bus')), P, 'Bus stop');
   visitedDots(d, s, focus, hx, hy + P * 0.75, fs * 0.32);
 
   // Pawns: every player standing in a drawn area.
@@ -1896,19 +1921,56 @@ function renderAreaView(s: GameState, isRobot: boolean): HTMLElement {
     }
     d.labels.append(placed);
   }
+  for (const dotEl of [...d.labels.querySelectorAll('.visit')]) d.labels.append(dotEl); // dots on top
   attachZoom(d.root, k, areaNames(d, [...d.paths.keys()].filter((id) => id !== focus)));
+  const note = mapNote && mapNote.until > Date.now() ? el('div', { className: 'map-note', textContent: mapNote.text }) : '';
+  if (note) {
+    note.style.animationDelay = `${mapNote!.until - NOTE_MS - Date.now()}ms`; // a redraw doesn't restart it
+    setTimeout(() => note.remove(), mapNote!.until - Date.now());
+  }
+  const ask = confirmWalk && myTurn && walks.has(confirmWalk) ? confirmBox(areaById.get(confirmWalk)!, () => { const id = confirmWalk!; confirmWalk = null; walkNow(id); }) : '';
+  if (!ask) confirmWalk = null;
 
   const caption = me.travel
     ? `${VEHICLE[me.travel.kind]} ${nameOf(me.seat)} is on the way to ${here.name}`
-    : `${WALK_LEGEND} · pinch or scroll to zoom`;
+    : `${WALK_LEGEND} · pinch to zoom`;
   const reset = button('⤢', () => { camera = null; render(); });
   reset.title = 'Back to the area';
   return el('div', { className: 'areaview' },
     el('div', { className: 'where' }, dot(me.seat), ` ${here.name} · ${here.continent} `, reset),
-    d.root,
+    d.root, note, ask,
     el('div', { className: 'small caption', textContent: caption }),
     popup ? renderPopup(s, popup, myTurn) : '');
 }
+
+// "Already visited" (owner, M5): a small question on the map before walking back.
+function confirmBox(to: Area, yes: () => void): HTMLElement {
+  const go = button('Yes, go', yes);
+  go.className = 'primary';
+  return el('div', { className: 'map-ask' },
+    el('p', {}, el('strong', { textContent: `You have already been to ${to.name}.` }), ' Going back gives no points, and the walk uses your turn. Go anyway?'),
+    el('div', { className: 'row' }, go, button('No', () => { confirmWalk = null; render(); })));
+}
+
+// Why a tapped area can't be reached on foot now (owner, M5).
+function noWalkReason(s: GameState, me: Player, here: Area, id: string): string {
+  const to = areaById.get(id)!;
+  if (!here.neighbours.includes(id)) {
+    const near = here.neighbours.map((n) => areaById.get(n)!.name);
+    const trips = ROUTE_KINDS.filter((kind) => hasRoute(here.id, kind)).map((kind) => TRIP_WORD[kind]);
+    return `🚫 No land border between ${here.name} and ${to.name}. `
+      + (near.length ? `From ${here.name} you can walk to ${near.join(', ')}.` : `${here.name} has no land border.`)
+      + (trips.length ? ` Or travel by ${trips.join(' or ')} from here.` : '');
+  }
+  const there = s.players.find((p) => p.seat !== me.seat && p.area === id);
+  if (there) return `🚫 ${nameOf(there.seat)} is in ${to.name}: two players can never share an area.`;
+  const booked = bookedBy(s, id);
+  if (booked && booked.seat !== me.seat) return `🚫 ${nameOf(booked.seat)} is travelling to ${to.name}: it stays closed until they arrive.`;
+  const fees = feeTotal(entryFees(s, me, me.area, id));
+  if (fees > me.points) return `🚫 Entering ${to.name} costs ${plural(fees, 'point')} (visa or tour fee), and you have ${plural(me.points, 'point')}.`;
+  return `🚫 You can't walk to ${to.name} now.`;
+}
+const TRIP_WORD: Record<RouteKind, string> = { airport: 'plane', port: 'ship', station: 'train', bus: 'bus' };
 
 // The popup menus of the drawn props (planes, ships, trains, the bus, wonder, citizenship).
 type PopupKind = RouteKind | 'wonder' | 'citizen';
@@ -1990,7 +2052,7 @@ function renderWorld(s: GameState): HTMLElement {
       id === detailArea ? 'picked' : '',
     ].join(' '),
     (id) => () => { detailArea = detailArea === id ? null : id; render(); },
-    'world', 10);
+    'world', worldFull ? 5 : 10); // full screen: the map grows, pieces and marks keep their size
   for (const [id, path] of d.paths) {
     const b = bookedBy(s, id);
     if (b) path.style.stroke = colourOf(b.seat);
@@ -2020,7 +2082,11 @@ function renderWorld(s: GameState): HTMLElement {
     const [cx, cy] = centre(p.area);
     d.labels.append(piece(p.seat, cx + (p.seat - 1.5) * d.fs * 0.9, cy, d.fs * 1.6));
   }
-  return el('div', { className: 'world' }, d.root);
+  // Full screen and back (owner, M5: with 4 players the small map gets busy), like a video player.
+  const toggle = button(worldFull ? '✕' : '⛶', () => { worldFull = !worldFull; render(); });
+  toggle.className = 'world-full-btn';
+  toggle.title = worldFull ? 'Back to the small map' : 'World map full screen';
+  return el('div', { className: worldFull ? 'world full' : 'world' }, d.root, toggle);
 }
 
 // The areas a citizenship of this area covers: the area, or every part of its big country.
