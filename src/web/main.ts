@@ -335,7 +335,7 @@ function renderSetup(): void {
       title(),
       lengths, about,
       saved && 'error' in saved ? el('p', { className: 'small', textContent: `${saved.error} It can't be continued; start a new journey.` }) : '',
-      counts, rows, guideBox(), newsBox(), start,
+      counts, rows, guideBox(), start,
       saved && 'state' in saved ? el('p', { className: 'small', textContent: 'Starting a new journey replaces the saved game.' }) : '',
       error,
       el('div', { className: 'row' }, button('← Back', renderStart)),
@@ -344,17 +344,13 @@ function renderSetup(): void {
 }
 
 // "Guided help" on the setup screen: turns the guide back on after "Turn off guided help".
-// "What happened" popups on or off (owner, M5), kept on this device.
+// "What happened" popups: turned off only during a game, with "Don't show again" (owner, M5);
+// not on the setup screen (owner, 2026-10-10). Kept on this device.
 const NEWS_KEY = 'kaj-news-off';
 let newsOff = (() => { try { return localStorage.getItem(NEWS_KEY) === '1'; } catch { return false; } })();
 function setNewsOff(off: boolean): void {
   newsOff = off;
   try { localStorage.setItem(NEWS_KEY, off ? '1' : '0'); } catch { /* not kept */ }
-}
-function newsBox(): HTMLElement {
-  const tick = el('input', { type: 'checkbox', checked: !newsOff });
-  tick.addEventListener('change', () => setNewsOff(!tick.checked));
-  return el('label', { className: 'small' }, tick, ' 📣 "What happened" popups (the other players\' moves)');
 }
 
 function guideBox(): HTMLElement {
