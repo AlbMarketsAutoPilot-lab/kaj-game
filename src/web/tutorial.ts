@@ -89,8 +89,9 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
       (pos, size) => {
         const [fx, fy] = pos('france');
         const [ix, iy] = pos('iberia');
-        return [place(pawn(ME, true), fx, fy, size * 0.55, 'You are here'), tag(fx, fy + size * 0.48, size * 0.26, 'You are here'),
-          tag(ix, iy - size * 0.08, size * 0.5, '👆'), tag(ix, iy + size * 0.36, size * 0.24, 'Tap here to continue')];
+        // Bigger words, readable on a phone (2026-10-10).
+        return [place(pawn(ME, true), fx, fy, size * 0.55, 'You are here'), tag(fx, fy + size * 0.55, size * 0.42, 'You are here'),
+          tag(ix, iy - size * 0.1, size * 0.5, '👆'), tag(ix, iy + size * 0.45, size * 0.4, 'Tap here to continue')];
       }),
     el('p', { className: 'small', textContent: '🇫🇷 You are in France · tap 🇪🇸 Iberia' }));
 
