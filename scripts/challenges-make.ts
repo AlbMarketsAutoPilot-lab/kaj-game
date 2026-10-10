@@ -136,6 +136,23 @@ for (const c of countries) {
   const far = sameContinent(c).filter((o) => !c.borders.includes(o.cca3));
   add('neighbour', c, `Which country borders ${the(c.name)}?`, pick(near).name, pick(far).name);
 }
+// Money names without the country (owner, M5): "Japanese yen" → "Yen", which would give the answer
+// away. Both answers keep their full names when the short ones would look the same
+// ("United States dollar" vs "Australian dollar").
+const MONEY_SHORT: Record<string, string> = {
+  'Bosnia and Herzegovina convertible mark': 'Convertible mark', 'Central African CFA franc': 'CFA franc',
+  'West African CFA franc': 'CFA franc', 'Israeli new shekel': 'Shekel', 'Venezuelan bolívar soberano': 'Bolívar',
+};
+const moneyShort = (name: string) => {
+  const word = MONEY_SHORT[name] ?? name.split(' ').at(-1)!;
+  return word[0].toUpperCase() + word.slice(1);
+};
+const fold = (s: string) => s.normalize('NFD').replace(/[^a-z]/gi, '').toLowerCase();
+function shortMoney(right: string, wrong: string): [string, string] {
+  const [r, w] = [moneyShort(right), moneyShort(wrong)];
+  return fold(r) === fold(w) ? [right, wrong] : [r, w];
+}
+
 // Which currency? One currency only; the wrong one is a different currency of the same continent
 // (never two CFA francs).
 const single = (c: Country) => Object.keys(c.currencies).length === 1;
@@ -143,7 +160,8 @@ for (const c of countries.filter(single)) {
   const [code, name] = Object.entries(c.currencies)[0];
   const others = sameContinent(c).filter(single).map((o) => Object.entries(o.currencies)[0])
     .filter(([k, n]) => k !== code && !(n.includes('CFA') && name.includes('CFA')));
-  add('currency', c, `What money does ${the(c.name)} use?`, name, pick(others)[1]);
+  const [right, wrong] = shortMoney(name, pick(others)[1]);
+  add('currency', c, `What money does ${the(c.name)} use?`, right, wrong);
 }
 
 // ---------- write the file and the review page ----------

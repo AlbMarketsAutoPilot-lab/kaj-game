@@ -324,7 +324,7 @@ function renderSetup(): void {
       title(),
       lengths, about,
       saved && 'error' in saved ? el('p', { className: 'small', textContent: `${saved.error} It can't be continued; start a new journey.` }) : '',
-      counts, rows, guideBox(), start,
+      counts, rows, guideBox(), newsBox(), start,
       saved && 'state' in saved ? el('p', { className: 'small', textContent: 'Starting a new journey replaces the saved game.' }) : '',
       error,
       el('div', { className: 'row' }, button('← Back', renderStart)),
@@ -333,6 +333,19 @@ function renderSetup(): void {
 }
 
 // "Guided help" on the setup screen: turns the guide back on after "Turn off guided help".
+// "What happened" popups on or off (owner, M5), kept on this device.
+const NEWS_KEY = 'kaj-news-off';
+let newsOff = (() => { try { return localStorage.getItem(NEWS_KEY) === '1'; } catch { return false; } })();
+function setNewsOff(off: boolean): void {
+  newsOff = off;
+  try { localStorage.setItem(NEWS_KEY, off ? '1' : '0'); } catch { /* not kept */ }
+}
+function newsBox(): HTMLElement {
+  const tick = el('input', { type: 'checkbox', checked: !newsOff });
+  tick.addEventListener('change', () => setNewsOff(!tick.checked));
+  return el('label', { className: 'small' }, tick, ' 📣 "What happened" popups (the other players\' moves)');
+}
+
 function guideBox(): HTMLElement {
   const tick = el('input', { type: 'checkbox', checked: !guideOff });
   tick.addEventListener('change', () => {
@@ -985,7 +998,7 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
         button('Cancel', () => { selling = false; render(); })));
     }
     box.append(
-      guideOff ? el('p', { className: 'small', textContent: 'Tap a green area to walk there. Tap the plane, ship, train, bus or monument on your area for travel and tours. Tap any area for its details.' }) : '',
+      guideOff ? el('p', { className: 'small', textContent: 'Tap an area marked 🚶 to walk there. Tap the plane, ship, train, bus or monument on your area for travel and tours. Tap any area for its details.' }) : '',
       renderGuide(s, actions),
       renderBigCountries(me));
   }
@@ -997,9 +1010,20 @@ function gainLabel(s: GameState, action: Action, to: Area): string {
   const before = currentPlayer(s).points;
   const after = apply(s, gameMap, action).players[currentPlayer(s).seat].points;
   const gain = after - before + feeTotal(entryFees(s, currentPlayer(s), currentPlayer(s).area, to.id));
-  if (gain > 0) return ` ✨ +${gain}`;
+  if (gain > 0) return ` +${gain}`;
   const me = currentPlayer(s);
   return to.bigCountry && !me.visitedAreas.includes(to.id) ? ' 🧩' : '';
+}
+
+// What a walk badge means, in words (owner, M5): shown on hover, and as the legend under the map.
+const WALK_LEGEND = '🚶 walk there · +1 points you get · +0 visited already · 🧩 part of a big country · 💰 fees to pay';
+function walkHint(text: string, name: string): string {
+  const parts = [`Walk to ${name} (uses your turn).`];
+  const gain = /\+(\d+)/.exec(text);
+  parts.push(gain && gain[1] !== '0' ? `You get +${gain[1]}.` : text.includes('🧩') ? 'A part of a big country: points when you have visited every part.' : 'Already visited: no points.');
+  const fee = /💰−(\d+)/.exec(text);
+  if (fee) parts.push(`You pay ${fee[1]} on arrival (visa or tour fee).`);
+  return parts.join(' ');
 }
 
 function feeLabel(s: GameState, to: string): string {
@@ -1332,7 +1356,7 @@ function renderGuide(s: GameState, actions: Action[]): HTMLElement | string {
       const fee = feeTotal(entryFees(s, me, me.area, w.to));
       return `${areaById.get(w.to)!.name} (${g > 0 ? `+${g}` : me.visitedAreas.includes(w.to) ? 'been there, +0' : '+0'}${fee ? `, fee ${fee}` : ''})`;
     });
-    lines.push(`🚶 From ${here.name} you can walk to: ${list.join(', ')}. Tap a green area.`);
+    lines.push(`🚶 From ${here.name} you can walk to: ${list.join(', ')}. Tap an area marked 🚶.`);
   }
   const closed = here.neighbours.flatMap((n) => {
     if (walks.some((w) => w.to === n)) return [];
@@ -1445,11 +1469,15 @@ function renderModal(s: GameState, actions: Action[], isRobot: boolean): Modal |
         el('ul', {}, ...income.filter((i) => i.seat === seat).map((i) => el('li', { textContent: i.text }))))),
       ok(() => { income = []; if (news.length === 0) newsNow = false; render(); }, 'Wonderful!')), 'gold'), sound: 'coins', soundKey: income };
   }
+  // Owner (M5): "Don't show again" turns this popup off on this device (back on in the setup).
+  if (news.length > 0 && newsOff) { news = []; newsNow = false; }
   if (news.length > 0 && (newsNow || !isRobot || s.phase === 'finished')) {
+    const hide = el('input', { type: 'checkbox' });
     return { turn: false, node: wrap(el('div', {},
       el('h2', { textContent: '📣 What happened' }),
       el('ul', {}, ...news.map((t) => el('li', { textContent: t }))),
-      ok(() => { news = []; newsNow = false; render(); }))) };
+      el('label', { className: 'small' }, hide, ' Don\'t show "What happened" again'),
+      ok(() => { if (hide.checked) setNewsOff(true); news = []; newsNow = false; render(); }))) };
   }
   // A person's turn begins (owner's request, task 14i): who plays now.
   const turnKey = `turn-${s.round}-${me.seat}`;
@@ -1598,9 +1626,10 @@ function drawMap(view: Box, k: number, cls: (id: string) => string, onTap: (id: 
 }
 
 // Text at (x, y) in view units; a tappable one gets a pill behind it.
-function label(d: Drawn, x: number, y: number, text: string, cls: string, size = 1, onTap?: () => void): void {
+function label(d: Drawn, x: number, y: number, text: string, cls: string, size = 1, onTap?: () => void, hint?: string): void {
   const fs = d.fs * size;
   const g = svg('g', { class: `label ${cls}` });
+  if (hint) g.append(svg('title', {}, hint)); // shown on hover (computer)
   if (onTap) {
     const w = [...text].length * fs * 0.62 + fs;
     g.append(svg('rect', { x: x - w / 2, y: y - fs * 0.8, width: w, height: fs * 1.6, rx: fs * 0.8 }));
@@ -1812,7 +1841,7 @@ function renderAreaView(s: GameState, isRobot: boolean): HTMLElement {
       const text = `🚶${gainLabel(s, walk, areaById.get(id)!) || ' +0'}${fees ? ` 💰−${fees}` : ''}`;
       const w = ([...text].length * fs * 0.62 + fs) * 0.9;
       const [bx, by] = badgeSpot(id, w, fs * 1.6 * 0.9);
-      label(d, bx, by, text, 'go', 0.9, walkTo(id));
+      label(d, bx, by, text, 'go', 0.9, walkTo(id), walkHint(text, areaById.get(id)!.name));
     }
   }
 
@@ -1871,7 +1900,7 @@ function renderAreaView(s: GameState, isRobot: boolean): HTMLElement {
 
   const caption = me.travel
     ? `${VEHICLE[me.travel.kind]} ${nameOf(me.seat)} is on the way to ${here.name}`
-    : 'Pinch or scroll to zoom · drag to move';
+    : `${WALK_LEGEND} · pinch or scroll to zoom`;
   const reset = button('⤢', () => { camera = null; render(); });
   reset.title = 'Back to the area';
   return el('div', { className: 'areaview' },

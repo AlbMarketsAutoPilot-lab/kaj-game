@@ -871,167 +871,167 @@ To report a problem, give the id (for example "capital-per: wrong").
 
 | Id | Question | Answers |
 |---|---|---|
-| currency-esp | What money does Spain use? | Ukrainian hryvnia / **Euro** |
-| currency-prt | What money does Portugal use? | Polish złoty / **Euro** |
-| currency-and | What money does Andorra use? | Icelandic króna / **Euro** |
-| currency-fra | What money does France use? | Belarusian ruble / **Euro** |
-| currency-mco | What money does Monaco use? | **Euro** / Serbian dinar |
-| currency-gbr | What money does the United Kingdom use? | **British pound** / Euro |
-| currency-irl | What money does Ireland use? | Icelandic króna / **Euro** |
-| currency-deu | What money does Germany use? | **Euro** / Danish krone |
-| currency-aut | What money does Austria use? | Icelandic króna / **Euro** |
-| currency-che | What money does Switzerland use? | **Swiss franc** / Hungarian forint |
-| currency-lie | What money does Liechtenstein use? | Euro / **Swiss franc** |
-| currency-bel | What money does Belgium use? | **Euro** / Icelandic króna |
-| currency-nld | What money does the Netherlands use? | **Euro** / Swedish krona |
-| currency-lux | What money does Luxembourg use? | **Euro** / Norwegian krone |
-| currency-ita | What money does Italy use? | **Euro** / Danish krone |
-| currency-smr | What money does San Marino use? | **Euro** / Norwegian krone |
-| currency-vat | What money does Vatican City use? | **Euro** / Swedish krona |
-| currency-mlt | What money does Malta use? | Swedish krona / **Euro** |
-| currency-nor | What money does Norway use? | Romanian leu / **Norwegian krone** |
-| currency-swe | What money does Sweden use? | **Swedish krona** / Polish złoty |
-| currency-dnk | What money does Denmark use? | Euro / **Danish krone** |
-| currency-fin | What money does Finland use? | **Euro** / denar |
-| currency-isl | What money does Iceland use? | **Icelandic króna** / denar |
-| currency-pol | What money does Poland use? | Euro / **Polish złoty** |
-| currency-cze | What money does Czechia use? | Euro / **Czech koruna** |
-| currency-svk | What money does Slovakia use? | **Euro** / Hungarian forint |
-| currency-hun | What money does Hungary use? | **Hungarian forint** / Euro |
-| currency-est | What money does Estonia use? | **Euro** / Belarusian ruble |
-| currency-lva | What money does Latvia use? | Russian ruble / **Euro** |
-| currency-ltu | What money does Lithuania use? | **Euro** / Russian ruble |
-| currency-blr | What money does Belarus use? | Euro / **Belarusian ruble** |
-| currency-ukr | What money does Ukraine use? | Euro / **Ukrainian hryvnia** |
-| currency-mda | What money does Moldova use? | **Moldovan leu** / Bosnia and Herzegovina convertible mark |
-| currency-svn | What money does Slovenia use? | **Euro** / Romanian leu |
-| currency-hrv | What money does Croatia use? | **Euro** / Ukrainian hryvnia |
-| currency-bih | What money does Bosnia and Herzegovina use? | **Bosnia and Herzegovina convertible mark** / Hungarian forint |
-| currency-srb | What money does Serbia use? | **Serbian dinar** / Euro |
-| currency-mne | What money does Montenegro use? | **Euro** / Norwegian krone |
-| currency-mkd | What money does North Macedonia use? | Czech koruna / **denar** |
-| currency-alb | What money does Albania use? | Euro / **Albanian lek** |
-| currency-rou | What money does Romania use? | **Romanian leu** / Euro |
-| currency-bgr | What money does Bulgaria use? | **Euro** / Ukrainian hryvnia |
-| currency-grc | What money does Greece use? | **Euro** / Icelandic króna |
-| currency-rus | What money does Russia use? | Euro / **Russian ruble** |
-| currency-tur | What money does Turkey use? | lari / **Turkish lira** |
-| currency-geo | What money does Georgia use? | **lari** / Vietnamese đồng |
-| currency-arm | What money does Armenia use? | Bahraini dinar / **Armenian dram** |
-| currency-aze | What money does Azerbaijan use? | **Azerbaijani manat** / Yemeni rial |
-| currency-isr | What money does Israel use? | **Israeli new shekel** / Omani rial |
-| currency-lbn | What money does Lebanon use? | **Lebanese pound** / Saudi riyal |
-| currency-syr | What money does Syria use? | Sri Lankan rupee / **Syrian pound** |
-| currency-jor | What money does Jordan use? | Turkish lira / **Jordanian dinar** |
-| currency-irq | What money does Iraq use? | Japanese yen / **Iraqi dinar** |
-| currency-sau | What money does Saudi Arabia use? | Bangladeshi taka / **Saudi riyal** |
-| currency-yem | What money does Yemen use? | lari / **Yemeni rial** |
-| currency-omn | What money does Oman use? | **Omani rial** / South Korean won |
-| currency-are | What money does the United Arab Emirates use? | **United Arab Emirates dirham** / Azerbaijani manat |
+| currency-esp | What money does Spain use? | Hryvnia / **Euro** |
+| currency-prt | What money does Portugal use? | Złoty / **Euro** |
+| currency-and | What money does Andorra use? | Króna / **Euro** |
+| currency-fra | What money does France use? | Ruble / **Euro** |
+| currency-mco | What money does Monaco use? | **Euro** / Dinar |
+| currency-gbr | What money does the United Kingdom use? | **Pound** / Euro |
+| currency-irl | What money does Ireland use? | Króna / **Euro** |
+| currency-deu | What money does Germany use? | **Euro** / Krone |
+| currency-aut | What money does Austria use? | Króna / **Euro** |
+| currency-che | What money does Switzerland use? | **Franc** / Forint |
+| currency-lie | What money does Liechtenstein use? | Euro / **Franc** |
+| currency-bel | What money does Belgium use? | **Euro** / Króna |
+| currency-nld | What money does the Netherlands use? | **Euro** / Krona |
+| currency-lux | What money does Luxembourg use? | **Euro** / Krone |
+| currency-ita | What money does Italy use? | **Euro** / Krone |
+| currency-smr | What money does San Marino use? | **Euro** / Krone |
+| currency-vat | What money does Vatican City use? | **Euro** / Krona |
+| currency-mlt | What money does Malta use? | Krona / **Euro** |
+| currency-nor | What money does Norway use? | Leu / **Krone** |
+| currency-swe | What money does Sweden use? | **Krona** / Złoty |
+| currency-dnk | What money does Denmark use? | Euro / **Krone** |
+| currency-fin | What money does Finland use? | **Euro** / Denar |
+| currency-isl | What money does Iceland use? | **Króna** / Denar |
+| currency-pol | What money does Poland use? | Euro / **Złoty** |
+| currency-cze | What money does Czechia use? | Euro / **Koruna** |
+| currency-svk | What money does Slovakia use? | **Euro** / Forint |
+| currency-hun | What money does Hungary use? | **Forint** / Euro |
+| currency-est | What money does Estonia use? | **Euro** / Ruble |
+| currency-lva | What money does Latvia use? | Ruble / **Euro** |
+| currency-ltu | What money does Lithuania use? | **Euro** / Ruble |
+| currency-blr | What money does Belarus use? | Euro / **Ruble** |
+| currency-ukr | What money does Ukraine use? | Euro / **Hryvnia** |
+| currency-mda | What money does Moldova use? | **Leu** / Convertible mark |
+| currency-svn | What money does Slovenia use? | **Euro** / Leu |
+| currency-hrv | What money does Croatia use? | **Euro** / Hryvnia |
+| currency-bih | What money does Bosnia and Herzegovina use? | **Convertible mark** / Forint |
+| currency-srb | What money does Serbia use? | **Dinar** / Euro |
+| currency-mne | What money does Montenegro use? | **Euro** / Krone |
+| currency-mkd | What money does North Macedonia use? | Koruna / **Denar** |
+| currency-alb | What money does Albania use? | Euro / **Lek** |
+| currency-rou | What money does Romania use? | **Leu** / Euro |
+| currency-bgr | What money does Bulgaria use? | **Euro** / Hryvnia |
+| currency-grc | What money does Greece use? | **Euro** / Króna |
+| currency-rus | What money does Russia use? | Euro / **Ruble** |
+| currency-tur | What money does Turkey use? | Lari / **Lira** |
+| currency-geo | What money does Georgia use? | **Lari** / Đồng |
+| currency-arm | What money does Armenia use? | Dinar / **Dram** |
+| currency-aze | What money does Azerbaijan use? | **Manat** / Rial |
+| currency-isr | What money does Israel use? | **Shekel** / Rial |
+| currency-lbn | What money does Lebanon use? | **Pound** / Riyal |
+| currency-syr | What money does Syria use? | Rupee / **Pound** |
+| currency-jor | What money does Jordan use? | Lira / **Dinar** |
+| currency-irq | What money does Iraq use? | Yen / **Dinar** |
+| currency-sau | What money does Saudi Arabia use? | Taka / **Riyal** |
+| currency-yem | What money does Yemen use? | Lari / **Rial** |
+| currency-omn | What money does Oman use? | **Rial** / Won |
+| currency-are | What money does the United Arab Emirates use? | **Dirham** / Manat |
 | currency-qat | What money does Qatar use? | Saudi riyal / **Qatari riyal** |
-| currency-bhr | What money does Bahrain use? | **Bahraini dinar** / Nepalese rupee |
-| currency-kwt | What money does Kuwait use? | **Kuwaiti dinar** / Syrian pound |
-| currency-irn | What money does Iran use? | Turkmenistan manat / **Iranian rial** |
-| currency-kaz | What money does Kazakhstan use? | **Kazakhstani tenge** / Lao kip |
-| currency-uzb | What money does Uzbekistan use? | **Uzbekistani soʻm** / Iranian rial |
-| currency-tkm | What money does Turkmenistan use? | Kuwaiti dinar / **Turkmenistan manat** |
-| currency-kgz | What money does Kyrgyzstan use? | **Kyrgyzstani som** / United Arab Emirates dirham |
-| currency-tjk | What money does Tajikistan use? | Indian rupee / **Tajikistani somoni** |
-| currency-pak | What money does Pakistan use? | **Pakistani rupee** / Thai baht |
-| currency-afg | What money does Afghanistan use? | **Afghan afghani** / Sri Lankan rupee |
-| currency-ind | What money does India use? | **Indian rupee** / Saudi riyal |
-| currency-lka | What money does Sri Lanka use? | Japanese yen / **Sri Lankan rupee** |
+| currency-bhr | What money does Bahrain use? | **Dinar** / Rupee |
+| currency-kwt | What money does Kuwait use? | **Dinar** / Pound |
+| currency-irn | What money does Iran use? | Manat / **Rial** |
+| currency-kaz | What money does Kazakhstan use? | **Tenge** / Kip |
+| currency-uzb | What money does Uzbekistan use? | **Soʻm** / Rial |
+| currency-tkm | What money does Turkmenistan use? | Dinar / **Manat** |
+| currency-kgz | What money does Kyrgyzstan use? | **Som** / Dirham |
+| currency-tjk | What money does Tajikistan use? | Rupee / **Somoni** |
+| currency-pak | What money does Pakistan use? | **Rupee** / Baht |
+| currency-afg | What money does Afghanistan use? | **Afghani** / Rupee |
+| currency-ind | What money does India use? | **Rupee** / Riyal |
+| currency-lka | What money does Sri Lanka use? | Yen / **Rupee** |
 | currency-npl | What money does Nepal use? | **Nepalese rupee** / Sri Lankan rupee |
-| currency-bgd | What money does Bangladesh use? | Yemeni rial / **Bangladeshi taka** |
-| currency-mdv | What money does the Maldives use? | Singapore dollar / **Maldivian rufiyaa** |
-| currency-chn | What money does China use? | **Chinese yuan** / Omani rial |
-| currency-mng | What money does Mongolia use? | **Mongolian tögrög** / Burmese kyat |
-| currency-kor | What money does South Korea use? | Sri Lankan rupee / **South Korean won** |
-| currency-prk | What money does North Korea use? | Indonesian rupiah / **North Korean won** |
-| currency-jpn | What money does Japan use? | United States dollar / **Japanese yen** |
-| currency-mmr | What money does Myanmar use? | Syrian pound / **Burmese kyat** |
-| currency-tha | What money does Thailand use? | Azerbaijani manat / **Thai baht** |
-| currency-lao | What money does Laos use? | **Lao kip** / Singapore dollar |
-| currency-vnm | What money does Vietnam use? | **Vietnamese đồng** / United Arab Emirates dirham |
-| currency-mys | What money does Malaysia use? | Bahraini dinar / **Malaysian ringgit** |
-| currency-sgp | What money does Singapore use? | Bangladeshi taka / **Singapore dollar** |
-| currency-idn | What money does Indonesia use? | **Indonesian rupiah** / Nepalese rupee |
-| currency-phl | What money does the Philippines use? | Indonesian rupiah / **Philippine peso** |
-| currency-tls | What money does Timor-Leste use? | Omani rial / **United States dollar** |
-| currency-png | What money does Papua New Guinea use? | **Papua New Guinean kina** / Japanese yen |
-| currency-mar | What money does Morocco use? | Central African CFA franc / **Moroccan dirham** |
-| currency-dza | What money does Algeria use? | Sierra Leonean leone / **Algerian dinar** |
+| currency-bgd | What money does Bangladesh use? | Rial / **Taka** |
+| currency-mdv | What money does the Maldives use? | Dollar / **Rufiyaa** |
+| currency-chn | What money does China use? | **Yuan** / Rial |
+| currency-mng | What money does Mongolia use? | **Tögrög** / Kyat |
+| currency-kor | What money does South Korea use? | Rupee / **Won** |
+| currency-prk | What money does North Korea use? | Rupiah / **Won** |
+| currency-jpn | What money does Japan use? | Dollar / **Yen** |
+| currency-mmr | What money does Myanmar use? | Pound / **Kyat** |
+| currency-tha | What money does Thailand use? | Manat / **Baht** |
+| currency-lao | What money does Laos use? | **Kip** / Dollar |
+| currency-vnm | What money does Vietnam use? | **Đồng** / Dirham |
+| currency-mys | What money does Malaysia use? | Dinar / **Ringgit** |
+| currency-sgp | What money does Singapore use? | Taka / **Dollar** |
+| currency-idn | What money does Indonesia use? | **Rupiah** / Rupee |
+| currency-phl | What money does the Philippines use? | Rupiah / **Peso** |
+| currency-tls | What money does Timor-Leste use? | Rial / **Dollar** |
+| currency-png | What money does Papua New Guinea use? | **Kina** / Yen |
+| currency-mar | What money does Morocco use? | CFA franc / **Dirham** |
+| currency-dza | What money does Algeria use? | Leone / **Dinar** |
 | currency-tun | What money does Tunisia use? | **Tunisian dinar** / Algerian dinar |
-| currency-lby | What money does Libya use? | Central African CFA franc / **Libyan dinar** |
-| currency-egy | What money does Egypt use? | Eritrean nakfa / **Egyptian pound** |
-| currency-mrt | What money does Mauritania use? | **Mauritanian ouguiya** / Sudanese pound |
-| currency-mli | What money does Mali use? | **West African CFA franc** / Algerian dinar |
-| currency-ner | What money does Niger use? | Burundian franc / **West African CFA franc** |
-| currency-tcd | What money does Chad use? | **Central African CFA franc** / Angolan kwanza |
-| currency-bfa | What money does Burkina Faso use? | Comorian franc / **West African CFA franc** |
-| currency-sen | What money does Senegal use? | Egyptian pound / **West African CFA franc** |
-| currency-gmb | What money does the Gambia use? | **dalasi** / West African CFA franc |
-| currency-gnb | What money does Guinea-Bissau use? | **West African CFA franc** / South African rand |
-| currency-gin | What money does Guinea use? | Egyptian pound / **Guinean franc** |
-| currency-sle | What money does Sierra Leone use? | **Sierra Leonean leone** / dalasi |
-| currency-lbr | What money does Liberia use? | Ghanaian cedi / **Liberian dollar** |
-| currency-civ | What money does Côte d'Ivoire use? | **West African CFA franc** / São Tomé and Príncipe dobra |
-| currency-gha | What money does Ghana use? | South African rand / **Ghanaian cedi** |
-| currency-tgo | What money does Togo use? | **West African CFA franc** / Tunisian dinar |
-| currency-ben | What money does Benin use? | **West African CFA franc** / Moroccan dirham |
-| currency-nga | What money does Nigeria use? | Central African CFA franc / **Nigerian naira** |
-| currency-cpv | What money does Cabo Verde use? | Ugandan shilling / **Cape Verdean escudo** |
-| currency-sdn | What money does Sudan use? | **Sudanese pound** / Algerian dinar |
-| currency-ssd | What money does South Sudan use? | West African CFA franc / **South Sudanese pound** |
-| currency-eth | What money does Ethiopia use? | West African CFA franc / **Ethiopian birr** |
-| currency-eri | What money does Eritrea use? | **Eritrean nakfa** / Burundian franc |
-| currency-dji | What money does Djibouti use? | Zambian kwacha / **Djiboutian franc** |
-| currency-som | What money does Somalia use? | **Somali shilling** / Sierra Leonean leone |
-| currency-cmr | What money does Cameroon use? | Ethiopian birr / **Central African CFA franc** |
-| currency-caf | What money does the Central African Republic use? | **Central African CFA franc** / São Tomé and Príncipe dobra |
-| currency-gnq | What money does Equatorial Guinea use? | **Central African CFA franc** / Mozambican metical |
-| currency-gab | What money does Gabon use? | Malawian kwacha / **Central African CFA franc** |
-| currency-cog | What money does the Republic of the Congo use? | Angolan kwanza / **Central African CFA franc** |
-| currency-cod | What money does the DR Congo use? | Moroccan dirham / **Congolese franc** |
-| currency-stp | What money does São Tomé and Príncipe use? | Central African CFA franc / **São Tomé and Príncipe dobra** |
-| currency-ken | What money does Kenya use? | West African CFA franc / **Kenyan shilling** |
-| currency-uga | What money does Uganda use? | Central African CFA franc / **Ugandan shilling** |
-| currency-tza | What money does Tanzania use? | Malawian kwacha / **Tanzanian shilling** |
+| currency-lby | What money does Libya use? | CFA franc / **Dinar** |
+| currency-egy | What money does Egypt use? | Nakfa / **Pound** |
+| currency-mrt | What money does Mauritania use? | **Ouguiya** / Pound |
+| currency-mli | What money does Mali use? | **CFA franc** / Dinar |
+| currency-ner | What money does Niger use? | Franc / **CFA franc** |
+| currency-tcd | What money does Chad use? | **CFA franc** / Kwanza |
+| currency-bfa | What money does Burkina Faso use? | Franc / **CFA franc** |
+| currency-sen | What money does Senegal use? | Pound / **CFA franc** |
+| currency-gmb | What money does the Gambia use? | **Dalasi** / CFA franc |
+| currency-gnb | What money does Guinea-Bissau use? | **CFA franc** / Rand |
+| currency-gin | What money does Guinea use? | Pound / **Franc** |
+| currency-sle | What money does Sierra Leone use? | **Leone** / Dalasi |
+| currency-lbr | What money does Liberia use? | Cedi / **Dollar** |
+| currency-civ | What money does Côte d'Ivoire use? | **CFA franc** / Dobra |
+| currency-gha | What money does Ghana use? | Rand / **Cedi** |
+| currency-tgo | What money does Togo use? | **CFA franc** / Dinar |
+| currency-ben | What money does Benin use? | **CFA franc** / Dirham |
+| currency-nga | What money does Nigeria use? | CFA franc / **Naira** |
+| currency-cpv | What money does Cabo Verde use? | Shilling / **Escudo** |
+| currency-sdn | What money does Sudan use? | **Pound** / Dinar |
+| currency-ssd | What money does South Sudan use? | CFA franc / **Pound** |
+| currency-eth | What money does Ethiopia use? | CFA franc / **Birr** |
+| currency-eri | What money does Eritrea use? | **Nakfa** / Franc |
+| currency-dji | What money does Djibouti use? | Kwacha / **Franc** |
+| currency-som | What money does Somalia use? | **Shilling** / Leone |
+| currency-cmr | What money does Cameroon use? | Birr / **CFA franc** |
+| currency-caf | What money does the Central African Republic use? | **CFA franc** / Dobra |
+| currency-gnq | What money does Equatorial Guinea use? | **CFA franc** / Metical |
+| currency-gab | What money does Gabon use? | Kwacha / **CFA franc** |
+| currency-cog | What money does the Republic of the Congo use? | Kwanza / **CFA franc** |
+| currency-cod | What money does the DR Congo use? | Dirham / **Franc** |
+| currency-stp | What money does São Tomé and Príncipe use? | CFA franc / **Dobra** |
+| currency-ken | What money does Kenya use? | CFA franc / **Shilling** |
+| currency-uga | What money does Uganda use? | CFA franc / **Shilling** |
+| currency-tza | What money does Tanzania use? | Kwacha / **Shilling** |
 | currency-rwa | What money does Rwanda use? | Djiboutian franc / **Rwandan franc** |
-| currency-bdi | What money does Burundi use? | **Burundian franc** / Sierra Leonean leone |
-| currency-mdg | What money does Madagascar use? | **Malagasy ariary** / Tunisian dinar |
-| currency-syc | What money does the Seychelles use? | **Seychellois rupee** / São Tomé and Príncipe dobra |
-| currency-com | What money does the Comoros use? | **Comorian franc** / Eritrean nakfa |
-| currency-mus | What money does Mauritius use? | **Mauritian rupee** / dalasi |
-| currency-ago | What money does Angola use? | Somali shilling / **Angolan kwanza** |
-| currency-zmb | What money does Zambia use? | Kenyan shilling / **Zambian kwacha** |
-| currency-mwi | What money does Malawi use? | South Sudanese pound / **Malawian kwacha** |
-| currency-moz | What money does Mozambique use? | Congolese franc / **Mozambican metical** |
-| currency-bwa | What money does Botswana use? | Kenyan shilling / **Botswana pula** |
-| currency-zaf | What money does South Africa use? | Libyan dinar / **South African rand** |
+| currency-bdi | What money does Burundi use? | **Franc** / Leone |
+| currency-mdg | What money does Madagascar use? | **Ariary** / Dinar |
+| currency-syc | What money does the Seychelles use? | **Rupee** / Dobra |
+| currency-com | What money does the Comoros use? | **Franc** / Nakfa |
+| currency-mus | What money does Mauritius use? | **Rupee** / Dalasi |
+| currency-ago | What money does Angola use? | Shilling / **Kwanza** |
+| currency-zmb | What money does Zambia use? | Shilling / **Kwacha** |
+| currency-mwi | What money does Malawi use? | Pound / **Kwacha** |
+| currency-moz | What money does Mozambique use? | Franc / **Metical** |
+| currency-bwa | What money does Botswana use? | Shilling / **Pula** |
+| currency-zaf | What money does South Africa use? | Dinar / **Rand** |
 | currency-can | What money does Canada use? | **Canadian dollar** / United States dollar |
-| currency-usa | What money does the United States use? | **United States dollar** / Mexican peso |
-| currency-mex | What money does Mexico use? | **Mexican peso** / Jamaican dollar |
-| currency-gtm | What money does Guatemala use? | **Guatemalan quetzal** / Honduran lempira |
-| currency-blz | What money does Belize use? | **Belize dollar** / Guatemalan quetzal |
-| currency-hnd | What money does Honduras use? | Jamaican dollar / **Honduran lempira** |
-| currency-slv | What money does El Salvador use? | Dominican peso / **United States dollar** |
-| currency-nic | What money does Nicaragua use? | **Nicaraguan córdoba** / United States dollar |
-| currency-cri | What money does Costa Rica use? | **Costa Rican colón** / Honduran lempira |
+| currency-usa | What money does the United States use? | **Dollar** / Peso |
+| currency-mex | What money does Mexico use? | **Peso** / Dollar |
+| currency-gtm | What money does Guatemala use? | **Quetzal** / Lempira |
+| currency-blz | What money does Belize use? | **Dollar** / Quetzal |
+| currency-hnd | What money does Honduras use? | Dollar / **Lempira** |
+| currency-slv | What money does El Salvador use? | Peso / **Dollar** |
+| currency-nic | What money does Nicaragua use? | **Córdoba** / Dollar |
+| currency-cri | What money does Costa Rica use? | **Colón** / Lempira |
 | currency-jam | What money does Jamaica use? | Belize dollar / **Jamaican dollar** |
-| currency-hti | What money does Haiti use? | **Haitian gourde** / United States dollar |
-| currency-dom | What money does Dominican Republic use? | Guatemalan quetzal / **Dominican peso** |
-| currency-col | What money does Colombia use? | **Colombian peso** / Bolivian boliviano |
-| currency-ven | What money does Venezuela use? | **Venezuelan bolívar soberano** / Brazilian real |
-| currency-ecu | What money does Ecuador use? | Chilean peso / **United States dollar** |
-| currency-guy | What money does Guyana use? | **Guyanese dollar** / Brazilian real |
-| currency-sur | What money does Suriname use? | Brazilian real / **Surinamese dollar** |
-| currency-per | What money does Peru use? | **Peruvian sol** / Surinamese dollar |
-| currency-bol | What money does Bolivia use? | Chilean peso / **Bolivian boliviano** |
-| currency-chl | What money does Chile use? | **Chilean peso** / Surinamese dollar |
-| currency-bra | What money does Brazil use? | Chilean peso / **Brazilian real** |
+| currency-hti | What money does Haiti use? | **Gourde** / Dollar |
+| currency-dom | What money does Dominican Republic use? | Quetzal / **Peso** |
+| currency-col | What money does Colombia use? | **Peso** / Boliviano |
+| currency-ven | What money does Venezuela use? | **Bolívar** / Real |
+| currency-ecu | What money does Ecuador use? | Peso / **Dollar** |
+| currency-guy | What money does Guyana use? | **Dollar** / Real |
+| currency-sur | What money does Suriname use? | Real / **Dollar** |
+| currency-per | What money does Peru use? | **Sol** / Dollar |
+| currency-bol | What money does Bolivia use? | Peso / **Boliviano** |
+| currency-chl | What money does Chile use? | **Peso** / Dollar |
+| currency-bra | What money does Brazil use? | Peso / **Real** |
 | currency-arg | What money does Argentina use? | Chilean peso / **Argentine peso** |
-| currency-ury | What money does Uruguay use? | Guyanese dollar / **Uruguayan peso** |
-| currency-pry | What money does Paraguay use? | Uruguayan peso / **Paraguayan guaraní** |
+| currency-ury | What money does Uruguay use? | Dollar / **Peso** |
+| currency-pry | What money does Paraguay use? | Peso / **Guaraní** |
 | currency-aus | What money does Australia use? | New Zealand dollar / **Australian dollar** |
 | currency-nzl | What money does New Zealand use? | Australian dollar / **New Zealand dollar** |
