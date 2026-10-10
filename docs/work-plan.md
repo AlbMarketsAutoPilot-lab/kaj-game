@@ -442,8 +442,8 @@ Owner-approved, one item at a time, each with before/after screenshots:
   the app (`MainActivity.java`; no new suppressions). To check on the owner's phone.
 - Loading screen: title, turning globe and "Loading…" until the start screen shows.
 - Top bar: title above the round, player chips in tidy rows for 3 or 4 players.
-- Right side: its bottom fades when there is more to scroll; the map caption is smaller and
-  breaks only between its parts.
+- Map caption: smaller, breaks only between its parts. (A fade at the bottom of the right side
+  was removed again the same day: on the owner's Galaxy S25 it made the panel flicker.)
 - Full world map: a framed card over the dimmed painting, round gold ✕.
 - Guide maps: rounded frame, bigger words on the first trip map.
 - End screen: medals (🥇🥈🥉) and soft rows in the ranking, the winner's row in gold.
