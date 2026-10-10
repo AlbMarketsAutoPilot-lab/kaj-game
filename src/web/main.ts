@@ -632,7 +632,11 @@ function finishPopup(s: GameState, close: () => void): HTMLElement {
       const value = businessValue(s, seat);
       const penalty = nomadPenalty(p);
       const detail = [`${p.points} travel`, `${value} assets`].join(' + ') + (penalty ? ` − ${penalty} Nomad penalty` : '');
-      return el('li', {}, dot(seat), ` ${name(seat)}: `, el('b', { textContent: plural(finalScore(s, p), 'point') }), ` (${detail})`);
+      // A medal for the first three places; equal points share a place (2026-10-10).
+      const place = 1 + s.players.filter((o) => finalScore(s, o) > finalScore(s, p)).length;
+      return el('li', { className: place === 1 ? 'first' : '' },
+        el('span', { className: 'medal', textContent: ['🥇', '🥈', '🥉'][place - 1] ?? `${place}.` }),
+        ' ', dot(seat), ` ${name(seat)}: `, el('b', { textContent: plural(finalScore(s, p), 'point') }), ` (${detail})`);
     })),
     el('div', { className: 'row' }, again, button('See the map', close)));
 }

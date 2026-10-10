@@ -289,7 +289,11 @@ button.link { background: none; border: none; padding: 0; text-align: left; font
 .big-title { font-family: "Cinzel", Georgia, serif; font-weight: 700; color: #ffe08a; text-shadow: 0 0 12px rgba(255, 220, 120, 0.6), 0 2px 0 #062a30; font-size: 1.5rem; margin: 4px 0 8px; }
 .finish .cheer { font-size: 1rem; margin: 6px 0; }
 .finish .ranking { text-align: left; display: inline-block; margin: 6px auto 4px; }
-.finish .ranking li { margin: 3px 0; }
+/* The ranking: a medal and a soft row per player, the winner's row in gold (2026-10-10). */
+.finish .ranking { list-style: none; padding: 0; }
+.finish .ranking li { margin: 4px 0; padding: 3px 14px 3px 8px; border-radius: 999px; background: rgba(255, 255, 255, 0.06); border: 1px solid transparent; }
+.finish .ranking li.first { background: rgba(243, 210, 122, 0.16); border-color: rgba(243, 210, 122, 0.55); }
+.finish .ranking .medal { display: inline-block; min-width: 1.5em; text-align: center; font-size: 1.15em; }
 .income ul { text-align: left; }
 .modal.gold .row, .modal.event .row { justify-content: center; }
 @media (prefers-reduced-motion: reduce) {
