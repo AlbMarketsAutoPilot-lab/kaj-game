@@ -89,9 +89,8 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
       (pos, size) => {
         const [fx, fy] = pos('france');
         const [ix, iy] = pos('iberia');
-        // Bigger words, readable on a phone (2026-10-10).
-        return [place(pawn(ME, true), fx, fy, size * 0.55, 'You are here'), tag(fx, fy + size * 0.55, size * 0.42, 'You are here'),
-          tag(ix, iy - size * 0.1, size * 0.5, '👆'), tag(ix, iy + size * 0.45, size * 0.4, 'Tap here to continue')];
+        return [place(pawn(ME, true), fx, fy, size * 0.55, 'You are here'), tag(fx, fy + size * 0.48, size * 0.26, 'You are here'),
+          tag(ix, iy - size * 0.08, size * 0.5, '👆'), tag(ix, iy + size * 0.36, size * 0.24, 'Tap here to continue')];
       }),
     el('p', { className: 'small', textContent: '🇫🇷 You are in France · tap 🇪🇸 Iberia' }));
 
@@ -227,19 +226,25 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
     const pts = el('div', { className: `guide-points${bump ? ' bump' : ''}`, textContent: `💰 ${points} points` });
     bump = false;
     const after = step.task && solved ? step.after : undefined;
-    const body = after
-      ? [el('h2', { className: 'big-title', textContent: after.title }), ...after.lines.map(line), after.picture ? after.picture() : '']
-      : [el('h2', { textContent: step.title }), ...step.lines.map(line),
-        step.picture ? step.picture(() => { solved = true; draw(); }) : ''];
+    const text = after
+      ? [el('h2', { className: 'big-title', textContent: after.title }), ...after.lines.map(line)]
+      : [el('h2', { textContent: step.title }), ...step.lines.map(line)];
+    const picture = after ? after.picture?.() : step.picture?.(() => { solved = true; draw(); });
     const go = button(last ? '▶ Start my first game' : 'Next ▶', last ? finish : next);
     go.className = 'primary';
     const skip = button('Skip guide', finish);
     const waiting = step.task && !solved;
+    const buttons = el('div', { className: 'row' }, waiting ? '' : go, last ? '' : skip);
+    // A map goes on the right half of the sideways screen, as big as the screen allows; the
+    // text and buttons on the left (owner, 2026-10-10: the maps were too small on a phone).
+    const map = picture instanceof Element && (picture.matches('.guide-map') || picture.querySelector('.guide-map'));
+    const body = map
+      ? [el('div', { className: 'guide-split' }, el('div', { className: 'guide-text' }, ...text, buttons), el('div', { className: 'guide-pic' }, picture))]
+      : [...text, picture ?? '', buttons];
     app.replaceChildren(el('div', { className: 'modal-back' },
-      el('div', { className: `modal card guide ${after ? 'gold' : step.cls ?? ''}` },
+      el('div', { className: `modal card guide ${map ? 'split' : ''} ${after ? 'gold' : step.cls ?? ''}` },
         el('div', { className: 'guide-top' }, pts, el('span', { className: 'small', textContent: `${index + 1} / ${steps.length}` })),
-        ...body,
-        el('div', { className: 'row' }, waiting ? '' : go, last ? '' : skip))));
+        ...body)));
   };
   draw();
 }

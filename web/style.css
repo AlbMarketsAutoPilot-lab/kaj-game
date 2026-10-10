@@ -335,6 +335,12 @@ button.link { background: none; border: none; padding: 0; text-align: left; font
    height the text and buttons (about 335 px) leave free. */
 .guide-map { max-height: min(calc(38 * var(--vh)), calc(100 * var(--vh) - 335px)); }
 .guide-prop { max-height: min(calc(26 * var(--vh)), calc(100 * var(--vh) - 335px)); }
+/* A guide page with a map (2026-10-10): text on the left, the map on the right, as tall as the
+   screen allows (the owner found the maps too small on a phone). */
+.modal.guide.split { width: min(980px, 100%); max-width: none; }
+.guide-split { display: grid; grid-template-columns: 1fr 1.2fr; gap: 14px; align-items: center; }
+.guide-split .guide-pic .guide-map { max-height: calc(100 * var(--vh) - 135px); }
+.guide-split .guide-pic .small { margin-top: 4px; }
 @media (max-height: 500px) {
   .modal-back { padding-top: calc(6px + var(--safe-t)); padding-bottom: calc(6px + var(--safe-b)); }
   .event-deck { font-size: 2.2rem; }
