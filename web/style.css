@@ -142,7 +142,6 @@ main:has(.game) { max-width: none; padding: calc(6px + var(--safe-t)) calc(6px +
 .left, .side { min-height: 0; }
 .side { overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
 .side > * { flex-shrink: 0; }
-.side.more { -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 36px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 36px), transparent); }
 .side .card { padding: 10px; }
 .side h2 { font-size: 1.05rem; color: var(--accent); }
 .player .points { font-size: 1.1rem; }
