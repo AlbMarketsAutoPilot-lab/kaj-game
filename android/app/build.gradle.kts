@@ -21,5 +21,6 @@ android {
 }
 
 dependencies {
+    implementation("androidx.activity:activity:1.10.1")
     implementation("androidx.webkit:webkit:1.17.1")
 }
