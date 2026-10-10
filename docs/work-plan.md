@@ -21,6 +21,11 @@ Every task also adds its part to the test board, so there is **always a playable
 - One "session" = one focused task in one chat. Claude cannot see the plan limits; the owner
   watches them. If a day is lost, use the cut order (bottom of this file).
 
+## Frozen games
+
+- **30- and 50-turn games frozen (owner, 2026-10-10):** no more changes to their rules, maps, data,
+  texts, screens or saved-game formats. Next: planning the 100-turn map (owner).
+
 ## Status table
 
 | # | Task | Effort | Sessions | Day | Status |
