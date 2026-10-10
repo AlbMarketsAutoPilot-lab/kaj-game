@@ -61,6 +61,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | 15 | Android release build (signed AAB for Play, built by the owner in Android Studio) | medium/high | 1 | — | in progress (2026-10-10): icon, SDK 36, audit fixes A + B done (`docs/audit-task15.md`); next: owner's Android Studio check, phone test, upload key, AAB |
 | 17 | Train France ↔ Russia West and France ↔ Turkey (30-turn map): A rules **high**, B screens medium | **high** / medium | 2 | 13–14 | done (A rules, robots, tests, save 9; B screens, sound) |
 | 18 | Bus from Mongolia to Siberia or China West (30-turn map), whole country at once | **high** | 1 | — | done (owner-approved 2026-10-09) |
+| 15v | Visual polish (owner, 2026-10-10): no rule, text or save changes | medium | 1 | — | ✅ done; the in-game "Leave the game?" popup needs the owner's phone test (Galaxy S25: map no longer shakes?) |
 | 16 | Full-game tests, bug fixes, buffer | medium | 1–2 | 15 | |
 
 ## The tasks
@@ -429,6 +430,24 @@ version 10, rules in `docs/engine.md`, and the screens. Owner's rules:
 The 30-turn game is finished: no more rule or content changes. Last changes: 7 more Backpacker
 news cards (b9–b15, all positive; 60 cards in all, the test limit) and Backpacker tips on the home
 choice (3 continents, the free quiz on every trip, the bus). Next: the 50-turn game, in a new session.
+
+### 15v. Visual polish — done (2026-10-10)
+
+Owner-approved, one item at a time, each with before/after screenshots:
+- Setup screen: the "What happened" tick box removed (it is turned off only in a game, with
+  "Don't show again", and stays off on that phone: owner's choice); two columns, so the screen
+  fits a sideways phone; gold tick boxes.
+- Back button: "Leave the game?" is now the game's own popup (Stay / Leave), no longer Android's
+  box, which looked out of place and made the map shake. "Leave" opens `kaj://leave`, which closes
+  the app (`MainActivity.java`; no new suppressions). To check on the owner's phone.
+- Loading screen: title, turning globe and "Loading…" until the start screen shows.
+- Top bar: title above the round, player chips in tidy rows for 3 or 4 players.
+- Right side: its bottom fades when there is more to scroll; the map caption is smaller and
+  breaks only between its parts.
+- Full world map: a framed card over the dimmed painting, round gold ✕.
+- Guide maps: rounded frame, bigger words on the first trip map.
+- End screen: medals (🥇🥈🥉) and soft rows in the ranking, the winner's row in gold.
+- Colours: one name for each shared colour (`style.css` `:root`); side panel titles in gold.
 
 ### 16. Full-game tests and fixes — day 15
 
