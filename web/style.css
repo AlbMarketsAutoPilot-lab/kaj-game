@@ -131,8 +131,10 @@ main:has(.game) { max-width: none; padding: 6px; height: calc(100 * var(--vh)); 
 .map-svg .land.near { filter: saturate(0.8) brightness(0.9); }
 .map-svg .land.go { stroke: #eafff6; stroke-width: 1.2px; }
 .map-svg.turn .land.far, .map-svg.turn .land.near { filter: saturate(0.35) brightness(0.55); }
-/* Owner (M5): on your turn the areas you can walk to glow, like the guide's. */
-.map-svg.turn .land.go { animation: glow 1.6s ease-in-out infinite; }
+/* Owner (M5): on your turn the areas you can walk to glow, only along their own border (a thin
+   line in screen pixels, whatever the zoom), so the glow never spills over other countries. */
+.map-svg.turn .land.go { animation: walk-glow 1.6s ease-in-out infinite; }
+@keyframes walk-glow { 50% { stroke: #fff6c8; stroke-width: 2.6px; filter: brightness(1.15); } }
 @media (prefers-reduced-motion: reduce) { .map-svg.turn .land.go { animation: none; } }
 .areaview { position: relative; }
 .map-note, .map-ask { position: absolute; left: 50%; top: 52px; transform: translateX(-50%); width: min(88%, 440px); z-index: 5;
