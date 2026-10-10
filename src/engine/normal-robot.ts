@@ -1,5 +1,5 @@
 import {
-  bigCountryParts, blockedByMoney, canPayAfterQuiz, currentPlayer, entryFees, feeTotal, legalActions,
+  bigCountryParts, blockedByMoney, continentReward, canPayAfterQuiz, currentPlayer, entryFees, feeTotal, legalActions,
 } from './engine.ts';
 import { BUSINESS_PRICE, bigCountryPoints, CONTINENT_BONUS, NOMAD_MIN_CONTINENTS, QUIZ_TRIES, canRide, ticketPrice, TRAVEL_TURNS, WELCOME_BONUS } from './constants.ts';
 import { areaById } from './map.ts';
@@ -166,7 +166,7 @@ function chooseMove(state: GameState, map: GameMap, moves: Action[], me: Player,
       if (lastTry && plain.some((b) => b.type === 'walk')) continue;
       const travel = TRAVEL_TURNS[me.profile!][a.kind];
       const nomad = me.profile === 'nomad' ? travel : 0;
-      // The bus counts the whole country (task 18).
+      // The bus gives the whole country's points at once (owner's rule, M5).
       const value = a.kind === 'bus' ? busArrivalValue(map, me, a.to) : arrivalValue(map, me, a.to);
       options.push({
         action, to: a.to, trip: true, turns: 1 + travel,
@@ -198,17 +198,20 @@ function chooseMove(state: GameState, map: GameMap, moves: Action[], me: Player,
 }
 
 // The points arriving in `to` gives now (as the engine scores it), plus a little for a new
-// part of a big country.
+// part of a big country. A surprise is secret: robots don't know it either.
 export function arrivalValue(map: GameMap, me: Player, to: string): number {
   const area = areaById(map, to);
   let value = 0;
   if (!me.visitedAreas.includes(to)) {
-    if (area.bigCountry) {
+    if (area.bigCountry && me.bigCountries.includes(area.bigCountry)) {
+      value += 1; // after the bus (owner, M5): each part not visited yet gives +1
+    } else if (area.bigCountry) {
       const parts = bigCountryParts(map, area.bigCountry);
       value += parts.every((id) => id === to || me.visitedAreas.includes(id)) ? bigCountryPoints(parts.length) : PART_PROGRESS;
     } else {
       value += area.wonder ? 2 : 1;
     }
+    value += wholeContinentValue(map, me, to);
   }
   if (!me.visitedContinents.includes(area.continent)) {
     value += 2;
@@ -218,15 +221,25 @@ export function arrivalValue(map: GameMap, me: Player, to: string): number {
   return value;
 }
 
-// Arriving by bus (task 18): the whole country at once, as the engine scores it, plus a new continent.
+// The whole-continent reward (owner, M5) when `to` is the last area of its continent not visited.
+function wholeContinentValue(map: GameMap, me: Player, to: string): number {
+  const c = areaById(map, to).continent;
+  if (me.fullContinents.includes(c)) return 0;
+  const left = map.areas.filter((a) => a.continent === c && a.id !== to && !me.visitedAreas.includes(a.id));
+  return left.length === 0 ? continentReward(map, c) : 0;
+}
+
+// Arriving by bus (owner's rule, M5): the country's points at once (if not had yet), plus the
+// continent's points as for any arrival; the destination part itself gives nothing more.
 function busArrivalValue(map: GameMap, me: Player, to: string): number {
   const area = areaById(map, to);
   if (!area.bigCountry) return arrivalValue(map, me, to);
   const parts = bigCountryParts(map, area.bigCountry);
-  const done = parts.every((id) => me.visitedAreas.includes(id));
+  const had = me.bigCountries.includes(area.bigCountry);
   // With the area counted as visited, arrivalValue gives only the continent's points.
   const continent = arrivalValue(map, { ...me, visitedAreas: [...me.visitedAreas, to] }, to);
-  return (done ? 0 : bigCountryPoints(parts.length)) + continent;
+  const full = me.visitedAreas.includes(to) ? 0 : wholeContinentValue(map, me, to);
+  return (had ? 0 : bigCountryPoints(parts.length)) + continent + full;
 }
 
 function unvisitedNext(map: GameMap, me: Player, to: string): number {

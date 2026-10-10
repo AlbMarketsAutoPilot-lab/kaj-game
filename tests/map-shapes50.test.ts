@@ -29,9 +29,9 @@ test('50-turn map shapes: drawn borders match the walking links', () => {
   const data = new Set<string>();
   for (const a of map50.areas) for (const n of a.neighbours) data.add([a.id, n].sort().join(' – '));
   const drawn = drawnTouches();
-  // The Channel Tunnel and the sea crossing Madagascar ↔ Zambezi are fixed links, not land borders.
+  // The Channel Tunnel is a fixed link, not a land border (Madagascar has no walk since M5).
   const notDrawn = [...data].filter((p) => !drawn.has(p)).sort();
-  assert.deepEqual(notDrawn, ['france – uk-ireland', 'madagascar – zambezi']);
+  assert.deepEqual(notDrawn, ['france – uk-ireland']);
   // Tibet (China West) touches Myanmar on the map, with no walking link (as on the 30-turn map).
   const noLink = [...drawn].filter((p) => !data.has(p));
   assert.deepEqual(noLink, ['china-west – myanmar']);

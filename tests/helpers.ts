@@ -19,9 +19,11 @@ export function startedGame(
   map: GameMap = testMap,
   profiles: Profile[] = ['backpacker', 'business', 'luxury', 'nomad'],
   eventCards = false,
+  continentRewards = false,
 ): GameState {
-  // Event cards are off by default here, so rule tests can count exact points.
-  let s = createGame({ seats: seats(starts.length), seed, eventCards }, map);
+  // Event cards are off by default here, so rule tests can count exact points; whole-continent
+  // rewards too (owner, M5), as the test maps' continents have 1 to 3 areas.
+  let s = createGame({ seats: seats(starts.length), seed, eventCards, continentRewards }, map);
   while (s.phase === 'chooseProfile') {
     const taken = new Set(s.players.map((p) => p.profile));
     s = apply(s, map, { type: 'chooseProfile', profile: profiles.find((p) => !taken.has(p))! });

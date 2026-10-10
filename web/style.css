@@ -131,7 +131,6 @@ main:has(.game) { max-width: none; padding: 6px; height: calc(100 * var(--vh)); 
 .map-svg .land.near { filter: saturate(0.8) brightness(0.9); }
 .map-svg .land.go { stroke: #eafff6; stroke-width: 1.2px; }
 .map-svg.turn .land.far, .map-svg.turn .land.near { filter: saturate(0.35) brightness(0.55); }
-.walk-lines line { stroke: #eafff6; stroke-opacity: 0.8; stroke-linecap: round; pointer-events: none; }
 .areaview { position: relative; }
 .map-note, .map-ask { position: absolute; left: 50%; top: 52px; transform: translateX(-50%); width: min(88%, 440px); z-index: 5;
   background: rgba(8, 40, 44, 0.94); border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; font-size: 0.95rem; box-shadow: 0 6px 18px rgba(0,0,0,0.4); }

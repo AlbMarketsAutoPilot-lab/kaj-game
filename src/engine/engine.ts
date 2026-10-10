@@ -4,6 +4,7 @@ import {
   cardEvery,
   CHALLENGE_POINTS,
   CONTINENT_BONUS,
+  continentRewardFor,
   EXAM_FACTS,
   EXAM_PASS,
   EXAM_QUESTIONS,
@@ -44,6 +45,7 @@ import type {
   BusinessKind,
   Challenge,
   ChallengeType,
+  Continent,
   Deck,
   DrawnCard,
   EventCard,
@@ -102,6 +104,8 @@ export function createGame(config: GameConfig, map: GameMap): GameState {
     broke: 0,
     loseTurn: false,
     landTurns: 0,
+    bigCountries: [],
+    fullContinents: [],
   }));
 
   return {
@@ -119,8 +123,10 @@ export function createGame(config: GameConfig, map: GameMap): GameState {
     offer: null,
     offeredThisTurn: false,
     eventCards: config.eventCards !== false,
+    continentRewards: config.continentRewards !== false,
     card: null,
     drawn: [],
+    rewards: [],
     challenge: null,
     challenged: null,
     result: null,
@@ -201,6 +207,7 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
   const next = structuredClone(state);
   next.payments = [];
   next.drawn = [];
+  next.rewards = [];
   next.challenged = null;
   const me = currentPlayer(next);
   // A card drawn at the start of this turn stays on show for the whole turn; any other card
@@ -235,6 +242,7 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
       me.visitedAreas.push(area.id);
       me.visitedContinents.push(area.continent);
       me.points = addPoints(me.points, WELCOME_BONUS[area.continent]);
+      wholeContinent(next, map, me, area.continent);
       advanceSetup(next, map);
       return next;
     }
@@ -422,24 +430,7 @@ function land(state: GameState, map: GameMap, me: Player): void {
   const trip = me.travel!;
   if (occupiedAreas(state, me.seat).has(trip.to)) return;
   me.travel = null;
-  if (trip.kind === 'bus') busWholeCountry(map, me, trip.to);
-  arrive(state, map, me, areaById(map, trip.to));
-}
-
-// The bus (task 18, owner's rule): arriving by bus in a part of a big country (Siberia, China
-// West) counts the whole country as visited: every part is marked, and the country's points
-// (Russia +5, China +3) are given once, also when some parts were visited before. A country
-// already complete gives nothing more. Only areas are marked: no continent, wonder or visa.
-// Called just before arrive(), which scores the destination itself.
-function busWholeCountry(map: GameMap, me: Player, to: string): void {
-  const country = areaById(map, to).bigCountry;
-  if (!country) return;
-  const parts = bigCountryParts(map, country);
-  if (parts.every((id) => me.visitedAreas.includes(id))) return;
-  const destinationNew = !me.visitedAreas.includes(to);
-  for (const id of parts) if (id !== to && !me.visitedAreas.includes(id)) me.visitedAreas.push(id);
-  // A new destination completes the country in arrive(), which gives the points; otherwise here.
-  if (!destinationNew) me.points = addPoints(me.points, bigCountryPoints(parts.length));
+  arrive(state, map, me, areaById(map, trip.to), trip.kind === 'bus');
 }
 
 // ---------- visas and citizenship (rulebook sections 7 and 8, docs/engine.md task 8) ----------
@@ -655,22 +646,41 @@ function startTurn(state: GameState, map: GameMap): void {
   }
 }
 
-// Scoring for arriving in an area (rulebook section 3), by walking, plane or ship.
-function arrive(state: GameState, map: GameMap, me: Player, area: Area): void {
+// Scoring for arriving in an area (rulebook section 3), by walking, plane, ship, train or bus.
+//
+// Big countries: all or nothing, a part gives 0 until every part is visited, then +1 +N once
+// (3 parts: +5). Visited parts are kept, so a player can leave and continue later.
+// The bus (owner's rule, M5, replacing task 18's "whole country counts as visited"): arriving by
+// bus in a part of a big country (Siberia, China West) gives the country's points at once
+// (Russia +5, China +3), once, also when some parts were visited before; only the destination
+// is marked visited. After that every other part still gives +1 when first visited (owner: this
+// rewards the Nomad and the Backpacker, who alone can take the bus). A country whose points were
+// already given gives nothing more by bus.
+function arrive(state: GameState, map: GameMap, me: Player, area: Area, byBus = false): void {
   me.area = area.id;
+  const country = area.bigCountry;
+  const countryDone = country !== undefined && me.bigCountries.includes(country);
+  const giveCountry = (c: string) => {
+    me.points = addPoints(me.points, bigCountryPoints(bigCountryParts(map, c).length));
+    me.bigCountries.push(c);
+  };
   if (!me.visitedAreas.includes(area.id)) {
     me.visitedAreas.push(area.id);
-    if (area.bigCountry) {
-      // All or nothing: a part gives 0 until every part is visited, then +1 +N once (3 parts: +5).
-      // Visited parts are kept, so a player can leave and continue later.
-      const parts = bigCountryParts(map, area.bigCountry);
-      if (parts.every((id) => me.visitedAreas.includes(id))) {
-        me.points = addPoints(me.points, bigCountryPoints(parts.length));
-      }
+    if (country) {
+      if (byBus && !countryDone) giveCountry(country);
+      else if (countryDone) me.points = addPoints(me.points, POINTS_NEW_AREA);
+      else if (bigCountryParts(map, country).every((id) => me.visitedAreas.includes(id))) giveCountry(country);
     } else {
       me.points = addPoints(me.points, POINTS_NEW_AREA);
       if (area.wonder) me.points = addPoints(me.points, POINTS_WONDER);
     }
+    // A surprise (owner, M5): secret points on the first arrival.
+    if (area.surprise) {
+      me.points = addPoints(me.points, area.surprise);
+      state.rewards.push({ seat: me.seat, kind: 'surprise', points: area.surprise, area: area.id });
+    }
+  } else if (byBus && country && !countryDone) {
+    giveCountry(country);
   }
   if (!me.visitedContinents.includes(area.continent)) {
     me.visitedContinents.push(area.continent);
@@ -678,6 +688,23 @@ function arrive(state: GameState, map: GameMap, me: Player, area: Area): void {
     const bonus = me.profile ? CONTINENT_BONUS[me.profile] : undefined;
     if (bonus && me.visitedContinents.length === bonus.continents) me.points = addPoints(me.points, bonus.points);
   }
+  wholeContinent(state, map, me, area.continent);
+}
+
+// The whole-continent reward of a continent on this map (owner, M5): see continentRewardFor.
+export function continentReward(map: GameMap, continent: Continent): number {
+  return continentRewardFor(map.areas.filter((a) => a.continent === continent).length);
+}
+
+// Every area of the continent visited: its reward, once (owner, M5). Only areas really visited
+// count (the bus no longer marks the other parts of a country).
+function wholeContinent(state: GameState, map: GameMap, me: Player, continent: Continent): void {
+  if (!state.continentRewards || me.fullContinents.includes(continent)) return;
+  if (!map.areas.every((a) => a.continent !== continent || me.visitedAreas.includes(a.id))) return;
+  const points = continentReward(map, continent);
+  me.fullContinents.push(continent);
+  me.points = addPoints(me.points, points);
+  state.rewards.push({ seat: me.seat, kind: 'continent', points, continent });
 }
 
 // One travel turn: Nomad +1, and the player lands at the end of the last one.

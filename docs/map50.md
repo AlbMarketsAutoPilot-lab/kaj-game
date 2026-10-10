@@ -2,9 +2,9 @@
 
 Owner-approved basis: 80–90 areas, same big-country splits as the 30-turn map, islands kept inside their bigger 30-turn areas (owner), 11 wonders, about 13 airports and 13 ports with about 21 connections, every rule and design from the 30-turn game (which stays frozen). Every 50-turn area lies inside one 30-turn area, so its facts can be sorted by country (M3).
 
-**Totals:** 84 areas · 11 wonders (🏛️) · 13 airports · 13 ports · 21 connections.
+**Totals:** 84 areas · 11 wonders (🏛️) · 13 airports · 15 ports · 23 connections.
 
-Walking links (owner-approved in M2, written in `src/maps/map50.ts`): the real land borders, the Channel Tunnel (France ↔ UK & Ireland) and one sea crossing, Madagascar & Islands ↔ Zambezi; no Spain ↔ Morocco. Owner (M2): the ship to UK & Ireland leaves from Portugal, not Spain, so a citizenship of Spain can't trap Portugal.
+Walking links (owner-approved in M2, written in `src/maps/map50.ts`): the real land borders, the Channel Tunnel (France ↔ UK & Ireland); no Spain ↔ Morocco. Owner (M5): no walk to Madagascar & Islands, reached by ship from Tanzania, Zambezi or South Africa; "Tanzania, Rwanda & Burundi" is now "Tanzania". Owner (M2): the ship to UK & Ireland leaves from Portugal, not Spain, so a citizenship of Spain can't trap Portugal.
 
 ## Europe (19)
 
@@ -78,11 +78,11 @@ Walking links (owner-approved in M2, written in `src/maps/map50.ts`): the real l
 | Central Africa | Cameroon, Central African Republic, Equatorial Guinea, Gabon, Republic of the Congo, São Tomé and Príncipe | Central Africa |  |  |
 | DR Congo | DR Congo | Central Africa |  |  |
 | Kenya & Uganda | Kenya, Uganda | East Africa | ✈️ |  |
-| 🏛️ Tanzania, Rwanda & Burundi | Tanzania, Rwanda, Burundi | East Africa |  | ⛴️ |
+| 🏛️ Tanzania | Tanzania, Rwanda, Burundi | East Africa |  | ⛴️ |
 | Madagascar & Islands | Madagascar, Seychelles, Comoros, Mauritius | East Africa |  | ⛴️ |
 | Angola & Namibia | Angola, Namibia | Southern Africa |  |  |
-| Zambezi | Zambia, Malawi, Mozambique, Zimbabwe | Southern Africa |  |  |
-| South Africa | South Africa, Botswana, Lesotho, Eswatini | Southern Africa | ✈️ |  |
+| Zambezi | Zambia, Malawi, Mozambique, Zimbabwe | Southern Africa |  | ⛴️ |
+| South Africa | South Africa, Botswana, Lesotho, Eswatini | Southern Africa | ✈️ | ⛴️ |
 
 ## North America (8)
 
@@ -120,9 +120,9 @@ Walking links (owner-approved in M2, written in `src/maps/map50.ts`): the real l
 | Australia East | Australia | Australia East |  | ⛴️ |
 | 🏛️ New Zealand | New Zealand | New Zealand | ✈️ | ⛴️ |
 
-## Connections (21)
+## Connections (23)
 
-The 13 connections of the 30-turn map are kept (on the matching part), plus 8 new ones (marked new).
+The 13 connections of the 30-turn map are kept (on the matching part), plus 10 new ones (marked new; 2 of them, Madagascar ↔ Zambezi and South Africa, added in M5).
 
 | | From | To | |
 |---|---|---|---|
@@ -132,7 +132,9 @@ The 13 connections of the 30-turn map are kept (on the matching part), plus 8 ne
 | ⛴️ | Japan | USA West |  |
 | ⛴️ | Australia East | New Zealand |  |
 | ⛴️ | USA West | Alaska |  |
-| ⛴️ | Madagascar & Islands | Tanzania, Rwanda & Burundi | new |
+| ⛴️ | Madagascar & Islands | Tanzania | new |
+| ⛴️ | Madagascar & Islands | Zambezi | new |
+| ⛴️ | Madagascar & Islands | South Africa | new |
 | ⛴️ | West Coast | Brazil North | new |
 | ✈️ | Gulf States | Australia West |  |
 | ✈️ | Australia West | Malay Islands |  |
@@ -148,14 +150,14 @@ The 13 connections of the 30-turn map are kept (on the matching part), plus 8 ne
 | ✈️ | India | Malay Islands | new |
 | ✈️ | India | Kenya & Uganda | new |
 
-## Train and bus (owner, not counted in the 21)
+## Train and bus (owner, not counted in the 23)
 
 | | From | To | |
 |---|---|---|---|
 | 🚆 | France | Russia West | both ways |
 | 🚆 | France | Turkey | both ways |
-| 🚌 | Mongolia | Siberia | one way, whole of Russia |
-| 🚌 | Mongolia | China West | one way, whole of China |
+| 🚌 | Mongolia | Siberia | one way, Russia's +5 at once |
+| 🚌 | Mongolia | China West | one way, China's +3 at once |
 
 Same rules as the 30-turn map (tickets, booths, Luxury can't take the train, bus only for Nomad and Backpacker). The Caucasus has no train.
 

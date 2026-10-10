@@ -37,7 +37,7 @@ const S: [string, string, string[], boolean?][] = [
  ['horn-of-africa','Sudan & South Sudan',['Sudan','South Sudan']],['horn-of-africa','Horn of Africa',['Ethiopia','Eritrea','Djibouti','Somalia']],
  ['central-africa','Central Africa',['Cameroon','Central African Republic','Equatorial Guinea','Gabon','Republic of the Congo','São Tomé and Príncipe']],
  ['central-africa','DR Congo',['DR Congo']],
- ['east-africa','Kenya & Uganda',['Kenya','Uganda']],['east-africa','Tanzania, Rwanda & Burundi',['Tanzania','Rwanda','Burundi'],true],
+ ['east-africa','Kenya & Uganda',['Kenya','Uganda']],['east-africa','Tanzania',['Tanzania','Rwanda','Burundi'],true],
  ['east-africa','Madagascar & Islands',['Madagascar','Seychelles','Comoros','Mauritius']],
  ['southern-africa','Angola & Namibia',['Angola','Namibia']],['southern-africa','Zambezi',['Zambia','Malawi','Mozambique','Zimbabwe']],
  ['southern-africa','South Africa',['South Africa','Botswana','Lesotho','Eswatini']],
@@ -54,7 +54,7 @@ const S: [string, string, string[], boolean?][] = [
 const R: [string,string,string][] = [
  ['port','Portugal','UK & Ireland'],['port','UK & Ireland','Iceland'],['port','Iceland','Canada East'],
  ['port','Japan','USA West'],['port','Australia East','New Zealand'],['port','USA West','Alaska'],
- ['port','Madagascar & Islands','Tanzania, Rwanda & Burundi'],['port','West Coast','Brazil North'],
+ ['port','Madagascar & Islands','Tanzania'],['port','Madagascar & Islands','Zambezi'],['port','Madagascar & Islands','South Africa'],['port','West Coast','Brazil North'],
  ['airport','Gulf States','Australia West'],['airport','Australia West','Malay Islands'],['airport','Malay Islands','Japan'],
  ['airport','Japan','New Zealand'],['airport','New Zealand','Chile'],['airport','South Africa','Chile'],['airport','UK & Ireland','Gulf States'],
  ['airport','UK & Ireland','USA East'],['airport','USA East','Brazil South'],['airport','Brazil South','Nigeria'],
@@ -69,15 +69,15 @@ const sites = (k: string) => new Set(R.filter(r=>r[0]===k).flatMap(r=>[r[1],r[2]
 const ap = sites('airport'), pt = sites('port');
 for (const n of names) for (const k of ['airport','port']) { const d = R.filter(r=>r[0]===k&&(r[1]===n||r[2]===n)).length; if (d>3) throw new Error(n+k+d); }
 const cont = (id:string)=>a30.get(id).continent;
-let md = `# 50-turn map — area list for review (task M1)\n\nOwner-approved basis: 80–90 areas, same big-country splits as the 30-turn map, islands kept inside their bigger 30-turn areas (owner), 11 wonders, about 13 airports and 13 ports with about 21 connections, every rule and design from the 30-turn game (which stays frozen). Every 50-turn area lies inside one 30-turn area, so its facts can be sorted by country (M3).\n\n**Totals:** ${S.length} areas · ${S.filter(s=>s[3]).length} wonders (🏛️) · ${ap.size} airports · ${pt.size} ports · ${R.length} connections.\n\nWalking links (owner-approved in M2, written in \`src/maps/map50.ts\`): the real land borders, the Channel Tunnel (France ↔ UK & Ireland) and one sea crossing, Madagascar & Islands ↔ Zambezi; no Spain ↔ Morocco. Owner (M2): the ship to UK & Ireland leaves from Portugal, not Spain, so a citizenship of Spain can't trap Portugal.\n`;
+let md = `# 50-turn map — area list for review (task M1)\n\nOwner-approved basis: 80–90 areas, same big-country splits as the 30-turn map, islands kept inside their bigger 30-turn areas (owner), 11 wonders, about 13 airports and 13 ports with about 21 connections, every rule and design from the 30-turn game (which stays frozen). Every 50-turn area lies inside one 30-turn area, so its facts can be sorted by country (M3).\n\n**Totals:** ${S.length} areas · ${S.filter(s=>s[3]).length} wonders (🏛️) · ${ap.size} airports · ${pt.size} ports · ${R.length} connections.\n\nWalking links (owner-approved in M2, written in \`src/maps/map50.ts\`): the real land borders, the Channel Tunnel (France ↔ UK & Ireland); no Spain ↔ Morocco. Owner (M5): no walk to Madagascar & Islands, reached by ship from Tanzania, Zambezi or South Africa; "Tanzania, Rwanda & Burundi" is now "Tanzania". Owner (M2): the ship to UK & Ireland leaves from Portugal, not Spain, so a citizenship of Spain can't trap Portugal.\n`;
 for (const c of ['Europe','Asia','Africa','North America','South America','Oceania']) {
   const rows = S.filter(s=>cont(s[0])===c);
   md += `\n## ${c} (${rows.length})\n\n| Area | Countries | Inside 30-turn area | ✈️ | ⛴️ |\n|---|---|---|---|---|\n`;
   for (const [id,n,cs,w] of rows) md += `| ${w?'🏛️ ':''}${n} | ${cs.join(', ')} | ${a30.get(id).name} | ${ap.has(n)?'✈️':''} | ${pt.has(n)?'⛴️':''} |\n`;
 }
-md += `\n## Connections (${R.length})\n\nThe 13 connections of the 30-turn map are kept (on the matching part), plus 8 new ones (marked new).\n\n| | From | To | |\n|---|---|---|---|\n`;
+md += `\n## Connections (${R.length})\n\nThe 13 connections of the 30-turn map are kept (on the matching part), plus 10 new ones (marked new; 2 of them, Madagascar ↔ Zambezi and South Africa, added in M5).\n\n| | From | To | |\n|---|---|---|---|\n`;
 R.forEach((r,i)=>{ const isNew = ['Madagascar & Islands','West Coast','USA East','Brazil South','India'].includes(r[1]) || r[2]==='USA East'; md += `| ${r[0]==='airport'?'✈️':'⛴️'} | ${r[1]} | ${r[2]} | ${isNew?'new':''} |\n`; });
-md += `\n## Train and bus (owner, not counted in the 21)\n\n| | From | To | |\n|---|---|---|---|\n| 🚆 | France | Russia West | both ways |\n| 🚆 | France | Turkey | both ways |\n| 🚌 | Mongolia | Siberia | one way, whole of Russia |\n| 🚌 | Mongolia | China West | one way, whole of China |\n\nSame rules as the 30-turn map (tickets, booths, Luxury can't take the train, bus only for Nomad and Backpacker). The Caucasus has no train.\n`;
+md += `\n## Train and bus (owner, not counted in the ${R.length})\n\n| | From | To | |\n|---|---|---|---|\n| 🚆 | France | Russia West | both ways |\n| 🚆 | France | Turkey | both ways |\n| 🚌 | Mongolia | Siberia | one way, Russia's +5 at once |\n| 🚌 | Mongolia | China West | one way, China's +3 at once |\n\nSame rules as the 30-turn map (tickets, booths, Luxury can't take the train, bus only for Nomad and Backpacker). The Caucasus has no train.\n`;
 md += `\n## Wonders (11)\n\nEurope 2 (Italy, Greece) · Asia 4 (Jordan, India, Cambodia, Japan) · Africa 2 (Egypt, Tanzania) · North America 1 (Mexico) · South America 1 (Peru) · Oceania 1 (New Zealand). From the rulebook's list of 15; left out: France, Turkey, Morocco, Chile.\n\n## Questions for the owner\n\n1. Are the groupings OK (names and countries)?\n2. Are the 8 new connections OK?\n3. Are the 11 wonders OK?\n`;
 writeFileSync(new URL('../docs/map50.md', import.meta.url), md);
 console.log(S.length, S.filter(s=>s[3]).length, ap.size, pt.size, R.length);

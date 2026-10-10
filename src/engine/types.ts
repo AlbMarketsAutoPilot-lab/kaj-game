@@ -31,6 +31,9 @@ export interface GameConfig {
   seed: number;
   // Event cards on (default). Off only in rule tests that count exact points.
   eventCards?: boolean;
+  // Whole-continent rewards on (default). Off only in rule tests on the tiny test map, whose
+  // one-area continents would be complete at once.
+  continentRewards?: boolean;
 }
 
 export interface Area {
@@ -44,6 +47,9 @@ export interface Area {
   wonder?: boolean;
   // Set on each part of a big country (USA, Canada, Russia, China, Brazil, Australia).
   bigCountry?: string;
+  // A secret reward on the first arrival (owner, M5: Madagascar on the 50-turn map, +3). Never
+  // shown before it is won.
+  surprise?: number;
   // Place cards written for this area id come here (task M2: the 50-turn Peru gets the
   // 30-turn Peru & Bolivia card). Without it, an area gets the place cards of its own id.
   cardsFrom?: string;
@@ -103,6 +109,20 @@ export interface Player {
   loseTurn: boolean;
   // Turns begun in an area (trip turns don't count): every 3rd one draws an event card (task 12).
   landTurns: number;
+  // Big countries whose points this player has had (owner, M5): by visiting every part, or at
+  // once by bus. After the bus, each part not visited yet still gives +1.
+  bigCountries: string[];
+  // Continents this player has visited completely, every area (owner, M5): rewarded once.
+  fullContinents: Continent[];
+}
+
+// A special reward given by the last move (owner, M5), so the screens can show it.
+export interface Reward {
+  seat: number;
+  kind: 'surprise' | 'continent';
+  points: number;
+  area?: string;
+  continent?: Continent;
 }
 
 // Businesses (rulebook section 6): guided tours at a wonder, an airline at an airport,
@@ -208,11 +228,14 @@ export interface GameState {
   offeredThisTurn: boolean;
   // Event cards on (see GameConfig).
   eventCards: boolean;
+  continentRewards: boolean;
   // The card drawn at the start of the current player's turn, on show for the whole turn.
   card: DrawnCard | null;
   // The cards drawn by the last move (a travel card, and the next player's start-of-turn card),
   // so the screens can say what happened. Cleared by every move, like `payments`.
   drawn: DrawnCard[];
+  // The surprises and whole-continent rewards of the last move (owner, M5). Cleared by every move.
+  rewards: Reward[];
   // The challenge the current player must answer now (task 12).
   challenge: Challenge | null;
   // The challenge answered by the last move, so the screens can say what happened.

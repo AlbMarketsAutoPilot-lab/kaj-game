@@ -4,11 +4,11 @@
 
 import { BUSINESS_PRICE, cardEvery, CHALLENGE_POINTS, GAME_LENGTHS, nomadWarningRound, CONTINENT_BONUS, EXAM_FACTS, EXAM_PASS, POINTS_NOMAD_TRAVEL_TURN, POINTS_NEW_AREA, POINTS_NEW_CONTINENT, POINTS_WONDER, GO_HOME_TURNS, NOMAD_MIN_CONTINENTS, NOMAD_PENALTY, POINTS_BUSINESS_CITIZENSHIP, QUIZ_TRIES, ROUTE_KINDS, bigCountryPoints, canRide, TICKET_BUSINESS, TICKET_PRICE, ticketPrice, TOUR_FEE, TRAVEL_TURNS, VISA_PRICE } from '../engine/constants.ts';
 import {
-  apply, blockedByMoney, examPassed, bookedBy, businessAt, canPayAfterQuiz, destinations, businessValue, createGame, currentPlayer, entryFees, feeTotal, finalScore, homeFor, landTurnsToCard, legalActions, nomadPenalty,
+  apply, blockedByMoney, continentReward, examPassed, bookedBy, businessAt, canPayAfterQuiz, destinations, businessValue, createGame, currentPlayer, entryFees, feeTotal, finalScore, homeFor, landTurnsToCard, legalActions, nomadPenalty,
 } from '../engine/engine.ts';
 import { robotAction } from '../engine/normal-robot.ts';
 import { loadGame, saveGame } from '../engine/save.ts';
-import type { Action, Area, BusinessKind, Challenge, ChallengeResult, ChallengeType, Continent, Deck, DrawnCard, GameState, Payment, Player, Profile, RobotLevel, RouteKind, SeatKind } from '../engine/types.ts';
+import type { Action, Area, BusinessKind, Reward, Challenge, ChallengeResult, ChallengeType, Continent, Deck, DrawnCard, GameState, Payment, Player, Profile, RobotLevel, RouteKind, SeatKind } from '../engine/types.ts';
 import type { GameLength } from '../engine/constants.ts';
 import type { GameMap } from '../engine/types.ts';
 import { mapById, mapFor } from '../maps/index.ts';
@@ -16,7 +16,7 @@ import { map30 } from '../maps/map30.ts';
 import type { Shapes } from '../maps/shapes.ts';
 import { shapes30 } from '../maps/shapes30.ts';
 import { shapes50 } from '../maps/shapes50.ts';
-import { countryCapital, countryFlag, WONDER_NAME, WONDER_PLACE } from './countries.ts';
+import { countryCapital, countryFlag, SURPRISE_FACT, WONDER_NAME, WONDER_PLACE } from './countries.ts';
 import { buildGeo, colourAreas, continentBox, pad, propSpots, squeeze, svg, unionBox, type Box, type PropKind } from './maps.ts';
 import { airport, busStop, citizenFlag, monument, pawn, place, port, station } from './props.ts';
 import { iconEl, iconUse, installIcons, PROFILE_COLOUR } from './icons.ts';
@@ -128,6 +128,9 @@ let newsNow = false;
 // Money people earn from others (visa, tour fee, a ticket on their airline or ferry): a gold
 // popup for each person, never for a robot (owner's request).
 let income: { seat: number; text: string }[] = [];
+// A person's surprise or whole continent (owner, M5): a gold popup each. A robot's continent is
+// told in "What happened"; a robot's surprise stays secret.
+let celebrations: Reward[] = [];
 // The popup after a person answers a quiz, test or challenge question: right or wrong, the
 // right answer and the fact behind it (owner's request).
 let answered: { ok: boolean; title: string; lines: string[] } | null = null;
@@ -317,6 +320,7 @@ function renderSetup(): void {
       seenCards.clear();
       news = [];
       income = [];
+      celebrations = [];
       useMap(mapFor(turns));
       state = createGame({ seats, seed }, gameMap);
       render();
@@ -370,10 +374,10 @@ function profileNote(p: Profile, who = ''): HTMLElement {
   const ship = TRAVEL_TURNS[p].port;
   const trips = `planes ${plane ? plural(plane, 'travel turn') : 'arrive right away'}, ships ${plural(ship, 'travel turn')}`;
   const good: Record<Profile, string[]> = {
-    backpacker: ['Never pays for a ticket: always the free quiz.', 'Can take the bus from Mongolia: all of Russia or China at once.', `+${CONTINENT_BONUS.backpacker!.points} for visiting ${CONTINENT_BONUS.backpacker!.continents} continents.`, 'Its own Backpacker event cards.'],
+    backpacker: ['Never pays for a ticket: always the free quiz.', 'Can take the bus from Mongolia: all of Russia (+5) or all of China (+3) at once.', `+${CONTINENT_BONUS.backpacker!.points} for visiting ${CONTINENT_BONUS.backpacker!.continents} continents.`, 'Its own Backpacker event cards.'],
     business: [`+${plural(POINTS_BUSINESS_CITIZENSHIP, 'point')} when you get citizenship (any area).`, `Fast: ${trips}.`],
     luxury: ['Can fly or sail to any airport or port.', 'Citizenship at once, with no test.', `+${CONTINENT_BONUS.luxury!.points} for visiting ${CONTINENT_BONUS.luxury!.continents} continents.`, `Fast: ${trips}.`],
-    nomad: [`Cheapest plane and ship ticket: ${plural(price ?? 0, 'point')}.`, `+${POINTS_NOMAD_TRAVEL_TURN} for every turn on a plane, ship, train or bus.`, 'Can take the bus from Mongolia: all of Russia or China at once.'],
+    nomad: [`Cheapest plane and ship ticket: ${plural(price ?? 0, 'point')}.`, `+${POINTS_NOMAD_TRAVEL_TURN} for every turn on a plane, ship, train or bus.`, 'Can take the bus from Mongolia: all of Russia (+5) or all of China (+3) at once.'],
   };
   const bad: Record<Profile, string[]> = {
     backpacker: ['Travels by plane, ship, train or bus only with the quiz (one try per turn).', `Slow: ${trips}.`],
@@ -499,7 +503,11 @@ function act(action: Action): void {
     if (line) income.push(line);
     else if (paymentNote(p) !== '') lines.push(paymentNote(p));
   }
-  if (mover.kind === 'human' && income.length > 0) newsNow = true;
+  for (const r of state.rewards) {
+    if (state.players[r.seat].kind === 'human') celebrations.push(r);
+    else if (r.kind === 'continent') lines.push(`🌍 ${nameOf(r.seat)} visited every area of ${r.continent}: +${plural(r.points, 'point')}!`);
+  }
+  if (mover.kind === 'human' && (income.length > 0 || celebrations.length > 0)) newsNow = true;
   // Event cards drawn by this move; a human's own start-of-turn card has its own box instead.
   const next = currentPlayer(state);
   lines.push(...state.drawn.filter((c) => state!.players[c.seat].kind === 'human' && !(c === state!.card && next.kind === 'human' && c.seat === next.seat)).map(cardNote));
@@ -910,7 +918,7 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
         : 'Tap a continent on the map. Each player starts on a different continent. Welcome bonus: Europe, Asia, Africa +3 · Americas +4 · Oceania +5.' }),
       zoom ? el('p', { className: 'small', textContent: `🏛️ Areas with this sign have a wonder: your first visit there gives +${plural(POINTS_WONDER, 'point')} more. Each wonder has Guided Tours that one player can buy for ${plural(BUSINESS_PRICE.tours, 'point')}; after that, every other player who visits pays the owner a ${TOUR_FEE}-point tour fee.` }) : '',
       me.profile === 'backpacker'
-        ? el('p', { className: 'small', textContent: `🎒 Tip: from Europe, Asia or Africa you can walk to 3 continents (+${CONTINENT_BONUS.backpacker!.points} Backpacker bonus). Your free quiz works on every plane, ship, train and bus: a right answer is a free trip. In Mongolia, the bus gives you all of Russia (+5) or all of China (+3) at once.` })
+        ? el('p', { className: 'small', textContent: `🎒 Tip: from Europe, Asia or Africa you can walk to 3 continents (+${CONTINENT_BONUS.backpacker!.points} Backpacker bonus). Your free quiz works on every plane, ship, train and bus: a right answer is a free trip. In Mongolia, the bus gives you all of Russia's points (+5) or all of China's (+3) at once.` })
         : '');
   } else if (s.quiz) {
     renderQuiz(box, s, who);
@@ -1016,7 +1024,9 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
 function gainLabel(s: GameState, action: Action, to: Area): string {
   const before = currentPlayer(s).points;
   const after = apply(s, gameMap, action).players[currentPlayer(s).seat].points;
-  const gain = after - before + feeTotal(entryFees(s, currentPlayer(s), currentPlayer(s).area, to.id));
+  // A surprise stays secret (owner, M5): never in the preview.
+  const secret = to.surprise && !currentPlayer(s).visitedAreas.includes(to.id) ? to.surprise : 0;
+  const gain = after - before + feeTotal(entryFees(s, currentPlayer(s), currentPlayer(s).area, to.id)) - secret;
   if (gain > 0) return ` +${gain}`;
   const me = currentPlayer(s);
   return to.bigCountry && !me.visitedAreas.includes(to.id) ? ' 🧩' : '';
@@ -1102,7 +1112,8 @@ function renderBigCountries(me: GameState['players'][number]): HTMLElement {
   const started = names.flatMap((c) => {
     const parts = gameMap.areas.filter((a) => a.bigCountry === c);
     const done = parts.filter((a) => me.visitedAreas.includes(a.id)).length;
-    return done > 0 ? [`${c} ${done}/${parts.length}${done === parts.length ? ' ✅' : ''}`] : [];
+    // ✅ once its points are had (all parts, or by bus: then each other part still +1).
+    return done > 0 ? [`${c} ${done}/${parts.length}${me.bigCountries.includes(c) ? ' ✅' : ''}`] : [];
   });
   return el('p', { className: 'small', textContent: started.length ? `🧩 Big countries: ${started.join(' · ')}` : '' });
 }
@@ -1314,7 +1325,9 @@ function arrivalLines(before: Player, after: Player): { area: string; lines: str
     lines.push(`+${POINTS_NEW_AREA} for visiting a new area.`);
     if (a.wonder) lines.push(`+${POINTS_WONDER} more for visiting ${WONDER_NAME[id] ?? 'its wonder'}.`);
     if (!before.visitedContinents.includes(a.continent)) lines.push(`+${POINTS_NEW_CONTINENT} for a new continent: ${a.continent} (your ${plural(after.visitedContinents.length, 'continent')} so far).`);
-    if (a.bigCountry) {
+    if (a.bigCountry && before.bigCountries.includes(a.bigCountry)) {
+      lines[0] = `+${POINTS_NEW_AREA} for a new part of ${a.bigCountry} (its big bonus came by bus).`;
+    } else if (a.bigCountry) {
       const parts = gameMap.areas.filter((x) => x.bigCountry === a.bigCountry);
       const done = parts.filter((x) => after.visitedAreas.includes(x.id)).length;
       lines[0] = done === parts.length
@@ -1322,14 +1335,17 @@ function arrivalLines(before: Player, after: Player): { area: string; lines: str
         : `🧩 ${a.bigCountry}: ${done} of ${parts.length} parts visited. Its points come when you have visited every part.`;
     }
   }
-  // The bus (task 18): the whole country counts as visited.
+  // The bus (owner's rule, M5): the whole country's points at once.
   const country = before.travel?.kind === 'bus' ? a.bigCountry : undefined;
-  if (country) {
+  if (country && !before.bigCountries.includes(country) && after.bigCountries.includes(country)) {
     const parts = gameMap.areas.filter((x) => x.bigCountry === country);
-    if (!parts.every((x) => before.visitedAreas.includes(x.id))) {
-      lines[0] = `🚌 The bus counts all of ${country}: all ${parts.length} parts visited, +${bigCountryPoints(parts.length)}!`;
-    }
+    lines[0] = `🚌 The bus gives all of ${country}'s points at once: +${bigCountryPoints(parts.length)}! Its other parts still give +${POINTS_NEW_AREA} each when you visit them.`;
   }
+  // A whole continent (owner, M5); the surprise has its own popup.
+  for (const c of after.fullContinents.filter((x) => !before.fullContinents.includes(x))) {
+    lines.push(`🌍 You visited every area of ${c}: +${continentReward(gameMap, c)}!`);
+  }
+  if (after.points > before.points && a.surprise && !before.visitedAreas.includes(id)) lines.push(`🎁 SURPRISE! +${a.surprise}`);
   const delta = after.points - before.points;
   lines.push(`In all: ${delta >= 0 ? '+' : '−'}${plural(Math.abs(delta), 'point')} (fees included). You have ${plural(after.points, 'point')}.`);
   return { area: id, lines: [`📍 You arrived in ${a.name}.`, ...lines] };
@@ -1402,7 +1418,7 @@ function renderGuide(s: GameState, actions: Action[]): HTMLElement | string {
     const turns = TRAVEL_TURNS[me.profile!][kind];
     lines.push(`${VEHICLE[kind]} There is ${placeName} here: ${words.verb} to ${to.join(' or ')}. ${
       price === null ? 'Backpacker: only with the free quiz.' : `Ticket ${plural(price, 'point')}, or try the free quiz.`} ${turns ? plural(turns, 'travel turn') : 'You arrive right away'}.${
-      kind === 'bus' ? ' The bus counts the whole country as visited: all of Russia (+5) or all of China (+3).' : ''} Tap the ${words.vehicle}.`);
+      kind === 'bus' ? ' The bus gives the whole country\'s points at once: Russia +5 or China +3; its other parts still give +1 each when you visit them.' : ''} Tap the ${words.vehicle}.`);
   }
   if (asksOffered(actions).length > 0) {
     lines.push(`🛂 You can ask for citizenship here (the button above). ${me.profile === 'luxury' ? 'Luxury: granted at once, and you can still move this turn.' : `Your turn ends; next turn you read ${EXAM_FACTS} facts and answer 3 questions about them: ${EXAM_PASS} right answers or more, and citizenship is yours.`} Then every other player pays you ${plural(VISA_PRICE, 'point')} to enter.`);
@@ -1467,6 +1483,20 @@ function renderModal(s: GameState, actions: Action[], isRobot: boolean): Modal |
       ok(end, '✔ End turn'))) };
   }
   // Money for people: a gold popup per person (never for a robot).
+  if (celebrations.length > 0 && (newsNow || !isRobot || s.phase === 'finished')) {
+    const r = celebrations[0];
+    const who = nameOf(r.seat);
+    const area = r.area ? areaById.get(r.area)! : null;
+    const title = r.kind === 'surprise' ? '🎁 SURPRISE!' : `🌍 All of ${r.continent}!`;
+    const text = r.kind === 'surprise'
+      ? `Thank you for visiting ${area!.name}, ${who}! ${area!.name} rewards you with +${plural(r.points, 'point')}. ${SURPRISE_FACT[r.area!] ?? ''}`
+      : `${who}, you visited every area of ${r.continent}: +${plural(r.points, 'point')}!`;
+    return { turn: false, node: wrap(el('div', { className: 'income' },
+      el('div', { className: 'coins', textContent: r.kind === 'surprise' ? '🎁' : '🌍' }),
+      el('h2', { className: 'big-title', textContent: title }),
+      el('p', { textContent: text }),
+      ok(() => { celebrations.shift(); if (news.length === 0 && income.length === 0 && celebrations.length === 0) newsNow = false; render(); }, 'Wonderful!')), 'gold'), sound: 'milestone', soundKey: r };
+  }
   if (income.length > 0 && (newsNow || !isRobot || s.phase === 'finished')) {
     const seats = [...new Set(income.map((i) => i.seat))];
     return { turn: false, node: wrap(el('div', { className: 'income' },
@@ -1495,6 +1525,18 @@ function renderModal(s: GameState, actions: Action[], isRobot: boolean): Modal |
       el('h2', { className: 'big-title', textContent: `${nameOf(me.seat)}, it's your turn!` }),
       el('p', { textContent: `Round ${s.round} of ${s.totalRounds}${where ? ` · 📍 ${where}` : ''} · ${plural(me.points, 'point')}` }),
       ok(() => { seenCards.add(turnKey); render(); }, "▶ Let's go"))), sound: 'tap', soundKey: turnKey };
+  }
+  // A person's first turn on a continent (owner, M5): the whole-continent reward to aim for.
+  const here2 = me.area ? areaById.get(me.area)! : null;
+  const contKey = here2 ? `continent-${me.seat}-${here2.continent}` : '';
+  if (s.phase === 'play' && me.kind === 'human' && !isRobot && here2 && !seenCards.has(contKey) && !me.fullContinents.includes(here2.continent)) {
+    const c = here2.continent;
+    const total = gameMap.areas.filter((a) => a.continent === c).length;
+    const seen = gameMap.areas.filter((a) => a.continent === c && me.visitedAreas.includes(a.id)).length;
+    return { turn: false, node: wrap(el('div', { className: 'milestone' },
+      el('h2', { className: 'big-title', textContent: `🌍 Welcome to ${c}!` }),
+      el('p', {}, 'Visit ', el('strong', { textContent: `all ${total} areas of ${c}` }), ' for a ', el('strong', { textContent: `+${continentReward(gameMap, c)} reward` }), `. You have visited ${seen} so far.`),
+      ok(() => { seenCards.add(contKey); render(); }, "Let's go!")), 'gold'), sound: 'milestone', soundKey: contKey };
   }
   const key = s.card ? `${s.card.round}-${s.card.seat}-${s.card.card.text}` : '';
   if (s.phase === 'play' && me.kind === 'human' && s.card?.seat === me.seat && !seenCards.has(key)) {
@@ -1814,8 +1856,6 @@ function renderAreaView(s: GameState, isRobot: boolean): HTMLElement {
     (id) => (walks.has(id) ? walkTo(id) : details(id)));
   // On your turn, the areas you can't walk to are dimmed more, so the ones you can stand out.
   if (myTurn && walks.size > 0) d.root.classList.add('turn');
-  const lines = svg('g', { class: 'walk-lines' });
-  d.labels.append(lines);
 
   const { fs } = d;
   // Walk badges (owner's report, Russia West's neighbours): each one sits just across the border
@@ -1864,8 +1904,6 @@ function renderAreaView(s: GameState, isRobot: boolean): HTMLElement {
       const text = `🚶${gainLabel(s, walk, areaById.get(id)!) || ' +0'}${fees ? ` 💰−${fees}` : ''}`;
       const w = ([...text].length * fs * 0.62 + fs) * 0.9;
       const [bx, by] = badgeSpot(id, w, fs * 1.6 * 0.9);
-      // A dashed line from the pawn to each place you can walk to (owner, M5).
-      lines.append(svg('line', { x1: fx * k, y1: fy, x2: bx, y2: by, 'stroke-width': fs * 0.18, 'stroke-dasharray': `${fs * 0.5} ${fs * 0.35}` }));
       label(d, bx, by, text, 'go', 0.9, walkTo(id), walkHint(text, areaById.get(id)!.name));
     }
   }
@@ -2109,14 +2147,15 @@ function renderAreaDetails(s: GameState, id: string): HTMLElement {
       el('span', { textContent: `${c}${cap ? ` · capital ${cap}` : ''}` }));
   });
   const parts = a.bigCountry ? gameMap.areas.filter((x) => x.bigCountry === a.bigCountry) : [];
+  const total = gameMap.areas.filter((x) => x.continent === a.continent).length;
   const lines = [
-    a.continent,
+    `${a.continent} · 🌍 visit all ${total} areas of ${a.continent}: +${continentReward(gameMap, a.continent)}`,
     a.wonder ? `🏛️ ${capital(WONDER_NAME[id] ?? 'a wonder')}: the first visit gives +1 point more` : '',
     a.bigCountry ? `🧩 Part of ${a.bigCountry}: ${me.profile ? `you have visited ${parts.filter((x) => me.visitedAreas.includes(x.id)).length}/${parts.length} parts` : `${parts.length} parts`}` : '',
     routes('airport').length ? `✈️ Airport: flights to ${routes('airport').join(', ')}` : '',
     routes('port').length ? `⚓ Port: ships to ${routes('port').join(', ')}` : '',
     routes('station').length ? `🚆 Station: trains to ${routes('station').join(', ')} (not for Luxury)` : '',
-    routes('bus').length ? `🚌 Bus stop: buses to ${routes('bus').join(' or ')}, one way (Nomad and Backpacker only): the whole country counts as visited` : '',
+    routes('bus').length ? `🚌 Bus stop: buses to ${routes('bus').join(' or ')}, one way (Nomad and Backpacker only): the whole country\'s points at once` : '',
     `🚶 Walk to: ${a.neighbours.map((n) => areaById.get(n)!.name).join(', ') || 'nowhere (plane or ship only)'}`,
     ...s.businesses.filter((b) => b.area === id).map((b) => `${BUSINESS_ICON[b.kind]} ${capital(BUSINESS_NAME[b.kind])}: ${b.owner === null ? `for sale, ${plural(BUSINESS_PRICE[b.kind], 'point')}` : `owned by ${nameOf(b.owner)}`}`),
     ...s.players.filter((p) => p.citizenship?.includes(id)).map((p) => `🛂 ${nameOf(p.seat)} is a citizen here: others pay a ${VISA_PRICE}-point visa`),
