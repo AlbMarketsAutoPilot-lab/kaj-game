@@ -1,6 +1,8 @@
 package com.kaj.game;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.graphics.Color;
 import android.os.Build;
@@ -17,11 +19,8 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.window.OnBackInvokedDispatcher;
 
-import androidx.activity.ComponentActivity;
-import androidx.activity.OnBackPressedCallback;
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.webkit.WebViewAssetLoader;
 
 import java.util.Locale;
@@ -29,7 +28,8 @@ import java.util.Locale;
 // One screen: the game (assets/index.html, built from the web code) inside a WebView.
 // Files are served from the APK on a fixed https address, so the game works offline
 // and its saved games (localStorage) stay in one place.
-public class MainActivity extends ComponentActivity {
+// Only Android's own classes and androidx.webkit: nothing else to download (task 15).
+public class MainActivity extends Activity {
     private static final String HOST = "appassets.androidplatform.net";
     private static final String START_URL = "https://" + HOST + "/assets/index.html";
     // The game's background colour (style.css), shown while the game loads (audit U1).
@@ -56,17 +56,27 @@ public class MainActivity extends ComponentActivity {
         showGame(savedInstanceState);
         hideSystemBars();
 
-        // Back button and back gesture, on every Android version: ask before leaving the game (audit C1).
-        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
-            @Override
-            public void handleOnBackPressed() {
-                new AlertDialog.Builder(MainActivity.this)
-                        .setMessage("Leave the game?")
-                        .setPositiveButton("Leave", (d, w) -> finish())
-                        .setNegativeButton("Stay", null)
-                        .show();
-            }
-        });
+        // Back gesture on Android 13 and newer (audit C1); older versions call onBackPressed below.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                    OnBackInvokedDispatcher.PRIORITY_DEFAULT, this::askToLeave);
+        }
+    }
+
+    // Back button or back gesture: ask before leaving the game.
+    private void askToLeave() {
+        new AlertDialog.Builder(this)
+                .setMessage("Leave the game?")
+                .setPositiveButton("Leave", (d, w) -> finish())
+                .setNegativeButton("Stay", null)
+                .show();
+    }
+
+    // Android 12 and older (and 13 to 15 without the new back system).
+    @Override
+    @SuppressWarnings("deprecation")
+    public void onBackPressed() {
+        askToLeave();
     }
 
     // Builds the web view and opens the game; again after the web engine was stopped (audit C2).
@@ -95,26 +105,26 @@ public class MainActivity extends ComponentActivity {
 
     private class GameClient extends WebViewClient {
         @Override
-        public WebResourceResponse shouldInterceptRequest(@NonNull WebView view, @NonNull WebResourceRequest request) {
+        public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
             return loader.shouldInterceptRequest(request.getUrl());
         }
 
         // The game never leaves the app.
         @Override
-        public boolean shouldOverrideUrlLoading(@NonNull WebView view, @NonNull WebResourceRequest request) {
+        public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
             return !HOST.equals(request.getUrl().getHost());
         }
 
         @Override
-        public void onPageFinished(@NonNull WebView view, @NonNull String url) {
+        public void onPageFinished(WebView view, String url) {
             sendCutout();
         }
 
         // Android stopped the web engine (low memory or a crash): open the game again instead of
         // closing the app. The start screen then offers to continue the saved game.
         @Override
-        @RequiresApi(Build.VERSION_CODES.O)
-        public boolean onRenderProcessGone(@NonNull WebView view, @NonNull RenderProcessGoneDetail detail) {
+        @TargetApi(Build.VERSION_CODES.O)
+        public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
             if (view == webView) {
                 removeWebView();
                 showGame(null);
@@ -204,7 +214,7 @@ public class MainActivity extends ComponentActivity {
     }
 
     @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
+    protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         if (webView != null) webView.saveState(outState);
     }
