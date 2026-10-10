@@ -36,6 +36,17 @@ export function svg<K extends keyof SVGElementTagNameMap>(tag: K, attrs: Record<
   return node;
 }
 
+// The glow around the area you stand in (2026-10-10): two soft lines over its edge, which keep
+// their width on screen at any zoom. A CSS drop-shadow grew with the zoom instead, and on phones a
+// small, zoomed-in area (Egypt) flickered under a popup.
+export function glowFor(shapes: SVGGElement): SVGGElement {
+  const g = svg('g', { transform: shapes.getAttribute('transform') ?? '' });
+  for (const p of shapes.querySelectorAll('.land.here')) {
+    for (const size of ['wide', 'narrow']) g.append(svg('path', { d: p.getAttribute('d')!, class: `halo ${size}` }));
+  }
+  return g;
+}
+
 function ringArea(r: Ring): number {
   let a = 0;
   for (let i = 0; i < r.length; i++) {

@@ -444,6 +444,10 @@ Owner-approved, one item at a time, each with before/after screenshots:
 - Top bar: title above the round, player chips in tidy rows for 3 or 4 players.
 - Map caption: smaller, breaks only between its parts. (A fade at the bottom of the right side
   was removed again the same day: on the owner's Galaxy S25 it made the panel flicker.)
+- Map glow (owner's Galaxy S25 video, 2026-10-10): the glow around the area you stand in and the
+  guide's tap glow were CSS drop-shadows, which grow with the map zoom; on a small, zoomed-in area
+  (Egypt) the phone drew the map only every other frame under a popup ("trembling"). Now two soft
+  lines that keep their width at any zoom (`maps.ts` `glowFor`), for every area.
 - Full world map: a framed card over the dimmed painting, round gold ✕.
 - Guide maps: rounded frame, bigger words on the first trip map.
 - End screen: medals (🥇🥈🥉) and soft rows in the ranking, the winner's row in gold.
