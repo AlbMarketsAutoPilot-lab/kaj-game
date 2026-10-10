@@ -69,10 +69,12 @@ app updates (fixed address `https://appassets.androidplatform.net`).
 | U3 | Retested during play: the map fills the tablet panel well (1366×1024). Only the home-country choice (once per game) leaves space. **No change** | — | Screenshots |
 | U4 | Small text a little bigger (`.small`, `.chip`, `.round`, header and map buttons); larger invisible touch area around header, chip and map buttons | `web/style.css` | Smallest text 10.2 → 10.9 px (568×320), 10.7 → 11.4 px (800×360) |
 | U5 | Guide drawing takes the height the text leaves free; news phone always fits; event card more compact on phones | `web/style.css` | Guide, all 11 steps: before, 6 steps scrolled (up to 88 px at 800×360); after, only the small "Skip guide" button is partly hidden on 2 steps (10–18 px) |
-| U6 | Not changed: waits for the owner's decision | — | — |
+| U6 | Owner's decision (2026-10-10): the clock keeps running when the player leaves the app (no looking up answers). No change | — | — |
 | S2 | `setAllowContentAccess(false)` | `MainActivity.java` | — |
 | S3 | Content-Security-Policy: only what is inside the file | `web/index.html` | No blocked item in the full test runs |
 | T1–T3 | `@SuppressLint` with review note, `@NonNull`, Android 11+ `WindowInsetsController` | `MainActivity.java` | Owner's Android Studio warnings |
+
+| Play | Privacy policy page (no data collected; contact info@connect.al, owner-approved), published with the website | `web/privacy.html`, `.github/workflows/pages.yml` | After merge: https://albmarketsautopilot-lab.github.io/kaj-game/privacy.html |
 
 Web checks after the fixes: `npm run typecheck` clean, `npm test` 190 pass, `npm run build` 4,344 KB, no
 layout overflow at the 7 screen sizes.

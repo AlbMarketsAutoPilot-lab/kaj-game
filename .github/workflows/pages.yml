@@ -2,6 +2,7 @@ name: Web
 
 # Publishes the game (dist/kaj.html as index.html) on GitHub Pages after each merge to main.
 # Link: https://albmarketsautopilot-lab.github.io/kaj-game/
+# Privacy policy (Google Play, task 15): https://albmarketsautopilot-lab.github.io/kaj-game/privacy.html
 on:
   push:
     branches: [main]
@@ -34,7 +35,7 @@ jobs:
       - name: Build the game (dist/kaj.html)
         run: npm run build
       - name: Prepare the site
-        run: mkdir site && cp dist/kaj.html site/index.html
+        run: mkdir site && cp dist/kaj.html site/index.html && cp web/privacy.html site/privacy.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
