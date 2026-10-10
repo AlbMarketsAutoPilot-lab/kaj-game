@@ -783,6 +783,7 @@ function render(): void {
         el('div', { className: 'left' }, s.phase === 'chooseStart' ? renderStartMap(s, isRobot) : renderAreaView(s, isRobot)),
         side)),
       modal ? modal.node : '');
+    moreBelow(side);
   }
 
   // Robots wait while a popup is open, so nothing is missed.
@@ -795,6 +796,14 @@ function render(): void {
       act(action);
     }, ROBOT_DELAY_MS);
   }
+}
+
+// The right side scrolls when its cards are long: its bottom edge fades while there is more
+// below, so nothing looks cut off (2026-10-10).
+function moreBelow(box: HTMLElement): void {
+  const update = () => box.classList.toggle('more', box.scrollTop + box.clientHeight < box.scrollHeight - 4);
+  box.addEventListener('scroll', update, { passive: true });
+  requestAnimationFrame(update);
 }
 
 // One small chip per player in the top bar; tapping it opens the full player card.
@@ -1978,7 +1987,8 @@ function renderAreaView(s: GameState, isRobot: boolean): HTMLElement {
   return el('div', { className: 'areaview' },
     el('div', { className: 'where' }, dot(me.seat), ` ${here.name} · ${here.continent} `, reset),
     d.root, note, ask,
-    el('div', { className: 'small caption', textContent: caption }),
+    // Each part of the caption stays on one line (2026-10-10): no break inside "big-country part".
+    el('div', { className: 'small caption' }, ...caption.split(' · ').flatMap((part, i) => [i ? ' · ' : '', el('span', { textContent: part })])),
     popup ? renderPopup(s, popup, myTurn) : '');
 }
 
