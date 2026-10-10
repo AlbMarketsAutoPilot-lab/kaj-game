@@ -368,7 +368,7 @@ The 30-turn game is **unfrozen**: these changes apply to both games. Session 1 (
 rewritten with the owner's texts (11 slides, bold key facts, "You are here" and "Tap here to continue" on the
 first map); "Tap an area marked 🚶" instead of the old "green area"; walk badges without ✨, with a legend and
 hover texts; "Don't show again" on "What happened"; short money names. Session 2 (medium, done): where you can
-walk (dimmed areas; the walking lines were removed by the owner, a small note when a tap can't go), visited dots, "already visited" warning, icons
+walk (the walkable areas glow and the others are dimmed; the walking lines were removed by the owner, a small note when a tap can't go), visited dots, "already visited" warning, icons
 inside their own area, world map full screen. Session 3 (**high**, done): Madagascar by ship only (Tanzania,
 Zambezi, South Africa) with a +3 SURPRISE, "Tanzania" as the name, whole-continent rewards (areas ÷ 3, at
 least +2), the bus gives +5/+3 at once and the other parts still +1 each, saves version 12.
