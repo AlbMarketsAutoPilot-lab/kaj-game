@@ -2232,5 +2232,24 @@ window.addEventListener('resize', () => {
   resizeTimer = window.setTimeout(() => { applyZoom(); if (state) render(); }, 150);
 });
 
+// "Leave the game?" (owner, 2026-10-10): the Android app's back button calls kajBack(), and the
+// game asks in its own popup, over any other popup. "Leave" opens kaj://leave, which closes the app;
+// a second back press closes the question.
+let leaveBox: HTMLElement | null = null;
+function closeLeave(): void {
+  leaveBox?.remove();
+  leaveBox = null;
+}
+(window as Window & { kajBack?: () => void }).kajBack = () => {
+  if (leaveBox) return closeLeave();
+  const stay = button('Stay', closeLeave);
+  stay.className = 'primary';
+  leaveBox = el('div', { className: 'modal-back leave' },
+    el('section', { className: 'card modal' },
+      el('h2', { textContent: 'Leave the game?' }),
+      el('div', { className: 'row' }, stay, button('Leave', () => { location.href = 'kaj://leave'; }))));
+  document.body.append(leaveBox);
+};
+
 installIcons();
 renderStart();

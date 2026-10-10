@@ -324,6 +324,10 @@ button.link { background: none; border: none; padding: 0; text-align: left; font
 .wonder-where { color: var(--muted); margin: 0 0 8px; font-family: "Cinzel", Georgia, serif; }
 .wonder-points { color: #ffe08a; font-weight: 700; }
 .modal-back.wait { background: transparent; cursor: pointer; }
+/* "Leave the game?" (Android back button) sits over every other popup and the full world map. */
+.modal-back.leave { z-index: 50; }
+.leave .modal { width: min(360px, 100%); text-align: center; background: linear-gradient(160deg, #0d4a50, #062a30); }
+.leave .row { justify-content: center; }
 .hourglass { font-size: 2.6rem; filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6)); animation: hourglass 2s ease-in-out infinite; }
 @keyframes hourglass { 0%, 40% { transform: rotate(0deg); } 50%, 90% { transform: rotate(180deg); } 100% { transform: rotate(180deg); } }
 @media (prefers-reduced-motion: reduce) { .hourglass { animation: none; } }

@@ -1,7 +1,6 @@
 package com.kaj.game;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -32,6 +31,8 @@ import java.util.Locale;
 public class MainActivity extends ComponentActivity {
     private static final String HOST = "appassets.androidplatform.net";
     private static final String START_URL = "https://" + HOST + "/assets/index.html";
+    // The game's "Leave" button opens this address; the app then closes (owner, 2026-10-10).
+    private static final String LEAVE_URL = "kaj://leave";
     // The game's background colour (style.css), shown while the game loads (audit U1).
     private static final int BACKGROUND = Color.rgb(0x0a, 0x3a, 0x40);
 
@@ -57,14 +58,18 @@ public class MainActivity extends ComponentActivity {
         hideSystemBars();
 
         // Back button and back gesture, on every Android version: ask before leaving the game (audit C1).
+        // The game asks in its own popup (owner, 2026-10-10): Android's box looked out of place and
+        // made the map shake. If the game has not loaded yet, the app closes at once.
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                new AlertDialog.Builder(MainActivity.this)
-                        .setMessage("Leave the game?")
-                        .setPositiveButton("Leave", (d, w) -> finish())
-                        .setNegativeButton("Stay", null)
-                        .show();
+                if (webView == null) {
+                    finish();
+                    return;
+                }
+                webView.evaluateJavascript("window.kajBack ? (window.kajBack(), 1) : 0", result -> {
+                    if (!"1".equals(result)) finish();
+                });
             }
         });
     }
@@ -99,9 +104,13 @@ public class MainActivity extends ComponentActivity {
             return loader.shouldInterceptRequest(request.getUrl());
         }
 
-        // The game never leaves the app.
+        // The game never leaves the app; its "Leave" button closes the app.
         @Override
         public boolean shouldOverrideUrlLoading(@NonNull WebView view, @NonNull WebResourceRequest request) {
+            if (LEAVE_URL.equals(request.getUrl().toString())) {
+                finish();
+                return true;
+            }
             return !HOST.equals(request.getUrl().getHost());
         }
 
