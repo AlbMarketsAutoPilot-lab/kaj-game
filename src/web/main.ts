@@ -331,30 +331,31 @@ function renderSetup(): void {
   start.className = 'primary';
 
   app.replaceChildren(
-    el('section', { className: 'card setup' },
+    // Two columns, so the whole screen fits a phone held sideways (2026-10-10).
+    el('section', { className: 'card setup new-game' },
       title(),
-      lengths, about,
-      saved && 'error' in saved ? el('p', { className: 'small', textContent: `${saved.error} It can't be continued; start a new journey.` }) : '',
-      counts, rows, guideBox(), newsBox(), start,
+      el('div', { className: 'setup-cols' },
+        el('div', { className: 'setup-col' },
+          lengths, about,
+          saved && 'error' in saved ? el('p', { className: 'small', textContent: `${saved.error} It can't be continued; start a new journey.` }) : '',
+          counts),
+        el('div', { className: 'setup-col' }, rows)),
+      guideBox(),
+      el('div', { className: 'row' }, button('← Back', renderStart), start),
       saved && 'state' in saved ? el('p', { className: 'small', textContent: 'Starting a new journey replaces the saved game.' }) : '',
       error,
-      el('div', { className: 'row' }, button('← Back', renderStart)),
-      el('p', { className: 'small', textContent: CREDITS })),
+      el('p', { className: 'small credits', textContent: CREDITS })),
   );
 }
 
 // "Guided help" on the setup screen: turns the guide back on after "Turn off guided help".
-// "What happened" popups on or off (owner, M5), kept on this device.
+// "What happened" popups: turned off only during a game, with "Don't show again" (owner, M5);
+// not on the setup screen (owner, 2026-10-10). Kept on this device.
 const NEWS_KEY = 'kaj-news-off';
 let newsOff = (() => { try { return localStorage.getItem(NEWS_KEY) === '1'; } catch { return false; } })();
 function setNewsOff(off: boolean): void {
   newsOff = off;
   try { localStorage.setItem(NEWS_KEY, off ? '1' : '0'); } catch { /* not kept */ }
-}
-function newsBox(): HTMLElement {
-  const tick = el('input', { type: 'checkbox', checked: !newsOff });
-  tick.addEventListener('change', () => setNewsOff(!tick.checked));
-  return el('label', { className: 'small' }, tick, ' 📣 "What happened" popups (the other players\' moves)');
 }
 
 function guideBox(): HTMLElement {
@@ -631,7 +632,11 @@ function finishPopup(s: GameState, close: () => void): HTMLElement {
       const value = businessValue(s, seat);
       const penalty = nomadPenalty(p);
       const detail = [`${p.points} travel`, `${value} assets`].join(' + ') + (penalty ? ` − ${penalty} Nomad penalty` : '');
-      return el('li', {}, dot(seat), ` ${name(seat)}: `, el('b', { textContent: plural(finalScore(s, p), 'point') }), ` (${detail})`);
+      // A medal for the first three places; equal points share a place (2026-10-10).
+      const place = 1 + s.players.filter((o) => finalScore(s, o) > finalScore(s, p)).length;
+      return el('li', { className: place === 1 ? 'first' : '' },
+        el('span', { className: 'medal', textContent: ['🥇', '🥈', '🥉'][place - 1] ?? `${place}.` }),
+        ' ', dot(seat), ` ${name(seat)}: `, el('b', { textContent: plural(finalScore(s, p), 'point') }), ` (${detail})`);
     })),
     el('div', { className: 'row' }, again, button('See the map', close)));
 }
@@ -782,6 +787,7 @@ function render(): void {
         el('div', { className: 'left' }, s.phase === 'chooseStart' ? renderStartMap(s, isRobot) : renderAreaView(s, isRobot)),
         side)),
       modal ? modal.node : '');
+    moreBelow(side);
   }
 
   // Robots wait while a popup is open, so nothing is missed.
@@ -794,6 +800,14 @@ function render(): void {
       act(action);
     }, ROBOT_DELAY_MS);
   }
+}
+
+// The right side scrolls when its cards are long: its bottom edge fades while there is more
+// below, so nothing looks cut off (2026-10-10).
+function moreBelow(box: HTMLElement): void {
+  const update = () => box.classList.toggle('more', box.scrollTop + box.clientHeight < box.scrollHeight - 4);
+  box.addEventListener('scroll', update, { passive: true });
+  requestAnimationFrame(update);
 }
 
 // One small chip per player in the top bar; tapping it opens the full player card.
@@ -1977,7 +1991,8 @@ function renderAreaView(s: GameState, isRobot: boolean): HTMLElement {
   return el('div', { className: 'areaview' },
     el('div', { className: 'where' }, dot(me.seat), ` ${here.name} · ${here.continent} `, reset),
     d.root, note, ask,
-    el('div', { className: 'small caption', textContent: caption }),
+    // Each part of the caption stays on one line (2026-10-10): no break inside "big-country part".
+    el('div', { className: 'small caption' }, ...caption.split(' · ').flatMap((part, i) => [i ? ' · ' : '', el('span', { textContent: part })])),
     popup ? renderPopup(s, popup, myTurn) : '');
 }
 
@@ -2235,6 +2250,25 @@ window.addEventListener('resize', () => {
   clearTimeout(resizeTimer);
   resizeTimer = window.setTimeout(() => { applyZoom(); if (state) render(); }, 150);
 });
+
+// "Leave the game?" (owner, 2026-10-10): the Android app's back button calls kajBack(), and the
+// game asks in its own popup, over any other popup. "Leave" opens kaj://leave, which closes the app;
+// a second back press closes the question.
+let leaveBox: HTMLElement | null = null;
+function closeLeave(): void {
+  leaveBox?.remove();
+  leaveBox = null;
+}
+(window as Window & { kajBack?: () => void }).kajBack = () => {
+  if (leaveBox) return closeLeave();
+  const stay = button('Stay', closeLeave);
+  stay.className = 'primary';
+  leaveBox = el('div', { className: 'modal-back leave' },
+    el('section', { className: 'card modal' },
+      el('h2', { textContent: 'Leave the game?' }),
+      el('div', { className: 'row' }, stay, button('Leave', () => { location.href = 'kaj://leave'; }))));
+  document.body.append(leaveBox);
+};
 
 installIcons();
 renderStart();
