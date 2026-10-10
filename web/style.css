@@ -155,8 +155,11 @@ main:has(.game) { max-width: none; padding: calc(6px + var(--safe-t)) calc(6px +
 .world { aspect-ratio: 2.6; flex-shrink: 0; }
 .world { position: relative; }
 .world-full-btn { position: absolute; right: 6px; top: 6px; padding: 2px 10px; min-height: 0; font-size: 1.1rem; z-index: 2; }
-.world.full { position: fixed; inset: 0; padding: var(--safe-t) var(--safe-r) var(--safe-b) var(--safe-l); z-index: 40; aspect-ratio: auto; border-radius: 0; display: flex; align-items: center; justify-content: center; background: #062a30; }
-.world.full .map-svg { width: 100%; height: 100%; }
+/* Full screen: the map as a framed card over the dimmed painting, with a round ✕ (2026-10-10). */
+.world.full { position: fixed; inset: 0; padding: calc(10px + var(--safe-t)) calc(10px + var(--safe-r)) calc(10px + var(--safe-b)) calc(10px + var(--safe-l)); z-index: 40; aspect-ratio: auto; border: none; border-radius: 0; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(rgba(2, 20, 24, 0.72), rgba(2, 20, 24, 0.72)), #0a3a40 var(--bg-art) center / cover no-repeat; }
+.world.full .map-svg { width: 100%; height: 100%; border: 1px solid var(--line); border-radius: 14px; background: rgba(4, 40, 52, 0.88); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6); }
+.world.full .world-full-btn { top: calc(18px + var(--safe-t)); right: calc(18px + var(--safe-r)); width: 44px; height: 44px; padding: 0; border: 2px solid var(--accent); background: rgba(6, 42, 48, 0.92); box-shadow: 0 3px 12px rgba(0, 0, 0, 0.5); }
 /* Slim solid borders: the colours already tell the areas apart (owner's request). */
 .map-svg .land { fill: #2f6f6a; stroke: rgba(10, 40, 46, 0.7); stroke-width: 0.7px; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
 .map-svg .land.far { filter: saturate(0.55) brightness(0.75); }
