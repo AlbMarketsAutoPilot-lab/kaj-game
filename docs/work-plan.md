@@ -58,7 +58,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | M4 | 50-turn map: screens (turn picker, home country, world map, guide), web and APK | medium | 1 | 15 | ✅ done (owner-approved 2026-10-09: screens, and the 4 new wonder drawings) |
 | M5 | 50-turn map: full test games and fixes | medium | 3 | 15 | ✅ sessions 1 (guide, texts, money names, What happened switch), 2 (map screens) and 3 (rules: bus, whole continents, Madagascar, saves v12) |
 | M6 | Wonder posters for the 7 wonders of the 30-turn map (the 4 of the 50-turn map come with M4) | medium | 1 | 13 | ✅ done |
-| 15 | Android release build (signed APK) | medium | 1 | — | postponed (owner, 2026-10-09) |
+| 15 | Android release build (signed AAB for Play, built by the owner in Android Studio) | medium/high | 1 | — | in progress (2026-10-10): icon, SDK 36, audit fixes A + B done (`docs/audit-task15.md`); next: owner's Android Studio check, phone test, upload key, AAB |
 | 17 | Train France ↔ Russia West and France ↔ Turkey (30-turn map): A rules **high**, B screens medium | **high** / medium | 2 | 13–14 | done (A rules, robots, tests, save 9; B screens, sound) |
 | 18 | Bus from Mongolia to Siberia or China West (30-turn map), whole country at once | **high** | 1 | — | done (owner-approved 2026-10-09) |
 | 16 | Full-game tests, bug fixes, buffer | medium | 1–2 | 15 | |
@@ -373,10 +373,17 @@ inside their own area, world map full screen. Session 3 (**high**, done): Madaga
 Zambezi, South Africa) with a +3 SURPRISE, "Tanzania" as the name, whole-continent rewards (areas ÷ 3, at
 least +2), the bus gives +5/+3 at once and the other parts still +1 each, saves version 12.
 
-### 15. Android release build — postponed
+### 15. Android release build — in progress (2026-10-10)
 
-- Signed APK from GitHub Actions; app icon, name, splash, screen orientation.
-- Owner steps: create the signing key and add it to GitHub secrets (one step at a time).
+- Owner's decision: build and sign in Android Studio on the owner's computer (no GitHub secrets); an
+  AAB for Google Play; target audience under 13 (Families Policy).
+- Done: app icon (owner's design, adaptive), `appCategory="game"`, version 1.0.0, target SDK 36
+  (Play requirement), AGP 8.10.1, Gradle 8.11.1 for Android Studio, audit and fixes
+  (`docs/audit-task15.md`).
+- Next: owner's Android Studio sync and warning check, phone test (Back, leaving the app, camera
+  hole, opening screen), upload key, signed AAB, Play Console (privacy policy link, age groups,
+  content rating, Data safety).
+- Updating the app later: replace `assets/index.html`, raise `versionCode`, sign with the same key.
 
 ### 17. The train — 30-turn map only (owner-approved 2026-10-09; the 50-turn work waits)
 

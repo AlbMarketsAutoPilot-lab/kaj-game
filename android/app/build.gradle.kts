@@ -4,14 +4,14 @@ plugins {
 
 android {
     namespace = "com.kaj.game"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.kaj.game"
         minSdk = 24 // Android 7.0
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
-        versionName = "0.1.0"
+        versionName = "1.0.0"
     }
 
     compileOptions {
@@ -21,5 +21,6 @@ android {
 }
 
 dependencies {
-    implementation("androidx.webkit:webkit:1.12.1")
+    implementation("androidx.activity:activity:1.10.1")
+    implementation("androidx.webkit:webkit:1.17.1")
 }

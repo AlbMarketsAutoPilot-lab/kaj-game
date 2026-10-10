@@ -1,5 +1,13 @@
 /* The poster's lettering: Cinzel (SIL Open Font Licence), inlined by the build. */
 :root { --bg-art: url("BG_LANDSCAPE"); --vh: 1vh; --vw: 1vw; }
+/* Audit U2: the game keeps out of the camera cut-out. The Android app sends --cut-*, env() is the
+   browser's own value; both are screen pixels, so they are divided by the page zoom (main.ts). */
+:root {
+  --safe-l: calc(max(var(--cut-l, 0px), env(safe-area-inset-left, 0px)) / var(--ui-zoom, 1));
+  --safe-r: calc(max(var(--cut-r, 0px), env(safe-area-inset-right, 0px)) / var(--ui-zoom, 1));
+  --safe-t: calc(max(var(--cut-t, 0px), env(safe-area-inset-top, 0px)) / var(--ui-zoom, 1));
+  --safe-b: calc(max(var(--cut-b, 0px), env(safe-area-inset-bottom, 0px)) / var(--ui-zoom, 1));
+}
 @font-face { font-family: "Cinzel"; font-weight: 700; src: url("FONT_CINZEL") format("woff2"); }
 :root {
   --ink: #eef8f6;
@@ -18,7 +26,7 @@ body {
   /* The owner's 20:9 background fills the screen (task 14 B1). */
   background: #0a3a40 var(--bg-art) center / cover fixed no-repeat;
 }
-main { max-width: 1100px; margin: 0 auto; padding: 16px; display: grid; gap: 12px; }
+main { max-width: 1100px; margin: 0 auto; padding: calc(16px + var(--safe-t)) calc(16px + var(--safe-r)) calc(16px + var(--safe-b)) calc(16px + var(--safe-l)); display: grid; gap: 12px; }
 h1, h2, h3 { margin: 0 0 8px; font-family: "Cinzel", Georgia, serif; }
 h1 { font-size: 2rem; color: var(--accent); }
 h2 { font-size: 1.25rem; }
@@ -43,7 +51,7 @@ select option { color: #000; }
 .player { padding: 10px; border-width: 2px; }
 .player.active { box-shadow: 0 0 0 3px var(--accent); }
 .points { font-size: 1.3rem; font-weight: 700; color: var(--accent); }
-.small { font-size: 0.85rem; color: var(--muted); margin: 0; }
+.small { font-size: 0.9rem; color: var(--muted); margin: 0; }
 .small.error { color: #ffb4a8; font-weight: 600; }
 .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; vertical-align: middle; border: 1px solid #fff8; }
 .dot.big { width: 16px; height: 16px; border: 2px solid #fff; }
@@ -75,7 +83,7 @@ strong.title { font-size: 1.05rem; white-space: nowrap; }
 .poster { position: fixed; inset: 0; background: #0a3a40; display: grid; place-items: center; }
 .poster img { width: 100%; height: 100%; object-fit: cover; }
 /* On the right, under the galaxy: the title, the globe and the city stay free. */
-.poster-buttons { position: absolute; bottom: 30%; right: 7%; display: flex; flex-direction: column; gap: 10px; align-items: center; }
+.poster-buttons { position: absolute; bottom: 30%; right: calc(7% + var(--safe-r)); display: flex; flex-direction: column; gap: 10px; align-items: center; }
 button.big { font-size: 1.3rem; padding: 10px 34px; font-family: "Cinzel", Georgia, serif; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45); }
 .poster-buttons button:not(.primary) { background: var(--card); }
 button.chosen { background: var(--accent); color: #1c2b2b; font-weight: 700; }
@@ -90,13 +98,16 @@ button.chosen { background: var(--accent); color: #1c2b2b; font-weight: 700; }
   #app { display: none; }
 }
 
-main:has(.game) { max-width: none; padding: 6px; height: calc(100 * var(--vh)); }
+main:has(.game) { max-width: none; padding: calc(6px + var(--safe-t)) calc(6px + var(--safe-r)) calc(6px + var(--safe-b)) calc(6px + var(--safe-l)); height: calc(100 * var(--vh)); }
 .game { height: 100%; display: grid; grid-template-rows: auto 1fr; gap: 6px; min-height: 0; }
 .game header { padding: 4px 8px; flex-wrap: wrap; }
-.game header button { padding: 4px 10px; font-size: 0.85rem; }
-.round { font-size: 0.85rem; color: var(--muted); white-space: nowrap; }
+.game header button { padding: 4px 10px; font-size: 0.9rem; }
+/* Audit U4: a bigger touch area around the small buttons, without changing how they look. */
+.game header button, .where button, button.chip { position: relative; }
+.game header button::after, .where button::after, button.chip::after { content: ""; position: absolute; inset: -6px 0; }
+.round { font-size: 0.9rem; color: var(--muted); white-space: nowrap; }
 .chips { display: flex; gap: 4px; flex-wrap: wrap; flex: 1; justify-content: center; }
-.chip { padding: 2px 8px; font-size: 0.8rem; border-width: 2px; }
+.chip { padding: 2px 8px; font-size: 0.85rem; border-width: 2px; }
 .chip.active { box-shadow: 0 0 0 2px var(--accent); }
 .chip.open { background: rgba(255, 255, 255, 0.2); }
 .chip b { color: var(--accent); }
@@ -116,14 +127,14 @@ main:has(.game) { max-width: none; padding: 6px; height: calc(100 * var(--vh)); 
 
 .areaview { position: relative; height: 100%; display: grid; grid-template-rows: auto 1fr auto; background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
 .where { padding: 4px 10px; font-family: "Cinzel", Georgia, serif; font-weight: 700; color: var(--accent); font-size: 0.95rem; }
-.where button { padding: 2px 10px; font-size: 0.8rem; font-family: system-ui, sans-serif; }
+.where button { padding: 2px 10px; font-size: 0.85rem; font-family: system-ui, sans-serif; }
 .caption { padding: 2px 10px 6px; }
 .map-svg { width: 100%; height: 100%; min-height: 0; display: block; background: rgba(4, 40, 52, 0.55); }
 .world { background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
 .world { aspect-ratio: 2.6; flex-shrink: 0; }
 .world { position: relative; }
 .world-full-btn { position: absolute; right: 6px; top: 6px; padding: 2px 10px; min-height: 0; font-size: 1.1rem; z-index: 2; }
-.world.full { position: fixed; inset: 0; z-index: 40; aspect-ratio: auto; border-radius: 0; display: flex; align-items: center; justify-content: center; background: #062a30; }
+.world.full { position: fixed; inset: 0; padding: var(--safe-t) var(--safe-r) var(--safe-b) var(--safe-l); z-index: 40; aspect-ratio: auto; border-radius: 0; display: flex; align-items: center; justify-content: center; background: #062a30; }
 .world.full .map-svg { width: 100%; height: 100%; }
 /* Slim solid borders: the colours already tell the areas apart (owner's request). */
 .map-svg .land { fill: #2f6f6a; stroke: rgba(10, 40, 46, 0.7); stroke-width: 0.7px; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
@@ -203,7 +214,7 @@ button.link { background: none; border: none; padding: 0; text-align: left; font
 .mini-flag { height: 14px; width: auto; border: 1px solid var(--muted); border-radius: 2px; }
 
 /* Task 14 B2: popups, countdown, guide */
-.modal-back { position: fixed; inset: 0; z-index: 5; background: rgba(2, 20, 24, 0.6); display: grid; place-items: center; padding: 12px; }
+.modal-back { position: fixed; inset: 0; z-index: 5; background: rgba(2, 20, 24, 0.6); display: grid; place-items: center; padding: calc(12px + var(--safe-t)) calc(12px + var(--safe-r)) calc(12px + var(--safe-b)) calc(12px + var(--safe-l)); }
 .modal { width: min(560px, 100%); max-height: 100%; overflow-y: auto; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6); border-width: 2px; }
 .modal h2 { font-size: 1.15rem; }
 .modal p { margin: 6px 0; }
@@ -278,6 +289,17 @@ button.link { background: none; border: none; padding: 0; text-align: left; font
 .guide-zero { fill: #fff6c8; font-weight: 700; paint-order: stroke; stroke: #062a30; stroke-width: 0.15px; }
 .guide-quiz { text-align: center; }
 .guide-inline { position: static; margin: 8px auto 0; }
+/* Audit U5: the guide fits on every screen without scrolling inside the card: the drawing gets the
+   height the text and buttons (about 335 px) leave free. */
+.guide-map { max-height: min(calc(38 * var(--vh)), calc(100 * var(--vh) - 335px)); }
+.guide-prop { max-height: min(calc(26 * var(--vh)), calc(100 * var(--vh) - 335px)); }
+@media (max-height: 500px) {
+  .modal-back { padding-top: calc(6px + var(--safe-t)); padding-bottom: calc(6px + var(--safe-b)); }
+  .event-deck { font-size: 2.2rem; }
+  .event-card { padding-top: 4px; }
+  .event-text { margin: 4px 6px; }
+  .event-badge { margin: 2px 0 4px; }
+}
 
 /* The start of a person's turn (task 14i). */
 .handover { text-align: center; }
@@ -309,7 +331,8 @@ button.link { background: none; border: none; padding: 0; text-align: left; font
 /* Event news (task 14k): the phone that buzzes, then the golden card with a headline. */
 .modal.phone-modal { background: transparent; border: none; box-shadow: none; width: auto; }
 .phone-wrap { display: flex; justify-content: center; }
-.phone { width: clamp(150px, calc(46 * var(--vh)), 210px); height: clamp(300px, calc(92 * var(--vh)), 420px); max-height: calc(92 * var(--vh)); border-radius: 30px; padding: 9px; background: linear-gradient(145deg, #2b3439, #0d1316);
+/* Audit U5: the phone always fits the screen with the popup around it (about 60 px). */
+.phone { width: clamp(150px, calc(46 * var(--vh)), 210px); height: clamp(240px, calc(100 * var(--vh) - 60px), 420px); max-height: calc(100 * var(--vh) - 60px); border-radius: 30px; padding: 9px; background: linear-gradient(145deg, #2b3439, #0d1316);
   box-shadow: 0 18px 40px #000a, inset 0 0 0 2px #59666c; animation: buzz 0.5s ease-in-out 4; }
 @keyframes buzz { 0%, 100% { transform: rotate(-3deg); } 25% { transform: rotate(-3deg) translateX(-3px); } 75% { transform: rotate(-3deg) translateX(3px); } }
 .phone-screen { height: 100%; border-radius: 22px; overflow: hidden; background: #0a3a40 var(--bg-art) 38% 30% / 300% auto;

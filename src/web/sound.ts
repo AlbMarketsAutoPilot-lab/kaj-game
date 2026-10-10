@@ -65,6 +65,22 @@ export function toggleSound(): void {
   }
 }
 
+// Leaving the app or locking the phone hides the page: the music and the clock sound pause, and
+// go on when the player comes back (audit C3).
+let musicWasOn = false;
+let timerWasOn = false;
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    musicWasOn = !!music && !music.paused;
+    timerWasOn = !!timer && !timer.paused;
+    music?.pause();
+    timer?.pause();
+  } else if (!off) {
+    if (musicWasOn) music?.play().catch(() => { /* waits for the next tap */ });
+    if (timerWasOn) timer?.play().catch(() => { /* stay silent */ });
+  }
+});
+
 // Every button tap clicks, and the first tap starts the music.
 document.addEventListener('click', (e) => {
   if ((e.target as HTMLElement).closest?.('button')) play('tap');

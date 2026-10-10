@@ -2223,6 +2223,7 @@ let uiZoom = 1;
 function applyZoom(): void {
   uiZoom = Math.min(2.4, Math.max(0.8, Math.min(window.innerWidth / 820, window.innerHeight / 430)));
   document.documentElement.style.setProperty('zoom', String(uiZoom));
+  document.documentElement.style.setProperty('--ui-zoom', String(uiZoom));
   // Screen units for the CSS (style.css uses var(--vh) and var(--vw)): a zoomed page would
   // otherwise make 100vh taller than the screen.
   document.documentElement.style.setProperty('--vh', `${window.innerHeight / uiZoom / 100}px`);
