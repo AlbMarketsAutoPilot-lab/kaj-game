@@ -448,6 +448,9 @@ Owner-approved, one item at a time, each with before/after screenshots:
   guide's tap glow were CSS drop-shadows, which grow with the map zoom; on a small, zoomed-in area
   (Egypt) the phone drew the map only every other frame under a popup ("trembling"). Now two soft
   lines that keep their width at any zoom (`maps.ts` `glowFor`), for every area.
+- Guide pages with a map (owner: too small on a phone): text and buttons on the left, the map on
+  the right as tall as the screen allows (about 3 times bigger: 95 → 295 px at 900×430).
+- Save and load: autosave after every move plus "Continue" stays; no save slots (owner, 2026-10-10).
 - Full world map: a framed card over the dimmed painting, round gold ✕.
 - Guide maps: rounded frame, bigger words on the first trip map.
 - End screen: medals (🥇🥈🥉) and soft rows in the ranking, the winner's row in gold.
