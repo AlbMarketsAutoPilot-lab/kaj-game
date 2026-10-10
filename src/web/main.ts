@@ -331,15 +331,20 @@ function renderSetup(): void {
   start.className = 'primary';
 
   app.replaceChildren(
-    el('section', { className: 'card setup' },
+    // Two columns, so the whole screen fits a phone held sideways (2026-10-10).
+    el('section', { className: 'card setup new-game' },
       title(),
-      lengths, about,
-      saved && 'error' in saved ? el('p', { className: 'small', textContent: `${saved.error} It can't be continued; start a new journey.` }) : '',
-      counts, rows, guideBox(), start,
+      el('div', { className: 'setup-cols' },
+        el('div', { className: 'setup-col' },
+          lengths, about,
+          saved && 'error' in saved ? el('p', { className: 'small', textContent: `${saved.error} It can't be continued; start a new journey.` }) : '',
+          counts),
+        el('div', { className: 'setup-col' }, rows)),
+      guideBox(),
+      el('div', { className: 'row' }, button('← Back', renderStart), start),
       saved && 'state' in saved ? el('p', { className: 'small', textContent: 'Starting a new journey replaces the saved game.' }) : '',
       error,
-      el('div', { className: 'row' }, button('← Back', renderStart)),
-      el('p', { className: 'small', textContent: CREDITS })),
+      el('p', { className: 'small credits', textContent: CREDITS })),
   );
 }
 

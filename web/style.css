@@ -35,6 +35,16 @@ h3 { font-size: 1rem; color: var(--accent); }
 .card { padding: 16px; }
 .setup { max-width: 460px; margin: calc(10 * var(--vh)) auto 0; display: grid; gap: 12px; text-align: center; }
 header { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px; }
+/* The new-game screen in two columns (2026-10-10): it fits a phone held sideways. */
+.setup.new-game { max-width: 820px; gap: 8px; padding: 12px 16px; }
+.setup.new-game .title { margin: 0; font-size: 1.7rem; }
+.setup-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; align-items: center; }
+.setup-col { display: grid; gap: 8px; }
+.setup-col p { margin: 0; }
+.setup.new-game .row button.primary { min-width: 220px; }
+.setup.new-game .error:empty { display: none; }
+.setup .credits { font-size: 0.72rem; }
+input[type="checkbox"] { accent-color: var(--accent); width: 1.1em; height: 1.1em; vertical-align: -0.15em; }
 .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; }
 .turn .row { justify-content: flex-start; }
 button, select {
