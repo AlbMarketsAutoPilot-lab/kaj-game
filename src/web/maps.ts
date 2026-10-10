@@ -18,6 +18,8 @@ export interface AreaGeo {
   touches: string[]; // areas that share a border line on the map
   // A point in the middle of the border shared with each touching area (x, y as in `path`).
   borderWith: Map<string, [number, number]>;
+  // The outer rings of every piece (x, y as in `path`), to tell which area a point is in.
+  rings: Ring[];
 }
 
 // Parts drawn but ignored for zooming and icons (owner's choice, task 14 B1):
@@ -149,7 +151,8 @@ export function buildGeo(map: GameMap, shapes: Shapes): Map<string, AreaGeo> {
     const ys = corePoints.map(([, y]) => -y);
     const core = { x: Math.min(...xs), y: Math.min(...ys), w: Math.max(...xs) - Math.min(...xs), h: Math.max(...ys) - Math.min(...ys) };
     const [cx, cy] = best ? deepestPoint(best) : [0, 0];
-    out.set(a.id, { path: parts.join(''), box: { x: minx, y: miny, w: maxx - minx, h: maxy - miny }, core, centre: [cx, -cy], touches: [], borderWith: new Map() });
+    const rings = polys.map((poly) => poly[0].map(([x, y]) => [x, -y] as [number, number]));
+    out.set(a.id, { path: parts.join(''), box: { x: minx, y: miny, w: maxx - minx, h: maxy - miny }, core, centre: [cx, -cy], touches: [], borderWith: new Map(), rings });
   }
   // Areas that share a border line in the topology touch each other.
   const byArc = new Map<number, string[]>();
@@ -224,4 +227,55 @@ export function colourAreas(map: GameMap, geo: Map<string, AreaGeo>): Map<string
     index.set(a.id, c);
   }
   return new Map([...index].map(([id, c]) => [id, AREA_COLOURS[c]]));
+}
+
+// ---------- drawn props inside their own area (owner, M5) ----------
+
+// The area a point is in (x, y as in `path`), or null for the sea.
+export function areaAt(geo: Map<string, AreaGeo>, x: number, y: number): string | null {
+  for (const [id, g] of geo) {
+    const b = g.box;
+    if (x < b.x || x > b.x + b.w || y < b.y || y > b.y + b.h) continue;
+    if (g.rings.some((r) => inside(r, x, y))) return id;
+  }
+  return null;
+}
+
+export type PropKind = 'wonder' | 'citizen' | 'airport' | 'port' | 'station' | 'bus';
+
+// Where each drawn prop of an area goes, around the pawn at the area's centre (view units: x is
+// multiplied by k; P is the prop size). Owner's rule (M5): a prop never sits over another area, so
+// it never looks like that area's. A port goes in the sea next to its area when it can; the others
+// inside their own area. Each prop tries its usual side first (airport left, port right, wonder and
+// flag above, station and bus below), then turns around the pawn and moves out step by step.
+const PREFERRED: Record<PropKind, number> = { wonder: -90, citizen: -90, airport: 180, port: 0, station: 180, bus: 90 };
+export function propSpots(geo: Map<string, AreaGeo>, focus: string, kinds: PropKind[], P: number, k: number): Map<PropKind, [number, number]> {
+  const [cx0, cy] = geo.get(focus)!.centre;
+  const cx = cx0 * k;
+  const taken: [number, number, number][] = [[cx, cy, P * 0.55]]; // the pawn
+  const spots = new Map<PropKind, [number, number]>();
+  const owner = (x: number, y: number) => areaAt(geo, x / k, y);
+  const half = P * 0.42;
+  const samples = (x: number, y: number): [number, number][] =>
+    [[x, y], [x - half, y - half], [x + half, y - half], [x - half, y + half], [x + half, y + half]];
+  const free = (x: number, y: number) => taken.every(([tx, ty, r]) => Math.hypot(tx - x, ty - y) > r + P * 0.5);
+  for (const kind of kinds) {
+    const start = PREFERRED[kind];
+    const angles = [0, 30, -30, 60, -60, 90, -90, 120, -120, 150, -150, 180].map((a) => ((start + a) * Math.PI) / 180);
+    const candidates: [number, number][] = [];
+    for (const r of [1.15, 1.45, 1.8, 2.2, 2.7, 3.3]) for (const a of angles) candidates.push([cx + Math.cos(a) * r * P, cy + Math.sin(a) * r * P]);
+    const ok = (x: number, y: number, centre: 'own' | 'sea' | 'any') => {
+      if (!free(x, y)) return false;
+      const at = samples(x, y).map(([sx, sy]) => owner(sx, sy));
+      if (at.some((id) => id !== null && id !== focus)) return false;
+      return centre === 'any' || (centre === 'own' ? at[0] === focus : at[0] === null);
+    };
+    const tries: ('own' | 'sea' | 'any')[] = kind === 'port' ? ['sea', 'any'] : ['own', 'any'];
+    let spot: [number, number] | undefined;
+    for (const t of tries) { spot = candidates.find(([x, y]) => ok(x, y, t)); if (spot) break; }
+    spot ??= candidates.find(([x, y]) => free(x, y)) ?? candidates[0];
+    taken.push([spot[0], spot[1], P * 0.5]);
+    spots.set(kind, spot);
+  }
+  return spots;
 }

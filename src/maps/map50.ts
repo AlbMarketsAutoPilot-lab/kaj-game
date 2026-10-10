@@ -5,7 +5,7 @@ import { SORT_50 } from '../facts/sort50.ts';
 import { map30 } from './map30.ts';
 
 // The 50-turn map (task M2, from the owner-approved list in docs/map50.md): 84 areas, 11 wonders,
-// 13 airports and 13 ports (21 connections), the train and the bus. Every area lies inside one
+// 13 airports and 15 ports (23 connections since M5), the train and the bus. Every area lies inside one
 // area of the 30-turn map (`inside`), whose continent it keeps. An area that is the same place as
 // on the 30-turn map keeps its id, so its place cards and wonder drawing still work.
 // Each walking link is written once in BORDERS below (owner-approved in M2); neighbours are built from it.
@@ -21,6 +21,7 @@ interface AreaInfo {
   wonder?: boolean;
   bigCountry?: string;
   cardsFrom?: string;
+  surprise?: number;
 }
 
 const AREAS: AreaInfo[] = [
@@ -96,8 +97,10 @@ const AREAS: AreaInfo[] = [
   },
   { id: 'dr-congo', name: 'DR Congo', inside: 'central-africa', countries: ['DR Congo'] },
   { id: 'kenya-uganda', name: 'Kenya & Uganda', inside: 'east-africa', countries: ['Kenya', 'Uganda'] },
-  { id: 'tanzania', name: 'Tanzania, Rwanda & Burundi', inside: 'east-africa', countries: ['Tanzania', 'Rwanda', 'Burundi'], wonder: true },
-  { id: 'madagascar', name: 'Madagascar & Islands', inside: 'east-africa', countries: ['Madagascar', 'Seychelles', 'Comoros', 'Mauritius'] },
+  // Owner (M5): the short name; Rwanda and Burundi show in the area's details.
+  { id: 'tanzania', name: 'Tanzania', inside: 'east-africa', countries: ['Tanzania', 'Rwanda', 'Burundi'], wonder: true },
+  // Owner (M5): a secret +3 on the first arrival ("SURPRISE!").
+  { id: 'madagascar', name: 'Madagascar & Islands', inside: 'east-africa', countries: ['Madagascar', 'Seychelles', 'Comoros', 'Mauritius'], surprise: 3 },
   { id: 'angola-namibia', name: 'Angola & Namibia', inside: 'southern-africa', countries: ['Angola', 'Namibia'] },
   { id: 'zambezi', name: 'Zambezi', inside: 'southern-africa', countries: ['Zambia', 'Malawi', 'Mozambique', 'Zimbabwe'] },
   { id: 'south-africa', name: 'South Africa', inside: 'southern-africa', countries: ['South Africa', 'Botswana', 'Lesotho', 'Eswatini'] },
@@ -134,9 +137,9 @@ const AREAS: AreaInfo[] = [
   { id: 'new-zealand', name: 'New Zealand', inside: 'new-zealand', countries: ['New Zealand'], wonder: true },
 ];
 
-// Walking links (owner-approved, M2): real land borders, the Channel Tunnel (France ↔ UK & Ireland,
-// as on the 30-turn map) and one sea crossing, Madagascar & Islands ↔ Zambezi, so a citizenship
-// of Tanzania can't trap Madagascar. No Spain ↔ Morocco (owner).
+// Walking links (owner-approved, M2): real land borders and the Channel Tunnel (France ↔ UK & Ireland,
+// as on the 30-turn map). No Spain ↔ Morocco (owner). Owner (M5): no walk to Madagascar & Islands
+// (the M2 sea crossing to Zambezi is gone); it is reached by ship only.
 const BORDERS: [string, string][] = [
   // Europe
   ['spain', 'portugal'], ['spain', 'france'], ['france', 'benelux'], ['france', 'germany'], ['france', 'alps'],
@@ -172,7 +175,7 @@ const BORDERS: [string, string][] = [
   ['sudan', 'dr-congo'], ['sudan', 'kenya-uganda'], ['horn-of-africa', 'kenya-uganda'], ['central-africa', 'dr-congo'],
   ['central-africa', 'angola-namibia'], ['dr-congo', 'kenya-uganda'], ['dr-congo', 'tanzania'], ['dr-congo', 'zambezi'],
   ['dr-congo', 'angola-namibia'], ['kenya-uganda', 'tanzania'], ['tanzania', 'zambezi'], ['angola-namibia', 'zambezi'],
-  ['angola-namibia', 'south-africa'], ['zambezi', 'south-africa'], ['madagascar', 'zambezi'],
+  ['angola-namibia', 'south-africa'], ['zambezi', 'south-africa'],
   // North America
   ['canada-west', 'canada-central'], ['canada-west', 'alaska'], ['canada-west', 'usa-west'], ['canada-central', 'canada-east'],
   ['canada-central', 'usa-west'], ['canada-central', 'usa-east'], ['canada-east', 'usa-east'], ['usa-west', 'usa-east'],
@@ -198,6 +201,9 @@ const ROUTES: Route[] = [
   { kind: 'port', a: 'australia-east', b: 'new-zealand' },
   { kind: 'port', a: 'usa-west', b: 'alaska' },
   { kind: 'port', a: 'madagascar', b: 'tanzania' },
+  // Owner (M5): Madagascar's port has 3 destinations, so a citizenship of Tanzania can't trap it.
+  { kind: 'port', a: 'madagascar', b: 'zambezi' },
+  { kind: 'port', a: 'madagascar', b: 'south-africa' },
   { kind: 'port', a: 'west-coast', b: 'brazil-north' },
   { kind: 'airport', a: 'gulf-states', b: 'australia-west' },
   { kind: 'airport', a: 'australia-west', b: 'maritime-asia' },

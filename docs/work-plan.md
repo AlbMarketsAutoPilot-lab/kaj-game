@@ -56,7 +56,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | M2 | 50-turn map: engine (map choice, data, timing, stuck-state checker, 1,000 robot games, saves v11) | **high** | 1 | 13–14 | ✅ done (owner-approved 2026-10-09: 151 walking links, ship from Portugal, Madagascar ↔ Zambezi, cards every 5 turns, v10 30-turn saves still load) |
 | M3 | 50-turn map: shapes, facts sorted by country (write only the missing ones) | medium | 1 | 14 | ✅ done (owner-approved 2026-10-09: 12 facts per area, 330 new) |
 | M4 | 50-turn map: screens (turn picker, home country, world map, guide), web and APK | medium | 1 | 15 | ✅ done (owner-approved 2026-10-09: screens, and the 4 new wonder drawings) |
-| M5 | 50-turn map: full test games and fixes | medium | 1 | 15 | |
+| M5 | 50-turn map: full test games and fixes | medium | 3 | 15 | ✅ sessions 1 (guide, texts, money names, What happened switch), 2 (map screens) and 3 (rules: bus, whole continents, Madagascar, saves v12) |
 | M6 | Wonder posters for the 7 wonders of the 30-turn map (the 4 of the 50-turn map come with M4) | medium | 1 | 13 | ✅ done |
 | 15 | Android release build (signed APK) | medium | 1 | — | postponed (owner, 2026-10-09) |
 | 17 | Train France ↔ Russia West and France ↔ Turkey (30-turn map): A rules **high**, B screens medium | **high** / medium | 2 | 13–14 | done (A rules, robots, tests, save 9; B screens, sound) |
@@ -361,6 +361,17 @@ never for robots, never in the home area. Not kept in the save: after "Continue"
 **Calm popups (owner, all popups):** after a popup is closed (OK, Let's go, End turn…), the board shows
 for 2 seconds with a turning ⌛ before the next popup opens (a tap opens it at once); popups that answer the player's own tap (quiz,
 answer, fees, citizenship) open at once. Order: M6 is merged first, then the 50-turn work starts at high effort (owner).
+
+### M5. Owner's test fixes (owner, 2026-10-10)
+
+The 30-turn game is **unfrozen**: these changes apply to both games. Session 1 (medium, done): the guide
+rewritten with the owner's texts (11 slides, bold key facts, "You are here" and "Tap here to continue" on the
+first map); "Tap an area marked 🚶" instead of the old "green area"; walk badges without ✨, with a legend and
+hover texts; "Don't show again" on "What happened"; short money names. Session 2 (medium, done): where you can
+walk (the walkable areas glow and the others are dimmed; the walking lines were removed by the owner, a small note when a tap can't go), visited dots, "already visited" warning, icons
+inside their own area, world map full screen. Session 3 (**high**, done): Madagascar by ship only (Tanzania,
+Zambezi, South Africa) with a +3 SURPRISE, "Tanzania" as the name, whole-continent rewards (areas ÷ 3, at
+least +2), the bus gives +5/+3 at once and the other parts still +1 each, saves version 12.
 
 ### 15. Android release build — postponed
 

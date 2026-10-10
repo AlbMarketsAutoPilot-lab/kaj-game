@@ -150,6 +150,16 @@ export const CONTINENT_BONUS: Readonly<Partial<Record<Profile, { continents: num
   luxury: { continents: 5, points: 5 },
 };
 
+// Whole continent (owner, M5): every area of a continent visited gives, once, the number of its
+// areas divided by 3 (rounded), and at least 2. So bigger continents and the bigger map give more:
+// 30 turns Europe 4, Asia 5, Africa 3, North America 3, South America 2, Oceania 2;
+// 50 turns Europe 6, Asia 8, Africa 6, North America 3, South America 3, Oceania 2.
+export const CONTINENT_REWARD_AREAS = 3;
+export const CONTINENT_REWARD_MIN = 2;
+export function continentRewardFor(areas: number): number {
+  return Math.max(CONTINENT_REWARD_MIN, Math.round(areas / CONTINENT_REWARD_AREAS));
+}
+
 // Digital Nomad: −5 off the final score (never below 0) with fewer than 3 continents.
 export const NOMAD_MIN_CONTINENTS = 3;
 export const NOMAD_PENALTY = 5;

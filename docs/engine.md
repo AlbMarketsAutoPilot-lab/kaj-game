@@ -531,7 +531,7 @@ Task 14f: a fair citizenship test (owner's change; `tests/citizenship.test.ts`).
   Luxury can't take the bus (`canRide()`). After 3 wrong quiz answers the Nomad pays 1 and goes;
   the Backpacker goes home.
 - **Travel:** 1 travel turn; the Nomad gets +1 for it; a challenge is offered.
-- **Whole country:** arriving by bus in Siberia marks all 3 parts of Russia visited and gives +5;
+- **Whole country (changed in M5, see "Owner's test fixes"):** arriving by bus in Siberia marks all 3 parts of Russia visited and gives +5;
   in China West both parts of China and +3. Given once, also when some parts were visited before;
   a country already complete gives nothing more. Only areas are marked: the continent counted is
   the one of the area really entered (Asia), never Europe for Russia West; no visa or tour fee for
@@ -543,6 +543,31 @@ Task 14f: a fair citizenship test (owner's change; `tests/citizenship.test.ts`).
 - **Robots:** the Nomad and Backpacker robots value the whole country when choosing the bus.
   1,000 mixed robot games: no stuck game, ~50 bus rides, scores as before.
 - **Save version 10.**
+
+## Owner's test fixes (task M5, both games; the 30-turn game is unfrozen)
+
+- **The bus (replaces task 18's "whole country visited"):** arriving by bus in Siberia or China West
+  gives the country's points at once (Russia +5, China +3), once, also when some parts were visited
+  before. Only the destination is marked visited; every other part still gives **+1** when first
+  visited (owner: a reward for the Nomad and the Backpacker). `Player.bigCountries` lists the
+  countries whose points a player has had (all parts walked, or by bus).
+- **Whole continents:** every area of a continent visited gives, once, `continentRewardFor(areas)`
+  = areas ÷ 3 rounded, at least 2. 30 turns: Europe 4, Asia 5, Africa 3, North America 3, South
+  America 2, Oceania 2. 50 turns: Europe 6, Asia 8, Africa 6, North America 3, South America 3,
+  Oceania 2 (owner-approved after measuring: robots finish Europe and Asia 0% of the time,
+  Oceania about a third). Only areas really visited count. `Player.fullContinents`;
+  `GameState.rewards` tells the screens. People see "Welcome to Africa! Visit all 19 areas for
+  +6" on their first turn on a continent, and a gold popup when they finish it.
+- **Madagascar (50 turns):** no walk (the M2 sea crossing to Zambezi is gone); its port sails to
+  Tanzania, Zambezi or South Africa (23 connections). **SURPRISE!** +3 on the first arrival
+  (`Area.surprise`), never as the home area, never announced before; a robot's surprise is not told.
+- **"Tanzania"** is the short name of Tanzania, Rwanda & Burundi.
+- **Save version 12:** no older save is continued.
+- **Robot report (1,000 games per line):** no stuck or endless game. Average scores, normal robots:
+  30 turns 43.9 → 45.9, 50 turns 66.7 → 68.6 (easy 41.0 / 61.3, hard 49.0 / 73.2); the levels keep
+  their order (hard beats normal 63% / 64%).
+- Rule tests on the tiny test map switch whole-continent rewards off (`continentRewards: false`,
+  like `eventCards`); the real games always have them.
 
 ## The 50-turn game (task M2, approved by the owner)
 

@@ -37,22 +37,24 @@ test('50-turn map: valid, two-way links, no duplicates, nothing unreachable, nob
   assert.deepEqual(stuckProblems(map50), []);
 });
 
-test('50-turn map: 84 areas, 11 wonders, 13 airports, 13 ports, 21 connections, 151 walking links', () => {
+test('50-turn map: 84 areas, 11 wonders, 13 airports, 15 ports, 23 connections, 150 walking links', () => {
   assert.equal(areas.length, 84);
   assert.deepEqual(areas.filter((a) => a.wonder).map((a) => a.id).sort(), [
     'cambodia-laos-vietnam', 'egypt', 'greece', 'india', 'italy', 'japan', 'jordan', 'mexico', 'new-zealand', 'peru', 'tanzania',
   ]);
   assert.equal(sites('airport').size, 13);
-  assert.equal(sites('port').size, 13);
-  assert.equal(routes.filter((r) => r.kind === 'airport' || r.kind === 'port').length, 21);
-  assert.equal(areas.reduce((n, a) => n + a.neighbours.length, 0) / 2, 151);
+  assert.equal(sites('port').size, 15);
+  assert.equal(routes.filter((r) => r.kind === 'airport' || r.kind === 'port').length, 23);
+  assert.equal(areas.reduce((n, a) => n + a.neighbours.length, 0) / 2, 150);
   for (const c of START_CONTINENTS) assert.ok(areas.some((a) => a.continent === c), c);
 });
 
-test('owner fixes (M2): the ship to UK & Ireland leaves from Portugal; Madagascar walks to Zambezi; no Spain ↔ Morocco', () => {
+test('owner fixes: the ship to UK & Ireland leaves from Portugal (M2); Madagascar by ship only, to 3 places (M5); no Spain ↔ Morocco', () => {
   assert.ok(routes.some((r) => r.kind === 'port' && r.a === 'portugal' && r.b === 'uk-ireland'));
   assert.ok(!sites('port').has('spain'));
-  assert.deepEqual(areas.find((a) => a.id === 'madagascar')!.neighbours, ['zambezi']);
+  assert.deepEqual(areas.find((a) => a.id === 'madagascar')!.neighbours, []);
+  assert.deepEqual(destinations(map50, 'madagascar', 'port', 'nomad').sort(), ['south-africa', 'tanzania', 'zambezi']);
+  assert.equal(areas.find((a) => a.id === 'tanzania')!.name, 'Tanzania');
   assert.ok(!areas.find((a) => a.id === 'spain')!.neighbours.includes('morocco'));
 });
 
@@ -81,9 +83,9 @@ test('the same big countries in the same parts; never wonders; parts linked', ()
   assert.ok(!areas.some((a) => a.bigCountry && a.wonder));
 });
 
-test('businesses: 11 guided tours, 13 airlines, 13 ferries, 3 train booths, 1 bus booth', () => {
+test('businesses: 11 guided tours, 13 airlines, 15 ferries, 3 train booths, 1 bus booth', () => {
   const count = (kind: string) => mapBusinesses(map50).filter((b) => b.kind === kind).length;
-  assert.deepEqual(['tours', 'airline', 'ferry', 'train', 'bus'].map(count), [11, 13, 13, 3, 1]);
+  assert.deepEqual(['tours', 'airline', 'ferry', 'train', 'bus'].map(count), [11, 13, 15, 3, 1]);
 });
 
 test('train: France ↔ Russia West or Turkey (not the Caucasus); Luxury can\'t take it', () => {
@@ -94,7 +96,7 @@ test('train: France ↔ Russia West or Turkey (not the Caucasus); Luxury can\'t 
   assert.deepEqual(destinations(map50, 'france', 'station', 'luxury'), []);
 });
 
-test('bus: Mongolia one way to Siberia or China West; the whole of Russia by bus', () => {
+test('bus: Mongolia one way to Siberia or China West; Russia\'s +5 at once by bus (M5)', () => {
   assert.deepEqual(destinations(map50, 'mongolia', 'bus', 'nomad').sort(), ['china-west', 'russia-east']);
   assert.deepEqual(destinations(map50, 'russia-east', 'bus', 'nomad'), []);
   let s = startedGame(['egypt', 'spain'], 1, map50, ['nomad', ...PROFILES]);
@@ -105,7 +107,8 @@ test('bus: Mongolia one way to Siberia or China West; the whole of Russia by bus
   s = apply(s, map50, { type: 'travel' });
   const me = seatOf(s, 0);
   assert.equal(me.area, 'russia-east');
-  for (const id of ['russia-west', 'russia-east', 'russia-far-east']) assert.ok(me.visitedAreas.includes(id), id);
+  assert.deepEqual(me.bigCountries, ['Russia']);
+  assert.ok(!me.visitedAreas.includes('russia-west') && !me.visitedAreas.includes('russia-far-east'));
 });
 
 test('timing (owner, M2): a card every 5 land turns, robots and the Nomad warning scaled to 50 turns', () => {
@@ -182,12 +185,10 @@ test('"Thin mountain air" (Peru & Bolivia on the 30-turn map) comes in Peru only
   assert.equal(seen.bolivia, 0);
 });
 
-test('saves version 11: 50-turn games resume; version-10 saves load for 30-turn games only (owner)', () => {
+test('saves version 12 (owner, M5): games resume; older saves (10, 11) are not continued', () => {
   const [s50] = randomGame(3, 2);
   assert.deepEqual(loadGame(saveGame(s50)), { state: s50 });
   const s30 = createGame({ seats: seats(2), seed: 1 }, map30);
-  const v10 = (state: GameState) => JSON.stringify({ version: 10, state });
-  assert.deepEqual(loadGame(v10(s30)), { state: s30 });
-  assert.ok('error' in loadGame(v10(createGame({ seats: seats(2), seed: 1 }, map50))));
-  assert.ok('error' in loadGame(JSON.stringify({ version: 9, state: s30 })));
+  assert.deepEqual(loadGame(saveGame(s30)), { state: s30 });
+  for (const version of [10, 11]) assert.ok('error' in loadGame(JSON.stringify({ version, state: s30 })));
 });

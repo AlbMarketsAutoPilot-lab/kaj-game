@@ -9,6 +9,7 @@ import { map30 } from '../src/maps/map30.ts';
 import { seatOf, startedGame } from './helpers.ts';
 
 // The bus (task 18, owner's rules): one bus stop, in Mongolia, one way to Siberia or China West.
+// Its points changed in M5 (owner): the country's points at once, the other parts +1 each later.
 
 const RUSSIA = ['russia-west', 'russia-east', 'russia-far-east'];
 const CHINA = ['china-west', 'china-east'];
@@ -70,40 +71,58 @@ test('only the Nomad (ticket 1 or quiz) and the Backpacker (quiz only) take the 
   assert.deepEqual(buses(s), ['quiz china-west', 'quiz russia-east']);
 });
 
-test('bus to Siberia: all of Russia visited, +5 once; Asia counts, Europe does not', () => {
+// Owner's rule (M5, replacing task 18's "whole country visited"): the bus gives the country's
+// points at once; only the destination is marked visited, and each other part still gives +1.
+test('bus to Siberia: +5 for all of Russia at once, only Siberia marked visited; Asia counts', () => {
   const s = ride(game('nomad'), 'russia-east');
   assert.equal(me(s).area, 'russia-east');
-  for (const id of RUSSIA) assert.ok(me(s).visitedAreas.includes(id), id);
+  assert.deepEqual(RUSSIA.filter((id) => me(s).visitedAreas.includes(id)), ['russia-east']);
+  assert.deepEqual(me(s).bigCountries, ['Russia']);
   assert.deepEqual(me(s).visitedContinents, ['Africa', 'Asia']);
   // 10 − 1 ticket + 1 Nomad bus turn + 5 Russia + 2 Asia.
   assert.equal(me(s).points, 17);
 });
 
-test('bus to China West: both parts of China visited, +3', () => {
+test('bus to China West: +3 for all of China at once', () => {
   const s = ride(game('backpacker'), 'china-west');
-  for (const id of CHINA) assert.ok(me(s).visitedAreas.includes(id), id);
+  assert.deepEqual(CHINA.filter((id) => me(s).visitedAreas.includes(id)), ['china-west']);
   // 10 + 3 China + 2 Asia (free quiz ticket, no Nomad bonus).
   assert.equal(me(s).points, 15);
 });
 
-test('parts visited before: the bus completes the country with the full +5 once', () => {
+test('after the bus, each other part of the country still gives +1 (and its continent counts)', () => {
+  let s = ride(game('nomad'), 'russia-east'); // 17 points
+  s = pass(s);
+  s = go(s, { type: 'walk', to: 'russia-far-east' });
+  assert.equal(me(s).points, 18);
+  s = go(pass(s), { type: 'walk', to: 'russia-east' }); // back: visited, 0
+  assert.equal(me(s).points, 18);
+  s = pass(s);
+  s = go(s, { type: 'walk', to: 'russia-west' });
+  // +1 for the part, +2 for Europe; the country's +5 is never given again.
+  assert.equal(me(s).points, 21);
+  assert.deepEqual(me(s).bigCountries, ['Russia']);
+});
+
+test('parts visited before: the bus still gives the full +5 once; nothing if Russia was had', () => {
   // Siberia itself visited before (Russia West and the Far East not).
   let s = game('backpacker');
   me(s).visitedAreas.push('russia-east');
   me(s).visitedContinents.push('Asia');
   s = ride(s, 'russia-east');
-  for (const id of RUSSIA) assert.ok(me(s).visitedAreas.includes(id), id);
   assert.equal(me(s).points, 15);
+  assert.deepEqual(me(s).bigCountries, ['Russia']);
   // Russia West visited before.
   s = game('backpacker');
   me(s).visitedAreas.push('russia-west');
   me(s).visitedContinents.push('Asia');
   s = ride(s, 'russia-east');
   assert.equal(me(s).points, 15);
-  // Already complete: nothing more (Asia already counted).
+  // Russia's points already had (all parts walked): nothing more (Asia already counted).
   s = game('backpacker');
   me(s).visitedAreas.push(...RUSSIA);
   me(s).visitedContinents.push('Asia');
+  me(s).bigCountries.push('Russia');
   s = ride(s, 'russia-east');
   assert.equal(me(s).points, 10);
 });

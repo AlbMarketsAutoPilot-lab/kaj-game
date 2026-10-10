@@ -2,10 +2,9 @@ import type { GameState } from './types.ts';
 
 // Saved games carry this number. A save from another version is never continued, so a game
 // is never scored by rules that did not exist when its moves were made.
-// Version 11: the 50-turn map (task M2).
-export const SAVE_VERSION = 11;
-// Owner (task M2): a version-10 save of a 30-turn game still loads; its rules did not change.
-const OLD_30_TURN_VERSION = 10;
+// Version 11: the 50-turn map (task M2). Version 12 (owner, M5): new rules for both games (the bus,
+// whole continents, Madagascar), so no older save is continued.
+export const SAVE_VERSION = 12;
 
 export function saveGame(state: GameState): string {
   return JSON.stringify({ version: SAVE_VERSION, state });
@@ -21,8 +20,7 @@ export function loadGame(text: string): { state: GameState } | { error: string }
   }
   if (typeof data !== 'object' || data === null) return { error: 'The saved game is damaged.' };
   const { version, state } = data as { version?: unknown; state?: GameState };
-  const old30 = version === OLD_30_TURN_VERSION && typeof state === 'object' && state !== null && state.mapId === 'map30';
-  if (version !== SAVE_VERSION && !old30) return { error: 'The saved game is from another version of KAJ.' };
+  if (version !== SAVE_VERSION) return { error: 'The saved game is from another version of KAJ.' };
   if (typeof state !== 'object' || state === null || !Array.isArray(state.players) || typeof state.round !== 'number') {
     return { error: 'The saved game is damaged.' };
   }

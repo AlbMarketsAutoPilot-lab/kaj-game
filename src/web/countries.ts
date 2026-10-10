@@ -52,3 +52,8 @@ export const WONDER_PLACE: Record<string, string> = {
 
 // The 50-turn Peru shows the Machu Picchu drawing of the 30-turn Peru & Bolivia (task M4).
 export const WONDER_ART: Record<string, string> = { peru: 'peru-bolivia' };
+
+// The surprise's fact (owner, M5; a safer figure than "150,000 species", which varies by source).
+export const SURPRISE_FACT: Record<string, string> = {
+  madagascar: 'About 9 in 10 of its plants and animals live nowhere else on Earth.',
+};
