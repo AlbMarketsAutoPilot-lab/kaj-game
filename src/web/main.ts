@@ -17,7 +17,7 @@ import type { Shapes } from '../maps/shapes.ts';
 import { shapes30 } from '../maps/shapes30.ts';
 import { shapes50 } from '../maps/shapes50.ts';
 import { countryCapital, countryFlag, SURPRISE_FACT, WONDER_NAME, WONDER_PLACE } from './countries.ts';
-import { buildGeo, colourAreas, continentBox, pad, propSpots, squeeze, svg, unionBox, type Box, type PropKind } from './maps.ts';
+import { buildGeo, colourAreas, continentBox, glowFor, pad, propSpots, squeeze, svg, unionBox, type Box, type PropKind } from './maps.ts';
 import { airport, busStop, citizenFlag, monument, pawn, place, port, station } from './props.ts';
 import { iconEl, iconUse, installIcons, PROFILE_COLOUR } from './icons.ts';
 import { tripScene, wonderScene } from './scenes.ts';
@@ -1671,7 +1671,7 @@ function drawMap(view: Box, k: number, cls: (id: string) => string, onTap: (id: 
   }
   const names = svg('g', { class: 'names' });
   const labels = svg('g');
-  root.append(shapes, names, labels);
+  root.append(shapes, glowFor(shapes), names, labels);
   // The page is zoomed to the screen (uiZoom): sizes here are in page pixels.
   const w = window.innerWidth / uiZoom / 2 - 12;
   const h = pane === 'left' ? window.innerHeight / uiZoom - 115 : w / 2.6;

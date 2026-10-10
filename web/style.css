@@ -184,7 +184,11 @@ main:has(.game) { max-width: none; padding: calc(6px + var(--safe-t)) calc(6px +
 .map-note { pointer-events: none; animation: note-fade 5s ease forwards; }
 .map-ask p { margin: 0 0 6px; }
 @keyframes note-fade { 0% { opacity: 0; } 6% { opacity: 1; } 85% { opacity: 1; } 100% { opacity: 0; } }
-.map-svg .land.here { stroke: var(--glow); stroke-width: 2px; filter: drop-shadow(0 0 4px rgba(255, 240, 180, 0.8)); }
+.map-svg .land.here { stroke: var(--glow); stroke-width: 2px; }
+/* Its glow: soft lines that keep their width at any zoom (maps.ts glowFor), no filter (2026-10-10). */
+.map-svg .halo { fill: none; vector-effect: non-scaling-stroke; stroke-linejoin: round; pointer-events: none; }
+.map-svg .halo.wide { stroke: rgba(255, 240, 180, 0.2); stroke-width: 10px; }
+.map-svg .halo.narrow { stroke: rgba(255, 240, 180, 0.4); stroke-width: 5px; }
 .map-svg .land.dim { filter: saturate(0.3) brightness(0.55); }
 .map-svg .land.booked { stroke-width: 1.5px; }
 .map-svg .land.picked { stroke: #fff; stroke-width: 1.5px; }
@@ -319,6 +323,9 @@ button.link { background: none; border: none; padding: 0; text-align: left; font
 .guide.quiz-on .guide-line { display: none; }
 .guide-list .guide-line { text-align: left; }
 @keyframes glow { 50% { filter: brightness(1.35) drop-shadow(0 0 6px var(--glow)); } }
+/* On a map the tap glow is a brighter edge, not a drop-shadow, which grew with the zoom (2026-10-10). */
+.map-svg .land.guide-glow { animation-name: glow-land; }
+@keyframes glow-land { 50% { filter: brightness(1.35); stroke: var(--glow); stroke-width: 3px; } }
 .guide-badge { font-weight: 700; color: var(--gold-bright); }
 .guide-badge img { height: 1em; vertical-align: -2px; }
 .guide-zero { fill: var(--glow); font-weight: 700; paint-order: stroke; stroke: var(--deep); stroke-width: 0.15px; }

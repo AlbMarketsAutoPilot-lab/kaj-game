@@ -6,7 +6,7 @@
 
 import { bigCountryPoints, BUSINESS_PRICE, CONTINENT_BONUS, EXAM_FACTS, EXAM_PASS, NOMAD_MIN_CONTINENTS, NOMAD_PENALTY, POINTS_BIG_COUNTRY_3_PARTS, POINTS_BUSINESS_CITIZENSHIP, POINTS_NEW_CONTINENT, POINTS_NOMAD_TRAVEL_TURN, POINTS_WONDER, TICKET_PRICE, VISA_PRICE } from '../engine/constants.ts';
 import type { AreaGeo } from './maps.ts';
-import { pad, squeeze, svg, unionBox } from './maps.ts';
+import { glowFor, pad, squeeze, svg, unionBox } from './maps.ts';
 import { airport, citizenFlag, pawn, place } from './props.ts';
 import { play, stopTimer } from './sound.ts';
 
@@ -72,7 +72,7 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
       if (tap) { path.classList.add('tap', 'guide-glow'); path.addEventListener('click', tap); }
       g.append(path);
     }
-    root.append(g);
+    root.append(g, glowFor(g));
     const at = (id: string): [number, number] => { const [x, y] = geo.get(id)!.centre; return [x * k, y]; };
     if (props) root.append(...props(at, Math.min(box.w * k, box.h) * 0.3));
     return root;
