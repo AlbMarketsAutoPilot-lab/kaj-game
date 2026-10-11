@@ -1,12 +1,19 @@
 // Balance lab only: rule packages to measure. Each patch replaces text in a COPY of
 // src/engine/constants.ts (never in the real file). "today" = the game as it is.
 // A patch: [text, new text, file (default src/engine/constants.ts)]. ladderOnly: robot head-to-head games only.
-export interface Package { name: string; about: string; patches: [string, string, string?][]; ladderOnly?: boolean; turns?: number[]; drivers?: string[] }
+export interface Package { name: string; about: string; patches: [string, string, string?][]; ladderOnly?: boolean; turns?: number[]; drivers?: string[]; ladder?: [string, string][] }
 
 const LUX = 'luxury: { continents: 5, points: 5 }';
 const BP = 'backpacker: { continents: 3, points: 3 }';
 const BIZ = 'POINTS_BUSINESS_CITIZENSHIP = 3';
 const NOMAD_TICKET = 'business: 2,\n  luxury: 3,\n  nomad: 1,';
+
+import { readFileSync } from 'node:fs';
+// The 7 Backpacker news cards added after task 18 (b9–b15, not studied): removed in the final packages.
+const CARDS = readFileSync(new URL('../../src/cards/cards.ts', import.meta.url), 'utf8');
+const BP_NEWS = CARDS.slice(CARDS.indexOf('  // More Backpacker news'), CARDS.indexOf('\n', CARDS.indexOf("id: 'b15'")) + 1);
+const EASY = 'easy: { accuracy: 0.5, challengeFrom: 5, reserve: 5 }';
+const RN = 'src/engine/normal-robot.ts';
 
 export const PACKAGES: Package[] = [
   { name: 'today', about: 'the game as it is now', patches: [] },
@@ -37,5 +44,15 @@ export const PACKAGES: Package[] = [
     patches: [[LUX, `luxury: { continents: 5, points: ${lux} }`], [BP, `backpacker: { continents: 3, points: ${bp} }`],
       [BIZ, `POINTS_BUSINESS_CITIZENSHIP = ${biz}`], [NOMAD_TICKET, `business: 2,\n  luxury: 3,\n  nomad: ${nomad},`],
       ['NOMAD_MIN_CONTINENTS = 3', `NOMAD_MIN_CONTINENTS = ${conts}`]] as [string, string][],
+  })),
+  // Final round (owner, 2026-10-11): Luxury bonus removed at both lengths, Backpacker +6, Business +5 (30) / +7 (50),
+  // Nomad ticket stays 1, Backpacker deck b1–b8, proposed robots (easy 65%, normal plans 2, hard plans 3).
+  ...([['X1', 30, 5, 3, 5], ['W1', 50, 7, 4, 5], ['W2', 50, 7, 4, 8]] as const).map(([name, turns, biz, conts, pen]) => ({
+    name, turns: [turns], drivers: ['N2', 'P4'], ladder: [['E', 'N2'], ['N2', 'H3']] as [string, string][],
+    about: `${turns} turns: no Luxury continent bonus; Backpacker 3 continents +6; Business citizenship +${biz}; Nomad ticket 1, needs ${conts} continents or −${pen}; Backpacker cards b1–b8; easy robot 65%`,
+    patches: [[LUX, 'luxury: { continents: 5, points: 0 }'], [BP, 'backpacker: { continents: 3, points: 6 }'],
+      [BIZ, `POINTS_BUSINESS_CITIZENSHIP = ${biz}`], ['NOMAD_MIN_CONTINENTS = 3', `NOMAD_MIN_CONTINENTS = ${conts}`],
+      ['NOMAD_PENALTY = 5', `NOMAD_PENALTY = ${pen}`], [BP_NEWS, '', 'src/cards/cards.ts'],
+      [EASY, 'easy: { accuracy: 0.65, challengeFrom: 5, reserve: 4 }', RN]] as [string, string, string?][],
   })),
 ];
