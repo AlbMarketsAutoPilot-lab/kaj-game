@@ -35,14 +35,14 @@ With 400 games per line a win share is accurate to about ±2–4 points.
 
 | Game | Robots | Backpacker | Business | Luxury | Nomad | Fair? |
 |---|---|---|---|---|---|---|
-| 30 turns, 2 players | normal | 18% ❌ (42.1) | 43% ✅ (45.9) | 81% ❌ (52.2) | 57% ✅ (49.0) | |
-| 30 turns, 4 players | normal | 9% ❌ (42.7) | 15% ❌ (43.2) | 53% ❌ (50.5) | 24% ✅ (44.8) | |
-| 30 turns, 2 players | planning | 41% ✅ (50.4) | 39% ❌ (49.2) | 72% ❌ (54.9) | 49% ✅ (50.3) | |
-| 30 turns, 4 players | planning | 9% ❌ (47.1) | 19% ❌ (49.2) | 55% ❌ (55.8) | 17% ❌ (50.1) | |
-| 50 turns, 2 players | normal | 27% ❌ (65.7) | 44% ✅ (68.8) | 71% ❌ (73.9) | 56% ✅ (71.2) | |
-| 50 turns, 4 players | normal | 10% ❌ (63.4) | 14% ❌ (65.4) | 39% ❌ (70.9) | 37% ❌ (72.2) | |
-| 50 turns, 2 players | planning | 42% ✅ (76.2) | 30% ❌ (72.4) | 58% ✅ (77.8) | 71% ❌ (80.7) | |
-| 50 turns, 4 players | planning | 14% ❌ (72.2) | 14% ❌ (71.2) | 40% ❌ (76.9) | 32% ❌ (76.5) | 9/32 |
+| 30 turns, 2 players | normal (today) | 18% ❌ (42.1) | 43% ✅ (45.9) | 81% ❌ (52.2) | 57% ✅ (49.0) | |
+| 30 turns, 4 players | normal (today) | 9% ❌ (42.7) | 15% ❌ (43.2) | 53% ❌ (50.5) | 24% ✅ (44.8) | |
+| 30 turns, 2 players | planning (plans 4) | 41% ✅ (50.4) | 39% ❌ (49.2) | 72% ❌ (54.9) | 49% ✅ (50.3) | |
+| 30 turns, 4 players | planning (plans 4) | 9% ❌ (47.1) | 19% ❌ (49.2) | 55% ❌ (55.8) | 17% ❌ (50.1) | |
+| 50 turns, 2 players | normal (today) | 27% ❌ (65.7) | 44% ✅ (68.8) | 71% ❌ (73.9) | 56% ✅ (71.2) | |
+| 50 turns, 4 players | normal (today) | 10% ❌ (63.4) | 14% ❌ (65.4) | 39% ❌ (70.9) | 37% ❌ (72.2) | |
+| 50 turns, 2 players | planning (plans 4) | 42% ✅ (76.2) | 30% ❌ (72.4) | 58% ✅ (77.8) | 71% ❌ (80.7) | |
+| 50 turns, 4 players | planning (plans 4) | 14% ❌ (72.2) | 14% ❌ (71.2) | 40% ❌ (76.9) | 32% ❌ (76.5) | 9/32 |
 
 **9 of 32** profile results inside the target. (Wins %, with the average final score in brackets.)
 
@@ -50,14 +50,14 @@ With 400 games per line a win share is accurate to about ±2–4 points.
 
 | Game | Robots | Backpacker | Business | Luxury | Nomad | Fair? |
 |---|---|---|---|---|---|---|
-| 30 turns, 4 players | normal | 28% ✅ (47.4) | 21% ✅ (44.9) | 29% ✅ (46.5) | 23% ✅ (44.5) | |
-| 30 turns, 2 players | normal | 36% ❌ (46.4) | 47% ✅ (48.0) | 60% ✅ (48.0) | 57% ✅ (49.5) | |
-| 50 turns, 4 players | normal | 24% ✅ (68.6) | 17% ❌ (67.1) | 18% ❌ (66.2) | 41% ❌ (72.5) | |
-| 30 turns, 2 players | planning | 61% ❌ (54.2) | 51% ✅ (51.6) | 48% ✅ (50.5) | 41% ✅ (50.1) | |
-| 50 turns, 2 players | normal | 51% ✅ (70.4) | 47% ✅ (70.5) | 44% ✅ (68.1) | 59% ✅ (72.8) | |
-| 30 turns, 4 players | planning | 26% ✅ (51.4) | 26% ✅ (51.2) | 29% ✅ (50.6) | 19% ❌ (49.5) | |
-| 50 turns, 2 players | planning | 46% ✅ (78.3) | 37% ❌ (74.9) | 52% ✅ (74.7) | 66% ❌ (78.5) | |
-| 50 turns, 4 players | planning | 41% ❌ (77.8) | 17% ❌ (71.7) | 16% ❌ (72.2) | 25% ✅ (74.6) | 21/32 |
+| 30 turns, 4 players | normal (today) | 28% ✅ (47.4) | 21% ✅ (44.9) | 29% ✅ (46.5) | 23% ✅ (44.5) | |
+| 30 turns, 2 players | normal (today) | 36% ❌ (46.4) | 47% ✅ (48.0) | 60% ✅ (48.0) | 57% ✅ (49.5) | |
+| 50 turns, 4 players | normal (today) | 24% ✅ (68.6) | 17% ❌ (67.1) | 18% ❌ (66.2) | 41% ❌ (72.5) | |
+| 30 turns, 2 players | planning (plans 4) | 61% ❌ (54.2) | 51% ✅ (51.6) | 48% ✅ (50.5) | 41% ✅ (50.1) | |
+| 50 turns, 2 players | normal (today) | 51% ✅ (70.4) | 47% ✅ (70.5) | 44% ✅ (68.1) | 59% ✅ (72.8) | |
+| 30 turns, 4 players | planning (plans 4) | 26% ✅ (51.4) | 26% ✅ (51.2) | 29% ✅ (50.6) | 19% ❌ (49.5) | |
+| 50 turns, 2 players | planning (plans 4) | 46% ✅ (78.3) | 37% ❌ (74.9) | 52% ✅ (74.7) | 66% ❌ (78.5) | |
+| 50 turns, 4 players | planning (plans 4) | 41% ❌ (77.8) | 17% ❌ (71.7) | 16% ❌ (72.2) | 25% ✅ (74.6) | 21/32 |
 
 **21 of 32** profile results inside the target. (Wins %, with the average final score in brackets.)
 
@@ -65,14 +65,14 @@ With 400 games per line a win share is accurate to about ±2–4 points.
 
 | Game | Robots | Backpacker | Business | Luxury | Nomad | Fair? |
 |---|---|---|---|---|---|---|
-| 30 turns, 2 players | normal | 27% ❌ (44.8) | 47% ✅ (47.8) | 70% ❌ (50.0) | 55% ✅ (49.3) | |
-| 30 turns, 4 players | normal | 20% ✅ (45.4) | 22% ✅ (45.0) | 36% ❌ (48.2) | 22% ✅ (44.6) | |
-| 50 turns, 4 players | normal | 17% ❌ (66.8) | 18% ❌ (67.1) | 25% ✅ (68.2) | 40% ❌ (72.1) | |
-| 30 turns, 2 players | planning | 46% ✅ (52.5) | 49% ✅ (51.6) | 57% ✅ (53.4) | 47% ✅ (50.5) | |
-| 50 turns, 2 players | normal | 39% ❌ (68.6) | 45% ✅ (70.1) | 56% ✅ (70.5) | 59% ✅ (73.0) | |
-| 30 turns, 4 players | planning | 19% ❌ (49.2) | 30% ✅ (51.6) | 32% ❌ (51.7) | 20% ✅ (49.5) | |
-| 50 turns, 2 players | planning | 45% ✅ (76.8) | 39% ❌ (75.2) | 50% ✅ (75.3) | 67% ❌ (78.6) | |
-| 50 turns, 4 players | planning | 27% ✅ (75.5) | 22% ✅ (73.1) | 28% ✅ (74.0) | 23% ✅ (74.6) | 21/32 |
+| 30 turns, 2 players | normal (today) | 27% ❌ (44.8) | 47% ✅ (47.8) | 70% ❌ (50.0) | 55% ✅ (49.3) | |
+| 30 turns, 4 players | normal (today) | 20% ✅ (45.4) | 22% ✅ (45.0) | 36% ❌ (48.2) | 22% ✅ (44.6) | |
+| 50 turns, 4 players | normal (today) | 17% ❌ (66.8) | 18% ❌ (67.1) | 25% ✅ (68.2) | 40% ❌ (72.1) | |
+| 30 turns, 2 players | planning (plans 4) | 46% ✅ (52.5) | 49% ✅ (51.6) | 57% ✅ (53.4) | 47% ✅ (50.5) | |
+| 50 turns, 2 players | normal (today) | 39% ❌ (68.6) | 45% ✅ (70.1) | 56% ✅ (70.5) | 59% ✅ (73.0) | |
+| 30 turns, 4 players | planning (plans 4) | 19% ❌ (49.2) | 30% ✅ (51.6) | 32% ❌ (51.7) | 20% ✅ (49.5) | |
+| 50 turns, 2 players | planning (plans 4) | 45% ✅ (76.8) | 39% ❌ (75.2) | 50% ✅ (75.3) | 67% ❌ (78.6) | |
+| 50 turns, 4 players | planning (plans 4) | 27% ✅ (75.5) | 22% ✅ (73.1) | 28% ✅ (74.0) | 23% ✅ (74.6) | 21/32 |
 
 **21 of 32** profile results inside the target. (Wins %, with the average final score in brackets.)
 
@@ -80,14 +80,14 @@ With 400 games per line a win share is accurate to about ±2–4 points.
 
 | Game | Robots | Backpacker | Business | Luxury | Nomad | Fair? |
 |---|---|---|---|---|---|---|
-| 30 turns, 4 players | normal | 18% ❌ (45.4) | 27% ✅ (45.9) | 35% ❌ (48.1) | 21% ✅ (44.6) | |
-| 30 turns, 2 players | normal | 26% ❌ (44.8) | 50% ✅ (48.4) | 69% ❌ (49.9) | 53% ✅ (49.3) | |
-| 30 turns, 2 players | planning | 45% ✅ (52.5) | 54% ✅ (52.7) | 56% ✅ (53.5) | 43% ✅ (50.4) | |
-| 30 turns, 4 players | planning | 18% ❌ (49.3) | 33% ❌ (52.4) | 30% ✅ (51.7) | 19% ❌ (49.5) | |
-| 50 turns, 4 players | normal | 16% ❌ (66.8) | 22% ✅ (67.8) | 24% ✅ (68.4) | 38% ❌ (72.1) | |
-| 50 turns, 2 players | normal | 39% ❌ (68.6) | 47% ✅ (70.8) | 56% ✅ (70.5) | 58% ✅ (72.9) | |
-| 50 turns, 2 players | planning | 45% ✅ (76.8) | 40% ✅ (76.0) | 48% ✅ (75.3) | 67% ❌ (78.6) | |
-| 50 turns, 4 players | planning | 27% ✅ (75.5) | 23% ✅ (74.0) | 27% ✅ (74.0) | 23% ✅ (74.5) | 21/32 |
+| 30 turns, 4 players | normal (today) | 18% ❌ (45.4) | 27% ✅ (45.9) | 35% ❌ (48.1) | 21% ✅ (44.6) | |
+| 30 turns, 2 players | normal (today) | 26% ❌ (44.8) | 50% ✅ (48.4) | 69% ❌ (49.9) | 53% ✅ (49.3) | |
+| 30 turns, 2 players | planning (plans 4) | 45% ✅ (52.5) | 54% ✅ (52.7) | 56% ✅ (53.5) | 43% ✅ (50.4) | |
+| 30 turns, 4 players | planning (plans 4) | 18% ❌ (49.3) | 33% ❌ (52.4) | 30% ✅ (51.7) | 19% ❌ (49.5) | |
+| 50 turns, 4 players | normal (today) | 16% ❌ (66.8) | 22% ✅ (67.8) | 24% ✅ (68.4) | 38% ❌ (72.1) | |
+| 50 turns, 2 players | normal (today) | 39% ❌ (68.6) | 47% ✅ (70.8) | 56% ✅ (70.5) | 58% ✅ (72.9) | |
+| 50 turns, 2 players | planning (plans 4) | 45% ✅ (76.8) | 40% ✅ (76.0) | 48% ✅ (75.3) | 67% ❌ (78.6) | |
+| 50 turns, 4 players | planning (plans 4) | 27% ✅ (75.5) | 23% ✅ (74.0) | 27% ✅ (74.0) | 23% ✅ (74.5) | 21/32 |
 
 **21 of 32** profile results inside the target. (Wins %, with the average final score in brackets.)
 
@@ -95,14 +95,14 @@ With 400 games per line a win share is accurate to about ±2–4 points.
 
 | Game | Robots | Backpacker | Business | Luxury | Nomad | Fair? |
 |---|---|---|---|---|---|---|
-| 30 turns, 4 players | normal | 18% ❌ (45.4) | 26% ✅ (45.8) | 37% ❌ (48.8) | 20% ✅ (44.7) | |
-| 30 turns, 4 players | planning | 17% ❌ (50.2) | 31% ❌ (52.3) | 35% ❌ (52.7) | 17% ❌ (49.4) | |
-| 30 turns, 2 players | normal | 26% ❌ (44.9) | 51% ✅ (48.5) | 69% ❌ (50.5) | 53% ✅ (49.1) | |
-| 30 turns, 2 players | planning | 47% ✅ (52.4) | 53% ✅ (52.3) | 58% ✅ (54.1) | 41% ✅ (50.4) | |
-| 50 turns, 2 players | normal | 38% ❌ (68.7) | 47% ✅ (71.3) | 58% ✅ (71.2) | 56% ✅ (72.9) | |
-| 50 turns, 4 players | normal | 14% ❌ (66.7) | 19% ❌ (67.9) | 29% ✅ (69.6) | 38% ❌ (72.4) | |
-| 50 turns, 2 players | planning | 45% ✅ (77.5) | 37% ❌ (75.0) | 52% ✅ (76.3) | 67% ❌ (78.6) | |
-| 50 turns, 4 players | planning | 25% ✅ (75.2) | 25% ✅ (74.7) | 26% ✅ (75.1) | 24% ✅ (74.8) | 18/32 |
+| 30 turns, 4 players | normal (today) | 18% ❌ (45.4) | 26% ✅ (45.8) | 37% ❌ (48.8) | 20% ✅ (44.7) | |
+| 30 turns, 4 players | planning (plans 4) | 17% ❌ (50.2) | 31% ❌ (52.3) | 35% ❌ (52.7) | 17% ❌ (49.4) | |
+| 30 turns, 2 players | normal (today) | 26% ❌ (44.9) | 51% ✅ (48.5) | 69% ❌ (50.5) | 53% ✅ (49.1) | |
+| 30 turns, 2 players | planning (plans 4) | 47% ✅ (52.4) | 53% ✅ (52.3) | 58% ✅ (54.1) | 41% ✅ (50.4) | |
+| 50 turns, 2 players | normal (today) | 38% ❌ (68.7) | 47% ✅ (71.3) | 58% ✅ (71.2) | 56% ✅ (72.9) | |
+| 50 turns, 4 players | normal (today) | 14% ❌ (66.7) | 19% ❌ (67.9) | 29% ✅ (69.6) | 38% ❌ (72.4) | |
+| 50 turns, 2 players | planning (plans 4) | 45% ✅ (77.5) | 37% ❌ (75.0) | 52% ✅ (76.3) | 67% ❌ (78.6) | |
+| 50 turns, 4 players | planning (plans 4) | 25% ✅ (75.2) | 25% ✅ (74.7) | 26% ✅ (75.1) | 24% ✅ (74.8) | 18/32 |
 
 **18 of 32** profile results inside the target. (Wins %, with the average final score in brackets.)
 
@@ -110,14 +110,14 @@ With 400 games per line a win share is accurate to about ±2–4 points.
 
 | Game | Robots | Backpacker | Business | Luxury | Nomad | Fair? |
 |---|---|---|---|---|---|---|
-| 30 turns, 4 players | normal | 18% ❌ (45.5) | 28% ✅ (45.7) | 31% ❌ (46.5) | 23% ✅ (44.4) | |
-| 30 turns, 4 players | planning | 19% ❌ (49.3) | 31% ❌ (52.0) | 30% ✅ (50.5) | 21% ✅ (49.5) | |
-| 30 turns, 2 players | normal | 27% ❌ (44.6) | 54% ✅ (48.6) | 62% ❌ (48.0) | 56% ✅ (49.5) | |
-| 30 turns, 2 players | planning | 51% ✅ (52.1) | 59% ✅ (52.6) | 48% ✅ (50.5) | 42% ✅ (50.1) | |
-| 50 turns, 4 players | normal | 18% ❌ (66.5) | 21% ✅ (67.8) | 19% ❌ (66.3) | 42% ❌ (72.4) | |
-| 50 turns, 2 players | normal | 41% ✅ (68.4) | 53% ✅ (71.2) | 46% ✅ (68.1) | 60% ✅ (72.7) | |
-| 50 turns, 2 players | planning | 39% ❌ (76.2) | 39% ❌ (75.7) | 53% ✅ (74.7) | 69% ❌ (78.5) | |
-| 50 turns, 4 players | planning | 33% ❌ (75.8) | 21% ✅ (72.4) | 18% ❌ (72.2) | 28% ✅ (74.6) | 18/32 |
+| 30 turns, 4 players | normal (today) | 18% ❌ (45.5) | 28% ✅ (45.7) | 31% ❌ (46.5) | 23% ✅ (44.4) | |
+| 30 turns, 4 players | planning (plans 4) | 19% ❌ (49.3) | 31% ❌ (52.0) | 30% ✅ (50.5) | 21% ✅ (49.5) | |
+| 30 turns, 2 players | normal (today) | 27% ❌ (44.6) | 54% ✅ (48.6) | 62% ❌ (48.0) | 56% ✅ (49.5) | |
+| 30 turns, 2 players | planning (plans 4) | 51% ✅ (52.1) | 59% ✅ (52.6) | 48% ✅ (50.5) | 42% ✅ (50.1) | |
+| 50 turns, 4 players | normal (today) | 18% ❌ (66.5) | 21% ✅ (67.8) | 19% ❌ (66.3) | 42% ❌ (72.4) | |
+| 50 turns, 2 players | normal (today) | 41% ✅ (68.4) | 53% ✅ (71.2) | 46% ✅ (68.1) | 60% ✅ (72.7) | |
+| 50 turns, 2 players | planning (plans 4) | 39% ❌ (76.2) | 39% ❌ (75.7) | 53% ✅ (74.7) | 69% ❌ (78.5) | |
+| 50 turns, 4 players | planning (plans 4) | 33% ❌ (75.8) | 21% ✅ (72.4) | 18% ❌ (72.2) | 28% ✅ (74.6) | 18/32 |
 
 **18 of 32** profile results inside the target. (Wins %, with the average final score in brackets.)
 
@@ -142,3 +142,69 @@ With 400 games per line a win share is accurate to about ±2–4 points.
 | 30 turns | normal, plans 2 moves | hard, plans 4 moves | 35% | 65% |
 | 50 turns | easy | normal, plans 2 moves | 27% | 73% |
 | 50 turns | normal, plans 2 moves | hard, plans 4 moves | 29% | 72% |
+
+## Package "T1": 30 turns: Luxury 5 continents +0; Backpacker 3 continents +7; Business citizenship +5; Nomad ticket 1
+
+| Game | Robots | Backpacker | Business | Luxury | Nomad | Fair? |
+|---|---|---|---|---|---|---|
+| 30 turns, 2 players | normal (plans 2) | 54% ✅ (51.4) | 49% ✅ (48.9) | 43% ✅ (47.9) | 53% ✅ (50.4) | |
+| 30 turns, 4 players | normal (plans 2) | 33% ❌ (50.7) | 18% ❌ (45.7) | 29% ✅ (48.8) | 21% ✅ (48.1) | |
+| 30 turns, 2 players | planning (plans 4) | 59% ✅ (53.7) | 49% ✅ (51.6) | 47% ✅ (50.4) | 45% ✅ (50.8) | |
+| 30 turns, 4 players | planning (plans 4) | 23% ✅ (50.5) | 28% ✅ (51.2) | 26% ✅ (50.3) | 23% ✅ (50.3) | 14/16 |
+
+**14 of 16** profile results inside the target. (Wins %, with the average final score in brackets.)
+
+## Package "T2": 30 turns: Luxury 5 continents +0; Backpacker 3 continents +7; Business citizenship +5; Nomad ticket 2
+
+| Game | Robots | Backpacker | Business | Luxury | Nomad | Fair? |
+|---|---|---|---|---|---|---|
+| 30 turns, 4 players | normal (plans 2) | 30% ✅ (50.4) | 23% ✅ (46.5) | 28% ✅ (48.9) | 20% ✅ (47.8) | |
+| 30 turns, 2 players | normal (plans 2) | 64% ❌ (52.0) | 46% ✅ (47.9) | 45% ✅ (48.3) | 44% ✅ (48.5) | |
+| 30 turns, 2 players | planning (plans 4) | 55% ✅ (53.1) | 53% ✅ (51.9) | 47% ✅ (50.6) | 45% ✅ (50.5) | |
+| 30 turns, 4 players | planning (plans 4) | 24% ✅ (50.7) | 28% ✅ (51.3) | 29% ✅ (50.5) | 19% ❌ (49.4) | 14/16 |
+
+**14 of 16** profile results inside the target. (Wins %, with the average final score in brackets.)
+
+## Package "T3": 30 turns: Luxury 5 continents +1; Backpacker 3 continents +7; Business citizenship +5; Nomad ticket 1
+
+| Game | Robots | Backpacker | Business | Luxury | Nomad | Fair? |
+|---|---|---|---|---|---|---|
+| 30 turns, 4 players | normal (plans 2) | 33% ❌ (50.8) | 17% ❌ (45.4) | 30% ✅ (49.0) | 19% ❌ (48.1) | |
+| 30 turns, 2 players | normal (plans 2) | 51% ✅ (51.3) | 47% ✅ (48.8) | 49% ✅ (48.9) | 52% ✅ (50.4) | |
+| 30 turns, 2 players | planning (plans 4) | 58% ✅ (53.6) | 48% ✅ (51.9) | 50% ✅ (51.6) | 45% ✅ (50.8) | |
+| 30 turns, 4 players | planning (plans 4) | 21% ✅ (50.3) | 29% ✅ (51.6) | 29% ✅ (51.0) | 21% ✅ (50.1) | 13/16 |
+
+**13 of 16** profile results inside the target. (Wins %, with the average final score in brackets.)
+
+## Package "U1": 50 turns: Luxury 5 continents +2; Backpacker 3 continents +7; Business citizenship +6; Nomad ticket 3; Nomad needs 3 continents (or −5)
+
+| Game | Robots | Backpacker | Business | Luxury | Nomad | Fair? |
+|---|---|---|---|---|---|---|
+| 50 turns, 4 players | normal (plans 2) | 26% ✅ (71.4) | 24% ✅ (70.3) | 38% ❌ (72.8) | 12% ❌ (67.6) | |
+| 50 turns, 2 players | normal (plans 2) | 59% ✅ (75.6) | 44% ✅ (70.8) | 59% ✅ (73.8) | 38% ❌ (70.6) | |
+| 50 turns, 2 players | planning (plans 4) | 51% ✅ (78.8) | 47% ✅ (75.5) | 51% ✅ (75.6) | 52% ✅ (75.9) | |
+| 50 turns, 4 players | planning (plans 4) | 33% ❌ (76.9) | 24% ✅ (74.1) | 26% ✅ (74.2) | 17% ❌ (72.8) | 11/16 |
+
+**11 of 16** profile results inside the target. (Wins %, with the average final score in brackets.)
+
+## Package "U2": 50 turns: Luxury 5 continents +2; Backpacker 3 continents +7; Business citizenship +6; Nomad ticket 2; Nomad needs 4 continents (or −5)
+
+| Game | Robots | Backpacker | Business | Luxury | Nomad | Fair? |
+|---|---|---|---|---|---|---|
+| 50 turns, 4 players | normal (plans 2) | 22% ✅ (71.8) | 19% ❌ (69.6) | 35% ❌ (73.0) | 23% ✅ (71.3) | |
+| 50 turns, 2 players | normal (plans 2) | 58% ✅ (75.5) | 37% ❌ (70.1) | 56% ✅ (74.0) | 49% ✅ (75.8) | |
+| 50 turns, 2 players | planning (plans 4) | 49% ✅ (78.7) | 47% ✅ (76.0) | 49% ✅ (75.5) | 55% ✅ (77.1) | |
+| 50 turns, 4 players | planning (plans 4) | 32% ❌ (76.7) | 27% ✅ (74.7) | 23% ✅ (73.5) | 19% ❌ (73.9) | 11/16 |
+
+**11 of 16** profile results inside the target. (Wins %, with the average final score in brackets.)
+
+## Package "U3": 50 turns: Luxury 5 continents +2; Backpacker 3 continents +7; Business citizenship +6; Nomad ticket 3; Nomad needs 4 continents (or −5)
+
+| Game | Robots | Backpacker | Business | Luxury | Nomad | Fair? |
+|---|---|---|---|---|---|---|
+| 50 turns, 4 players | normal (plans 2) | 26% ✅ (71.9) | 24% ✅ (70.7) | 34% ❌ (72.4) | 16% ❌ (69.5) | |
+| 50 turns, 2 players | normal (plans 2) | 57% ✅ (75.5) | 38% ❌ (69.9) | 58% ✅ (74.2) | 47% ✅ (74.0) | |
+| 50 turns, 2 players | planning (plans 4) | 49% ✅ (78.4) | 48% ✅ (76.0) | 53% ✅ (75.5) | 50% ✅ (75.8) | |
+| 50 turns, 4 players | planning (plans 4) | 32% ❌ (76.3) | 25% ✅ (74.2) | 25% ✅ (74.2) | 18% ❌ (72.4) | 11/16 |
+
+**11 of 16** profile results inside the target. (Wins %, with the average final score in brackets.)

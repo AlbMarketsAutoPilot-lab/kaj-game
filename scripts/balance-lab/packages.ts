@@ -25,17 +25,17 @@ export const PACKAGES: Package[] = [
   })),
   // Round 3 (owner, 2026-10-11): numbers per game length, no caps; profile tests with the proposed robots
   // (normal plans 2 moves; planning robots plan 4 moves).
-  ...([['T1', 0, 7, 5, 1], ['T2', 0, 7, 5, 2], ['T3', 1, 7, 5, 1]] as const).map(([name, lux, bp, biz, nomad]) => ({
+  ...([['T1', 0, 7, 5, 1], ['T2', 0, 7, 5, 2], ['T3', 1, 7, 5, 1], ['T4', 0, 6, 5, 2], ['T5', 0, 6, 5, 1]] as const).map(([name, lux, bp, biz, nomad]) => ({
     name, turns: [30], drivers: ['N2', 'P4'],
     about: `30 turns: Luxury 5 continents +${lux}; Backpacker 3 continents +${bp}; Business citizenship +${biz}; Nomad ticket ${nomad}`,
     patches: [[LUX, `luxury: { continents: 5, points: ${lux} }`], [BP, `backpacker: { continents: 3, points: ${bp} }`],
       [BIZ, `POINTS_BUSINESS_CITIZENSHIP = ${biz}`], [NOMAD_TICKET, `business: 2,\n  luxury: 3,\n  nomad: ${nomad},`]] as [string, string][],
   })),
-  ...([['U1', 3, 3], ['U2', 2, 4], ['U3', 3, 4]] as const).map(([name, nomad, conts]) => ({
+  ...([['U1', 2, 7, 6, 3, 3], ['U2', 2, 7, 6, 2, 4], ['U3', 2, 7, 6, 3, 4], ['V1', 1, 6, 7, 2, 4], ['V2', 0, 6, 7, 2, 4]] as const).map(([name, lux, bp, biz, nomad, conts]) => ({
     name, turns: [50], drivers: ['N2', 'P4'],
-    about: `50 turns: Luxury 5 continents +2; Backpacker 3 continents +7; Business citizenship +6; Nomad ticket ${nomad}; Nomad needs ${conts} continents (or −5)`,
-    patches: [[LUX, 'luxury: { continents: 5, points: 2 }'], [BP, 'backpacker: { continents: 3, points: 7 }'],
-      [BIZ, 'POINTS_BUSINESS_CITIZENSHIP = 6'], [NOMAD_TICKET, `business: 2,\n  luxury: 3,\n  nomad: ${nomad},`],
+    about: `50 turns: Luxury 5 continents +${lux}; Backpacker 3 continents +${bp}; Business citizenship +${biz}; Nomad ticket ${nomad}; Nomad needs ${conts} continents (or −5)`,
+    patches: [[LUX, `luxury: { continents: 5, points: ${lux} }`], [BP, `backpacker: { continents: 3, points: ${bp} }`],
+      [BIZ, `POINTS_BUSINESS_CITIZENSHIP = ${biz}`], [NOMAD_TICKET, `business: 2,\n  luxury: 3,\n  nomad: ${nomad},`],
       ['NOMAD_MIN_CONTINENTS = 3', `NOMAD_MIN_CONTINENTS = ${conts}`]] as [string, string][],
   })),
 ];

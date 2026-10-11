@@ -46,7 +46,7 @@ for (const [name, pkg] of Object.entries<any>(R)) {
       all++; if (f) ok++;
       return `${w}% ${f ? '✅' : '❌'} (${(s.score / s.games).toFixed(1)})`;
     });
-    md += `| ${v.job.turns} turns, ${v.job.players} players | ${v.job.driver === 'N' ? 'normal' : 'planning'} | ${cells.join(' | ')} | |\n`;
+    md += `| ${v.job.turns} turns, ${v.job.players} players | ${({ N: 'normal (today)', N2: 'normal (plans 2)', P4: 'planning (plans 4)' } as Record<string, string>)[v.job.driver]} | ${cells.join(' | ')} | |\n`;
   }
   md = md.replace(/\| \|\n(?![\s\S]*\| \|\n)/, `| ${ok}/${all} |\n`);
   md += `\n**${ok} of ${all}** profile results inside the target. (Wins %, with the average final score in brackets.)\n`;
