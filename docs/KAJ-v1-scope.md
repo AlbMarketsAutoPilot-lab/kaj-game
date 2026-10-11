@@ -108,6 +108,7 @@ Target: a complete, playable v1 within about 15 days of work.
 | Online play, exam timers online | **No online play**; the timers in section 6 apply offline |
 | One robot level in v1 (this scope's first version) | **Easy, normal and hard** (owner's change, task 13) |
 | 30-turn map: every big country in 2 parts | **Canada, Russia and the USA (with Alaska) in 3 parts, +5 when complete** (owner's changes, tasks 14a and 14b); 53 areas |
+| Profile bonuses: Backpacker +3, Luxury +5 for 5 continents, Business +3, Nomad +1 per travel turn and −5 below 3 continents | **Balanced (owner, 2026-10-11, measured):** Backpacker +7 (helper cards b1–b8), Luxury no continent bonus, Business +6, Nomad +1 per trip, +5 for 3 continents, no travel challenges (it works); robots plan ahead (normal 2 moves, hard 3) |
 | "Ask for citizenship here?" on arrival | **A button in the area you stand in** (any area but your home country); the turn ends, test next turn; Luxury: granted at once, and the turn goes on (owner's change, task 14d) |
 | Any wrong answer: one learning turn, then granted anyway | **2 of 3 right to pass**, after reading 6 facts in the test turn; fewer: no citizenship, and the one request of the game is used up (owner's change, task 14f) |
 
@@ -115,7 +116,10 @@ Target: a complete, playable v1 within about 15 days of work.
 
 The 50-turn map (first candidate), keep cards, mini missions, the memory game, landmark drawings, the full 27–30 facts, the passport screen, balance simulator reports, and online play.
 
-8 profiles are **not planned**.
+**Future standalone app (owner, 2026-10-11):** the 100-turn game with 8 profiles will be a separate,
+paid app, built later. Version 1.0 of this app mentions neither. Version 1.1 of this app will mention the
+new app once it exists. Plans already written: `docs/map100.md` (the 100-turn map) and `docs/profiles8.md`
+(the 4 new profiles).
 
 ## 11. If time runs short: cut order
 

@@ -78,7 +78,7 @@ test('Nomad plane: pay 1, 1 travel turn (+1), then land', () => {
   assert.equal(seatOf(s, 0).points, 3 - 1 + 1 + 1 + 2);
 });
 
-test('Nomad ship: 3 travel turns (+3); Business ship: 1 travel turn', () => {
+test('Nomad ship: 3 travel turns, +1 for the trip (owner, 2026-10-11); Business ship: 1 travel turn', () => {
   let s = game(['eu-north', 'af-north'], 'nomad');
   s = board(s, 'na-one', 'port');
   for (const p2 of ['af-south', 'af-north', 'af-south']) {
@@ -87,7 +87,7 @@ test('Nomad ship: 3 travel turns (+3); Business ship: 1 travel turn', () => {
     s = travel(s);
   }
   assert.equal(seatOf(s, 0).area, 'na-one');
-  assert.equal(seatOf(s, 0).points, 3 - 1 + 3 + 1 + 2);
+  assert.equal(seatOf(s, 0).points, 3 - 1 + 1 + 1 + 2);
 
   let b = game(['eu-north', 'af-north'], 'business');
   b = board(b, 'na-one', 'port');

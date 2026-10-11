@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { apply, createGame, currentPlayer, finalScore, legalActions, nomadPenalty } from '../src/engine/engine.ts';
+import { apply, createGame, currentPlayer, finalScore, legalActions } from '../src/engine/engine.ts';
 import { randomInt } from '../src/engine/rng.ts';
 import { randomRobotAction } from '../src/engine/robot.ts';
 import { loadGame, saveGame } from '../src/engine/save.ts';
@@ -68,7 +68,7 @@ test(`random robots play ${GAMES} games on the 30-turn map with planes and ships
   let income = 0;
   let longestTrip = 0;
   let longestBlock = 0;
-  const bonuses = { backpacker: 0, luxury: 0, nomadPenalty: 0, nomadPenaltyLostWin: 0 };
+  const bonuses = { backpacker: 0, nomad: 0 };
   const profiles: Record<string, number> = {};
   let resumes = 0;
   const cards = { scheduled: 0, travel: 0, lostTurns: 0, won: 0, lost: 0 };
@@ -151,11 +151,7 @@ test(`random robots play ${GAMES} games on the 30-turn map with planes and ships
     for (const q of s.players) {
       profiles[q.profile!] = (profiles[q.profile!] ?? 0) + 1;
       if (q.profile === 'backpacker' && q.visitedContinents.length >= 3) bonuses.backpacker++;
-      if (q.profile === 'luxury' && q.visitedContinents.length >= 5) bonuses.luxury++;
-      if (q.profile === 'nomad' && nomadPenalty(q) > 0) {
-        bonuses.nomadPenalty++;
-        if (finalScore(s, q) + nomadPenalty(q) > Math.max(...s.players.filter((o) => o !== q).map((o) => finalScore(s, o)))) bonuses.nomadPenaltyLostWin++;
-      }
+      if (q.profile === 'nomad' && q.visitedContinents.length >= 3) bonuses.nomad++;
     }
   }
   console.log(`task 11: cards ${JSON.stringify(cards)}, longest trip ${longestTrip}, longest blocked ${longestBlock}`);

@@ -25,6 +25,13 @@ Every task also adds its part to the test board, so there is **always a playable
 
 - **30- and 50-turn games frozen (owner, 2026-10-10):** no more changes to their rules, maps, data,
   texts, screens or saved-game formats. Next: planning the 100-turn map (owner).
+- **Next session (new chat): task 15, publishing the signed AAB on Google Play.** Version 1.0 = the 30- and
+  50-turn games as they are now (frozen), with no mention of the 100-turn game or 8 profiles.
+- **Future standalone paid app (owner, 2026-10-11):** the 100-turn game with 8 profiles, built later as a
+  separate app (section L, `docs/map100.md`, `docs/profiles8.md`). Version 1.1 of this app will mention it.
+- **Profile balance and planning robots (owner, 2026-10-11), then the final freeze** of the 30- and
+  50-turn games: see `docs/engine.md` ("Profile balance and planning robots") and `docs/balance-lab.md`.
+- **100-turn map planned (L1, 2026-10-10):** proposal in `docs/map100.md`, waiting for the owner's answers. See section L.
 
 ## Status table
 
@@ -68,6 +75,13 @@ Every task also adds its part to the test board, so there is **always a playable
 | 18 | Bus from Mongolia to Siberia or China West (30-turn map), whole country at once | **high** | 1 | — | done (owner-approved 2026-10-09) |
 | 15v | Visual polish (owner, 2026-10-10): no rule, text or save changes | medium | 1 | — | ✅ done; the in-game "Leave the game?" popup needs the owner's phone test (Galaxy S25: map no longer shakes?) |
 | 16 | Full-game tests, bug fixes, buffer | medium | 1–2 | 15 | |
+| B | Profile balance and planning robots, both games (test-only lab first, then the rules; saves v13) | **high** | — | 5 | ✅ done (owner, 2026-10-11): final freeze of the 30- and 50-turn games |
+| L1 | 100-turn map: plan (`docs/map100.md`, made by `node scripts/map100-review.ts`) | **high** | 1 | 4 | ✅ proposal done; moved to the future standalone app (owner, 2026-10-11) |
+| L2 | 100-turn map: engine (map100, points for 4–5 parts, cards every 10, timing, stuck-state checker, 1,000 robot games, save stays 12) | **high** | 2 | standalone app | |
+| L3 | 100-turn map: shapes (new splits; 30- and 50-turn shape files unchanged) | medium | 1 | standalone app | |
+| L4 | 100-turn map: facts (sort the 50-turn facts, about 580 new ones; owner checks about 5 days) | medium | 2 | standalone app | |
+| L5 | 100-turn map: screens (turn picker, small areas, 4 wonder drawings, guide), web and APK | medium | 2 | standalone app | |
+| L6 | 100-turn map: full test games and fixes | medium (high if a rule changes) | 2 | standalone app | |
 
 ## The tasks
 
@@ -460,6 +474,38 @@ Owner-approved, one item at a time, each with before/after screenshots:
 - Guide maps: rounded frame, bigger words on the first trip map.
 - End screen: medals (🥇🥈🥉) and soft rows in the ranking, the winner's row in gold.
 - Colours: one name for each shared colour (`style.css` `:root`); side panel titles in gold.
+
+### L. The 100-turn map (owner, 2026-10-10) — now the future standalone paid app
+
+**Owner's decision (2026-10-11):** the 100-turn game will be a separate, paid app with **8 profiles**
+(`docs/profiles8.md`: Photographer, Student, Merchant, Explorer, plus the 4 of this app), built later.
+This app's version 1.0 mentions neither; version 1.1 will mention the new app. What was decided in this
+app since these plans were written also applies there: the same rules on every map, real-life rules with
+no caps, the numbers decide the balance (`docs/balance-lab.md`, the balanced profile rules and the planning
+robots in `docs/engine.md`).
+
+The 30- and 50-turn games stay frozen; the 100-turn game reuses their rules and design, as the 50-turn
+game reused the 30-turn one. **L1 (high, done):** proposal `docs/map100.md`, made by
+`node scripts/map100-review.ts`: 138 areas, each inside one 50-turn area (Europe 33, Asia 37, Africa 39,
+North America 13, South America 12, Oceania 4); 15 wonders; 20 airports, 24 ports, 34 connections (23 kept,
+8 needed new, 3 optional); 266 walking links (new: Øresund Bridge); Russia 5 parts, Canada 4, China 3,
+Brazil 3, Australia 3, USA 3. The stuck-state checker passes on the proposal. 8 questions for the owner
+at the end of `docs/map100.md`.
+
+Rules for the next sessions: no change to the 30- or 50-turn rules, maps, data, texts, screens or save
+format. The 100-turn game keeps save version 12 and adds only its map id (question 7). Points for 4 or more
+parts only touch the 100-turn map (no 30- or 50-turn country has more than 3 parts). The v1 scope
+(`docs/KAJ-v1-scope.md`) would need a line for the 100-turn map, like the one for the 50-turn map (owner).
+
+Sessions after L1: **9** (L2 2 high; L3 1, L4 2, L5 2, L6 2 medium), plus about 5 days of fact checking by the owner.
+
+**Dates and budget (checked 2026-10-10, day 4):** still open for v1: task 15 (1 session + the owner's
+Android Studio and Play steps) and task 16 (1–2). At about 1.5 sessions a day, 11 days leave room for
+about 16 sessions, so 3 + 9 = 12 fit on the calendar with about 2–3 days to spare. They do not fit safely
+on the budget: the owner's weekly Claude allowance is already 80% used, 2 sessions are high effort,
+the owner checks about 580 facts, and 100-turn test games are long. **Decision proposed: the 100-turn map
+comes after v1** (tasks 15 and 16 first, v1 = the 30- and 50-turn games). Doing it before would push back
+task 15 (the Play release) and task 16 (full-game tests) to the last days with no buffer.
 
 ### 16. Full-game tests and fixes — day 15
 

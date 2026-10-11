@@ -614,6 +614,30 @@ the timing below differ. Engine only: the screens come in M4 (until then the web
 - **Save version 11.** Owner: a version-10 save of a 30-turn game still loads (its rules did not
   change); other older saves are not continued.
 
+## Profile balance and planning robots (owner, 2026-10-11, both games)
+
+Measured in a test-only lab (`scripts/balance-lab/`, results in `docs/balance-lab.md`): robot games on
+a copy of the engine, with today's normal robots and with planning robots. Owner's rules for the study:
+the same rules on both maps, real-life rules, no caps; the numbers decide. Before: 9 of 32 results fair
+(each profile 20–30% of 4-player wins, 40–60% of 2-player wins); the measured rule set: 24 of 32.
+
+- **Luxury:** the +5 for 5 continents is removed (`CONTINENT_BONUS`).
+- **Backpacker:** +7 for 3 continents (was +3); its helper cards are b1–b8 again (b9–b15 removed).
+- **Business:** +6 for citizenship (was +3, `POINTS_BUSINESS_CITIZENSHIP`).
+- **Digital Nomad:** ticket 1 as before; **+1 per trip** (`POINTS_NOMAD_TRIP`, paid on the first travel
+  turn; a ship's 3 turns give +1, not +3; a wait for a taken destination gives nothing); **+5 for 3
+  continents**, and no more −5 at the end with fewer; **no travel challenges** (it works on trips): the
+  "Play the challenge" button stays, and a person who presses it gets a joke from the boss ("back to
+  work!", and its "No thanks" reads "Keep working") and the trip goes on. **Secret surprise** (owner, never
+  in the rules or the guide, like Madagascar's): on a ship, the Nomad's 3rd press of "Play" on the same
+  trip gives a real challenge (`nomadSurprise`). Robot Nomads never press "Play", so the measured balance
+  is unchanged.
+- **Robots** (`ROBOT_LEVELS`, `src/engine/planner.ts`): easy answers 65% right (70% in the 50-turn game),
+  keeps 4 points, doesn't plan; normal 75%, keeps 3, plans 2 moves ahead; hard 90%, keeps 2, plans 3.
+  The planner looks ahead over walks and trips (turns, tickets, fees, quiz waits, the bus, big countries,
+  whole continents, profile bonuses) and counts a point k turns later as 0.85^k.
+- **Save version 13:** no older save is continued.
+
 ## Project setup
 
 - TypeScript, run directly by Node 22.18 or newer (no build step for tests).

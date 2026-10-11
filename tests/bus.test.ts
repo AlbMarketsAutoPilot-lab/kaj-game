@@ -99,8 +99,9 @@ test('after the bus, each other part of the country still gives +1 (and its cont
   assert.equal(me(s).points, 18);
   s = pass(s);
   s = go(s, { type: 'walk', to: 'russia-west' });
-  // +1 for the part, +2 for Europe; the country's +5 is never given again.
-  assert.equal(me(s).points, 21);
+  // +1 for the part, +2 for Europe, +5 Nomad bonus for its 3rd continent (owner, 2026-10-11);
+  // the country's +5 is never given again.
+  assert.equal(me(s).points, 26);
   assert.deepEqual(me(s).bigCountries, ['Russia']);
 });
 

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { apply, createGame, currentPlayer, legalActions } from '../src/engine/engine.ts';
-import { robotAction } from '../src/engine/normal-robot.ts';
+import { robotAction, ROBOT_LEVELS, EASY_ACCURACY_LONG_GAME } from '../src/engine/normal-robot.ts';
 import { loadGame, saveGame } from '../src/engine/save.ts';
 import type { Action, GameState, RobotLevel } from '../src/engine/types.ts';
 import { map30 } from '../src/maps/map30.ts';
@@ -44,15 +44,16 @@ test('start area: the highest welcome bonus, then the most neighbours; the Backp
   }
 });
 
-test('walking: most points now (a wonder), less after fees', () => {
+// The easy robot doesn't plan (owner, 2026-10-11): it takes the most points now.
+test('walking (easy): most points now (a wonder), less after fees', () => {
   const s = startedGame(['central-europe', 'egypt'], 1, map30, ['business', 'luxury']);
-  const a = act(s);
+  const a = act(s, 'easy');
   assert.deepEqual(a, { type: 'walk', to: 'italy' });
 
   // Italy with a visa (2) gives 2 − 2 = 0: a plain new area (+1) is better.
   const visa = structuredClone(s);
   visa.players.find((p) => p !== currentPlayer(visa))!.citizenship = ['italy'];
-  const b = act(visa);
+  const b = act(visa, 'easy');
   assert.ok(b.type === 'walk' && b.to !== 'italy');
 });
 
@@ -68,7 +69,7 @@ test('citizenship: asked in the first area where it can, before round 10', () =>
   assert.notEqual(act(late).type, 'askCitizenship');
 });
 
-test('businesses: bought only when the reserve is kept (easy 5, normal 3, hard 2)', () => {
+test('businesses: bought only when the reserve is kept (easy 4, normal 3, hard 2)', () => {
   const s = startedGame(['italy', 'egypt'], 1, map30, ['business', 'luxury']);
   const me = currentPlayer(s);
   const withPoints = (n: number) => {
@@ -82,8 +83,8 @@ test('businesses: bought only when the reserve is kept (easy 5, normal 3, hard 2
   assert.equal(buys('hard', 4), true);
   assert.equal(buys('normal', 4), false);
   assert.equal(buys('normal', 5), true);
-  assert.equal(buys('easy', 6), false);
-  assert.equal(buys('easy', 7), true);
+  assert.equal(buys('easy', 5), false);
+  assert.equal(buys('easy', 6), true);
 });
 
 test('a last quiz try that would send it home: the robot walks instead, if it can', () => {
@@ -120,10 +121,10 @@ test('challenges: played only with enough points (easy 5, normal 3, hard 1)', ()
   assert.equal(plays('easy', 5), true);
 });
 
-test('answers: right about 50% (easy), 75% (normal), 90% (hard) of the time', () => {
+test('answers: right about 65% (easy), 75% (normal), 90% (hard) of the time (easy 70% in 50 turns)', () => {
   const s = startedGame(['iberia', 'egypt'], 1, map30, ['business', 'luxury']);
   s.quiz = { kind: 'port', to: 'uk-ireland', question: { text: '?', options: ['a', 'b'], correct: 1 } };
-  const expected = { easy: 0.5, normal: 0.75, hard: 0.9 };
+  const expected = { easy: 0.65, normal: 0.75, hard: 0.9 };
   for (const level of LEVELS) {
     let right = 0;
     let seed = 42;
@@ -177,3 +178,10 @@ for (const level of LEVELS) {
     assert.ok(longestTrip <= 10, `a trip took ${longestTrip} turns`);
   });
 }
+
+// Owner, 2026-10-11 (measured in docs/balance-lab.md): easy doesn't plan, normal plans 2 moves, hard 3;
+// easy answers 70% right in the 50-turn game.
+test('levels: planning depth and the easy robot in the 50-turn game', () => {
+  assert.deepEqual([ROBOT_LEVELS.easy.depth, ROBOT_LEVELS.normal.depth, ROBOT_LEVELS.hard.depth], [1, 2, 3]);
+  assert.equal(EASY_ACCURACY_LONG_GAME, 0.7);
+});
