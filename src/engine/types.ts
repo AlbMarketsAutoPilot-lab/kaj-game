@@ -55,11 +55,12 @@ export interface Area {
   cardsFrom?: string;
 }
 
-export type RouteKind = 'airport' | 'port' | 'station' | 'bus';
+export type RouteKind = 'airport' | 'port' | 'station' | 'bus' | 'car';
 
 // A fixed two-way route between two airports (or two ports, or two train stations): a <-> b.
 // One airport, port or station can be in up to 3 routes (a hub).
-// A one-way route goes only from a to b (the bus, task 18: there is a bus stop only in a).
+// A one-way route goes only from a to b (the bus, task 18: there is a bus stop only in a; the car,
+// task 19: a car rental only in a).
 export interface Route {
   kind: RouteKind;
   a: string;
@@ -114,6 +115,11 @@ export interface Player {
   bigCountries: string[];
   // Continents this player has visited completely, every area (owner, M5): rewarded once.
   fullContinents: Continent[];
+  // The round the player last arrived in an area (the starting area counts as round 1). The
+  // Backpacker's hitchhike works only after arriving on an even round (task 19, a secret).
+  arrivedRound: number;
+  // The round of a hitchhike that failed: no second try in the same turn (task 19).
+  hitchFailedRound: number | null;
 }
 
 // A special reward given by the last move (owner, M5), so the screens can show it.
@@ -127,8 +133,9 @@ export interface Reward {
 
 // Businesses (rulebook section 6): guided tours at a wonder, an airline at an airport,
 // a ferry agency at a port, a train ticket booth at a station (task 17), a bus ticket booth at
-// the bus stop (task 18). Bought by the player standing in the area.
-export type BusinessKind = 'tours' | 'airline' | 'ferry' | 'train' | 'bus';
+// the bus stop (task 18), a car rental where the car leaves (task 19). Bought by the player standing
+// in the area.
+export type BusinessKind = 'tours' | 'airline' | 'ferry' | 'train' | 'bus' | 'car';
 
 export interface Business {
   kind: BusinessKind;
@@ -244,6 +251,8 @@ export interface GameState {
   // The challenge answered by the last move, so the screens can say what happened.
   // Cleared by every move, like `payments`.
   challenged: ChallengeResult | null;
+  // The hitchhike tried by the last move (task 19): did a car stop? Cleared by every move.
+  hitchhiked: { seat: number; to: string; stopped: boolean } | null;
   result: GameResult | null;
 }
 
@@ -310,7 +319,10 @@ export type Action =
   // Pay the ticket and board. Not for the Backpacker, who travels only with the quiz.
   // Luxury never takes the train (task 17).
   | { type: 'board'; kind: RouteKind; to: string }
-  // Try the airline quiz for this trip; the next move is the answer.
+  // The Backpacker tries to hitchhike (the car, task 19). If no car stops the turn goes on and
+  // the player must move another way.
+  | { type: 'hitchhike'; to: string }
+  // Try the airline quiz for this trip (never for the car); the next move is the answer.
   | { type: 'quiz'; kind: RouteKind; to: string }
   // Ask for citizenship of the area the player stands in (owner's rule, task 14d): never the
   // home country, once per game, never the Nomad, where nobody holds or is asking for it.

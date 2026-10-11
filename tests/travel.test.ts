@@ -198,11 +198,12 @@ test('home is the area itself: the player stays and the count starts again', () 
 });
 
 // The stuck-state checker (task 2b) assumes the quiz is always possible:
-// any profile, any airport or port of the 30-turn map, even with 0 points.
+// any profile, any airport or port of the 30-turn map, even with 0 points. The car has no quiz
+// (task 19): the stuck-state checker leaves it out.
 test('30-turn map: the quiz is offered for every destination, for every profile, with 0 points', () => {
   for (const profile of PROFILES) {
     // Luxury can't take the train (task 17); only the Nomad and Backpacker take the bus, one way (task 18).
-    for (const r of (map30.routes ?? []).filter((x) => canRide(profile, x.kind))) {
+    for (const r of (map30.routes ?? []).filter((x) => canRide(profile, x.kind) && x.kind !== 'car')) {
       for (const [from, to] of r.oneWay ? [[r.a, r.b]] : [[r.a, r.b], [r.b, r.a]]) {
         const s = withPlayerAt(map30, profile, from);
         const offered = legalActions(s, map30).some((a) => a.type === 'quiz' && a.kind === r.kind && a.to === to);

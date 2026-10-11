@@ -252,14 +252,14 @@ export function areaAt(geo: Map<string, AreaGeo>, x: number, y: number): string 
   return null;
 }
 
-export type PropKind = 'wonder' | 'citizen' | 'airport' | 'port' | 'station' | 'bus';
+export type PropKind = 'wonder' | 'citizen' | 'airport' | 'port' | 'station' | 'bus' | 'car';
 
 // Where each drawn prop of an area goes, around the pawn at the area's centre (view units: x is
 // multiplied by k; P is the prop size). Owner's rule (M5): a prop never sits over another area, so
 // it never looks like that area's. A port goes in the sea next to its area when it can; the others
 // inside their own area. Each prop tries its usual side first (airport left, port right, wonder and
-// flag above, station and bus below), then turns around the pawn and moves out step by step.
-const PREFERRED: Record<PropKind, number> = { wonder: -90, citizen: -90, airport: 180, port: 0, station: 180, bus: 90 };
+// flag above, station, bus and car below), then turns around the pawn and moves out step by step.
+const PREFERRED: Record<PropKind, number> = { wonder: -90, citizen: -90, airport: 180, port: 0, station: 180, bus: 90, car: 90 };
 export function propSpots(geo: Map<string, AreaGeo>, focus: string, kinds: PropKind[], P: number, k: number): Map<PropKind, [number, number]> {
   const [cx0, cy] = geo.get(focus)!.centre;
   const cx = cx0 * k;

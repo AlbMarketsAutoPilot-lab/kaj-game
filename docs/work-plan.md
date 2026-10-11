@@ -70,12 +70,13 @@ Every task also adds its part to the test board, so there is **always a playable
 | M4 | 50-turn map: screens (turn picker, home country, world map, guide), web and APK | medium | 1 | 15 | ✅ done (owner-approved 2026-10-09: screens, and the 4 new wonder drawings) |
 | M5 | 50-turn map: full test games and fixes | medium | 3 | 15 | ✅ sessions 1 (guide, texts, money names, What happened switch), 2 (map screens) and 3 (rules: bus, whole continents, Madagascar, saves v12) |
 | M6 | Wonder posters for the 7 wonders of the 30-turn map (the 4 of the 50-turn map come with M4) | medium | 1 | 13 | ✅ done |
-| 15 | Android release build (signed AAB for Play, built by the owner in Android Studio) | medium/high | 1 | — | in progress (2026-10-10): icon, SDK 36, audit fixes A + B done (`docs/audit-task15.md`); next: owner's Android Studio check, phone test, upload key, AAB |
+| 15 | Android release build (signed AAB for Play, built by the owner in Android Studio) | medium/high | 1 | — | in progress: icon, SDK 36, audit fixes A + B done (`docs/audit-task15.md`); owner's Android Studio build and phone test done (2026-10-11, signed APK); next: AAB for Play |
 | 17 | Train France ↔ Russia West and France ↔ Turkey (30-turn map): A rules **high**, B screens medium | **high** / medium | 2 | 13–14 | done (A rules, robots, tests, save 9; B screens, sound) |
 | 18 | Bus from Mongolia to Siberia or China West (30-turn map), whole country at once | **high** | 1 | — | done (owner-approved 2026-10-09) |
 | 15v | Visual polish (owner, 2026-10-10): no rule, text or save changes | medium | 1 | — | ✅ done; the in-game "Leave the game?" popup needs the owner's phone test (Galaxy S25: map no longer shakes?) |
 | 16 | Full-game tests, bug fixes, buffer | medium | 1–2 | 15 | |
 | B | Profile balance and planning robots, both games (test-only lab first, then the rules; saves v13) | **high** | — | 5 | ✅ done (owner, 2026-10-11): final freeze of the 30- and 50-turn games |
+| 19 | The car in Mexico (both games): rent 1 (Nomad, Business, Luxury), Backpacker hitchhikes (secret: even arrival round), USA +5 at once; turn buttons without "walk, fly and sail"; saves v14 | **high** | 1 | — | ✅ done (owner, 2026-10-11): the last change, then the final freeze |
 | L1 | 100-turn map: plan (`docs/map100.md`, made by `node scripts/map100-review.ts`) | **high** | 1 | 4 | ✅ proposal done; moved to the future standalone app (owner, 2026-10-11) |
 | L2 | 100-turn map: engine (map100, points for 4–5 parts, cards every 10, timing, stuck-state checker, 1,000 robot games, save stays 12) | **high** | 2 | standalone app | |
 | L3 | 100-turn map: shapes (new splits; 30- and 50-turn shape files unchanged) | medium | 1 | standalone app | |
