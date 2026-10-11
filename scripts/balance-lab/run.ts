@@ -52,8 +52,8 @@ for (const pkg of PACKAGES.filter((p) => wanted.length === 0 || wanted.includes(
   const dir = copyFor(pkg); dirs.push(dir);
   results[pkg.name] = { about: pkg.about, games: GAMES, lines: {} };
   const jobs: [string, object][] = [];
-  for (const turns of [30, 50]) {
-    if (!pkg.ladderOnly) for (const players of [4, 2]) for (const driver of ['N', 'P4']) jobs.push([`profiles ${turns} ${players} ${driver}`, { kind: 'profiles', turns, players, driver, games: GAMES }]);
+  for (const turns of pkg.turns ?? [30, 50]) {
+    if (!pkg.ladderOnly) for (const players of [4, 2]) for (const driver of pkg.drivers ?? ['N', 'P4']) jobs.push([`profiles ${turns} ${players} ${driver}`, { kind: 'profiles', turns, players, driver, games: GAMES }]);
     // The robot ladder: on today's rules only.
     if (pkg.ladderOnly) for (const [a, b] of [['E', 'N'], ['E', 'N2'], ['N2', 'H4']]) jobs.push([`versus ${turns} ${a} ${b}`, { kind: 'versus', turns, a, b, games: GAMES }]);
     if (pkg.name === 'today') for (const [a, b] of [['E', 'N'], ['N', 'H'], ['N', 'P4'], ['H', 'H4'], ['N', 'N2'], ['E', 'N2'], ['N2', 'H4'], ['E', 'H4'], ['N2', 'H3'], ['E', 'H3']]) {
