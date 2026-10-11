@@ -571,6 +571,9 @@ chooses), on the 30- and 50-turn maps. The owner's last change before the final 
   tips and area details; a desert-road trip scene, and the thumb scenes (a car stops / rushes past).
 - **Stuck-state checker:** leaves the car out, like the train and the bus.
 - **Save version 14:** no older save is continued.
+- **Robot report (1,000 games per line):** no stuck or endless game. Average scores alone, before → with
+  the car: 30 turns easy 44.6 → 45.0, normal 48.0 → 50.9, hard 52.2 → 52.2; 50 turns easy 66.3 → 67.8,
+  normal 70.9 → 73.1, hard 75.7 → 77.2. The levels keep their order (hard beats normal 57% / 61%).
 
 ## Owner's test fixes (task M5, both games; the 30-turn game is unfrozen)
 
