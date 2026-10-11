@@ -106,7 +106,8 @@ function choose(state: GameState, map: GameMap, actions: Action[], me: Player, s
     return { type: 'examAnswer', choice: answer(exam.questions[exam.answers.length].correct, settings, rnd) };
   }
   if (first.type === 'travel') {
-    const play = me.points >= settings.challengeFrom;
+    // A robot Nomad works on its trips and never presses "Play" (owner, 2026-10-11).
+    const play = me.points >= settings.challengeFrom && me.profile !== 'nomad';
     return actions.find((a) => a.type === 'travel' && (a.challenge === true) === play) ?? first;
   }
   if (first.type === 'chooseProfile') return actions[Math.floor(rnd.next() * actions.length)];

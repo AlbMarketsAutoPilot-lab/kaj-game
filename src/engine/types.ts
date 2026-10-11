@@ -187,6 +187,9 @@ export interface Travel {
   to: string;
   // Travel turns still to come. At 0 the player lands, or waits if the destination is taken.
   turnsLeft: number;
+  // The Nomad's presses of "Play the challenge" on this trip (owner, 2026-10-11: a secret, see
+  // nomadSurprise in engine.ts).
+  workPresses?: number;
 }
 
 // One a/b airline-quiz question. Nothing is secret in v1, so it can sit in the state.

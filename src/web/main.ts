@@ -4,7 +4,7 @@
 
 import { BUSINESS_PRICE, cardEvery, CHALLENGE_POINTS, GAME_LENGTHS, CONTINENT_BONUS, EXAM_FACTS, EXAM_PASS, POINTS_NOMAD_TRIP, POINTS_NEW_AREA, POINTS_NEW_CONTINENT, POINTS_WONDER, GO_HOME_TURNS, POINTS_BUSINESS_CITIZENSHIP, QUIZ_TRIES, ROUTE_KINDS, bigCountryPoints, canRide, TICKET_BUSINESS, TICKET_PRICE, ticketPrice, TOUR_FEE, TRAVEL_TURNS, VISA_PRICE } from '../engine/constants.ts';
 import {
-  apply, blockedByMoney, continentReward, examPassed, bookedBy, businessAt, canPayAfterQuiz, destinations, businessValue, createGame, currentPlayer, entryFees, feeTotal, finalScore, homeFor, landTurnsToCard, legalActions,
+  apply, blockedByMoney, continentReward, examPassed, bookedBy, businessAt, canPayAfterQuiz, destinations, businessValue, createGame, currentPlayer, entryFees, feeTotal, finalScore, homeFor, landTurnsToCard, legalActions, nomadSurprise,
 } from '../engine/engine.ts';
 import { robotAction } from '../engine/normal-robot.ts';
 import { loadGame, saveGame } from '../engine/save.ts';
@@ -948,7 +948,8 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
       ? `Clickety-clack through the night. In the dining car someone unfolds a map: "A geography challenge? Right +${CHALLENGE_POINTS}, wrong −${CHALLENGE_POINTS}."`
       : `Calm water, a sky full of stars. In the ship's lounge someone sets up a quiz table: "A geography challenge? Right +${CHALLENGE_POINTS}, wrong −${CHALLENGE_POINTS}."`;
     const play = button('🌍 Play the challenge', () => {
-      if (me.profile === 'nomad') { nomadAtWork = true; render(); return; }
+      // The boss answers, except for the secret surprise (a real challenge, engine.ts nomadSurprise).
+      if (me.profile === 'nomad' && !nomadSurprise(me)) { nomadAtWork = true; render(); return; }
       act({ type: 'travel', challenge: true });
     });
     play.className = 'primary';
@@ -956,8 +957,7 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
     if (nomadAtWork && me.profile === 'nomad') {
       box.append(tripScene(trip.kind), el('div', { className: 'trip-text' },
         el('h2', {}, '📧 Ping! A message from your boss'),
-        el('p', { textContent: '"Quizzes? QUIZZES?! You\'re supposed to be working, not playing with strangers! That report was due yesterday. Laptop open, coffee in hand, back to work!" 😤☕💻' }),
-        el('p', { className: 'small', textContent: `💻 Digital Nomad: no challenges on trips, you're working. Your +${POINTS_NOMAD_TRIP} for this trip is safe.` }),
+        el('p', { textContent: `"Quizzes? QUIZZES?! You're supposed to be working! I'm paying you +${plural(POINTS_NOMAD_TRIP, 'point')} to work during trips! Laptop open, coffee in hand, back to work!" 😤☕💻` }),
         el('div', { className: 'row' }, button('💻 Back to work', () => { nomadAtWork = false; act({ type: 'travel', challenge: true }); }))));
       return box;
     }
@@ -968,7 +968,7 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
         : `A challenge needs at least ${plural(CHALLENGE_POINTS, 'point')}, so there is none this turn.` }),
       me.profile === 'nomad' ? el('p', { className: 'small', textContent: `💻 Digital Nomad: +${POINTS_NOMAD_TRIP} for every trip, paid on its first travel turn.` }) : '',
       el('div', { className: 'row' }, ...(challenge
-        ? [play, button(plane || train || bus ? '😴 No thanks' : '🌅 No thanks', () => act({ type: 'travel' }))]
+        ? [play, button(me.profile === 'nomad' ? '💻 Keep working' : plane || train || bus ? '😴 No thanks' : '🌅 No thanks', () => act({ type: 'travel' }))]
         : [button('Continue the trip', () => act({ type: 'travel' }))]))));
   } else {
     const here = areaById.get(me.area!)!;

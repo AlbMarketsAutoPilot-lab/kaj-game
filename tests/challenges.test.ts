@@ -131,3 +131,20 @@ test('the challenge is random but replays the same with the same seed', () => {
   }
   assert.equal(ids.size, CHALLENGE_TYPES.length, 'every type comes up');
 });
+
+// Owner's secret (2026-10-11, never in the rules, like Madagascar's): on a ship, the Nomad's 3rd press
+// of "Play the challenge" on the same trip gives a real challenge.
+test('the Nomad at sea: 2 presses get the boss, the 3rd a real challenge', () => {
+  let s = atSea();
+  s = pass(go(s, { type: 'travel', challenge: true }));
+  assert.equal(s.challenge, null);
+  s = pass(go(s, { type: 'travel', challenge: true }));
+  assert.equal(s.challenge, null);
+  assert.equal(p1(s).travel!.turnsLeft, 1);
+  const t = go(s, { type: 'travel', challenge: true });
+  assert.ok(t.challenge, 'a real challenge on the 3rd press');
+  const before = p1(t).points;
+  const right = go(t, { type: 'challengeAnswer', choice: t.challenge!.correct });
+  assert.equal(p1(right).area, 'na-one');
+  assert.equal(p1(right).points, before + 1 + 2 + 1); // lands: area +1, continent +2; challenge +1; no 2nd trip point
+});

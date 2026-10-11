@@ -628,7 +628,10 @@ the same rules on both maps, real-life rules, no caps; the numbers decide. Befor
   turn; a ship's 3 turns give +1, not +3; a wait for a taken destination gives nothing); **+5 for 3
   continents**, and no more −5 at the end with fewer; **no travel challenges** (it works on trips): the
   "Play the challenge" button stays, and a person who presses it gets a joke from the boss ("back to
-  work!") and the trip goes on.
+  work!", and its "No thanks" reads "Keep working") and the trip goes on. **Secret surprise** (owner, never
+  in the rules or the guide, like Madagascar's): on a ship, the Nomad's 3rd press of "Play" on the same
+  trip gives a real challenge (`nomadSurprise`). Robot Nomads never press "Play", so the measured balance
+  is unchanged.
 - **Robots** (`ROBOT_LEVELS`, `src/engine/planner.ts`): easy answers 65% right (70% in the 50-turn game),
   keeps 4 points, doesn't plan; normal 75%, keeps 3, plans 2 moves ahead; hard 90%, keeps 2, plans 3.
   The planner looks ahead over walks and trips (turns, tickets, fees, quiz waits, the bus, big countries,

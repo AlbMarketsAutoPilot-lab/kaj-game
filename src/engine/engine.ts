@@ -302,11 +302,14 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
       // No event cards on trips (owner's rule, task 12). A challenge, if the player wants one,
       // is drawn now and answered with the next move; the trip goes on after the answer.
       // The Nomad works on its trips (owner, 2026-10-11): it may press "Play", but it gets no
-      // challenge (the screens tell it to get back to work), and the trip goes on.
-      if (action.challenge && me.profile !== 'nomad') {
+      // challenge (the screens tell it to get back to work), and the trip goes on. Secret surprise
+      // (owner, like Madagascar's, never in the rules): on a ship, the 3rd press of the same trip
+      // gives a real challenge, for insisting.
+      if (action.challenge && (me.profile !== 'nomad' || nomadSurprise(me))) {
         next.challenge = pickChallenge(next);
         return next;
       }
+      if (action.challenge) me.travel!.workPresses = (me.travel!.workPresses ?? 0) + 1;
       travelOn(next, map, me);
       endTurn(next, map);
       return next;
@@ -700,6 +703,13 @@ function wholeContinent(state: GameState, map: GameMap, me: Player, continent: C
   me.fullContinents.push(continent);
   me.points = addPoints(me.points, points);
   state.rewards.push({ seat: me.seat, kind: 'continent', points, continent });
+}
+
+// The Nomad's secret surprise (owner, 2026-10-11): on a ship trip, after 2 presses of "Play the
+// challenge" (each answered by the boss), the 3rd press gives a real challenge.
+export const NOMAD_SURPRISE_PRESSES = 2;
+export function nomadSurprise(me: Player): boolean {
+  return me.profile === 'nomad' && me.travel?.kind === 'port' && (me.travel.workPresses ?? 0) >= NOMAD_SURPRISE_PRESSES;
 }
 
 // One travel turn: the player lands at the end of the last one. The Nomad gets +1 once per trip,
