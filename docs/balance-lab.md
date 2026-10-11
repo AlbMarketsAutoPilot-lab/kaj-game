@@ -382,3 +382,39 @@ With 400 games per line a win share is accurate to about ±2–4 points.
 | 50 turns, 4 players | planning (plans 4) | 45% ❌ (78.2) | 26% ✅ (74.1) | 17% ❌ (71.9) | 11% ❌ (70.7) | 9/16 |
 
 **9 of 16** profile results inside the target. (Wins %, with the average final score in brackets.)
+
+## Robot variant "FINAL-30": no Luxury continent bonus; Backpacker 3 continents +7, cards b1–b8; Business citizenship +6; Nomad ticket 1, no challenges, +5 for 3 continents
+
+| Game | A | B | A wins | B wins |
+|---|---|---|---|---|
+| 30 turns | easy | normal, plans 2 moves | 38% | 62% |
+| 30 turns | normal, plans 2 moves | hard, plans 3 moves | 35% | 65% |
+
+## Package "FINAL-30": no Luxury continent bonus; Backpacker 3 continents +7, cards b1–b8; Business citizenship +6; Nomad ticket 1, no challenges, +5 for 3 continents
+
+| Game | Robots | Backpacker | Business | Luxury | Nomad | Fair? |
+|---|---|---|---|---|---|---|
+| 30 turns, 2 players | normal (plans 2) | 43% ✅ (49.8) | 55% ✅ (49.3) | 42% ✅ (47.2) | 59% ✅ (50.9) | |
+| 30 turns, 4 players | normal (plans 2) | 25% ✅ (49.2) | 24% ✅ (46.7) | 29% ✅ (48.4) | 21% ✅ (48.5) | |
+| 30 turns, 2 players | planning (plans 4) | 47% ✅ (51.8) | 55% ✅ (52.3) | 48% ✅ (50.4) | 50% ✅ (51.6) | |
+| 30 turns, 4 players | planning (plans 4) | 16% ❌ (48.8) | 33% ❌ (51.9) | 25% ✅ (50.0) | 26% ✅ (51.5) | 14/16 |
+
+**14 of 16** profile results inside the target. (Wins %, with the average final score in brackets.)
+
+## Robot variant "FINAL-50": no Luxury continent bonus; Backpacker 3 continents +7, cards b1–b8; Business citizenship +6; Nomad ticket 1, no challenges, +5 for 3 continents
+
+| Game | A | B | A wins | B wins |
+|---|---|---|---|---|
+| 50 turns | easy | normal, plans 2 moves | 25% | 75% |
+| 50 turns | normal, plans 2 moves | hard, plans 3 moves | 30% | 70% |
+
+## Package "FINAL-50": no Luxury continent bonus; Backpacker 3 continents +7, cards b1–b8; Business citizenship +6; Nomad ticket 1, no challenges, +5 for 3 continents
+
+| Game | Robots | Backpacker | Business | Luxury | Nomad | Fair? |
+|---|---|---|---|---|---|---|
+| 50 turns, 2 players | normal (plans 2) | 61% ❌ (74.5) | 44% ✅ (70.2) | 47% ✅ (70.0) | 48% ✅ (73.2) | |
+| 50 turns, 4 players | normal (plans 2) | 30% ✅ (71.7) | 23% ✅ (69.7) | 31% ❌ (70.9) | 15% ❌ (68.9) | |
+| 50 turns, 2 players | planning (plans 4) | 29% ❌ (75.0) | 43% ✅ (74.9) | 53% ✅ (74.3) | 74% ❌ (80.5) | |
+| 50 turns, 4 players | planning (plans 4) | 30% ✅ (75.4) | 22% ✅ (73.0) | 19% ❌ (71.9) | 29% ✅ (75.7) | 10/16 |
+
+**10 of 16** profile results inside the target. (Wins %, with the average final score in brackets.)
