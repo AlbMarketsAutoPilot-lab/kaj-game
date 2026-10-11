@@ -7,6 +7,7 @@ These rules apply to every session and every task in this repository.
 - When the owner has to do something (run a command, click in Cloudflare or GitHub, open a page), give exactly **one step**, with the exact command or action and what the owner should expect to see.
 - Stop after that step. Continue only when the owner says **done** (usually with the output). Check the output before giving the next step.
 - If the owner asks a question about a step, answer only about that step. Do not include or preview other steps.
+- **Never give generic commands or instructions.** Never write placeholders like "go to your folder" or "your path". Every command must be complete and exact, ready to copy and paste as it is. If a detail is missing (for example the folder path on the owner's computer), ask for it first, then give the exact command.
 
 ## 2. No decision without the owner's approval
 
