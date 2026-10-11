@@ -1,6 +1,9 @@
 # 8 profiles — 4 new profiles and their balance on paper (planning, no code)
 
-Status: **proposal for the owner** (2026-10-10). Nothing in the game is changed by this file.
+Status: **plan for the future standalone paid app** (owner, 2026-10-11: the 100-turn game with 8 profiles,
+built later as a separate app; not in this app's version 1.0). Written 2026-10-10, before the profile
+balance of 2026-10-11 (`docs/engine.md`, `docs/balance-lab.md`): the numbers in sections 1 and 3 are
+from the old rules, and the new app must be measured again with the lab before its numbers are set.
 Rulebook v7: "4 players and 8 profiles may come later". v1 scope: "8 profiles are not planned".
 Adding profiles changes the rules, screens and saves of the **frozen** 30- and 50-turn games, so it
 needs the owner's decision to unfreeze them (planned as v2, after v1).

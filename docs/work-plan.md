@@ -25,6 +25,10 @@ Every task also adds its part to the test board, so there is **always a playable
 
 - **30- and 50-turn games frozen (owner, 2026-10-10):** no more changes to their rules, maps, data,
   texts, screens or saved-game formats. Next: planning the 100-turn map (owner).
+- **Next session (new chat): task 15, publishing the signed AAB on Google Play.** Version 1.0 = the 30- and
+  50-turn games as they are now (frozen), with no mention of the 100-turn game or 8 profiles.
+- **Future standalone paid app (owner, 2026-10-11):** the 100-turn game with 8 profiles, built later as a
+  separate app (section L, `docs/map100.md`, `docs/profiles8.md`). Version 1.1 of this app will mention it.
 - **Profile balance and planning robots (owner, 2026-10-11), then the final freeze** of the 30- and
   50-turn games: see `docs/engine.md` ("Profile balance and planning robots") and `docs/balance-lab.md`.
 - **100-turn map planned (L1, 2026-10-10):** proposal in `docs/map100.md`, waiting for the owner's answers. See section L.
@@ -72,12 +76,12 @@ Every task also adds its part to the test board, so there is **always a playable
 | 15v | Visual polish (owner, 2026-10-10): no rule, text or save changes | medium | 1 | — | ✅ done; the in-game "Leave the game?" popup needs the owner's phone test (Galaxy S25: map no longer shakes?) |
 | 16 | Full-game tests, bug fixes, buffer | medium | 1–2 | 15 | |
 | B | Profile balance and planning robots, both games (test-only lab first, then the rules; saves v13) | **high** | — | 5 | ✅ done (owner, 2026-10-11): final freeze of the 30- and 50-turn games |
-| L1 | 100-turn map: plan (`docs/map100.md`, made by `node scripts/map100-review.ts`) | **high** | 1 | 4 | ✅ proposal done; waiting for the owner's 8 answers |
-| L2 | 100-turn map: engine (map100, points for 4–5 parts, cards every 10, timing, stuck-state checker, 1,000 robot games, save stays 12) | **high** | 2 | after v1 | |
-| L3 | 100-turn map: shapes (new splits; 30- and 50-turn shape files unchanged) | medium | 1 | after v1 | |
-| L4 | 100-turn map: facts (sort the 50-turn facts, about 580 new ones; owner checks about 5 days) | medium | 2 | after v1 | |
-| L5 | 100-turn map: screens (turn picker, small areas, 4 wonder drawings, guide), web and APK | medium | 2 | after v1 | |
-| L6 | 100-turn map: full test games and fixes | medium (high if a rule changes) | 2 | after v1 | |
+| L1 | 100-turn map: plan (`docs/map100.md`, made by `node scripts/map100-review.ts`) | **high** | 1 | 4 | ✅ proposal done; moved to the future standalone app (owner, 2026-10-11) |
+| L2 | 100-turn map: engine (map100, points for 4–5 parts, cards every 10, timing, stuck-state checker, 1,000 robot games, save stays 12) | **high** | 2 | standalone app | |
+| L3 | 100-turn map: shapes (new splits; 30- and 50-turn shape files unchanged) | medium | 1 | standalone app | |
+| L4 | 100-turn map: facts (sort the 50-turn facts, about 580 new ones; owner checks about 5 days) | medium | 2 | standalone app | |
+| L5 | 100-turn map: screens (turn picker, small areas, 4 wonder drawings, guide), web and APK | medium | 2 | standalone app | |
+| L6 | 100-turn map: full test games and fixes | medium (high if a rule changes) | 2 | standalone app | |
 
 ## The tasks
 
@@ -471,7 +475,14 @@ Owner-approved, one item at a time, each with before/after screenshots:
 - End screen: medals (🥇🥈🥉) and soft rows in the ranking, the winner's row in gold.
 - Colours: one name for each shared colour (`style.css` `:root`); side panel titles in gold.
 
-### L. The 100-turn map (owner, 2026-10-10)
+### L. The 100-turn map (owner, 2026-10-10) — now the future standalone paid app
+
+**Owner's decision (2026-10-11):** the 100-turn game will be a separate, paid app with **8 profiles**
+(`docs/profiles8.md`: Photographer, Student, Merchant, Explorer, plus the 4 of this app), built later.
+This app's version 1.0 mentions neither; version 1.1 will mention the new app. What was decided in this
+app since these plans were written also applies there: the same rules on every map, real-life rules with
+no caps, the numbers decide the balance (`docs/balance-lab.md`, the balanced profile rules and the planning
+robots in `docs/engine.md`).
 
 The 30- and 50-turn games stay frozen; the 100-turn game reuses their rules and design, as the 50-turn
 game reused the 30-turn one. **L1 (high, done):** proposal `docs/map100.md`, made by

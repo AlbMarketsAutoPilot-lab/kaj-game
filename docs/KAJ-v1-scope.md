@@ -116,7 +116,10 @@ Target: a complete, playable v1 within about 15 days of work.
 
 The 50-turn map (first candidate), keep cards, mini missions, the memory game, landmark drawings, the full 27–30 facts, the passport screen, balance simulator reports, and online play.
 
-8 profiles are **not planned**.
+**Future standalone app (owner, 2026-10-11):** the 100-turn game with 8 profiles will be a separate,
+paid app, built later. Version 1.0 of this app mentions neither. Version 1.1 of this app will mention the
+new app once it exists. Plans already written: `docs/map100.md` (the 100-turn map) and `docs/profiles8.md`
+(the 4 new profiles).
 
 ## 11. If time runs short: cut order
 
