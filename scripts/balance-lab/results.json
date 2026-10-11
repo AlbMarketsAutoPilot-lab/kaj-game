@@ -2762,5 +2762,525 @@
     }
    }
   }
+ },
+ "T4": {
+  "about": "30 turns: Luxury 5 continents +0; Backpacker 3 continents +6; Business citizenship +5; Nomad ticket 2",
+  "games": 1000,
+  "lines": {
+   "profiles 30 2 N2": {
+    "job": {
+     "kind": "profiles",
+     "turns": 30,
+     "players": 2,
+     "driver": "N2",
+     "games": 1000
+    },
+    "profiles": {
+     "backpacker": {
+      "score": 25885,
+      "wins": 305,
+      "games": 508
+     },
+     "nomad": {
+      "score": 24494,
+      "wins": 229,
+      "games": 505
+     },
+     "business": {
+      "score": 24164,
+      "wins": 240,
+      "games": 504
+     },
+     "luxury": {
+      "score": 23349,
+      "wins": 224,
+      "games": 483
+     }
+    }
+   },
+   "profiles 30 4 N2": {
+    "job": {
+     "kind": "profiles",
+     "turns": 30,
+     "players": 4,
+     "driver": "N2",
+     "games": 1000
+    },
+    "profiles": {
+     "business": {
+      "score": 46543,
+      "wins": 239,
+      "games": 1000
+     },
+     "luxury": {
+      "score": 48952,
+      "wins": 291,
+      "games": 1000
+     },
+     "nomad": {
+      "score": 47794,
+      "wins": 208,
+      "games": 1000
+     },
+     "backpacker": {
+      "score": 49420,
+      "wins": 260,
+      "games": 1000
+     }
+    }
+   },
+   "profiles 30 2 P4": {
+    "job": {
+     "kind": "profiles",
+     "turns": 30,
+     "players": 2,
+     "driver": "P4",
+     "games": 1000
+    },
+    "profiles": {
+     "backpacker": {
+      "score": 26465,
+      "wins": 256,
+      "games": 508
+     },
+     "nomad": {
+      "score": 25503,
+      "wins": 232,
+      "games": 505
+     },
+     "business": {
+      "score": 26144,
+      "wins": 276,
+      "games": 504
+     },
+     "luxury": {
+      "score": 24434,
+      "wins": 236,
+      "games": 483
+     }
+    }
+   },
+   "profiles 30 4 P4": {
+    "job": {
+     "kind": "profiles",
+     "turns": 30,
+     "players": 4,
+     "driver": "P4",
+     "games": 1000
+    },
+    "profiles": {
+     "business": {
+      "score": 51260,
+      "wins": 291,
+      "games": 1000
+     },
+     "luxury": {
+      "score": 50521,
+      "wins": 306,
+      "games": 1000
+     },
+     "nomad": {
+      "score": 49353,
+      "wins": 201,
+      "games": 1000
+     },
+     "backpacker": {
+      "score": 49704,
+      "wins": 201,
+      "games": 1000
+     }
+    }
+   }
+  }
+ },
+ "T5": {
+  "about": "30 turns: Luxury 5 continents +0; Backpacker 3 continents +6; Business citizenship +5; Nomad ticket 1",
+  "games": 1000,
+  "lines": {
+   "profiles 30 4 N2": {
+    "job": {
+     "kind": "profiles",
+     "turns": 30,
+     "players": 4,
+     "driver": "N2",
+     "games": 1000
+    },
+    "profiles": {
+     "business": {
+      "score": 45670,
+      "wins": 189,
+      "games": 1000
+     },
+     "luxury": {
+      "score": 48757,
+      "wins": 307,
+      "games": 1000
+     },
+     "nomad": {
+      "score": 48122,
+      "wins": 226,
+      "games": 1000
+     },
+     "backpacker": {
+      "score": 49712,
+      "wins": 277,
+      "games": 1000
+     }
+    }
+   },
+   "profiles 30 2 N2": {
+    "job": {
+     "kind": "profiles",
+     "turns": 30,
+     "players": 2,
+     "driver": "N2",
+     "games": 1000
+    },
+    "profiles": {
+     "backpacker": {
+      "score": 25625,
+      "wins": 249,
+      "games": 508
+     },
+     "nomad": {
+      "score": 25475,
+      "wins": 281,
+      "games": 505
+     },
+     "business": {
+      "score": 24631,
+      "wins": 253,
+      "games": 504
+     },
+     "luxury": {
+      "score": 23119,
+      "wins": 215,
+      "games": 483
+     }
+    }
+   },
+   "profiles 30 2 P4": {
+    "job": {
+     "kind": "profiles",
+     "turns": 30,
+     "players": 2,
+     "driver": "P4",
+     "games": 1000
+    },
+    "profiles": {
+     "backpacker": {
+      "score": 26776,
+      "wins": 272,
+      "games": 508
+     },
+     "nomad": {
+      "score": 25676,
+      "wins": 236,
+      "games": 505
+     },
+     "business": {
+      "score": 26017,
+      "wins": 256,
+      "games": 504
+     },
+     "luxury": {
+      "score": 24331,
+      "wins": 236,
+      "games": 483
+     }
+    }
+   },
+   "profiles 30 4 P4": {
+    "job": {
+     "kind": "profiles",
+     "turns": 30,
+     "players": 4,
+     "driver": "P4",
+     "games": 1000
+    },
+    "profiles": {
+     "business": {
+      "score": 51157,
+      "wins": 288,
+      "games": 1000
+     },
+     "luxury": {
+      "score": 50334,
+      "wins": 274,
+      "games": 1000
+     },
+     "nomad": {
+      "score": 50284,
+      "wins": 237,
+      "games": 1000
+     },
+     "backpacker": {
+      "score": 49472,
+      "wins": 201,
+      "games": 1000
+     }
+    }
+   }
+  }
+ },
+ "V1": {
+  "about": "50 turns: Luxury 5 continents +1; Backpacker 3 continents +6; Business citizenship +7; Nomad ticket 2; Nomad needs 4 continents (or −5)",
+  "games": 1000,
+  "lines": {
+   "profiles 50 4 N2": {
+    "job": {
+     "kind": "profiles",
+     "turns": 50,
+     "players": 4,
+     "driver": "N2",
+     "games": 1000
+    },
+    "profiles": {
+     "business": {
+      "score": 69699,
+      "wins": 233,
+      "games": 1000
+     },
+     "luxury": {
+      "score": 70854,
+      "wins": 276,
+      "games": 1000
+     },
+     "nomad": {
+      "score": 71380,
+      "wins": 258,
+      "games": 1000
+     },
+     "backpacker": {
+      "score": 71211,
+      "wins": 231,
+      "games": 1000
+     }
+    }
+   },
+   "profiles 50 2 N2": {
+    "job": {
+     "kind": "profiles",
+     "turns": 50,
+     "players": 2,
+     "driver": "N2",
+     "games": 1000
+    },
+    "profiles": {
+     "backpacker": {
+      "score": 37936,
+      "wins": 280,
+      "games": 508
+     },
+     "nomad": {
+      "score": 37971,
+      "wins": 259,
+      "games": 505
+     },
+     "business": {
+      "score": 35645,
+      "wins": 223,
+      "games": 504
+     },
+     "luxury": {
+      "score": 34780,
+      "wins": 237,
+      "games": 483
+     }
+    }
+   },
+   "profiles 50 2 P4": {
+    "job": {
+     "kind": "profiles",
+     "turns": 50,
+     "players": 2,
+     "driver": "P4",
+     "games": 1000
+    },
+    "profiles": {
+     "backpacker": {
+      "score": 39016,
+      "wins": 196,
+      "games": 508
+     },
+     "nomad": {
+      "score": 38901,
+      "wins": 277,
+      "games": 505
+     },
+     "business": {
+      "score": 38581,
+      "wins": 262,
+      "games": 504
+     },
+     "luxury": {
+      "score": 36394,
+      "wins": 264,
+      "games": 483
+     }
+    }
+   },
+   "profiles 50 4 P4": {
+    "job": {
+     "kind": "profiles",
+     "turns": 50,
+     "players": 4,
+     "driver": "P4",
+     "games": 1000
+    },
+    "profiles": {
+     "business": {
+      "score": 74641,
+      "wins": 295,
+      "games": 1000
+     },
+     "luxury": {
+      "score": 72323,
+      "wins": 186,
+      "games": 1000
+     },
+     "nomad": {
+      "score": 73573,
+      "wins": 236,
+      "games": 1000
+     },
+     "backpacker": {
+      "score": 75951,
+      "wins": 281,
+      "games": 1000
+     }
+    }
+   }
+  }
+ },
+ "V2": {
+  "about": "50 turns: Luxury 5 continents +0; Backpacker 3 continents +6; Business citizenship +7; Nomad ticket 2; Nomad needs 4 continents (or −5)",
+  "games": 1000,
+  "lines": {
+   "profiles 50 4 N2": {
+    "job": {
+     "kind": "profiles",
+     "turns": 50,
+     "players": 4,
+     "driver": "N2",
+     "games": 1000
+    },
+    "profiles": {
+     "business": {
+      "score": 70289,
+      "wins": 216,
+      "games": 1000
+     },
+     "luxury": {
+      "score": 69807,
+      "wins": 242,
+      "games": 1000
+     },
+     "nomad": {
+      "score": 71549,
+      "wins": 266,
+      "games": 1000
+     },
+     "backpacker": {
+      "score": 71858,
+      "wins": 276,
+      "games": 1000
+     }
+    }
+   },
+   "profiles 50 2 N2": {
+    "job": {
+     "kind": "profiles",
+     "turns": 50,
+     "players": 2,
+     "driver": "N2",
+     "games": 1000
+    },
+    "profiles": {
+     "backpacker": {
+      "score": 38001,
+      "wins": 286,
+      "games": 508
+     },
+     "nomad": {
+      "score": 37975,
+      "wins": 251,
+      "games": 505
+     },
+     "business": {
+      "score": 35660,
+      "wins": 233,
+      "games": 504
+     },
+     "luxury": {
+      "score": 34079,
+      "wins": 230,
+      "games": 483
+     }
+    }
+   },
+   "profiles 50 2 P4": {
+    "job": {
+     "kind": "profiles",
+     "turns": 50,
+     "players": 2,
+     "driver": "P4",
+     "games": 1000
+    },
+    "profiles": {
+     "backpacker": {
+      "score": 39047,
+      "wins": 203,
+      "games": 508
+     },
+     "nomad": {
+      "score": 38767,
+      "wins": 273,
+      "games": 505
+     },
+     "business": {
+      "score": 38556,
+      "wins": 253,
+      "games": 504
+     },
+     "luxury": {
+      "score": 36203,
+      "wins": 270,
+      "games": 483
+     }
+    }
+   },
+   "profiles 50 4 P4": {
+    "job": {
+     "kind": "profiles",
+     "turns": 50,
+     "players": 4,
+     "driver": "P4",
+     "games": 1000
+    },
+    "profiles": {
+     "business": {
+      "score": 74353,
+      "wins": 294,
+      "games": 1000
+     },
+     "luxury": {
+      "score": 71270,
+      "wins": 164,
+      "games": 1000
+     },
+     "nomad": {
+      "score": 73641,
+      "wins": 233,
+      "games": 1000
+     },
+     "backpacker": {
+      "score": 75904,
+      "wins": 306,
+      "games": 1000
+     }
+    }
+   }
+  }
  }
 }
