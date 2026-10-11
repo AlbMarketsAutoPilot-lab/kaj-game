@@ -68,7 +68,7 @@ const TRAVEL_WORDS: Readonly<Record<RouteKind, { verb: string; vehicle: string; 
   port: { verb: 'sail', vehicle: 'ship', place: 'port', a: 'a ship', sound: 'ship', promo: 'Airline' },
   station: { verb: 'ride the train', vehicle: 'train', place: 'station', a: 'the train', sound: 'train', promo: 'Railway' },
   bus: { verb: 'take the bus', vehicle: 'bus', place: 'bus stop', a: 'the bus', sound: 'bus', promo: 'Bus' },
-  car: { verb: 'drive', vehicle: 'car', place: 'car rental', a: 'a rented car', sound: 'bus', promo: 'Car rental' },
+  car: { verb: 'drive', vehicle: 'car', place: 'car rental', a: 'a rented car', sound: 'car', promo: 'Car rental' },
 };
 // Who can't take a trip of this kind (see canRide), as told on the screens.
 const NO_RIDE: Partial<Record<RouteKind, string>> = {
@@ -1505,7 +1505,7 @@ function renderModal(s: GameState, actions: Action[], isRobot: boolean): Modal |
       el('p', { textContent: h.stopped
         ? `You raise your thumb, and a car pulls over. The driver is going to ${where} and has a free seat: you ride for free, ${plural(TRAVEL_TURNS.backpacker.car, 'travel turn')}.`
         : 'You raise your thumb… the cars rush past, and none stops. You can\'t stay in Mexico: walk on to another area this turn.' }),
-      ok(() => { hitched = null; render(); }))), 'trip'), sound: h.stopped ? 'bus' : 'wrong', soundKey: h };
+      ok(() => { hitched = null; render(); }))), 'trip'), sound: h.stopped ? 'car' : 'wrong', soundKey: h };
   }
   if (answered) {
     const r = answered;
