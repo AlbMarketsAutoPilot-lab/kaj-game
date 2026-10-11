@@ -1,8 +1,9 @@
 import {
   bigCountryParts, blockedByMoney, continentReward, canPayAfterQuiz, currentPlayer, entryFees, feeTotal, legalActions,
 } from './engine.ts';
-import { BUSINESS_PRICE, bigCountryPoints, CONTINENT_BONUS, NOMAD_MIN_CONTINENTS, QUIZ_TRIES, canRide, ticketPrice, TRAVEL_TURNS, WELCOME_BONUS } from './constants.ts';
+import { BUSINESS_PRICE, bigCountryPoints, CONTINENT_BONUS, POINTS_NOMAD_TRIP, QUIZ_TRIES, canRide, ticketPrice, TRAVEL_TURNS, WELCOME_BONUS } from './constants.ts';
 import { areaById } from './map.ts';
+import { planMove } from './planner.ts';
 import { nextRandom } from './rng.ts';
 import type { Action, BusinessKind, Continent, GameMap, GameState, Player, RobotLevel } from './types.ts';
 
@@ -17,13 +18,24 @@ export interface LevelSettings {
   challengeFrom: number;
   // Points it keeps after paying a ticket or buying a business.
   reserve: number;
+  // How many moves ahead it plans (1: no planning, src/engine/planner.ts).
+  depth: number;
 }
 
+// Levels (owner, 2026-10-11, measured in docs/balance-lab.md): easy doesn't plan and answers 65% right
+// (70% in the 50-turn game, so it still wins at least a quarter of its games against normal); normal
+// plans 2 moves ahead, hard 3. Each level beats the one below about 60–70% of the time.
 export const ROBOT_LEVELS: Readonly<Record<RobotLevel, LevelSettings>> = {
-  easy: { accuracy: 0.5, challengeFrom: 5, reserve: 5 },
-  normal: { accuracy: 0.75, challengeFrom: 3, reserve: 3 },
-  hard: { accuracy: 0.9, challengeFrom: 1, reserve: 2 },
+  easy: { accuracy: 0.65, challengeFrom: 5, reserve: 4, depth: 1 },
+  normal: { accuracy: 0.75, challengeFrom: 3, reserve: 3, depth: 2 },
+  hard: { accuracy: 0.9, challengeFrom: 1, reserve: 2, depth: 3 },
 };
+export const EASY_ACCURACY_LONG_GAME = 0.7;
+
+function levelSettings(level: RobotLevel, totalRounds: number): LevelSettings {
+  const s = ROBOT_LEVELS[level];
+  return level === 'easy' && totalRounds >= 50 ? { ...s, accuracy: EASY_ACCURACY_LONG_GAME } : s;
+}
 
 // Asks for citizenship in the first area it can (not its home country) before this round.
 export const ROBOT_CITIZENSHIP_BEFORE = 10;
@@ -47,10 +59,13 @@ export function robotAction(state: GameState, map: GameMap, seed: number, level?
   const me = currentPlayer(state);
   // During a sale offer the buyer answers.
   const actor = state.offer ? state.players[state.offer.to] : me;
-  const settings = ROBOT_LEVELS[level ?? actor.level ?? 'normal'];
+  const settings = levelSettings(level ?? actor.level ?? 'normal', state.totalRounds);
   const rnd = new Rand(seed);
   const action = choose(state, map, actions, me, settings, rnd);
-  return [action, rnd.seed];
+  // A move: the planning levels look further ahead.
+  const isMove = action.type === 'walk' || action.type === 'board' || action.type === 'quiz';
+  const planned = isMove && !state.offer && settings.depth > 1 ? planMove(state, map, me, actions, settings.depth, settings.reserve, settings.accuracy) : null;
+  return [planned ?? action, rnd.seed];
 }
 
 class Rand {
@@ -165,7 +180,7 @@ function chooseMove(state: GameState, map: GameMap, moves: Action[], me: Player,
       const lastTry = action === quiz && me.quizWrong >= QUIZ_TRIES - 1 && !canPayAfterQuiz(state, me, a.kind, a.to);
       if (lastTry && plain.some((b) => b.type === 'walk')) continue;
       const travel = TRAVEL_TURNS[me.profile!][a.kind];
-      const nomad = me.profile === 'nomad' ? travel : 0;
+      const nomad = me.profile === 'nomad' && travel > 0 ? POINTS_NOMAD_TRIP : 0;
       // The bus gives the whole country's points at once (owner's rule, M5).
       const value = a.kind === 'bus' ? busArrivalValue(map, me, a.to) : arrivalValue(map, me, a.to);
       options.push({
@@ -176,7 +191,7 @@ function chooseMove(state: GameState, map: GameMap, moves: Action[], me: Player,
   }
 
   let chosen: Move;
-  const nomadTarget = me.profile === 'nomad' && state.round >= robotRound(ROBOT_NOMAD_ROUND, state.totalRounds) && me.visitedContinents.length < NOMAD_MIN_CONTINENTS;
+  const nomadTarget = me.profile === 'nomad' && state.round >= robotRound(ROBOT_NOMAD_ROUND, state.totalRounds) && me.visitedContinents.length < CONTINENT_BONUS.nomad!.continents;
   if (nomadTarget) {
     // Nomad from round 18 with fewer than 3 continents: the quickest way to a new continent.
     const dist = distances(map, me, (id) => !me.visitedContinents.includes(areaById(map, id).continent));

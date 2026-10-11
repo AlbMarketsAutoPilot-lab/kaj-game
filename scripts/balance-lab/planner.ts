@@ -1,10 +1,12 @@
-// Balance lab only (owner, 2026-10-11): a test-only planning robot. The game never uses it.
+// Balance lab only (owner, 2026-10-11): a test-only planning robot. The game uses its engine version,
+// src/engine/planner.ts. The lab results in docs/balance-lab.md were measured on the code of commit
+// 01374db (before the balance change); the patches in packages.ts apply to that code only.
 // It plays like the normal robot (src/engine/normal-robot.ts) in everything but the move: there it
 // looks `depth` moves ahead (walks and trips, with their real turns, tickets, fees, quiz waits, the
 // bus's whole country, big countries, whole continents, profile bonuses) and picks the first move of
 // the best plan, by discounted points. Other players are not predicted (only the first move checks them).
 import { canPayAfterQuiz, continentReward, currentPlayer, destinations, entryFees, feeTotal, legalActions } from '../../src/engine/engine.ts';
-import { bigCountryPoints, CONTINENT_BONUS, NOMAD_MIN_CONTINENTS, NOMAD_PENALTY, POINTS_NEW_CONTINENT, QUIZ_TRIES, ROUTE_KINDS, ticketPrice, TRAVEL_TURNS } from '../../src/engine/constants.ts';
+import { bigCountryPoints, CONTINENT_BONUS, POINTS_NEW_CONTINENT, QUIZ_TRIES, ROUTE_KINDS, ticketPrice, TRAVEL_TURNS } from '../../src/engine/constants.ts';
 import { ROBOT_LEVELS, robotAction } from '../../src/engine/normal-robot.ts';
 import { areaById } from '../../src/engine/map.ts';
 import type { Action, GameMap, GameState, Player, RobotLevel, RouteKind } from '../../src/engine/types.ts';
@@ -43,8 +45,6 @@ function arrive(map: GameMap, me: Player, s: Sim, to: string, byBus: boolean): [
     gain += POINTS_NEW_CONTINENT;
     const bonus = CONTINENT_BONUS[me.profile!];
     if (bonus && n.conts.size === bonus.continents) gain += bonus.points;
-    // The Nomad's −5 is avoided by its 3rd continent: worth the same as +5.
-    if (me.profile === 'nomad' && n.conts.size === NOMAD_MIN_CONTINENTS) gain += NOMAD_PENALTY;
   }
   return [gain, n];
 }
@@ -73,7 +73,8 @@ function steps(state: GameState, map: GameMap, me: Player, s: Sim, reserve: numb
       const wait = pay ? 0 : Math.min(QUIZ_TRIES - 1, (1 - p) / p);
       const travel = TRAVEL_TURNS[me.profile!][kind];
       const [g, n] = arrive(map, me, s, to, kind === 'bus');
-      const nomad = me.profile === 'nomad' ? travel : 0;
+      // The Nomad: +1 per trip (the game's rule since 2026-10-11).
+      const nomad = me.profile === 'nomad' && travel > 0 ? 1 : 0;
       const gain = g + nomad - f - (pay ? ticket! : 0);
       n.points += gain;
       // Boarding uses a turn (the area was entered on an earlier turn, except on the first step).

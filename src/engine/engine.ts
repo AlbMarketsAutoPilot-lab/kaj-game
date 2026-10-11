@@ -12,13 +12,11 @@ import {
   MAX_ROBOTS,
   MAX_SEATS,
   MIN_SEATS,
-  NOMAD_MIN_CONTINENTS,
-  NOMAD_PENALTY,
   bigCountryPoints,
   POINTS_BUSINESS_CITIZENSHIP,
   POINTS_NEW_AREA,
   POINTS_NEW_CONTINENT,
-  POINTS_NOMAD_TRAVEL_TURN,
+  POINTS_NOMAD_TRIP,
   POINTS_WONDER,
   PROFILES,
   QUIZ_TRIES,
@@ -303,7 +301,9 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
     case 'travel': {
       // No event cards on trips (owner's rule, task 12). A challenge, if the player wants one,
       // is drawn now and answered with the next move; the trip goes on after the answer.
-      if (action.challenge) {
+      // The Nomad works on its trips (owner, 2026-10-11): it may press "Play", but it gets no
+      // challenge (the screens tell it to get back to work), and the trip goes on.
+      if (action.challenge && me.profile !== 'nomad') {
         next.challenge = pickChallenge(next);
         return next;
       }
@@ -472,20 +472,15 @@ export function businessValue(state: GameState, seat: number): number {
   return state.businesses.filter((b) => b.owner === seat).reduce((sum, b) => sum + BUSINESS_PRICE[b.kind], 0);
 }
 
-// The Digital Nomad's end penalty (0 for everyone else, and for a Nomad with 3 continents).
-export function nomadPenalty(p: Player): number {
-  return p.profile === 'nomad' && p.visitedContinents.length < NOMAD_MIN_CONTINENTS ? NOMAD_PENALTY : 0;
-}
-
-// Final score: points plus the price of every business owned (owner's rule, task 9),
-// minus the Nomad penalty, never below 0.
+// Final score: points plus the price of every business owned (owner's rule, task 9), never below 0.
+// (The Nomad's −5 for fewer than 3 continents was replaced by +5 for 3 continents, owner 2026-10-11.)
 export function finalScore(state: GameState, p: Player): number {
   return scoreWith(state.businesses, p);
 }
 
 function scoreWith(businesses: Business[], p: Player): number {
   const value = businesses.filter((b) => b.owner === p.seat).reduce((sum, b) => sum + BUSINESS_PRICE[b.kind], 0);
-  return addPoints(p.points + value, -nomadPenalty(p));
+  return addPoints(p.points + value, 0);
 }
 
 // The player standing in an area may buy its business if nobody owns it and they can pay.
@@ -707,10 +702,12 @@ function wholeContinent(state: GameState, map: GameMap, me: Player, continent: C
   state.rewards.push({ seat: me.seat, kind: 'continent', points, continent });
 }
 
-// One travel turn: Nomad +1, and the player lands at the end of the last one.
+// One travel turn: the player lands at the end of the last one. The Nomad gets +1 once per trip,
+// on its first travel turn (owner, 2026-10-11: per trip, not per travel turn; a wait for a taken
+// destination gives nothing).
 function travelOn(state: GameState, map: GameMap, me: Player): void {
   const trip = me.travel!;
-  if (me.profile === 'nomad') me.points = addPoints(me.points, POINTS_NOMAD_TRAVEL_TURN);
+  if (me.profile === 'nomad' && trip.turnsLeft === TRAVEL_TURNS.nomad[trip.kind]) me.points = addPoints(me.points, POINTS_NOMAD_TRIP);
   if (trip.turnsLeft > 0) trip.turnsLeft -= 1;
   if (trip.turnsLeft === 0) land(state, map, me);
 }

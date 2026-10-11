@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { cardEvery, GAME_LENGTHS, nomadWarningRound, PROFILES, START_CONTINENTS } from '../src/engine/constants.ts';
+import { cardEvery, GAME_LENGTHS, PROFILES, START_CONTINENTS } from '../src/engine/constants.ts';
 import { apply, createGame, currentPlayer, destinations, eligibleCards, legalActions, mapBusinesses } from '../src/engine/engine.ts';
 import { validateMap, walkingGroups } from '../src/engine/map.ts';
 import { robotAction, robotRound } from '../src/engine/normal-robot.ts';
@@ -111,12 +111,11 @@ test('bus: Mongolia one way to Siberia or China West; Russia\'s +5 at once by bu
   assert.ok(!me.visitedAreas.includes('russia-west') && !me.visitedAreas.includes('russia-far-east'));
 });
 
-test('timing (owner, M2): a card every 5 land turns, robots and the Nomad warning scaled to 50 turns', () => {
+test('timing (owner, M2): a card every 5 land turns, robots scaled to 50 turns', () => {
   assert.equal(cardEvery(30), 3);
   assert.equal(cardEvery(50), 5);
   assert.deepEqual([robotRound(10, 30), robotRound(18, 30)], [10, 18]);
   assert.deepEqual([robotRound(10, 50), robotRound(18, 50)], [17, 30]);
-  assert.deepEqual([nomadWarningRound(30), nomadWarningRound(50)], [25, 45]);
 });
 
 // Plays a whole game with random robots; checks every card is drawn on a 5th land turn, never in

@@ -123,4 +123,7 @@ export const PACKAGES: Package[] = [
     }
     case 'askCitizenship': {`, ENG]] as [string, string, string?][],
   })),
+  // The game as shipped after the balance change (2026-10-11): the real code, no patches.
+  { name: 'SHIPPED-30', turns: [30], drivers: ['N2', 'P4'], ladder: [['E', 'N2'], ['N2', 'H3']], about: 'the balanced game as it is now in src/ (no patches), 30 turns', patches: [] },
+  { name: 'SHIPPED-50', turns: [50], drivers: ['N2', 'P4'], ladder: [['E', 'N2'], ['N2', 'H3']], about: 'the balanced game as it is now in src/ (no patches), 50 turns', patches: [] },
 ];

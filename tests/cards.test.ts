@@ -136,7 +136,8 @@ test('no card on a trip: a travel turn draws nothing and does not count', () => 
     const before = p1(s).points;
     s = go(s, { type: 'travel' });
     assert.ok(s.drawn.every((c) => c.seat !== p1(s).seat), 'no travel card');
-    assert.equal(p1(s).points, before + 1 + (i === 2 ? 1 + 2 : 0)); // Nomad +1; landing: area +1, continent +2
+    // Nomad +1 once per trip, on the first travel turn (owner, 2026-10-11); landing: area +1, continent +2
+    assert.equal(p1(s).points, before + (i === 0 ? 1 : 0) + (i === 2 ? 1 + 2 : 0));
     assert.equal(p1(s).landTurns, 1, 'trip turns are not counted');
     s = pass(s);
   }

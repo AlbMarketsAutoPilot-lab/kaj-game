@@ -4,7 +4,7 @@
 // comes back with "📖 How to play". It is a practice board of its own: the saved game is never
 // touched.
 
-import { bigCountryPoints, BUSINESS_PRICE, CONTINENT_BONUS, EXAM_FACTS, EXAM_PASS, NOMAD_MIN_CONTINENTS, NOMAD_PENALTY, POINTS_BIG_COUNTRY_3_PARTS, POINTS_BUSINESS_CITIZENSHIP, POINTS_NEW_CONTINENT, POINTS_NOMAD_TRAVEL_TURN, POINTS_WONDER, TICKET_PRICE, VISA_PRICE } from '../engine/constants.ts';
+import { bigCountryPoints, BUSINESS_PRICE, CONTINENT_BONUS, EXAM_FACTS, EXAM_PASS, POINTS_BIG_COUNTRY_3_PARTS, POINTS_BUSINESS_CITIZENSHIP, POINTS_NEW_CONTINENT, POINTS_NOMAD_TRIP, POINTS_WONDER, TICKET_PRICE, VISA_PRICE } from '../engine/constants.ts';
 import type { AreaGeo } from './maps.ts';
 import { glowFor, pad, squeeze, svg, unionBox } from './maps.ts';
 import { airport, citizenFlag, pawn, place } from './props.ts';
@@ -181,7 +181,7 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
   };
 
   // The owner's texts (M5). **…** is shown in bold.
-  const lux = CONTINENT_BONUS.luxury!, bag = CONTINENT_BONUS.backpacker!;
+  const nomad = CONTINENT_BONUS.nomad!, bag = CONTINENT_BONUS.backpacker!;
   const steps: Step[] = [
     { title: '🌍 Welcome, traveller!', task: true, picture: firstTrip,
       lines: ['This is a **short guide (about 5 minutes) before your first game**. Nothing here counts: it\'s just practice.', '**KAJ is simple: the more you travel, the more points you collect!** But your turns are limited, so make every move count. When the last turn ends, the player with the **most points wins**.', "Let's take your first trip!"],
@@ -196,8 +196,8 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
     { title: '🧳 Your profile\'s bonuses', cls: 'guide-list', lines: [
       `1. 🎒 **Backpacker: +${bag.points} for reaching ${bag.continents} continents.** Never pays for tickets (always the free quiz) and can take the bus. *But:* slow trips.`,
       `2. 💼 **Business Traveler: +${POINTS_BUSINESS_CITIZENSHIP} when granted citizenship**, and fast trips. *But:* tickets cost ${TICKET_PRICE.business}, and no bus.`,
-      `3. 💎 **Luxury Traveler: +${lux.points} for reaching ${lux.continents} continents.** Flies or sails to **any** airport or port, and gets citizenship with no test. *But:* tickets cost ${TICKET_PRICE.luxury}, and no train or bus.`,
-      `4. 💻 **Digital Nomad: +${POINTS_NOMAD_TRAVEL_TURN} for every travel turn** and the **cheapest tickets**, and can take the bus. *But:* **−${NOMAD_PENALTY} at the end with fewer than ${NOMAD_MIN_CONTINENTS} continents**, never citizenship, and slow trips.`] },
+      `3. 💎 **Luxury Traveler: flies or sails to any airport or port**, and gets **citizenship with no test**. *But:* tickets cost ${TICKET_PRICE.luxury}, and no train or bus.`,
+      `4. 💻 **Digital Nomad: +${POINTS_NOMAD_TRIP} for every trip** (it works on the way), **+${nomad.points} for reaching ${nomad.continents} continents**, the **cheapest tickets**, and can take the bus. *But:* never citizenship, no travel challenges (it's working!), and slow trips.`] },
     { title: '💼 Own a business', task: true, picture: buyAirline,
       lines: ['Want more? Own a business, and the other players pay you:', '✈️ an airline at an airport · ⚓ a ferry agency at a port · 🚆 a train ticket booth at a station · 🚌 a bus ticket booth at the bus stop · 🏛️ guided tours at a wonder.', '**Buy the airline at this airport to continue the guide.**'],
       after: { title: '🎉 You own the airline of UK & Ireland!', picture: () => airportView(true),

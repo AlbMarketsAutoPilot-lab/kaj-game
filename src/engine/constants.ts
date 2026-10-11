@@ -105,14 +105,15 @@ export const TRAVEL_TURNS: Readonly<Record<Profile, Readonly<Record<RouteKind, n
 // After this many wrong quiz answers in one area, a player who can pay must pay and board.
 export const QUIZ_TRIES = 3;
 
-// Digital Nomad: +1 for every turn on a plane, ship, train or bus.
-export const POINTS_NOMAD_TRAVEL_TURN = 1;
+// Digital Nomad: +1 for every trip by plane, ship, train or bus (balance, owner 2026-10-11: per trip,
+// no longer per travel turn, so a 3-turn ship trip gives +1 like a plane).
+export const POINTS_NOMAD_TRIP = 1;
 
 // Visa: paid to the citizen each time another player enters their area (rulebook section 7).
 export const VISA_PRICE = 2;
 
-// Business Traveler: +3 when granted citizenship (rulebook section 12).
-export const POINTS_BUSINESS_CITIZENSHIP = 3;
+// Business Traveler: +6 when granted citizenship (rulebook section 12: +3; balance, owner 2026-10-11).
+export const POINTS_BUSINESS_CITIZENSHIP = 6;
 
 // Citizenship test (owner's change, after task 14e): read 6 facts, then 3 a/b questions about
 // them in the same turn; 2 right answers or more pass, fewer: no citizenship.
@@ -144,10 +145,12 @@ export const TOUR_FEE = 1;
 export const GO_HOME_TURNS = 3;
 
 // Profile bonuses (rulebook section 12). The start continent counts. The bonus is given once,
-// on the move that reaches that many continents.
+// on the move that reaches that many continents. Balance (owner, 2026-10-11, measured in
+// docs/balance-lab.md): Backpacker +7 (was +3); the Luxury +5 for 5 continents is removed; the
+// Nomad gets +5 for 3 continents (instead of −5 at the end with fewer than 3).
 export const CONTINENT_BONUS: Readonly<Partial<Record<Profile, { continents: number; points: number }>>> = {
-  backpacker: { continents: 3, points: 3 },
-  luxury: { continents: 5, points: 5 },
+  backpacker: { continents: 3, points: 7 },
+  nomad: { continents: 3, points: 5 },
 };
 
 // Whole continent (owner, M5): every area of a continent visited gives, once, the number of its
@@ -158,15 +161,6 @@ export const CONTINENT_REWARD_AREAS = 3;
 export const CONTINENT_REWARD_MIN = 2;
 export function continentRewardFor(areas: number): number {
   return Math.max(CONTINENT_REWARD_MIN, Math.round(areas / CONTINENT_REWARD_AREAS));
-}
-
-// Digital Nomad: −5 off the final score (never below 0) with fewer than 3 continents.
-export const NOMAD_MIN_CONTINENTS = 3;
-export const NOMAD_PENALTY = 5;
-// From this round the Nomad's continent bar warns about the penalty (the last 5 turns).
-export const NOMAD_WARNING_ROUND = 25;
-export function nomadWarningRound(totalRounds: number): number {
-  return totalRounds - 5;
 }
 
 // Event cards (task 11, count changed in task 12): at the start of each player's 3rd, 6th, 9th …

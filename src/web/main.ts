@@ -2,9 +2,9 @@
 // landscape board (left: the current area drawn; right: the world map and the turn panel).
 // Robots play with simple rules, at the level chosen for each seat (task 13).
 
-import { BUSINESS_PRICE, cardEvery, CHALLENGE_POINTS, GAME_LENGTHS, nomadWarningRound, CONTINENT_BONUS, EXAM_FACTS, EXAM_PASS, POINTS_NOMAD_TRAVEL_TURN, POINTS_NEW_AREA, POINTS_NEW_CONTINENT, POINTS_WONDER, GO_HOME_TURNS, NOMAD_MIN_CONTINENTS, NOMAD_PENALTY, POINTS_BUSINESS_CITIZENSHIP, QUIZ_TRIES, ROUTE_KINDS, bigCountryPoints, canRide, TICKET_BUSINESS, TICKET_PRICE, ticketPrice, TOUR_FEE, TRAVEL_TURNS, VISA_PRICE } from '../engine/constants.ts';
+import { BUSINESS_PRICE, cardEvery, CHALLENGE_POINTS, GAME_LENGTHS, CONTINENT_BONUS, EXAM_FACTS, EXAM_PASS, POINTS_NOMAD_TRIP, POINTS_NEW_AREA, POINTS_NEW_CONTINENT, POINTS_WONDER, GO_HOME_TURNS, POINTS_BUSINESS_CITIZENSHIP, QUIZ_TRIES, ROUTE_KINDS, bigCountryPoints, canRide, TICKET_BUSINESS, TICKET_PRICE, ticketPrice, TOUR_FEE, TRAVEL_TURNS, VISA_PRICE } from '../engine/constants.ts';
 import {
-  apply, blockedByMoney, continentReward, examPassed, bookedBy, businessAt, canPayAfterQuiz, destinations, businessValue, createGame, currentPlayer, entryFees, feeTotal, finalScore, homeFor, landTurnsToCard, legalActions, nomadPenalty,
+  apply, blockedByMoney, continentReward, examPassed, bookedBy, businessAt, canPayAfterQuiz, destinations, businessValue, createGame, currentPlayer, entryFees, feeTotal, finalScore, homeFor, landTurnsToCard, legalActions,
 } from '../engine/engine.ts';
 import { robotAction } from '../engine/normal-robot.ts';
 import { loadGame, saveGame } from '../engine/save.ts';
@@ -121,6 +121,8 @@ let robotTimer = 0;
 let hold: { seat: number; from: string | null; to: string | null; lines: string[]; ready: boolean; animated: boolean } | null = null;
 let holdTimer = 0;
 let quizTimer = 0;
+// The Nomad pressed "Play the challenge": it works on trips (owner, 2026-10-11), so a joke instead.
+let nomadAtWork = false;
 // What happened (other players' moves, payments, cards), shown in one popup (task 14 B2):
 // on a person's turn, or straight after a person's own move (`newsNow`).
 let news: string[] = [];
@@ -377,14 +379,14 @@ function profileNote(p: Profile, who = ''): HTMLElement {
   const good: Record<Profile, string[]> = {
     backpacker: ['Never pays for a ticket: always the free quiz.', 'Can take the bus from Mongolia: all of Russia (+5) or all of China (+3) at once.', `+${CONTINENT_BONUS.backpacker!.points} for visiting ${CONTINENT_BONUS.backpacker!.continents} continents.`, 'Its own Backpacker event cards.'],
     business: [`+${plural(POINTS_BUSINESS_CITIZENSHIP, 'point')} when you get citizenship (any area).`, `Fast: ${trips}.`],
-    luxury: ['Can fly or sail to any airport or port.', 'Citizenship at once, with no test.', `+${CONTINENT_BONUS.luxury!.points} for visiting ${CONTINENT_BONUS.luxury!.continents} continents.`, `Fast: ${trips}.`],
-    nomad: [`Cheapest plane and ship ticket: ${plural(price ?? 0, 'point')}.`, `+${POINTS_NOMAD_TRAVEL_TURN} for every turn on a plane, ship, train or bus.`, 'Can take the bus from Mongolia: all of Russia (+5) or all of China (+3) at once.'],
+    luxury: ['Can fly or sail to any airport or port.', 'Citizenship at once, with no test.', `Fast: ${trips}.`],
+    nomad: [`Cheapest plane and ship ticket: ${plural(price ?? 0, 'point')}.`, `+${POINTS_NOMAD_TRIP} for every trip by plane, ship, train or bus (it works on the way).`, `+${CONTINENT_BONUS.nomad!.points} for visiting ${CONTINENT_BONUS.nomad!.continents} continents.`, 'Can take the bus from Mongolia: all of Russia (+5) or all of China (+3) at once.'],
   };
   const bad: Record<Profile, string[]> = {
     backpacker: ['Travels by plane, ship, train or bus only with the quiz (one try per turn).', `Slow: ${trips}.`],
     business: [`Ticket ${plural(price ?? 0, 'point')}.`, 'Can\'t take the bus.'],
     luxury: [`The highest ticket: ${plural(price ?? 0, 'point')}.`, 'Can\'t take the train or the bus.'],
-    nomad: [`Train ticket ${plural(ticketPrice('nomad', 'station') ?? 0, 'point')}.`, 'Can never ask for citizenship.', `−${NOMAD_PENALTY} at the end with fewer than ${NOMAD_MIN_CONTINENTS} continents.`, `Slow: ${trips}.`],
+    nomad: [`Train ticket ${plural(ticketPrice('nomad', 'station') ?? 0, 'point')}.`, 'Can never ask for citizenship.', 'Works on trips: no travel challenges.', `Slow: ${trips}.`],
   };
   return el('div', { className: 'note profile-note' },
     el('strong', {}, who ? '' : 'You chose ', iconEl(p), ` ${PROFILE_LABEL[p]}${who ? '' : '.'}`),
@@ -630,8 +632,7 @@ function finishPopup(s: GameState, close: () => void): HTMLElement {
     el('ol', { className: 'ranking' }, ...r.ranking.map((seat) => {
       const p = s.players[seat];
       const value = businessValue(s, seat);
-      const penalty = nomadPenalty(p);
-      const detail = [`${p.points} travel`, `${value} assets`].join(' + ') + (penalty ? ` − ${penalty} Nomad penalty` : '');
+      const detail = [`${p.points} travel`, `${value} assets`].join(' + ');
       // A medal for the first three places; equal points share a place (2026-10-10).
       const place = 1 + s.players.filter((o) => finalScore(s, o) > finalScore(s, p)).length;
       return el('li', { className: place === 1 ? 'first' : '' },
@@ -853,19 +854,14 @@ function nextCardText(s: GameState, p: Player): string {
   return turns === 1 ? '🔔 Event card: next turn on land' : `🔔 Event card: in ${turns} turns on land`;
 }
 
-// "Continents 2/3" for the profiles with a continent bonus or penalty (rulebook section 14).
+// "Continents 2/3" for the profiles with a continent bonus (rulebook section 14).
 function continentBar(s: GameState, p: Player): HTMLElement | string {
   const n = p.visitedContinents.length;
   const bonus = p.profile ? CONTINENT_BONUS[p.profile] : undefined;
-  const goal = bonus?.continents ?? (p.profile === 'nomad' ? NOMAD_MIN_CONTINENTS : 0);
-  if (!goal) return '';
+  if (!bonus) return '';
+  const goal = bonus.continents;
   const bar = `Continents ${'▰'.repeat(Math.min(n, goal))}${'▱'.repeat(Math.max(0, goal - n))} ${Math.min(n, goal)}/${goal}`;
-  if (bonus) return el('div', { className: 'small', textContent: n >= goal ? `${bar} ✅ +${bonus.points} earned` : `${bar} (+${bonus.points} at ${goal})` });
-  if (n >= goal) return el('div', { className: 'small', textContent: `${bar} ✅ no penalty` });
-  const warn = s.round >= nomadWarningRound(s.totalRounds) && s.phase === 'play';
-  return el('div', { className: warn ? 'small error' : 'small', textContent: warn
-    ? `${bar} ⚠️ −${NOMAD_PENALTY} at the end unless you reach a ${goal}rd continent`
-    : `${bar} (−${NOMAD_PENALTY} at the end below ${goal})` });
+  return el('div', { className: 'small', textContent: n >= goal ? `${bar} ✅ +${bonus.points} earned` : `${bar} (+${bonus.points} at ${goal})` });
 }
 
 function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElement {
@@ -883,10 +879,8 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
       el('ol', {}, ...r.ranking.map((seat) => {
         const p = s.players[seat];
         const value = businessValue(s, seat);
-        const penalty = nomadPenalty(p);
-        // One total in points: travel points + assets (businesses at their price) − Nomad penalty.
-        const detail = [`${p.points} travel`, `${value} assets`]
-          .join(' + ') + (penalty ? ` − ${penalty} Nomad penalty` : '');
+        // One total in points: travel points + assets (businesses at their price).
+        const detail = [`${p.points} travel`, `${value} assets`].join(' + ');
         return el('li', {}, dot(seat), ` ${nameOf(seat)}: ${plural(finalScore(s, p), 'point')} (${detail}), ${plural(p.visitedContinents.length, 'continent')}, ${plural(p.visitedAreas.length, 'area')}`);
       })),
       button('Play again', renderSetup));
@@ -953,15 +947,26 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
       : train
       ? `Clickety-clack through the night. In the dining car someone unfolds a map: "A geography challenge? Right +${CHALLENGE_POINTS}, wrong −${CHALLENGE_POINTS}."`
       : `Calm water, a sky full of stars. In the ship's lounge someone sets up a quiz table: "A geography challenge? Right +${CHALLENGE_POINTS}, wrong −${CHALLENGE_POINTS}."`;
-    const play = button('🌍 Play the challenge', () => act({ type: 'travel', challenge: true }));
+    const play = button('🌍 Play the challenge', () => {
+      if (me.profile === 'nomad') { nomadAtWork = true; render(); return; }
+      act({ type: 'travel', challenge: true });
+    });
     play.className = 'primary';
     box.classList.add('trip-turn');
+    if (nomadAtWork && me.profile === 'nomad') {
+      box.append(tripScene(trip.kind), el('div', { className: 'trip-text' },
+        el('h2', {}, '📧 Ping! A message from your boss'),
+        el('p', { textContent: '"Quizzes? QUIZZES?! You\'re supposed to be working, not playing with strangers! That report was due yesterday. Laptop open, coffee in hand, back to work!" 😤☕💻' }),
+        el('p', { className: 'small', textContent: `💻 Digital Nomad: no challenges on trips, you're working. Your +${POINTS_NOMAD_TRIP} for this trip is safe.` }),
+        el('div', { className: 'row' }, button('💻 Back to work', () => { nomadAtWork = false; act({ type: 'travel', challenge: true }); }))));
+      return box;
+    }
     box.append(tripScene(trip.kind), el('div', { className: 'trip-text' },
       el('h2', {}, who, ` ${plane ? 'is flying' : train ? 'is on the train' : bus ? 'is on the bus' : 'is at sea'} to ${to}${step}`),
       el('p', { className: 'small', textContent: challenge
         ? `${offer} One question, ${CHALLENGE_SECONDS} seconds. You don't have to play.`
         : `A challenge needs at least ${plural(CHALLENGE_POINTS, 'point')}, so there is none this turn.` }),
-      me.profile === 'nomad' ? el('p', { className: 'small', textContent: '💻 Digital Nomad: +1 for this travel turn either way.' }) : '',
+      me.profile === 'nomad' ? el('p', { className: 'small', textContent: `💻 Digital Nomad: +${POINTS_NOMAD_TRIP} for every trip, paid on its first travel turn.` }) : '',
       el('div', { className: 'row' }, ...(challenge
         ? [play, button(plane || train || bus ? '😴 No thanks' : '🌅 No thanks', () => act({ type: 'travel' }))]
         : [button('Continue the trip', () => act({ type: 'travel' }))]))));

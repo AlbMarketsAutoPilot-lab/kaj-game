@@ -26,6 +26,14 @@ function atSea(): GameState {
   return pass(s);
 }
 
+// A Backpacker at sea (free quiz ticket, 3 travel turns): the Nomad plays no challenges (owner, 2026-10-11).
+function backpackerAtSea(): GameState {
+  let s = game(['eu-north', 'as-east'], ['backpacker', 'luxury']);
+  s = go(s, { type: 'quiz', kind: 'port', to: 'na-one' });
+  s = go(s, { type: 'answer', choice: s.quiz!.question.correct });
+  return pass(s);
+}
+
 test('the question file: 6 types, two different answers, unique ids, every flag present', () => {
   assert.ok(CHALLENGES.length >= 600, `${CHALLENGES.length} questions`);
   assert.equal(new Set(CHALLENGES.map((c) => c.id)).size, CHALLENGES.length, 'ids are unique');
@@ -66,24 +74,33 @@ test('saying no: nothing happens, the trip goes on (Nomad +1)', () => {
   assert.deepEqual(t.drawn, []);
 });
 
+test('the Nomad works on trips (owner, 2026-10-11): "Play" gives no challenge, the trip goes on, +1 once per trip', () => {
+  const s = atSea();
+  assert.deepEqual(legalActions(s, map), [{ type: 'travel' }, { type: 'travel', challenge: true }], 'the button stays');
+  const t = go(s, { type: 'travel', challenge: true });
+  assert.equal(t.challenge, null);
+  assert.equal(p1(t).travel!.turnsLeft, 2);
+  assert.equal(p1(t).points, p1(s).points + 1);
+});
+
 test('playing: the question comes now, the answer is the next move', () => {
-  let s = atSea();
+  let s = backpackerAtSea();
   s = go(s, { type: 'travel', challenge: true });
   assert.ok(s.challenge);
   assert.equal(p1(s).travel!.turnsLeft, 3, 'the trip goes on only after the answer');
   assert.deepEqual(legalActions(s, map), [{ type: 'challengeAnswer', choice: 0 }, { type: 'challengeAnswer', choice: 1 }]);
 });
 
-test('right +1, wrong −1; the trip goes on either way (Nomad +1)', () => {
-  const s = go(atSea(), { type: 'travel', challenge: true });
+test('right +1, wrong −1; the trip goes on either way', () => {
+  const s = go(backpackerAtSea(), { type: 'travel', challenge: true });
   const before = p1(s).points;
   const right = go(s, { type: 'challengeAnswer', choice: s.challenge!.correct });
-  assert.equal(p1(right).points, before + 1 + 1);
+  assert.equal(p1(right).points, before + 1);
   assert.equal(p1(right).travel!.turnsLeft, 2);
   assert.deepEqual(right.challenged, { seat: p1(s).seat, challenge: s.challenge, choice: s.challenge!.correct, right: true, change: 1 });
   assert.equal(right.challenge, null);
   const wrong = go(s, { type: 'challengeAnswer', choice: s.challenge!.correct === 0 ? 1 : 0 });
-  assert.equal(p1(wrong).points, before + 1 - 1);
+  assert.equal(p1(wrong).points, before - 1);
   assert.equal(p1(wrong).travel!.turnsLeft, 2);
   assert.equal(wrong.challenged!.right, false);
   assert.equal(wrong.challenged!.change, -1);
@@ -105,7 +122,7 @@ test('the last travel turn lands first, then the challenge counts', () => {
 test('the challenge is random but replays the same with the same seed', () => {
   const ids = new Set<string>();
   for (let r = 1; r < 200; r++) {
-    const s = atSea();
+    const s = backpackerAtSea();
     s.rng = r;
     const a = go(s, { type: 'travel', challenge: true });
     const b = go(s, { type: 'travel', challenge: true });

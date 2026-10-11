@@ -3,8 +3,9 @@ import type { GameState } from './types.ts';
 // Saved games carry this number. A save from another version is never continued, so a game
 // is never scored by rules that did not exist when its moves were made.
 // Version 11: the 50-turn map (task M2). Version 12 (owner, M5): new rules for both games (the bus,
-// whole continents, Madagascar), so no older save is continued.
-export const SAVE_VERSION = 12;
+// whole continents, Madagascar), so no older save is continued. Version 13 (owner, 2026-10-11): the
+// profile balance and the planning robots, for both games.
+export const SAVE_VERSION = 13;
 
 export function saveGame(state: GameState): string {
   return JSON.stringify({ version: SAVE_VERSION, state });

@@ -25,6 +25,8 @@ Every task also adds its part to the test board, so there is **always a playable
 
 - **30- and 50-turn games frozen (owner, 2026-10-10):** no more changes to their rules, maps, data,
   texts, screens or saved-game formats. Next: planning the 100-turn map (owner).
+- **Profile balance and planning robots (owner, 2026-10-11), then the final freeze** of the 30- and
+  50-turn games: see `docs/engine.md` ("Profile balance and planning robots") and `docs/balance-lab.md`.
 - **100-turn map planned (L1, 2026-10-10):** proposal in `docs/map100.md`, waiting for the owner's answers. See section L.
 
 ## Status table
@@ -69,6 +71,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | 18 | Bus from Mongolia to Siberia or China West (30-turn map), whole country at once | **high** | 1 | — | done (owner-approved 2026-10-09) |
 | 15v | Visual polish (owner, 2026-10-10): no rule, text or save changes | medium | 1 | — | ✅ done; the in-game "Leave the game?" popup needs the owner's phone test (Galaxy S25: map no longer shakes?) |
 | 16 | Full-game tests, bug fixes, buffer | medium | 1–2 | 15 | |
+| B | Profile balance and planning robots, both games (test-only lab first, then the rules; saves v13) | **high** | — | 5 | ✅ done (owner, 2026-10-11): final freeze of the 30- and 50-turn games |
 | L1 | 100-turn map: plan (`docs/map100.md`, made by `node scripts/map100-review.ts`) | **high** | 1 | 4 | ✅ proposal done; waiting for the owner's 8 answers |
 | L2 | 100-turn map: engine (map100, points for 4–5 parts, cards every 10, timing, stuck-state checker, 1,000 robot games, save stays 12) | **high** | 2 | after v1 | |
 | L3 | 100-turn map: shapes (new splits; 30- and 50-turn shape files unchanged) | medium | 1 | after v1 | |
