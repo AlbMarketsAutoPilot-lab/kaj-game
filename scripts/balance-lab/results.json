@@ -5020,5 +5020,321 @@
     }
    }
   }
+ },
+ "SHIPPED-30": {
+  "about": "the balanced game as it is now in src/ (no patches), 30 turns",
+  "games": 2000,
+  "lines": {
+   "profiles 30 2 N2": {
+    "job": {
+     "kind": "profiles",
+     "turns": 30,
+     "players": 2,
+     "driver": "N2",
+     "games": 2000
+    },
+    "profiles": {
+     "backpacker": {
+      "score": 50387,
+      "wins": 472,
+      "games": 1008
+     },
+     "nomad": {
+      "score": 50444,
+      "wins": 536,
+      "games": 1030
+     },
+     "business": {
+      "score": 49547,
+      "wins": 586,
+      "games": 1001
+     },
+     "luxury": {
+      "score": 45288,
+      "wins": 404,
+      "games": 961
+     }
+    }
+   },
+   "versus 30 E N2": {
+    "job": {
+     "kind": "versus",
+     "turns": 30,
+     "a": "E",
+     "b": "N2",
+     "games": 2000
+    },
+    "winsA": 773,
+    "winsB": 1224,
+    "draws": 3,
+    "scoreA": 45.4585,
+    "scoreB": 48.1575
+   },
+   "profiles 30 4 N2": {
+    "job": {
+     "kind": "profiles",
+     "turns": 30,
+     "players": 4,
+     "driver": "N2",
+     "games": 2000
+    },
+    "profiles": {
+     "business": {
+      "score": 92595,
+      "wins": 453,
+      "games": 2000
+     },
+     "luxury": {
+      "score": 96299,
+      "wins": 583,
+      "games": 2000
+     },
+     "nomad": {
+      "score": 94267,
+      "wins": 405,
+      "games": 2000
+     },
+     "backpacker": {
+      "score": 98662,
+      "wins": 555,
+      "games": 2000
+     }
+    }
+   },
+   "versus 30 N2 H3": {
+    "job": {
+     "kind": "versus",
+     "turns": 30,
+     "a": "N2",
+     "b": "H3",
+     "games": 2000
+    },
+    "winsA": 702,
+    "winsB": 1295,
+    "draws": 3,
+    "scoreA": 48.3225,
+    "scoreB": 52.604
+   },
+   "profiles 30 2 P4": {
+    "job": {
+     "kind": "profiles",
+     "turns": 30,
+     "players": 2,
+     "driver": "P4",
+     "games": 2000
+    },
+    "profiles": {
+     "backpacker": {
+      "score": 52050,
+      "wins": 435,
+      "games": 1008
+     },
+     "nomad": {
+      "score": 55111,
+      "wins": 616,
+      "games": 1030
+     },
+     "business": {
+      "score": 52853,
+      "wins": 527,
+      "games": 1001
+     },
+     "luxury": {
+      "score": 48486,
+      "wins": 421,
+      "games": 961
+     }
+    }
+   },
+   "profiles 30 4 P4": {
+    "job": {
+     "kind": "profiles",
+     "turns": 30,
+     "players": 4,
+     "driver": "P4",
+     "games": 2000
+    },
+    "profiles": {
+     "business": {
+      "score": 102860,
+      "wins": 591,
+      "games": 2000
+     },
+     "luxury": {
+      "score": 101073,
+      "wins": 544,
+      "games": 2000
+     },
+     "nomad": {
+      "score": 102477,
+      "wins": 520,
+      "games": 2000
+     },
+     "backpacker": {
+      "score": 98494,
+      "wins": 344,
+      "games": 2000
+     }
+    }
+   }
+  }
+ },
+ "SHIPPED-50": {
+  "about": "the balanced game as it is now in src/ (no patches), 50 turns",
+  "games": 2000,
+  "lines": {
+   "profiles 50 2 N2": {
+    "job": {
+     "kind": "profiles",
+     "turns": 50,
+     "players": 2,
+     "driver": "N2",
+     "games": 2000
+    },
+    "profiles": {
+     "backpacker": {
+      "score": 75388,
+      "wins": 600,
+      "games": 1008
+     },
+     "nomad": {
+      "score": 75193,
+      "wins": 508,
+      "games": 1030
+     },
+     "business": {
+      "score": 70014,
+      "wins": 435,
+      "games": 1001
+     },
+     "luxury": {
+      "score": 67404,
+      "wins": 451,
+      "games": 961
+     }
+    }
+   },
+   "profiles 50 4 N2": {
+    "job": {
+     "kind": "profiles",
+     "turns": 50,
+     "players": 4,
+     "driver": "N2",
+     "games": 2000
+    },
+    "profiles": {
+     "business": {
+      "score": 139282,
+      "wins": 458,
+      "games": 2000
+     },
+     "luxury": {
+      "score": 140722,
+      "wins": 542,
+      "games": 2000
+     },
+     "nomad": {
+      "score": 138358,
+      "wins": 412,
+      "games": 2000
+     },
+     "backpacker": {
+      "score": 142961,
+      "wins": 586,
+      "games": 2000
+     }
+    }
+   },
+   "versus 50 E N2": {
+    "job": {
+     "kind": "versus",
+     "turns": 50,
+     "a": "E",
+     "b": "N2",
+     "games": 2000
+    },
+    "winsA": 607,
+    "winsB": 1390,
+    "draws": 3,
+    "scoreA": 67.031,
+    "scoreB": 72.5865
+   },
+   "versus 50 N2 H3": {
+    "job": {
+     "kind": "versus",
+     "turns": 50,
+     "a": "N2",
+     "b": "H3",
+     "games": 2000
+    },
+    "winsA": 643,
+    "winsB": 1354,
+    "draws": 3,
+    "scoreA": 71.5085,
+    "scoreB": 76.931
+   },
+   "profiles 50 2 P4": {
+    "job": {
+     "kind": "profiles",
+     "turns": 50,
+     "players": 2,
+     "driver": "P4",
+     "games": 2000
+    },
+    "profiles": {
+     "backpacker": {
+      "score": 75597,
+      "wins": 338,
+      "games": 1008
+     },
+     "nomad": {
+      "score": 81286,
+      "wins": 689,
+      "games": 1030
+     },
+     "business": {
+      "score": 75567,
+      "wins": 475,
+      "games": 1001
+     },
+     "luxury": {
+      "score": 71798,
+      "wins": 498,
+      "games": 961
+     }
+    }
+   },
+   "profiles 50 4 P4": {
+    "job": {
+     "kind": "profiles",
+     "turns": 50,
+     "players": 4,
+     "driver": "P4",
+     "games": 2000
+    },
+    "profiles": {
+     "business": {
+      "score": 145027,
+      "wins": 410,
+      "games": 2000
+     },
+     "luxury": {
+      "score": 145023,
+      "wins": 420,
+      "games": 2000
+     },
+     "nomad": {
+      "score": 148358,
+      "wins": 514,
+      "games": 2000
+     },
+     "backpacker": {
+      "score": 151724,
+      "wins": 651,
+      "games": 2000
+     }
+    }
+   }
+  }
  }
 }

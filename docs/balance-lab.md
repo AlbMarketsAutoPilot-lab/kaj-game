@@ -440,3 +440,39 @@ With 400 games per line a win share is accurate to about ±2–4 points.
 | 50 turns, 4 players | planning (plans 4) | 53% ❌ (81.1) | 14% ❌ (72.4) | 18% ❌ (73.3) | 15% ❌ (73.8) | 5/16 |
 
 **5 of 16** profile results inside the target. (Wins %, with the average final score in brackets.)
+
+## Robot variant "SHIPPED-30": the balanced game as it is now in src/ (no patches), 30 turns
+
+| Game | A | B | A wins | B wins |
+|---|---|---|---|---|
+| 30 turns | easy | normal, plans 2 moves | 39% | 61% |
+| 30 turns | normal, plans 2 moves | hard, plans 3 moves | 35% | 65% |
+
+## Package "SHIPPED-30": the balanced game as it is now in src/ (no patches), 30 turns
+
+| Game | Robots | Backpacker | Business | Luxury | Nomad | Fair? |
+|---|---|---|---|---|---|---|
+| 30 turns, 2 players | normal (plans 2) | 47% ✅ (50.0) | 59% ✅ (49.5) | 42% ✅ (47.1) | 52% ✅ (49.0) | |
+| 30 turns, 4 players | normal (plans 2) | 28% ✅ (49.3) | 23% ✅ (46.3) | 29% ✅ (48.1) | 20% ✅ (47.1) | |
+| 30 turns, 2 players | planning (plans 4) | 43% ✅ (51.6) | 53% ✅ (52.8) | 44% ✅ (50.5) | 60% ✅ (53.5) | |
+| 30 turns, 4 players | planning (plans 4) | 17% ❌ (49.2) | 30% ✅ (51.4) | 27% ✅ (50.5) | 26% ✅ (51.2) | 15/16 |
+
+**15 of 16** profile results inside the target. (Wins %, with the average final score in brackets.)
+
+## Robot variant "SHIPPED-50": the balanced game as it is now in src/ (no patches), 50 turns
+
+| Game | A | B | A wins | B wins |
+|---|---|---|---|---|
+| 50 turns | easy | normal, plans 2 moves | 30% | 70% |
+| 50 turns | normal, plans 2 moves | hard, plans 3 moves | 32% | 68% |
+
+## Package "SHIPPED-50": the balanced game as it is now in src/ (no patches), 50 turns
+
+| Game | Robots | Backpacker | Business | Luxury | Nomad | Fair? |
+|---|---|---|---|---|---|---|
+| 50 turns, 2 players | normal (plans 2) | 60% ✅ (74.8) | 43% ✅ (69.9) | 47% ✅ (70.1) | 49% ✅ (73.0) | |
+| 50 turns, 4 players | normal (plans 2) | 29% ✅ (71.5) | 23% ✅ (69.6) | 27% ✅ (70.4) | 21% ✅ (69.2) | |
+| 50 turns, 2 players | planning (plans 4) | 34% ❌ (75.0) | 47% ✅ (75.5) | 52% ✅ (74.7) | 67% ❌ (78.9) | |
+| 50 turns, 4 players | planning (plans 4) | 33% ❌ (75.9) | 21% ✅ (72.5) | 21% ✅ (72.5) | 26% ✅ (74.2) | 13/16 |
+
+**13 of 16** profile results inside the target. (Wins %, with the average final score in brackets.)
