@@ -55,4 +55,15 @@ export const PACKAGES: Package[] = [
       ['NOMAD_PENALTY = 5', `NOMAD_PENALTY = ${pen}`], [BP_NEWS, '', 'src/cards/cards.ts'],
       [EASY, 'easy: { accuracy: 0.65, challengeFrom: 5, reserve: 4 }', RN]] as [string, string, string?][],
   })),
+  // Round 5 (owner, 2026-10-11): the Nomad works on travel turns (no challenge); Backpacker +8, with its
+  // deck b1–b8 or b1–b15; easy robot 65% (30 turns) or 70% (50 turns); hard plans 3 (and 4, to compare).
+  ...([['Y1', 30, 5, false, 0.65], ['Y2', 30, 5, true, 0.65], ['Z1', 50, 7, false, 0.7], ['Z2', 50, 7, true, 0.7]] as const).map(([name, turns, biz, news, easy]) => ({
+    name, turns: [turns], drivers: ['N2', 'P4'], ladder: [['E', 'N2'], ['N2', 'H3'], ['N2', 'H4']] as [string, string][],
+    about: `${turns} turns: no Luxury continent bonus; Backpacker 3 continents +8, cards ${news ? 'b1–b15' : 'b1–b8'}; Business citizenship +${biz}; Nomad ticket 1, no challenge on travel turns, 3 continents or −5; easy robot ${easy * 100}%`,
+    patches: [[LUX, 'luxury: { continents: 5, points: 0 }'], [BP, 'backpacker: { continents: 3, points: 8 }'],
+      [BIZ, `POINTS_BUSINESS_CITIZENSHIP = ${biz}`],
+      ["return me.points >= CHALLENGE_POINTS ? [", "return me.points >= CHALLENGE_POINTS && me.profile !== 'nomad' ? [", 'src/engine/engine.ts'],
+      ...(news ? [] : [[BP_NEWS, '', 'src/cards/cards.ts']]),
+      [EASY, `easy: { accuracy: ${easy}, challengeFrom: 5, reserve: 4 }`, RN]] as [string, string, string?][],
+  })),
 ];
