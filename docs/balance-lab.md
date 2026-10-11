@@ -418,3 +418,25 @@ With 400 games per line a win share is accurate to about ±2–4 points.
 | 50 turns, 4 players | planning (plans 4) | 30% ✅ (75.4) | 22% ✅ (73.0) | 19% ❌ (71.9) | 29% ✅ (75.7) | 10/16 |
 
 **10 of 16** profile results inside the target. (Wins %, with the average final score in brackets.)
+
+## Package "LIFT-30": final candidate + Nomad +1 per trip (not per travel turn) + Backpacker lift once per continent
+
+| Game | Robots | Backpacker | Business | Luxury | Nomad | Fair? |
+|---|---|---|---|---|---|---|
+| 30 turns, 2 players | normal (plans 2) | 73% ❌ (55.4) | 51% ✅ (49.3) | 34% ❌ (46.6) | 41% ✅ (48.9) | |
+| 30 turns, 4 players | normal (plans 2) | 53% ❌ (53.9) | 16% ❌ (46.1) | 18% ❌ (47.0) | 13% ❌ (46.5) | |
+| 30 turns, 2 players | planning (plans 4) | 75% ❌ (58.5) | 43% ✅ (52.4) | 37% ❌ (50.5) | 45% ✅ (52.7) | |
+| 30 turns, 4 players | planning (plans 4) | 40% ❌ (54.9) | 24% ✅ (51.8) | 19% ❌ (50.4) | 16% ❌ (50.9) | 5/16 |
+
+**5 of 16** profile results inside the target. (Wins %, with the average final score in brackets.)
+
+## Package "LIFT-50": final candidate + Nomad +1 per trip (not per travel turn) + Backpacker lift once per continent
+
+| Game | Robots | Backpacker | Business | Luxury | Nomad | Fair? |
+|---|---|---|---|---|---|---|
+| 50 turns, 4 players | normal (plans 2) | 47% ❌ (76.3) | 19% ❌ (69.5) | 21% ✅ (69.6) | 13% ❌ (68.8) | |
+| 50 turns, 2 players | normal (plans 2) | 72% ❌ (78.0) | 39% ❌ (69.2) | 45% ✅ (70.2) | 44% ✅ (72.5) | |
+| 50 turns, 2 players | planning (plans 4) | 68% ❌ (81.6) | 36% ❌ (74.8) | 43% ✅ (74.4) | 52% ✅ (78.4) | |
+| 50 turns, 4 players | planning (plans 4) | 53% ❌ (81.1) | 14% ❌ (72.4) | 18% ❌ (73.3) | 15% ❌ (73.8) | 5/16 |
+
+**5 of 16** profile results inside the target. (Wins %, with the average final score in brackets.)
