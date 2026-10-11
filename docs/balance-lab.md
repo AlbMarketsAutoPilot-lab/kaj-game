@@ -252,3 +252,57 @@ With 400 games per line a win share is accurate to about ±2–4 points.
 | 50 turns, 4 players | planning (plans 4) | 31% ❌ (75.9) | 29% ✅ (74.4) | 16% ❌ (71.3) | 23% ✅ (73.6) | 14/16 |
 
 **14 of 16** profile results inside the target. (Wins %, with the average final score in brackets.)
+
+## Robot variant "X1": 30 turns: no Luxury continent bonus; Backpacker 3 continents +6; Business citizenship +5; Nomad ticket 1, needs 3 continents or −5; Backpacker cards b1–b8; easy robot 65%
+
+| Game | A | B | A wins | B wins |
+|---|---|---|---|---|
+| 30 turns | easy | normal, plans 2 moves | 38% | 62% |
+| 30 turns | normal, plans 2 moves | hard, plans 3 moves | 34% | 66% |
+
+## Package "X1": 30 turns: no Luxury continent bonus; Backpacker 3 continents +6; Business citizenship +5; Nomad ticket 1, needs 3 continents or −5; Backpacker cards b1–b8; easy robot 65%
+
+| Game | Robots | Backpacker | Business | Luxury | Nomad | Fair? |
+|---|---|---|---|---|---|---|
+| 30 turns, 2 players | normal (plans 2) | 41% ✅ (48.9) | 52% ✅ (48.5) | 48% ✅ (47.4) | 58% ✅ (50.3) | |
+| 30 turns, 4 players | normal (plans 2) | 23% ✅ (48.3) | 21% ✅ (45.8) | 32% ❌ (48.6) | 23% ✅ (48.1) | |
+| 30 turns, 2 players | planning (plans 4) | 46% ✅ (50.9) | 51% ✅ (51.3) | 50% ✅ (50.3) | 52% ✅ (50.8) | |
+| 30 turns, 4 players | planning (plans 4) | 15% ❌ (47.9) | 31% ❌ (51.3) | 28% ✅ (50.2) | 25% ✅ (50.2) | 13/16 |
+
+**13 of 16** profile results inside the target. (Wins %, with the average final score in brackets.)
+
+## Robot variant "W1": 50 turns: no Luxury continent bonus; Backpacker 3 continents +6; Business citizenship +7; Nomad ticket 1, needs 4 continents or −5; Backpacker cards b1–b8; easy robot 65%
+
+| Game | A | B | A wins | B wins |
+|---|---|---|---|---|
+| 50 turns | easy | normal, plans 2 moves | 23% | 77% |
+| 50 turns | normal, plans 2 moves | hard, plans 3 moves | 31% | 69% |
+
+## Package "W1": 50 turns: no Luxury continent bonus; Backpacker 3 continents +6; Business citizenship +7; Nomad ticket 1, needs 4 continents or −5; Backpacker cards b1–b8; easy robot 65%
+
+| Game | Robots | Backpacker | Business | Luxury | Nomad | Fair? |
+|---|---|---|---|---|---|---|
+| 50 turns, 2 players | normal (plans 2) | 45% ✅ (72.9) | 42% ✅ (70.4) | 42% ✅ (70.1) | 71% ❌ (78.9) | |
+| 50 turns, 4 players | normal (plans 2) | 21% ✅ (70.5) | 25% ✅ (70.9) | 23% ✅ (70.0) | 31% ❌ (73.2) | |
+| 50 turns, 2 players | planning (plans 4) | 28% ❌ (74.8) | 53% ✅ (76.5) | 53% ✅ (74.7) | 65% ❌ (79.0) | |
+| 50 turns, 4 players | planning (plans 4) | 24% ✅ (74.4) | 27% ✅ (74.3) | 19% ❌ (71.8) | 30% ✅ (75.4) | 11/16 |
+
+**11 of 16** profile results inside the target. (Wins %, with the average final score in brackets.)
+
+## Robot variant "W2": 50 turns: no Luxury continent bonus; Backpacker 3 continents +6; Business citizenship +7; Nomad ticket 1, needs 4 continents or −8; Backpacker cards b1–b8; easy robot 65%
+
+| Game | A | B | A wins | B wins |
+|---|---|---|---|---|
+| 50 turns | easy | normal, plans 2 moves | 23% | 77% |
+| 50 turns | normal, plans 2 moves | hard, plans 3 moves | 31% | 69% |
+
+## Package "W2": 50 turns: no Luxury continent bonus; Backpacker 3 continents +6; Business citizenship +7; Nomad ticket 1, needs 4 continents or −8; Backpacker cards b1–b8; easy robot 65%
+
+| Game | Robots | Backpacker | Business | Luxury | Nomad | Fair? |
+|---|---|---|---|---|---|---|
+| 50 turns, 4 players | normal (plans 2) | 21% ✅ (70.5) | 25% ✅ (70.9) | 23% ✅ (70.0) | 31% ❌ (73.2) | |
+| 50 turns, 2 players | normal (plans 2) | 45% ✅ (72.9) | 42% ✅ (70.4) | 42% ✅ (70.1) | 71% ❌ (78.9) | |
+| 50 turns, 2 players | planning (plans 4) | 32% ❌ (74.5) | 55% ✅ (76.4) | 55% ✅ (74.8) | 57% ✅ (77.1) | |
+| 50 turns, 4 players | planning (plans 4) | 26% ✅ (74.5) | 28% ✅ (73.9) | 21% ✅ (72.4) | 25% ✅ (74.5) | 13/16 |
+
+**13 of 16** profile results inside the target. (Wins %, with the average final score in brackets.)
