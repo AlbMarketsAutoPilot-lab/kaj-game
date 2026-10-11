@@ -14,6 +14,7 @@ const CARDS = readFileSync(new URL('../../src/cards/cards.ts', import.meta.url),
 const BP_NEWS = CARDS.slice(CARDS.indexOf('  // More Backpacker news'), CARDS.indexOf('\n', CARDS.indexOf("id: 'b15'")) + 1);
 const EASY = 'easy: { accuracy: 0.5, challengeFrom: 5, reserve: 5 }';
 const RN = 'src/engine/normal-robot.ts';
+const ENG = 'src/engine/engine.ts';
 
 export const PACKAGES: Package[] = [
   { name: 'today', about: 'the game as it is now', patches: [] },
@@ -75,5 +76,51 @@ export const PACKAGES: Package[] = [
       [BIZ, 'POINTS_BUSINESS_CITIZENSHIP = 6'], ['NOMAD_PENALTY = 5', 'NOMAD_PENALTY = 0'],
       ["return me.points >= CHALLENGE_POINTS ? [", "return me.points >= CHALLENGE_POINTS && me.profile !== 'nomad' ? [", 'src/engine/engine.ts'],
       [BP_NEWS, '', 'src/cards/cards.ts'], [EASY, `easy: { accuracy: ${easy}, challengeFrom: 5, reserve: 4 }`, RN]] as [string, string, string?][],
+  })),
+  // Owner (2026-10-11): the final candidate plus (1) the Nomad's +1 per trip, not per travel turn, and (2) the
+  // Backpacker's lift: once per continent, on its first walking turn there, it may walk a 2nd area in the same
+  // turn (each area its points and fees, only through free areas; one area is fine, the lift is then used up).
+  ...([['LIFT-30', 30], ['LIFT-50', 50]] as const).map(([name, turns]) => ({
+    name, turns: [turns], drivers: ['N2', 'P4'],
+    about: 'final candidate + Nomad +1 per trip (not per travel turn) + Backpacker lift once per continent',
+    patches: [[LUX, 'luxury: { continents: 5, points: 0 },\n  nomad: { continents: 3, points: 5 }'], [BP, 'backpacker: { continents: 3, points: 7 }'],
+      [BIZ, 'POINTS_BUSINESS_CITIZENSHIP = 6'], ['NOMAD_PENALTY = 5', 'NOMAD_PENALTY = 0'],
+      ["return me.points >= CHALLENGE_POINTS ? [", "return me.points >= CHALLENGE_POINTS && me.profile !== 'nomad' ? [", ENG],
+      [BP_NEWS, '', 'src/cards/cards.ts'],
+      // Nomad: +1 once per trip (on its first travel turn).
+      ["  if (me.profile === 'nomad') me.points = addPoints(me.points, POINTS_NOMAD_TRAVEL_TURN);",
+        "  if (me.profile === 'nomad' && trip.turnsLeft === TRAVEL_TURNS.nomad[trip.kind]) me.points = addPoints(me.points, POINTS_NOMAD_TRAVEL_TURN);", ENG],
+      ["const nomad = me.profile === 'nomad' ? travel : 0;", "const nomad = me.profile === 'nomad' ? 1 : 0;", RN],
+      ["const nomad = me.profile === 'nomad' ? travel : 0;", "const nomad = me.profile === 'nomad' ? 1 : 0;", 'scripts/balance-lab/planner.ts'],
+      // Backpacker lift: the 2nd step of the turn.
+      ["      if (me.loseTurn) return [{ type: 'lostTurn' }];", `      if (me.loseTurn) return [{ type: 'lostTurn' }];
+      if ((state as any).liftStep) {
+        const shut = closedAreas(state, me.seat);
+        const steps: Action[] = areaById(map, me.area!).neighbours
+          .filter((to) => !shut.has(to) && me.points >= feeTotal(entryFees(state, me, me.area, to))).map((to) => ({ type: 'walk', to }));
+        return [...steps, { type: 'liftStop' } as any];
+      }`, ENG],
+      [`      arrive(next, map, me, areaById(map, action.to));
+      endTurn(next, map);
+      return next;
+    }
+    case 'askCitizenship': {`, `      const liftFrom = areaById(map, me.area!).continent;
+      arrive(next, map, me, areaById(map, action.to));
+      const lifts: string[] = ((me as any).lifts ??= []);
+      if (!(next as any).liftStep && me.profile === 'backpacker' && !lifts.includes(liftFrom)) {
+        lifts.push(liftFrom);
+        (next as any).liftStep = true;
+        return next;
+      }
+      (next as any).liftStep = false;
+      endTurn(next, map);
+      return next;
+    }
+    case 'liftStop' as any: {
+      (next as any).liftStep = false;
+      endTurn(next, map);
+      return next;
+    }
+    case 'askCitizenship': {`, ENG]] as [string, string, string?][],
   })),
 ];
