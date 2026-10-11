@@ -195,9 +195,9 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
       after: { title: '✅ Right!', lines: ['Free ticket! If only real life worked like that!'] } },
     { title: '🧳 Your profile\'s bonuses', cls: 'guide-list', lines: [
       `1. 🎒 **Backpacker: +${bag.points} for reaching ${bag.continents} continents.** Never pays for tickets (always the free quiz), can take the bus and try to hitchhike. *But:* slow trips.`,
-      `2. 💼 **Business Traveler: +${POINTS_BUSINESS_CITIZENSHIP} when granted citizenship**, and fast trips. *But:* tickets cost ${TICKET_PRICE.business}, and no bus.`,
-      `3. 💎 **Luxury Traveler: flies or sails to any airport or port**, and gets **citizenship with no test**. *But:* tickets cost ${TICKET_PRICE.luxury}, and no train or bus.`,
-      `4. 💻 **Digital Nomad: +${POINTS_NOMAD_TRIP} for every trip** (it works on the way), **+${nomad.points} for reaching ${nomad.continents} continents**, the **cheapest tickets**, and can take the bus. *But:* never citizenship, no travel challenges (it's working!), and slow trips.`] },
+      `2. 💼 **Business Traveler: +${POINTS_BUSINESS_CITIZENSHIP} when granted citizenship**, fast trips, and can rent a car in Mexico. *But:* tickets cost ${TICKET_PRICE.business}, and no bus.`,
+      `3. 💎 **Luxury Traveler: flies or sails to any airport or port**, gets **citizenship with no test**, and can rent a car in Mexico. *But:* tickets cost ${TICKET_PRICE.luxury}, and no train or bus.`,
+      `4. 💻 **Digital Nomad: +${POINTS_NOMAD_TRIP} for every trip** (it works on the way), **+${nomad.points} for reaching ${nomad.continents} continents**, the **cheapest tickets**, and can take the bus and rent a car. *But:* never citizenship, no travel challenges (it's working!), and slow trips.`] },
     { title: '💼 Own a business', task: true, picture: buyAirline,
       lines: ['Want more? Own a business, and the other players pay you:', '✈️ an airline at an airport · ⚓ a ferry agency at a port · 🚆 a train ticket booth at a station · 🚌 a bus ticket booth at the bus stop · 🚗 a car rental in Mexico · 🏛️ guided tours at a wonder.', '**Buy the airline at this airport to continue the guide.**'],
       after: { title: '🎉 You own the airline of UK & Ireland!', picture: () => airportView(true),
