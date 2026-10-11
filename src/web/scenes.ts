@@ -1,6 +1,7 @@
 // The trip scenes (owner-approved preview, task 14j): drawn over the game's own background
 // painting (set by CSS, .trip-scene). No people: a plane in the night sky, a liner at sea, or a
-// night train (task 17), or a bus on the steppe (task 18).
+// night train (task 17), a bus on the steppe (task 18), or a car in the desert (task 19); the
+// hitchhiker by the road is the one person drawn.
 
 import type { RouteKind } from '../engine/types.ts';
 import { WONDER_ART } from './countries.ts';
@@ -170,8 +171,66 @@ const BUS = `<rect width="440" height="230" fill="#062a30" opacity=".12"/>
 <path d="M310 196 Q380 192 440 188" stroke="#fff6c8" stroke-width="12" opacity=".12" filter="url(#trip-blur6)"/>
 <rect width="440" height="230" fill="url(#trip-moonglow)" opacity=".25"/>`;
 
+// A car on a desert highway at dusk (task 19, Mexico to the USA): mesas, cacti, the road, a red
+// car with its lights on. Pieces shared with the hitchhiking scenes below.
+const DESERT = `<rect width="440" height="230" fill="#062a30" opacity=".12"/>
+<path d="M0 150 L40 150 L52 118 L120 118 L134 150 L260 150 L270 128 L320 128 L332 150 L440 150 V230 H0 Z" fill="#7a3f2c" opacity=".7"/>
+<path d="M0 168 Q120 156 240 164 T440 158 V230 H0 Z" fill="#3d2a22" opacity=".9"/>
+<g fill="#1d4a3a" opacity=".9">
+<path d="M380 172 V136 Q380 130 386 130 Q392 130 392 136 V172 Z"/><path d="M380 152 H372 V142 Q372 138 376 138 Q380 138 380 142 Z"/><path d="M392 146 H400 V136 Q400 132 396 132 Q392 132 392 136 Z"/>
+<path d="M30 176 V150 Q30 145 35 145 Q40 145 40 150 V176 Z"/><path d="M40 162 H46 V154 Q46 150 43 150 Q40 150 40 154 Z"/>
+</g>
+<path d="M0 204 H440" stroke="#3b4a4f" stroke-width="22"/>
+<path d="M0 204 H440" stroke="#f4f1de" stroke-width="1.6" stroke-dasharray="14 12" opacity=".7"/>`;
+// The car, its back on the left; `x` is where it stands on the road. `bag`: a backpack on the back seat.
+const carAt = (x: number, bag = false, blur = false) => `<g transform="translate(${x} 200) scale(1.25)"${blur ? ' filter="url(#trip-soft)" opacity=".85"' : ''}>
+<path d="M0 -6 V-24 Q0 -30 8 -30 H34 L52 -46 H92 L112 -30 H134 Q142 -30 142 -22 V-6 Z" fill="url(#trip-car-red)"/>
+<path d="M56 -42 H72 V-31 H44 Z" fill="#bfe9ff" opacity=".9"/><path d="M76 -42 H90 L104 -31 H76 Z" fill="#bfe9ff" opacity=".9"/>
+${bag ? '<rect x="58" y="-40" width="10" height="11" rx="3" fill="#e07a3f"/><path d="M60 -40 Q63 -45 66 -40" stroke="#7d3a14" stroke-width="1.6" fill="none"/>' : ''}
+<path d="M0 -18 H142" stroke="#7d1f16" stroke-width="2"/>
+<circle cx="138" cy="-22" r="3.4" fill="#fff6c8" filter="url(#trip-glow)"/>
+<rect x="-1" y="-24" width="4" height="6" fill="#ff5a4a" filter="url(#trip-glow)"/>
+<circle cx="30" cy="-4" r="10" fill="#1a1a1a" stroke="#5f8583" stroke-width="2"/><circle cx="30" cy="-4" r="3.4" fill="#9fbdbb"/>
+<circle cx="112" cy="-4" r="10" fill="#1a1a1a" stroke="#5f8583" stroke-width="2"/><circle cx="112" cy="-4" r="3.4" fill="#9fbdbb"/>
+</g>`;
+// The hitchhiker by the road: a big backpack, a cap, and the thumb up.
+const hikerAt = (x: number) => `<g transform="translate(${x} 196) scale(1.6)">
+<rect x="-13" y="-34" width="11" height="18" rx="3.5" fill="#e07a3f"/><path d="M-11 -34 Q-7.5 -39 -4 -34" stroke="#7d3a14" stroke-width="1.6" fill="none"/>
+<path d="M-6 -32 H6 V-12 H-6 Z" fill="#2fb39a"/>
+<path d="M-4 -12 L-6 4" stroke="#163e46" stroke-width="4" stroke-linecap="round"/><path d="M4 -12 L6 4" stroke="#163e46" stroke-width="4" stroke-linecap="round"/>
+<circle cx="0" cy="-38" r="5.5" fill="#f1c9a5"/><path d="M-6 -39 Q0 -48 6 -39 L10 -38.5 Z" fill="#c0392b"/>
+<path d="M5 -28 L16 -34" stroke="#2fb39a" stroke-width="3.4" stroke-linecap="round"/>
+<path d="M15 -33 L15.6 -41 Q17.8 -42 18.2 -40 L18 -34 Q18 -31 15 -32 Z" fill="#f1c9a5"/>
+</g>`;
+const CAR = `${DESERT}
+${carAt(120)}
+<g fill="#e9dcb5" filter="url(#trip-blur6)">
+<ellipse cx="96" cy="196" rx="22" ry="8" opacity=".35"/><ellipse cx="60" cy="190" rx="28" ry="10" opacity=".25"/>
+</g>
+<path d="M310 196 Q380 192 440 188" stroke="#fff6c8" stroke-width="12" opacity=".12" filter="url(#trip-blur6)"/>
+<rect width="440" height="230" fill="url(#trip-moonglow)" opacity=".25"/>`;
+// The Backpacker's ride: the same car, with its backpack on the back seat.
+const HITCH_RIDE = CAR.replace(carAt(120), carAt(120, true));
+// A car stops: brake lights on, the hitchhiker next to it.
+const HITCH_STOP = `${DESERT}
+${carAt(150)}
+${hikerAt(110)}
+<rect width="440" height="230" fill="url(#trip-moonglow)" opacity=".25"/>`;
+// No car stops: it rushes past in a blur of speed lines and dust.
+const HITCH_PASS = `${DESERT}
+${hikerAt(80)}
+${carAt(250, false, true)}
+<g stroke="#f4f1de" stroke-width="2" stroke-linecap="round" opacity=".55">
+<path d="M150 160 H230"/><path d="M160 176 H240"/><path d="M140 190 H235"/>
+</g>
+<g fill="#e9dcb5" filter="url(#trip-blur6)">
+<ellipse cx="230" cy="194" rx="30" ry="10" opacity=".4"/><ellipse cx="190" cy="188" rx="34" ry="11" opacity=".3"/><ellipse cx="150" cy="182" rx="30" ry="10" opacity=".2"/>
+</g>
+<rect width="440" height="230" fill="url(#trip-moonglow)" opacity=".25"/>`;
+
 const TRAIN_DEFS = `<linearGradient id="trip-bus" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f2d65c"/><stop offset="1" stop-color="#c79a22"/></linearGradient>
 <linearGradient id="trip-car" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2fb39a"/><stop offset="1" stop-color="#0f6a5c"/></linearGradient>
+<linearGradient id="trip-car-red" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e2574a"/><stop offset="1" stop-color="#9a2a1f"/></linearGradient>
 <linearGradient id="trip-loco" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e2574a"/><stop offset="1" stop-color="#7d1f16"/></linearGradient>`;
 
 const SCENES: Record<RouteKind, { className: string; art: string }> = {
@@ -179,14 +238,26 @@ const SCENES: Record<RouteKind, { className: string; art: string }> = {
   port: { className: 'ship', art: SHIP },
   station: { className: 'train', art: TRAIN },
   bus: { className: 'bus', art: BUS },
+  car: { className: 'car', art: CAR },
 };
 
-// The scene for a plane ('airport'), ship ('port'), train ('station') or bus trip.
-export function tripScene(kind: RouteKind): HTMLElement {
+function sceneBox(className: string, art: string): HTMLElement {
   const box = document.createElement('div');
-  box.className = `trip-scene ${SCENES[kind].className}`;
-  box.innerHTML = `<svg viewBox="0 0 440 230" aria-hidden="true"><defs>${DEFS}${TRAIN_DEFS}</defs>${SCENES[kind].art}</svg>`;
+  box.className = `trip-scene ${className}`;
+  box.innerHTML = `<svg viewBox="0 0 440 230" aria-hidden="true"><defs>${DEFS}${TRAIN_DEFS}</defs>${art}</svg>`;
   return box;
+}
+
+// The scene for a plane ('airport'), ship ('port'), train ('station'), bus or car trip. The
+// Backpacker's car ride is a hitchhike (task 19): its backpack rides on the back seat.
+export function tripScene(kind: RouteKind, hitchhiker = false): HTMLElement {
+  if (kind === 'car' && hitchhiker) return sceneBox('car', HITCH_RIDE);
+  return sceneBox(SCENES[kind].className, SCENES[kind].art);
+}
+
+// The Backpacker's thumb by the road (task 19): a car stops, or it rushes past.
+export function hitchScene(stopped: boolean): HTMLElement {
+  return sceneBox('car', stopped ? HITCH_STOP : HITCH_PASS);
 }
 
 // The wonder posters (task M6, owner-approved drawings in assets/wonders/, inlined by the build):

@@ -6,7 +6,7 @@
 // GAMMA^k. Other players are not predicted (only the first move checks them). The same algorithm as the
 // balance lab's test robot (scripts/balance-lab/planner.ts).
 import { canPayAfterQuiz, continentReward, destinations, entryFees, feeTotal } from './engine.ts';
-import { bigCountryPoints, CONTINENT_BONUS, POINTS_NEW_CONTINENT, POINTS_NOMAD_TRIP, QUIZ_TRIES, ROUTE_KINDS, ticketPrice, TRAVEL_TURNS } from './constants.ts';
+import { bigCountryPoints, CONTINENT_BONUS, POINTS_NEW_CONTINENT, POINTS_NOMAD_TRIP, QUIZ_TRIES, ROUTE_KINDS, ticketPrice, TRAVEL_TURNS, wholeCountryTrip } from './constants.ts';
 import { areaById } from './map.ts';
 import type { Action, GameMap, GameState, Player, RouteKind } from './types.ts';
 
@@ -60,16 +60,18 @@ function steps(state: GameState, map: GameMap, me: Player, s: Sim, reserve: numb
     let dests = destinations(map, s.area, kind, me.profile!);
     if (dests.length === 0) continue;
     // Luxury may go to any airport or port: only the 4 best first arrivals are looked at.
-    if (dests.length > 4) dests = dests.map((d) => [d, arrive(map, me, s, d, kind === 'bus')[0]] as const).sort((a, b) => b[1] - a[1]).slice(0, 4).map((d) => d[0]);
+    if (dests.length > 4) dests = dests.map((d) => [d, arrive(map, me, s, d, wholeCountryTrip(kind))[0]] as const).sort((a, b) => b[1] - a[1]).slice(0, 4).map((d) => d[0]);
     for (const to of dests) {
       const f = fees(to);
       const ticket = ticketPrice(me.profile!, kind);
       const pay = ticket !== null && s.points - ticket - f >= reserve;
       if (!pay && f > s.points) continue;
+      // The car has no quiz (task 19): pay, or the Backpacker hitchhikes (robots don't know the secret).
+      if (kind === 'car' && !pay && ticket !== null) continue;
       // Quiz: each wrong try uses a turn; at most QUIZ_TRIES tries.
-      const wait = pay ? 0 : Math.min(QUIZ_TRIES - 1, (1 - p) / p);
+      const wait = pay || kind === 'car' ? 0 : Math.min(QUIZ_TRIES - 1, (1 - p) / p);
       const travel = TRAVEL_TURNS[me.profile!][kind];
-      const [g, n] = arrive(map, me, s, to, kind === 'bus');
+      const [g, n] = arrive(map, me, s, to, wholeCountryTrip(kind));
       const nomad = me.profile === 'nomad' && travel > 0 ? POINTS_NOMAD_TRIP : 0;
       const gain = g + nomad - f - (pay ? ticket! : 0);
       n.points += gain;
@@ -110,6 +112,7 @@ export function planMove(state: GameState, map: GameMap, me: Player, legal: Acti
   for (const st of steps(state, map, me, s, reserve, accuracy, true)) {
     let action: Action | undefined;
     if (st.kind === 'walk') action = legal.find((a) => a.type === 'walk' && a.to === st.to);
+    else if (st.kind === 'car' && ticketPrice(me.profile!, 'car') === null) action = legal.find((a) => a.type === 'hitchhike' && a.to === st.to);
     else {
       const quiz = legal.find((a) => a.type === 'quiz' && a.kind === st.kind && a.to === st.to);
       const board = legal.find((a) => a.type === 'board' && a.kind === st.kind && a.to === st.to);

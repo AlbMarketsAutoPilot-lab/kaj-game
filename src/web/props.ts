@@ -1,6 +1,6 @@
 // Drawn icons for the area the player stands in (task 14 B1, owner-approved): an airport with a
 // hovering plane, a port with a rocking ship, a station with a steaming train (task 17),
-// a bus stop with its bus (task 18), a monument for the wonder, a citizenship flag,
+// a bus stop with its bus (task 18), a car rental (task 19), a monument for the wonder, a citizenship flag,
 // and the players' pawns. Each one is drawn in a 40 × 40 box centred on (0, 0).
 
 import { svg } from './maps.ts';
@@ -111,6 +111,45 @@ export function busStop(owner?: string): SVGGElement {
       svg('circle', { cx: 16, cy: 5.5, r: 1, fill: '#fff6c8' }),
       svg('circle', { cx: -4, cy: 8.5, r: 2.6, fill: '#3b4a4f', stroke: INK, 'stroke-width': 1 }),
       svg('circle', { cx: 11, cy: 8.5, r: 2.6, fill: '#3b4a4f', stroke: INK, 'stroke-width': 1 })),
+  );
+  if (owner) g.append(pennant(-18, 10, owner));
+  return g;
+}
+
+// A car rental (task 19): a strip of road with a little red car that bounces, and beside it a
+// "RENT" sign, or, for the Backpacker (who never rents: it hitchhikes), a hitchhiker with a big
+// backpack and a raised thumb.
+export function carRental(owner?: string, hitchhiker = false): SVGGElement {
+  const car = svg('g', { class: 'hover' },
+    // Body, cabin and windows.
+    svg('path', { d: 'M-6 5 L-6 -1 Q-6 -3 -4 -3 L0 -3 L4 -9 L13 -9 L17 -3 L19 -3 Q21 -3 21 -1 L21 5 Z', fill: '#d65f4e', stroke: INK, 'stroke-width': 1.2 }),
+    svg('path', { d: 'M5 -7.6 L8.2 -7.6 L8.2 -3.4 L2.6 -3.4 Z', fill: '#bfe9ff', stroke: INK, 'stroke-width': 0.7 }),
+    svg('path', { d: 'M9.6 -7.6 L12.6 -7.6 L15.6 -3.4 L9.6 -3.4 Z', fill: '#bfe9ff', stroke: INK, 'stroke-width': 0.7 }),
+    svg('circle', { cx: 20, cy: 0.5, r: 1, fill: '#fff6c8' }),
+    svg('circle', { cx: 0.5, cy: 6, r: 2.8, fill: '#3b4a4f', stroke: INK, 'stroke-width': 1 }),
+    svg('circle', { cx: 14.5, cy: 6, r: 2.8, fill: '#3b4a4f', stroke: INK, 'stroke-width': 1 }));
+  const side = hitchhiker
+    ? svg('g', {},
+      // The hitchhiker: backpack, body, head with a cap, and the arm out with the thumb up.
+      svg('rect', { x: -19.5, y: -8, width: 5, height: 9, rx: 1.6, fill: '#e07a3f', stroke: INK, 'stroke-width': 0.9 }),
+      svg('line', { x1: -14, y1: -6, x2: -14, y2: 4, stroke: INK, 'stroke-width': 3.2, 'stroke-linecap': 'round' }),
+      svg('line', { x1: -14.6, y1: 4, x2: -16, y2: 10, stroke: INK, 'stroke-width': 1.6, 'stroke-linecap': 'round' }),
+      svg('line', { x1: -13.4, y1: 4, x2: -12, y2: 10, stroke: INK, 'stroke-width': 1.6, 'stroke-linecap': 'round' }),
+      svg('circle', { cx: -14, cy: -10, r: 2.6, fill: '#f1c9a5', stroke: INK, 'stroke-width': 0.9 }),
+      svg('path', { d: 'M-16.8 -10.6 Q-14 -15 -11.2 -10.6 L-9.4 -10.4 Z', fill: '#2fb39a', stroke: INK, 'stroke-width': 0.7 }),
+      svg('line', { x1: -13, y1: -4.5, x2: -9.5, y2: -6.5, stroke: INK, 'stroke-width': 1.5, 'stroke-linecap': 'round' }),
+      svg('path', { d: 'M-9.8 -6.6 L-9.4 -10 Q-8.4 -10.4 -8.2 -9.4 L-8.4 -7 Z', fill: '#f1c9a5', stroke: INK, 'stroke-width': 0.7, class: 'twinkle' }))
+    : svg('g', {},
+      // The rental sign: a pole with a square sign.
+      svg('line', { x1: -14, y1: 10, x2: -14, y2: -5, stroke: INK, 'stroke-width': 1.4 }),
+      svg('rect', { x: -20, y: -15, width: 12, height: 10, rx: 1.6, fill: '#2fb39a', stroke: INK, 'stroke-width': 1.1 }),
+      svg('text', { x: -14, y: -10, 'font-size': 3.4, 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#fff', 'font-weight': 700 }, 'RENT'));
+  const g = svg('g', {},
+    // Road with a dashed centre line.
+    svg('rect', { x: -19, y: 10, width: 38, height: 5, rx: 1.5, fill: '#3b4a4f', stroke: INK, 'stroke-width': 1 }),
+    svg('line', { x1: -16, y1: 12.5, x2: 17, y2: 12.5, stroke: '#f4f1de', 'stroke-width': 1, 'stroke-dasharray': '3 3' }),
+    side,
+    svg('g', { transform: 'translate(-3 2)' }, car),
   );
   if (owner) g.append(pennant(-18, 10, owner));
   return g;

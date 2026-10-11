@@ -1,7 +1,7 @@
 import {
   bigCountryParts, blockedByMoney, continentReward, canPayAfterQuiz, currentPlayer, entryFees, feeTotal, legalActions,
 } from './engine.ts';
-import { BUSINESS_PRICE, bigCountryPoints, CONTINENT_BONUS, POINTS_NOMAD_TRIP, QUIZ_TRIES, canRide, ticketPrice, TRAVEL_TURNS, WELCOME_BONUS } from './constants.ts';
+import { BUSINESS_PRICE, bigCountryPoints, CONTINENT_BONUS, POINTS_NOMAD_TRIP, QUIZ_TRIES, canRide, ticketPrice, TRAVEL_TURNS, WELCOME_BONUS, wholeCountryTrip } from './constants.ts';
 import { areaById } from './map.ts';
 import { planMove } from './planner.ts';
 import { nextRandom } from './rng.ts';
@@ -51,7 +51,7 @@ export function robotRound(round30: number, totalRounds: number): number {
 const PART_PROGRESS = 0.5;
 // A trip uses extra turns, so it must give at least 1 point more than the best walk.
 const TRIP_EXTRA = 0.99;
-const BUY_ORDER: BusinessKind[] = ['tours', 'airline', 'ferry', 'train', 'bus'];
+const BUY_ORDER: BusinessKind[] = ['tours', 'airline', 'ferry', 'train', 'bus', 'car'];
 
 export function robotAction(state: GameState, map: GameMap, seed: number, level?: RobotLevel): [action: Action, nextSeed: number] {
   const actions = legalActions(state, map);
@@ -63,7 +63,7 @@ export function robotAction(state: GameState, map: GameMap, seed: number, level?
   const rnd = new Rand(seed);
   const action = choose(state, map, actions, me, settings, rnd);
   // A move: the planning levels look further ahead.
-  const isMove = action.type === 'walk' || action.type === 'board' || action.type === 'quiz';
+  const isMove = action.type === 'walk' || action.type === 'board' || action.type === 'quiz' || action.type === 'hitchhike';
   const planned = isMove && !state.offer && settings.depth > 1 ? planMove(state, map, me, actions, settings.depth, settings.reserve, settings.accuracy) : null;
   return [planned ?? action, rnd.seed];
 }
@@ -123,7 +123,7 @@ function choose(state: GameState, map: GameMap, actions: Action[], me: Player, s
   const ask = actions.find((a) => a.type === 'askCitizenship');
   if (ask && state.round < robotRound(ROBOT_CITIZENSHIP_BEFORE, state.totalRounds)) return ask;
 
-  const moves = actions.filter((a) => a.type === 'walk' || a.type === 'board' || a.type === 'quiz');
+  const moves = actions.filter((a) => a.type === 'walk' || a.type === 'board' || a.type === 'quiz' || a.type === 'hitchhike');
   if (moves.length === 0) {
     // Sell only during the "out of money" warning: the dearest business, to the richest buyer.
     const sells = actions.filter((a) => a.type === 'sell');
@@ -165,6 +165,10 @@ function chooseMove(state: GameState, map: GameMap, moves: Action[], me: Player,
     if (a.type === 'walk') {
       const fees = feeTotal(entryFees(state, me, me.area, a.to));
       options.push({ action: a, to: a.to, gain: arrivalValue(map, me, a.to) - fees, turns: 1, trip: false });
+    } else if (a.type === 'hitchhike') {
+      // The Backpacker's hitchhike (task 19): robots don't know when a car stops, so they just try.
+      const fees = feeTotal(entryFees(state, me, me.area, a.to));
+      options.push({ action: a, to: a.to, trip: true, turns: 1 + TRAVEL_TURNS[me.profile!].car, gain: busArrivalValue(map, me, a.to) - fees });
     } else if (a.type === 'board' || a.type === 'quiz') {
       const key = `${a.kind}:${a.to}`;
       if (tripsSeen.has(key)) continue;
@@ -182,8 +186,8 @@ function chooseMove(state: GameState, map: GameMap, moves: Action[], me: Player,
       if (lastTry && plain.some((b) => b.type === 'walk')) continue;
       const travel = TRAVEL_TURNS[me.profile!][a.kind];
       const nomad = me.profile === 'nomad' && travel > 0 ? POINTS_NOMAD_TRIP : 0;
-      // The bus gives the whole country's points at once (owner's rule, M5).
-      const value = a.kind === 'bus' ? busArrivalValue(map, me, a.to) : arrivalValue(map, me, a.to);
+      // The bus and the car give the whole country's points at once (owner's rule, M5, task 19).
+      const value = wholeCountryTrip(a.kind) ? busArrivalValue(map, me, a.to) : arrivalValue(map, me, a.to);
       options.push({
         action, to: a.to, trip: true, turns: 1 + travel,
         gain: value + nomad - fees - (pay ? ticket! : 0),

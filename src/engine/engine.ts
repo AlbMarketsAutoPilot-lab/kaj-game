@@ -24,6 +24,7 @@ import {
   canRide,
   START_CONTINENTS,
   TICKET_BUSINESS,
+  wholeCountryTrip,
   ticketPrice,
   TOTAL_ROUNDS,
   TOUR_FEE,
@@ -104,6 +105,8 @@ export function createGame(config: GameConfig, map: GameMap): GameState {
     landTurns: 0,
     bigCountries: [],
     fullContinents: [],
+    arrivedRound: 1,
+    hitchFailedRound: null,
   }));
 
   return {
@@ -127,6 +130,7 @@ export function createGame(config: GameConfig, map: GameMap): GameState {
     rewards: [],
     challenge: null,
     challenged: null,
+    hitchhiked: null,
     result: null,
   };
 }
@@ -207,6 +211,7 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
   next.drawn = [];
   next.rewards = [];
   next.challenged = null;
+  next.hitchhiked = null;
   const me = currentPlayer(next);
   // A card drawn at the start of this turn stays on show for the whole turn; any other card
   // (the last player's) is cleared by the next move.
@@ -237,6 +242,7 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
       // The starting area counts as visited but earns no area point;
       // the welcome bonus replaces it (see docs/engine.md).
       me.home = area.id;
+      me.arrivedRound = 1; // the start counts as arriving in round 1 (owner, task 19)
       me.visitedAreas.push(area.id);
       me.visitedContinents.push(area.continent);
       me.points = addPoints(me.points, WELCOME_BONUS[area.continent]);
@@ -262,6 +268,19 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
       depart(next, map, me, action.kind, action.to, ticketPrice(me.profile!, action.kind)!);
       endTurn(next, map);
       return next;
+    case 'hitchhike': {
+      // The secret (owner, task 19, never told to players): a car stops only for a Backpacker who
+      // arrived in Mexico on an even round. If none stops nothing happens and the turn goes on.
+      const stopped = hitchhikeStops(me);
+      next.hitchhiked = { seat: me.seat, to: action.to, stopped };
+      if (!stopped) {
+        me.hitchFailedRound = next.round;
+        return next;
+      }
+      depart(next, map, me, 'car', action.to, 0);
+      endTurn(next, map);
+      return next;
+    }
     case 'quiz': {
       // The question is about the destination. The turn goes on: the next move is the answer.
       const [question, rng] = makeQuestion(map, action.to, next.rng);
@@ -385,7 +404,8 @@ export function destinations(map: GameMap, from: string, kind: RouteKind, profil
 // Boarding options in the player's area: pay the ticket (if they can) or try the quiz.
 // Every profile may always try the quiz, so a trip is always possible from an airport, port or
 // station (Luxury: never the train), except to an area whose fees (visa, tour fee) the player
-// can't pay: the fees are due even with a free ticket.
+// can't pay: the fees are due even with a free ticket. The car (task 19) has no quiz: the
+// Backpacker hitchhikes instead, once per turn.
 function tripActions(state: GameState, me: Player, map: GameMap): Action[] {
   const out: Action[] = [];
   // No trip to an area where someone stands or that someone has booked (owner's rule, task 13).
@@ -398,7 +418,9 @@ function tripActions(state: GameState, me: Player, map: GameMap): Action[] {
       if (price !== null && me.points >= price + fees) {
         out.push({ type: 'board', kind, to });
       }
-      if (me.points >= fees) out.push({ type: 'quiz', kind, to });
+      if (me.points < fees) continue;
+      if (kind !== 'car') out.push({ type: 'quiz', kind, to });
+      else if (price === null && me.hitchFailedRound !== state.round) out.push({ type: 'hitchhike', to });
     }
   }
   return out;
@@ -433,7 +455,13 @@ function land(state: GameState, map: GameMap, me: Player): void {
   const trip = me.travel!;
   if (occupiedAreas(state, me.seat).has(trip.to)) return;
   me.travel = null;
-  arrive(state, map, me, areaById(map, trip.to), trip.kind === 'bus');
+  arrive(state, map, me, areaById(map, trip.to), wholeCountryTrip(trip.kind));
+}
+
+// The Backpacker's hitchhike (owner, task 19): a car stops only when the player arrived in the
+// area on an even round. A secret: never shown or explained, and robots don't plan with it.
+export function hitchhikeStops(me: Player): boolean {
+  return me.arrivedRound % 2 === 0;
 }
 
 // ---------- visas and citizenship (rulebook sections 7 and 8, docs/engine.md task 8) ----------
@@ -654,8 +682,10 @@ function startTurn(state: GameState, map: GameMap): void {
 // is marked visited. After that every other part still gives +1 when first visited (owner: this
 // rewards the Nomad and the Backpacker, who alone can take the bus). A country whose points were
 // already given gives nothing more by bus.
+// The car (task 19) works like the bus: from Mexico, the USA's points at once.
 function arrive(state: GameState, map: GameMap, me: Player, area: Area, byBus = false): void {
   me.area = area.id;
+  me.arrivedRound = state.round;
   const country = area.bigCountry;
   const countryDone = country !== undefined && me.bigCountries.includes(country);
   const giveCountry = (c: string) => {

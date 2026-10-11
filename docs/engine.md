@@ -544,6 +544,34 @@ Task 14f: a fair citizenship test (owner's change; `tests/citizenship.test.ts`).
   1,000 mixed robot games: no stuck game, ~50 bus rides, scores as before.
 - **Save version 10.**
 
+## The car (task 19, approved by the owner, both games)
+
+A fifth route kind, `car`, one way (`oneWay: true`) from Mexico to USA West or USA East (the player
+chooses), on the 30- and 50-turn maps. The owner's last change before the final freeze.
+
+- **Rent (Nomad, Business, Luxury):** 1 point (`CAR_TICKET_PRICE`), never a quiz. With less than
+  1 point (plus any fees) there is no car.
+- **Hitchhike (Backpacker only, free):** the action `hitchhike`. **Secret, never shown or explained:**
+  a car stops only when the Backpacker arrived in Mexico on an even round (`Player.arrivedRound`,
+  `hitchhikeStops()`); the starting area counts as round 1. If no car stops nothing happens: no
+  points, no turn lost, no second try that turn (`Player.hitchFailedRound`); the player must move
+  another way. `GameState.hitchhiked` tells the screens what happened. Robots don't know the
+  secret: they just try.
+- **Points like the bus:** the USA's +5 at once (no Alaska needed), once; only the arrival area is
+  marked visited, and the other USA parts still give +1 each (`wholeCountryTrip()`).
+- **Travel:** 1 travel turn for everyone; the Nomad's +1 per trip; challenges as on every trip (the
+  Nomad gets its boss's message instead).
+- **Fees:** as usual: visa and tour fee paid on boarding (a hitchhike pays them only if a car
+  stops); booked areas closed.
+- **Car rental:** 1 business (`car`) at 2 points, in Mexico; anyone may buy it (the Backpacker too).
+  A paid rental goes to its owner.
+- **Screens:** the turn buttons say "30 rounds around the world." and "50 rounds around a bigger
+  world."; a rental sign and a red car on the map, but a hitchhiker with a raised thumb for a
+  Backpacker; the car added to the guide's travel slide and business slide, profile cards, popups,
+  tips and area details; a desert-road trip scene, and the thumb scenes (a car stops / rushes past).
+- **Stuck-state checker:** leaves the car out, like the train and the bus.
+- **Save version 14:** no older save is continued.
+
 ## Owner's test fixes (task M5, both games; the 30-turn game is unfrozen)
 
 - **The bus (replaces task 18's "whole country visited"):** arriving by bus in Siberia or China West

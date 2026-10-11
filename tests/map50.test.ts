@@ -83,9 +83,9 @@ test('the same big countries in the same parts; never wonders; parts linked', ()
   assert.ok(!areas.some((a) => a.bigCountry && a.wonder));
 });
 
-test('businesses: 11 guided tours, 13 airlines, 15 ferries, 3 train booths, 1 bus booth', () => {
+test('businesses: 11 guided tours, 13 airlines, 15 ferries, 3 train booths, 1 bus booth, 1 car rental', () => {
   const count = (kind: string) => mapBusinesses(map50).filter((b) => b.kind === kind).length;
-  assert.deepEqual(['tours', 'airline', 'ferry', 'train', 'bus'].map(count), [11, 13, 15, 3, 1]);
+  assert.deepEqual(['tours', 'airline', 'ferry', 'train', 'bus', 'car'].map(count), [11, 13, 15, 3, 1, 1]);
 });
 
 test('train: France ↔ Russia West or Turkey (not the Caucasus); Luxury can\'t take it', () => {

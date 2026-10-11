@@ -47,8 +47,8 @@ export function bigCountryPoints(parts: number): number {
   return parts >= 3 ? POINTS_BIG_COUNTRY_3_PARTS : POINTS_BIG_COUNTRY_AREA + parts;
 }
 
-// The ways to travel beyond walking: plane, ship, train (task 17) and bus (task 18).
-export const ROUTE_KINDS: readonly RouteKind[] = ['airport', 'port', 'station', 'bus'];
+// The ways to travel beyond walking: plane, ship, train (task 17), bus (task 18) and car (task 19).
+export const ROUTE_KINDS: readonly RouteKind[] = ['airport', 'port', 'station', 'bus', 'car'];
 
 // An airport or port has 1 to 3 fixed destinations (v1 scope section 4).
 export const MAX_DESTINATIONS = 3;
@@ -79,8 +79,17 @@ export const BUS_TICKET_PRICE: Readonly<Record<Profile, number | null>> = {
   nomad: 1,
 };
 
+// Car rental (task 19, owner's rule): 1 for Nomad, Business and Luxury, never a quiz. The
+// Backpacker never pays: it hitchhikes (see `hitchhikeStops` in engine.ts).
+export const CAR_TICKET_PRICE: Readonly<Record<Profile, number | null>> = {
+  backpacker: null,
+  business: 1,
+  luxury: 1,
+  nomad: 1,
+};
+
 // Who may take each kind of trip: everyone, except Luxury on the train (task 17), and only the
-// Nomad and the Backpacker on the bus (task 18).
+// Nomad and the Backpacker on the bus (task 18). Everyone takes the car (task 19).
 export function canRide(profile: Profile, kind: RouteKind): boolean {
   if (kind === 'station') return profile !== 'luxury';
   if (kind === 'bus') return profile === 'nomad' || profile === 'backpacker';
@@ -90,22 +99,23 @@ export function canRide(profile: Profile, kind: RouteKind): boolean {
 // The ticket for a trip of this kind; null: quiz only (or no trip at all, see canRide).
 export function ticketPrice(profile: Profile, kind: RouteKind): number | null {
   if (kind === 'bus') return BUS_TICKET_PRICE[profile];
+  if (kind === 'car') return CAR_TICKET_PRICE[profile];
   return kind === 'station' ? TRAIN_TICKET_PRICE[profile] : TICKET_PRICE[profile];
 }
 
-// Travel turns: plane 1, ship 3; Business and Luxury: plane 0, ship 1. Train and bus: 1 for
-// everyone (tasks 17 and 18).
+// Travel turns: plane 1, ship 3; Business and Luxury: plane 0, ship 1. Train, bus and car: 1 for
+// everyone (tasks 17, 18 and 19).
 export const TRAVEL_TURNS: Readonly<Record<Profile, Readonly<Record<RouteKind, number>>>> = {
-  backpacker: { airport: 1, port: 3, station: 1, bus: 1 },
-  business: { airport: 0, port: 1, station: 1, bus: 1 },
-  luxury: { airport: 0, port: 1, station: 1, bus: 1 },
-  nomad: { airport: 1, port: 3, station: 1, bus: 1 },
+  backpacker: { airport: 1, port: 3, station: 1, bus: 1, car: 1 },
+  business: { airport: 0, port: 1, station: 1, bus: 1, car: 1 },
+  luxury: { airport: 0, port: 1, station: 1, bus: 1, car: 1 },
+  nomad: { airport: 1, port: 3, station: 1, bus: 1, car: 1 },
 };
 
 // After this many wrong quiz answers in one area, a player who can pay must pay and board.
 export const QUIZ_TRIES = 3;
 
-// Digital Nomad: +1 for every trip by plane, ship, train or bus (balance, owner 2026-10-11: per trip,
+// Digital Nomad: +1 for every trip by plane, ship, train, bus or car (balance, owner 2026-10-11: per trip,
 // no longer per travel turn, so a 3-turn ship trip gives +1 like a plane).
 export const POINTS_NOMAD_TRIP = 1;
 
@@ -128,6 +138,7 @@ export const BUSINESS_PRICE: Readonly<Record<BusinessKind, number>> = {
   ferry: 2,
   train: 2,
   bus: 2,
+  car: 2,
 };
 
 // The business that sells the tickets at each kind of departure point.
@@ -136,7 +147,13 @@ export const TICKET_BUSINESS: Readonly<Record<RouteKind, BusinessKind>> = {
   port: 'ferry',
   station: 'train',
   bus: 'bus',
+  car: 'car',
 };
+
+// The bus and the car give a big country's points at once (owner, M5 and task 19).
+export function wholeCountryTrip(kind: RouteKind): boolean {
+  return kind === 'bus' || kind === 'car';
+}
 
 // Guided tours: 1 point to the owner each time another player enters the wonder area.
 export const TOUR_FEE = 1;
