@@ -23,6 +23,11 @@ These rules apply to every session and every task in this repository.
 - Keep answers short and in plain language.
 - Always keep a playable build. If time runs short, follow the cut order in `docs/KAJ-v1-scope.md`.
 
+## 4. Verify, never guess
+
+- Never guess. Before answering, verify in the code, the project documents or what the owner pasted from the screen.
+- If something cannot be verified, say so plainly instead of giving a likely-sounding answer.
+
 ## Project documents
 
 - `docs/KAJ-v1-scope.md`: what v1 contains. **It wins over the rulebook for v1.**
