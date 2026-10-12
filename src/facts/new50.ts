@@ -47,7 +47,7 @@ export const FACTS_50_NEW: FactBatch = {
     f('The film The Sound of Music is set in and around Salzburg, Austria.', 'The film The Sound of Music is set in…', 'Austria', 'Brazil'),
     f('The Red Cross was founded in Geneva, Switzerland, in 1863.', 'The Red Cross was founded in which Swiss city?', 'Geneva', 'Zurich'),
     f('The white Lipizzaner horses perform at the Spanish Riding School in Vienna.', 'Where do the Lipizzaner horses of the Spanish Riding School perform?', 'Vienna', 'Lisbon'),
-    f('Switzerland is neutral: it has not taken sides in a war for more than 200 years.', 'Switzerland is known for being…', 'neutral in wars', 'ruled by a king'),
+    f('The Rhine Falls in Switzerland is the largest waterfall in Europe by the amount of water.', 'The Rhine Falls is a big waterfall in…', 'Switzerland', 'Spain'),
     f('Saint Bernard dogs were trained by monks to rescue travellers lost in the snow of the Swiss Alps.', 'Saint Bernard dogs rescued travellers in…', 'the Swiss Alps', 'the Amazon'),
   ],
   scandinavia: [
@@ -68,7 +68,7 @@ export const FACTS_50_NEW: FactBatch = {
   poland: [
     f('Pierogi are Polish dumplings filled with potato, cheese, meat or fruit.', 'Pierogi are Polish…', 'dumplings', 'hats'),
     f('Malbork Castle in Poland is the largest castle in the world built of brick.', 'Malbork Castle is the largest castle in the world built of…', 'brick', 'ice'),
-    f('The Old Town of Warsaw was destroyed in the Second World War and carefully rebuilt as it was.', 'After the war, Warsaw\'s Old Town was…', 'rebuilt as it was', 'left in ruins'),
+    f('The Wieliczka Salt Mine near Kraków has chapels and statues carved from salt.', 'In the Wieliczka mine, chapels and statues are carved from…', 'salt', 'ice'),
     f('Every hour, a trumpeter plays a tune from the tower of St Mary\'s Church in Kraków.', 'Which instrument is played every hour from a church tower in Kraków?', 'A trumpet', 'A drum'),
     f('Pope John Paul II, who led the Catholic Church from 1978 to 2005, came from Poland.', 'Pope John Paul II came from…', 'Poland', 'Brazil'),
     f('The Vistula, Poland\'s longest river, flows through Kraków and Warsaw.', 'Which river flows through Kraków and Warsaw?', 'The Vistula', 'The Thames'),
@@ -99,7 +99,7 @@ export const FACTS_50_NEW: FactBatch = {
   'western-balkans': [
     f('Lake Bled in Slovenia has a tiny island with a church on it.', 'The tiny island in Lake Bled, Slovenia, has a…', 'church', 'lighthouse'),
     f('The tennis champion Novak Djokovic comes from Serbia.', 'The tennis champion Novak Djokovic comes from…', 'Serbia', 'Sweden'),
-    f('Albania has thousands of small concrete bunkers, built long ago in case of war.', 'Albania has thousands of small concrete…', 'bunkers', 'pyramids'),
+    f('Lake Ohrid, shared by Albania and North Macedonia, is one of the oldest lakes in Europe.', 'Lake Ohrid is shared by Albania and…', 'North Macedonia', 'Portugal'),
   ],
   'romania-bulgaria': [
     f('The Cyrillic alphabet was developed in medieval Bulgaria, more than 1,000 years ago.', 'Which alphabet was developed in medieval Bulgaria?', 'Cyrillic', 'Latin'),
