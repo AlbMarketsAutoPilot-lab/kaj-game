@@ -70,7 +70,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | M4 | 50-turn map: screens (turn picker, home country, world map, guide), web and APK | medium | 1 | 15 | ✅ done (owner-approved 2026-10-09: screens, and the 4 new wonder drawings) |
 | M5 | 50-turn map: full test games and fixes | medium | 3 | 15 | ✅ sessions 1 (guide, texts, money names, What happened switch), 2 (map screens) and 3 (rules: bus, whole continents, Madagascar, saves v12) |
 | M6 | Wonder posters for the 7 wonders of the 30-turn map (the 4 of the 50-turn map come with M4) | medium | 1 | 13 | ✅ done |
-| 15 | Android release build (signed AAB for Play, built by the owner in Android Studio) | medium/high | 1 | — | in progress: icon, SDK 36, audit fixes A + B done (`docs/audit-task15.md`); owner's Android Studio build and phone test done (2026-10-11, signed APK); next: AAB for Play |
+| 15 | Android release build (signed AAB for Play, built by the owner in Android Studio) | medium/high | 1 | — | done: version 1.0.0 (code 1) sent for Google Play review on 2026-10-12 (production, all countries); see section 15 |
 | 17 | Train France ↔ Russia West and France ↔ Turkey (30-turn map): A rules **high**, B screens medium | **high** / medium | 2 | 13–14 | done (A rules, robots, tests, save 9; B screens, sound) |
 | 18 | Bus from Mongolia to Siberia or China West (30-turn map), whole country at once | **high** | 1 | — | done (owner-approved 2026-10-09) |
 | 15v | Visual polish (owner, 2026-10-10): no rule, text or save changes | medium | 1 | — | ✅ done; the in-game "Leave the game?" popup needs the owner's phone test (Galaxy S25: map no longer shakes?) |
@@ -394,7 +394,22 @@ inside their own area, world map full screen. Session 3 (**high**, done): Madaga
 Zambezi, South Africa) with a +3 SURPRISE, "Tanzania" as the name, whole-continent rewards (areas ÷ 3, at
 least +2), the bus gives +5/+3 at once and the other parts still +1 each, saves version 12.
 
-### 15. Android release build — in progress (2026-10-10)
+### 15. Android release build — done, in Google Play review (2026-10-12)
+
+- 2026-10-12, Play Console (owner): app "Kris Ann's Journey" (com.kaj.game, developer Connect AL),
+  free, Board game; tags Board, Educational, Trivia, Party games, Strategy. Production release 1.0.0
+  (code 1), all 177 countries, sent for review. Target ages 6–8, 9–12, 13–15, 16–17, 18+ (Families
+  Policy), Teacher Approved opted in, no ads, no data collected, no sign-in, privacy policy link set.
+  Content rating: all ages everywhere (ESRB Everyone, PEGI 3, USK 0, South Korea All).
+- Same day, owner-approved code and text changes (PRs #61, #62): `LICENSE` (© 2026 Connect AL, all
+  rights reserved), README section, Connect AL named in the privacy policy, © in the in-game credits;
+  2 wine facts and 11 war facts replaced with neutral facts of the same country (the first rating
+  was 15+ in South Korea and Taiwan). CLAUDE.md rule 4: verify, never guess.
+- Store listing: short description "Strategy board game meets trivia quiz: travel the world with
+  family and friends."; full description with the game's own icons; feature graphic from the
+  owner's poster (1024×500); phone screenshots taken from real games (engine-played states opened in
+  the web build). R8/deobfuscation warning left as is (no shrinking in 1.0.0, owner's choice).
+- Open: Google's review result; "Google Play Games on PC" shows as opted in (check after review).
 
 - Owner's decision: build and sign in Android Studio on the owner's computer (no GitHub secrets); an
   AAB for Google Play; target audience under 13 (Families Policy).
