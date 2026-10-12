@@ -60,7 +60,7 @@ export const batch1: FactBatch = {
     f('Luxembourg is the only Grand Duchy in the world: its head of state is a Grand Duke.', 'Luxembourg\'s head of state is a…', 'Grand Duke', 'Sultan'),
   ],
   italy: [
-    f('The Colosseum in Rome held about 50,000 people who came to watch gladiator fights.', 'The Colosseum was used for…', 'gladiator fights', 'car races'),
+    f('The Colosseum in Rome, built almost 2,000 years ago, could hold about 50,000 people.', 'The Colosseum is in which city?', 'Rome', 'Milan'),
     f('The Leaning Tower of Pisa started to lean while it was being built, because the ground is soft.', 'Why does the Tower of Pisa lean?', 'Soft ground', 'An earthquake'),
     f('Venice is built on more than 100 small islands, with canals instead of roads for cars.', 'In Venice, people get around on…', 'canals', 'underground trains'),
     f('Vatican City, inside Rome, is the smallest country in the world.', 'Which is the smallest country in the world?', 'Vatican City', 'Monaco'),
@@ -123,7 +123,7 @@ export const batch1: FactBatch = {
     f('The Curonian Spit, shared by Lithuania and Russia, is a long, thin strip of tall sand dunes.', 'The Curonian Spit is a long strip of…', 'sand dunes', 'ice'),
     f('Riga, in Latvia, is famous for its many buildings in the Art Nouveau style.', 'Riga is famous for buildings in which style?', 'Art Nouveau', 'Aztec'),
     f('In 1989, about 2 million people held hands in a chain across Estonia, Latvia and Lithuania: the "Baltic Way".', 'In the "Baltic Way", people…', 'held hands in a long chain', 'ran a race'),
-    f('Moldova\'s Mileștii Mici is a huge underground wine cellar with about 200 km of tunnels.', 'Mileștii Mici is a huge underground…', 'wine cellar', 'train station'),
+    f('Moldova lies between Romania and Ukraine and has no coast on the sea.', 'Moldova is a country with no…', 'sea coast', 'rivers'),
     f('Amber, which is fossilised tree resin, often washes up on the beaches of the Baltic Sea.', 'Amber is made from old tree…', 'resin', 'leaves'),
     f('The Antonov An-225, built in Ukraine, was the heaviest airplane ever built.', 'The Antonov An-225 was a giant…', 'airplane', 'ship'),
     f('Belarus has about 10,000 lakes.', 'Belarus is known for its many…', 'lakes', 'volcanoes'),

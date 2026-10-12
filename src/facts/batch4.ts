@@ -15,7 +15,7 @@ export const batch4: FactBatch = {
     f('Lake Retba in Senegal is famous for its pink water, coloured by tiny algae.', 'Lake Retba is famous for its…', 'pink water', 'black sand'),
     f('Kente is a brightly coloured cloth woven in strips, from Ghana.', 'Kente is a colourful…', 'cloth', 'drink'),
     f('Cabo Verde is a group of volcanic islands in the Atlantic Ocean, off the coast of West Africa.', 'Cabo Verde lies in which ocean?', 'The Atlantic', 'The Indian Ocean'),
-    f('The old kingdom of Dahomey, in today\'s Benin, had a famous army of women soldiers.', 'The kingdom of Dahomey had a famous army of…', 'women soldiers', 'elephant riders'),
+    f('Ganvié in Benin is a village built on stilts in a lake, where people travel by boat.', 'In Ganvié, Benin, the houses stand on stilts in a…', 'lake', 'desert'),
     f('The Benin Bronzes are famous metal sculptures made in the old Kingdom of Benin, in today\'s Nigeria.', 'The Benin Bronzes come from a kingdom in today\'s…', 'Nigeria', 'Kenya'),
     f('Jollof rice, cooked in one pot with tomatoes, onions and peppers, is a favourite dish across West Africa.', 'Jollof is a West African dish made with…', 'rice', 'potatoes'),
   ],
