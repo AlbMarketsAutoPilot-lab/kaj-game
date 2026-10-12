@@ -10,3 +10,9 @@ npm run typecheck
 npm test
 npm run build   # dist/kaj.html: the test board, opens straight from disk
 ```
+
+## Copyright and licence
+
+© 2026 Connect AL. All rights reserved. This code is published for viewing only: it may not be copied,
+reused, changed or distributed without written permission from Connect AL. See [`LICENSE`](LICENSE),
+which also lists the parts made by others and their own licences. Contact: info@connect.al

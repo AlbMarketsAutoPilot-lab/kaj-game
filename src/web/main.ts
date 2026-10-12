@@ -58,7 +58,7 @@ const FLAGS: Record<string, string> = (window as unknown as { KAJ_FLAGS?: Record
 // The owner's poster, put into the page by the build as a data URI.
 const POSTER: string = (window as unknown as { KAJ_POSTER?: string }).KAJ_POSTER ?? '';
 // Credits for the open data and flags (shown on the start screen).
-const CREDITS = 'Country data: mledoze/countries, ODbL 1.0 · Flags: flag-icons by Panayiotis Lipiridis, MIT licence · Map shapes: Natural Earth · Lettering: Cinzel, SIL Open Font Licence · Sounds: Pixabay, Pixabay Content License';
+const CREDITS = 'Country data: mledoze/countries, ODbL 1.0 · Flags: flag-icons by Panayiotis Lipiridis, MIT licence · Map shapes: Natural Earth · Lettering: Cinzel, SIL Open Font Licence · Sounds: Pixabay, Pixabay Content License · © 2026 Connect AL. All rights reserved.';
 // Citizenship test: 15 seconds for each question (owner's choice, task 8).
 const EXAM_SECONDS = 15;
 const VEHICLE: Record<RouteKind, string> = { airport: '✈️', port: '⚓', station: '🚆', bus: '🚌', car: '🚗' };

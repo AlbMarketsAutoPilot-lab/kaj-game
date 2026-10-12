@@ -1,0 +1,36 @@
+Kris Ann's Journey (KAJ)
+Copyright © 2026 Connect AL. All rights reserved.
+
+This software and everything made for it by Connect AL are the property of
+Connect AL. This includes the source code, the game rules and design, the
+board, the cards, the questions and all other game text, the art (the
+poster, background, wonder pictures and app icon, created for Connect AL
+with the help of AI tools from Connect AL's original ideas and direction),
+the name "Kris Ann's Journey", the name "KAJ" and the app icon.
+
+The fact that this source code can be seen on GitHub does NOT give anyone a
+licence to use it. Without prior written permission from Connect AL, no one
+may:
+  - copy, download for reuse, change, translate or build on any part of it;
+  - publish, share, upload or distribute it, or any changed version of it,
+    in any app store, website or other place;
+  - sell it, rent it, or use it to make money in any way;
+  - use the names "Kris Ann's Journey" or "KAJ", or the app icon, for any
+    other product.
+
+The only use allowed is viewing this repository on GitHub, as GitHub's
+Terms of Service require, and playing the official game published by
+Connect AL.
+
+Parts made by others are not owned by Connect AL. They keep their own
+licences and are listed here:
+  - Country data: mledoze/countries, Open Database License (ODbL) 1.0
+    (see data/LICENSE-ODbL.md)
+  - Flags: flag-icons by Panayiotis Lipiridis, MIT licence
+    (see assets/flags/LICENSE)
+  - Map shapes: Natural Earth (public domain)
+  - Lettering: Cinzel font, SIL Open Font Licence
+    (see assets/fonts/Cinzel-OFL.txt)
+  - Sounds: Pixabay, Pixabay Content License (see assets/sounds/CREDITS.txt)
+
+Permission requests and reports of copying: info@connect.al
