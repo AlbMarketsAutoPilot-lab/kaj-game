@@ -129,7 +129,10 @@ function deepestPoint(r: Ring): [number, number] {
   return [cx, cy];
 }
 
-export function buildGeo(map: GameMap, shapes: Shapes): Map<string, AreaGeo> {
+// `centres`: the pawn spots made in advance by scripts/map-centres.ts (src/maps/centres.ts), so a
+// phone does not search for them while the player waits (Google Play review, 2026-10-14: a slow
+// phone froze 3.5 to 5 s). Without it, they are found here (scripts, tests).
+export function buildGeo(map: GameMap, shapes: Shapes, centres?: Readonly<Record<string, readonly [number, number]>>): Map<string, AreaGeo> {
   const out = new Map<string, AreaGeo>();
   for (const a of map.areas) {
     let polys = areaPolygons(shapes, a.id);
@@ -161,7 +164,8 @@ export function buildGeo(map: GameMap, shapes: Shapes): Map<string, AreaGeo> {
     const xs = corePoints.map(([x]) => x);
     const ys = corePoints.map(([, y]) => -y);
     const core = { x: Math.min(...xs), y: Math.min(...ys), w: Math.max(...xs) - Math.min(...xs), h: Math.max(...ys) - Math.min(...ys) };
-    const [cx, cy] = best ? deepestPoint(best) : [0, 0];
+    const made = centres?.[a.id];
+    const [cx, cy] = made ? [made[0], -made[1]] : best ? deepestPoint(best) : [0, 0];
     const rings = polys.map((poly) => poly[0].map(([x, y]) => [x, -y] as [number, number]));
     out.set(a.id, { path: parts.join(''), box: { x: minx, y: miny, w: maxx - minx, h: maxy - miny }, core, centre: [cx, -cy], touches: [], borderWith: new Map(), rings });
   }

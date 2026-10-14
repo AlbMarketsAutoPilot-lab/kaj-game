@@ -86,3 +86,8 @@ document.addEventListener('click', (e) => {
   if ((e.target as HTMLElement).closest?.('button')) play('tap');
   startMusic();
 }, true);
+
+// The Android app lets sound play without a tap (MainActivity), so the music starts as the game
+// opens (owner, 2026-10-14: it stayed silent until the sound button was turned off and on). A web
+// browser blocks this; there the first tap starts it (above).
+startMusic();
