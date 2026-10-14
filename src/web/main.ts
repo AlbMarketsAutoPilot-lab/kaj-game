@@ -16,6 +16,7 @@ import { map30 } from '../maps/map30.ts';
 import type { Shapes } from '../maps/shapes.ts';
 import { shapes30 } from '../maps/shapes30.ts';
 import { shapes50 } from '../maps/shapes50.ts';
+import { centres } from '../maps/centres.ts';
 import { countryCapital, countryFlag, SURPRISE_FACT, WONDER_NAME, WONDER_PLACE } from './countries.ts';
 import { buildGeo, colourAreas, continentBox, glowFor, pad, propSpots, squeeze, svg, unionBox, type Box, type PropKind } from './maps.ts';
 import { airport, busStop, carRental, citizenFlag, monument, pawn, place, port, station } from './props.ts';
@@ -99,7 +100,7 @@ let worldBox: Box;
 let areaColour = new Map<string, string>();
 function useMap(m: GameMap): void {
   if (!drawn.has(m.id)) {
-    const g = buildGeo(m, SHAPES[m.id]);
+    const g = buildGeo(m, SHAPES[m.id], centres[m.id]);
     drawn.set(m.id, { geo: g, colour: colourAreas(m, g) });
   }
   gameMap = m;
