@@ -51,7 +51,6 @@ header { display: flex; align-items: center; justify-content: space-between; gap
 .setup-col p { margin: 0; }
 .setup.new-game .row button.primary { min-width: 220px; }
 .setup.new-game .error:empty { display: none; }
-.setup .credits { font-size: 0.72rem; }
 input[type="checkbox"] { accent-color: var(--accent); width: 1.1em; height: 1.1em; vertical-align: -0.15em; }
 .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; }
 .turn .row { justify-content: flex-start; }
@@ -104,6 +103,14 @@ strong.title { font-size: 1.05rem; white-space: nowrap; }
 .poster-buttons { position: absolute; bottom: 30%; right: calc(7% + var(--safe-r)); display: flex; flex-direction: column; gap: 10px; align-items: center; }
 button.big { font-size: 1.3rem; padding: 10px 34px; font-family: "Cinzel", Georgia, serif; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45); }
 .poster-buttons button:not(.primary) { background: var(--card); }
+/* Task 15: the privacy and copyright links and the ©, centred at the bottom. */
+.poster-legal { position: absolute; left: var(--safe-l); right: var(--safe-r); bottom: calc(4px + var(--safe-b)); padding: 0 12px; text-align: center; font-size: 0.72rem; line-height: 1.35; text-shadow: 0 0 3px var(--deep), 0 1px 2px var(--deep); }
+.poster-legal p { margin: 2px 0; }
+.legal-link { cursor: pointer; margin: 0 12px; color: var(--accent); text-decoration: underline; font-size: 0.85rem; }
+.legal { max-width: 760px; width: 100%; margin: 0 auto; text-align: left; }
+.legal h1 { font-size: 1.6rem; }
+.legal .date { color: var(--muted); }
+.legal p, .legal li { overflow-wrap: anywhere; }
 button.chosen { background: var(--accent); color: #1c2b2b; font-weight: 700; }
 .setup { margin: calc(4 * var(--vh)) auto 0; }
 

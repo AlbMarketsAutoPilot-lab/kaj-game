@@ -70,7 +70,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | M4 | 50-turn map: screens (turn picker, home country, world map, guide), web and APK | medium | 1 | 15 | ✅ done (owner-approved 2026-10-09: screens, and the 4 new wonder drawings) |
 | M5 | 50-turn map: full test games and fixes | medium | 3 | 15 | ✅ sessions 1 (guide, texts, money names, What happened switch), 2 (map screens) and 3 (rules: bus, whole continents, Madagascar, saves v12) |
 | M6 | Wonder posters for the 7 wonders of the 30-turn map (the 4 of the 50-turn map come with M4) | medium | 1 | 13 | ✅ done |
-| 15 | Android release build (signed AAB for Play, built by the owner in Android Studio) | medium/high | 1 | — | 1.0.0 rejected 2026-10-14 (unresponsive: start-up freeze on slow phones); fix 1.0.1 (code 3) ready to build; see section 15 |
+| 15 | Android release build (signed AAB for Play, built by the owner in Android Studio) | medium/high | 1 | — | 1.0.0 rejected 2026-10-14 (unresponsive: start-up freeze on slow phones); 1.0.1 (code 3) in review; 1.0.2 (code 4, privacy and copyright pages) ready to build; see section 15 |
 | 17 | Train France ↔ Russia West and France ↔ Turkey (30-turn map): A rules **high**, B screens medium | **high** / medium | 2 | 13–14 | done (A rules, robots, tests, save 9; B screens, sound) |
 | 18 | Bus from Mongolia to Siberia or China West (30-turn map), whole country at once | **high** | 1 | — | done (owner-approved 2026-10-09) |
 | 15v | Visual polish (owner, 2026-10-10): no rule, text or save changes | medium | 1 | — | ✅ done; the in-game "Leave the game?" popup needs the owner's phone test (Galaxy S25: map no longer shakes?) |
@@ -417,6 +417,14 @@ least +2), the bus gives +5/+3 at once and the other parts still +1 each, saves 
   `tests/centres.test.ts`: identical maps) — now 0.5 s and 0.7 s at 6×; music starts as the app
   opens; R8 on for release (`proguard-rules.pro`). Internal test: version 2 (1.0.0). Owner: turn off
   Google Play Games on PC and Android XR. The task 15 audit had measured 4.9 s and missed it.
+- 1.0.1 (code 3) sent for review with Google Play Games on PC kept on (owner's choice).
+- 2026-10-17, 1.0.2 (code 4), owner-approved: Google Play needs a privacy policy link inside the app.
+  Start screen: "Privacy Policy" and "Copyright" links at the bottom, centred, then "© 2026 Connect
+  AL. All rights reserved."; both pages open inside the app (no internet), Back returns to the
+  start screen. New `web/copyright.html` (the LICENSE text and the credits), also on GitHub Pages;
+  the credits line left the setup screen. Addresses inside the pages are plain text. Checked at
+  568×320 to 1920×1080, touch and mouse wheel. `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` comes from
+  androidx.core 1.13.0 (via androidx.activity); kept (signature-level, harmless).
 
 - Owner's decision: build and sign in Android Studio on the owner's computer (no GitHub secrets); an
   AAB for Google Play; target audience under 13 (Families Policy).

@@ -43,12 +43,17 @@ const sounds = Object.fromEntries(
     .map((f) => [f.slice(0, -4), dataUri(`assets/sounds/${f}`, 'audio/mpeg')]),
 );
 
+// The privacy and copyright pages (task 15), shown inside the app: the app opens no outside address.
+const page = (p: string) => read(p).toString().split('<main>')[1].split('</main>')[0];
+const legal = { privacy: page('web/privacy.html'), copyright: page('web/copyright.html') };
+
 const html = read('web/index.html')
   .toString()
   .replace('/*STYLE*/', () => css)
   .replace('/*FLAGS*/', () => JSON.stringify(flags))
   .replace('/*SOUNDS*/', () => JSON.stringify(sounds))
   .replace('/*WONDERS*/', () => JSON.stringify(wonders).replace(/<\/script/gi, '<\\/script'))
+  .replace('/*LEGAL*/', () => JSON.stringify(legal).replace(/<\/script/gi, '<\\/script'))
   .replace('/*POSTER*/', () => dataUri('assets/art/poster.webp'))
   .replace('/*SCRIPT*/', () => js);
 

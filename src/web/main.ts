@@ -59,7 +59,11 @@ const FLAGS: Record<string, string> = (window as unknown as { KAJ_FLAGS?: Record
 // The owner's poster, put into the page by the build as a data URI.
 const POSTER: string = (window as unknown as { KAJ_POSTER?: string }).KAJ_POSTER ?? '';
 // Credits for the open data and flags (shown on the start screen).
-const CREDITS = 'Country data: mledoze/countries, ODbL 1.0 · Flags: flag-icons by Panayiotis Lipiridis, MIT licence · Map shapes: Natural Earth · Lettering: Cinzel, SIL Open Font Licence · Sounds: Pixabay, Pixabay Content License · © 2026 Connect AL. All rights reserved.';
+// The privacy and copyright pages (web/privacy.html, web/copyright.html), inlined by the build and
+// shown inside the app (task 15): the credits and licences are on the copyright page.
+const LEGAL: Record<LegalPage, string> = (window as unknown as { KAJ_LEGAL?: Record<LegalPage, string> }).KAJ_LEGAL ?? { privacy: '', copyright: '' };
+type LegalPage = 'privacy' | 'copyright';
+const LEGAL_NAME: Record<LegalPage, string> = { privacy: 'Privacy Policy', copyright: 'Copyright' };
 // Citizenship test: 15 seconds for each question (owner's choice, task 8).
 const EXAM_SECONDS = 15;
 const VEHICLE: Record<RouteKind, string> = { airport: '✈️', port: '⚓', station: '🚆', bus: '🚌', car: '🚗' };
@@ -231,6 +235,7 @@ function title(tag: 'h1' | 'strong' = 'h1'): HTMLElement {
 // ---------- start screen: the owner's poster ----------
 
 function renderStart(): void {
+  legalOpen = false;
   clearTimeout(robotTimer);
   clearTimeout(holdTimer);
   hold = null;
@@ -258,8 +263,34 @@ function renderStart(): void {
   app.replaceChildren(
     el('section', { className: 'poster' },
       POSTER ? el('img', { src: POSTER, alt: "Kris Ann's Journey" }) : title(),
-      el('div', { className: 'poster-buttons' }, play, resume ?? '', howTo, soundButton())),
+      el('div', { className: 'poster-buttons' }, play, resume ?? '', howTo, soundButton()),
+      el('footer', { className: 'poster-legal' },
+        el('p', {}, legalLink('privacy'), legalLink('copyright')),
+        el('p', { textContent: '© 2026 Connect AL. All rights reserved.' }))),
   );
+}
+
+// A link to the privacy or copyright page (owner, task 15); it opens inside the app.
+function legalLink(page: LegalPage): HTMLElement {
+  const link = el('span', { className: 'legal-link', textContent: LEGAL_NAME[page], role: 'link', tabIndex: 0 });
+  link.addEventListener('click', () => renderLegal(page));
+  link.addEventListener('keydown', (e) => { if (e.key === 'Enter') renderLegal(page); });
+  return link;
+}
+
+// The privacy or copyright page; Back (or the phone's back button) returns to the start screen.
+let legalOpen = false;
+function renderLegal(page: LegalPage): void {
+  legalOpen = true;
+  const text = el('div');
+  text.innerHTML = LEGAL[page]; // the game's own pages, from the build
+  app.replaceChildren(
+    el('section', { className: 'card legal' },
+      el('div', { className: 'row' }, button('← Back', renderStart)),
+      text,
+      el('div', { className: 'row' }, button('← Back', renderStart))),
+  );
+  window.scrollTo(0, 0);
 }
 
 // ---------- setup screen ----------
@@ -350,8 +381,7 @@ function renderSetup(): void {
       guideBox(),
       el('div', { className: 'row' }, button('← Back', renderStart), start),
       saved && 'state' in saved ? el('p', { className: 'small', textContent: 'Starting a new journey replaces the saved game.' }) : '',
-      error,
-      el('p', { className: 'small credits', textContent: CREDITS })),
+      error),
   );
 }
 
@@ -2342,6 +2372,7 @@ function closeLeave(): void {
 }
 (window as Window & { kajBack?: () => void }).kajBack = () => {
   if (leaveBox) return closeLeave();
+  if (legalOpen) return renderStart();
   const stay = button('Stay', closeLeave);
   stay.className = 'primary';
   leaveBox = el('div', { className: 'modal-back leave' },

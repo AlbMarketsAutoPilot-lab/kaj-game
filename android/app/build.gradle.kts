@@ -10,8 +10,8 @@ android {
         applicationId = "com.kaj.game"
         minSdk = 24 // Android 7.0
         targetSdk = 36
-        versionCode = 3 // 1: first review; 2: internal test of 1.0.0
-        versionName = "1.0.1"
+        versionCode = 4 // 1: first review; 2: internal test of 1.0.0; 3: 1.0.1
+        versionName = "1.0.2"
     }
 
     // R8 shrinks the Java part (owner, 2026-10-14, Play Console's advice); the game itself is the
