@@ -2,13 +2,15 @@
 // It opens straight from disk, with no server: npm run build
 import { build } from 'esbuild';
 import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
 const root = new URL('../', import.meta.url);
 const read = (p: string) => readFileSync(new URL(p, root));
 const dataUri = (p: string, type = 'image/webp') => `data:${type};base64,${read(p).toString('base64')}`;
 
 const result = await build({
-  entryPoints: [new URL('src/web/main.ts', root).pathname],
+  // fileURLToPath, not .pathname: on Windows (the Windows app build) .pathname gives "/D:/...".
+  entryPoints: [fileURLToPath(new URL('src/web/main.ts', root))],
   bundle: true,
   format: 'iife',
   target: 'es2020',

@@ -1,0 +1,58 @@
+name: Windows
+
+# Builds the Windows app (task W) into the Microsoft Store upload file (.msixupload), so the
+# owner needs no Visual Studio. Made from Microsoft's "Set up continuous integration for your
+# WinUI app" (Store bundle workflow). Unsigned: the Microsoft Store signs the package after
+# submission. Download it from the run's "kaj-windows-store" artifact.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  msix:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    env:
+      Solution_Name: windows\KAJ.sln
+      Configuration: Release
+      Bundle_Platforms: x86|x64|ARM64
+      Appx_Package_Dir: Packages\
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Build the game file into the app
+        run: npm run windows:assets
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - uses: microsoft/setup-msbuild@v2
+      - name: Restore the app
+        run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration
+      - name: Build the Store package
+        run: >
+          msbuild $env:Solution_Name
+          /p:Configuration=$env:Configuration
+          /p:Platform=x64
+          /p:AppxBundlePlatforms="$env:Bundle_Platforms"
+          /p:AppxBundle=Always
+          /p:UapAppxPackageBuildMode=StoreUpload
+          /p:AppxPackageDir="$env:Appx_Package_Dir"
+          /p:AppxPackageSigningEnabled=false
+          /p:GenerateAppxPackageOnBuild=true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kaj-windows-store
+          path: '**/Packages/*.msixupload'
+          if-no-files-found: error
+          retention-days: 14
