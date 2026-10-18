@@ -114,14 +114,17 @@ button.big { font-size: 1.3rem; padding: 10px 34px; font-family: "Cinzel", Georg
 button.chosen { background: var(--accent); color: #1c2b2b; font-weight: 700; }
 .setup { margin: calc(4 * var(--vh)) auto 0; }
 
-/* Landscape only (owner's decision, task 14 A1); Android is locked, a browser shows this. */
+/* Landscape only (owner's decision, task 14 A1); Android is locked, a browser shows this.
+   Not in the Windows app (task W): a narrow window is not a phone held upright. */
 #turn-phone { display: none; }
 @media (orientation: portrait) and (max-width: 900px) {
-  #turn-phone { display: flex; position: fixed; inset: 0; z-index: 10; flex-direction: column; gap: 8px;
+  html:not(.windows-app) #turn-phone { display: flex; position: fixed; inset: 0; z-index: 10; flex-direction: column; gap: 8px;
     align-items: center; justify-content: center; text-align: center; background: var(--sea); font-size: 1.2rem; padding: 24px; }
   #turn-phone .title { font-size: 2rem; margin: 0; }
-  #app { display: none; }
+  html:not(.windows-app) #app { display: none; }
 }
+/* Windows app (task W): dragging with the mouse moves the map, it doesn't select text. */
+.windows-app body { user-select: none; }
 
 main:has(.game) { max-width: none; padding: calc(6px + var(--safe-t)) calc(6px + var(--safe-r)) calc(6px + var(--safe-b)) calc(6px + var(--safe-l)); height: calc(100 * var(--vh)); }
 .game { height: 100%; display: grid; grid-template-rows: auto 1fr; gap: 6px; min-height: 0; }

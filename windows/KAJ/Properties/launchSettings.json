@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "KAJ (Package)": {
+      "commandName": "MsixPackage"
+    }
+  }
+}

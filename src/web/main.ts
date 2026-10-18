@@ -2378,9 +2378,27 @@ function closeLeave(): void {
   leaveBox = el('div', { className: 'modal-back leave' },
     el('section', { className: 'card modal' },
       el('h2', { textContent: 'Leave the game?' }),
-      el('div', { className: 'row' }, stay, button('Leave', () => { location.href = 'kaj://leave'; }))));
+      el('div', { className: 'row' }, stay, button('Leave', leaveApp))));
   document.body.append(leaveBox);
 };
+
+// The Windows app (task W, windows/KAJ) shows the game in WebView2, which gives the page
+// chrome.webview to talk to the app. There Esc works like Android's back button, F11 switches
+// full screen, "Leave" closes the app, and the phone-only screen and text selection are off.
+const windowsApp = (window as Window & { chrome?: { webview?: { postMessage(m: string): void } } }).chrome?.webview;
+function leaveApp(): void {
+  if (windowsApp) windowsApp.postMessage('leave');
+  else location.href = 'kaj://leave';
+}
+if (windowsApp) {
+  document.documentElement.classList.add('windows-app');
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') (window as Window & { kajBack?: () => void }).kajBack?.();
+    else if (e.key === 'F11') windowsApp.postMessage('fullscreen');
+    else return;
+    e.preventDefault();
+  });
+}
 
 installIcons();
 renderStart();

@@ -10,7 +10,8 @@
     "map:doc": "node scripts/map-table.ts",
     "map:centres": "node scripts/map-centres.ts",
     "build": "node scripts/build-web.ts",
-    "android:assets": "npm run build && node -e \"require('fs').mkdirSync('android/app/src/main/assets',{recursive:true});require('fs').copyFileSync('dist/kaj.html','android/app/src/main/assets/index.html')\""
+    "android:assets": "npm run build && node -e \"require('fs').mkdirSync('android/app/src/main/assets',{recursive:true});require('fs').copyFileSync('dist/kaj.html','android/app/src/main/assets/index.html')\"",
+    "windows:assets": "npm run build && node -e \"require('fs').mkdirSync('windows/KAJ/Game',{recursive:true});require('fs').copyFileSync('dist/kaj.html','windows/KAJ/Game/index.html')\""
   },
   "license": "UNLICENSED",
   "engines": {
