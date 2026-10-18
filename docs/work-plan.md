@@ -457,7 +457,11 @@ least +2), the bus gives +5/+3 at once and the other parts still +1 each, saves 
   screen, no text selection. Checked in Chromium: a normal browser is unchanged.
   Package images made from the Android icon (`windows/KAJ/Assets`). Windows App SDK 2.4.0 on .NET 8,
   as in Microsoft's current WindowsAppSDK-Samples.
-- **Next (one step at a time):** owner installs Visual Studio Community (WinUI workload) and checks
+- **Owner's PC (2026-10-18):** Visual Studio could not be installed (C: has under 8 GB free; even with
+  Visual Studio on E:, parts must go on C:). Owner-approved instead: GitHub builds the Store file
+  (`.github/workflows/windows.yml`, Microsoft's WinUI CI article; unsigned, the Store signs it),
+  artifact `kaj-windows-store`. No Visual Studio needed.
+- **Earlier plan (replaced):** owner installs Visual Studio Community (WinUI workload) and checks
   its licence covers Connect AL; build and run on the PC; reserve the name in Partner Center and
   "Associate App with the Store" (fills the package identity); Windows App Certification Kit;
   privacy page: a Windows section and the OneDrive backup choice (ask the owner); listing
