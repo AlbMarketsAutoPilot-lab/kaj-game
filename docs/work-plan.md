@@ -461,6 +461,11 @@ least +2), the bus gives +5/+3 at once and the other parts still +1 each, saves 
   Visual Studio on E:, parts must go on C:). Owner-approved instead: GitHub builds the Store file
   (`.github/workflows/windows.yml`, Microsoft's WinUI CI article; unsigned, the Store signs it),
   artifact `kaj-windows-store`. No Visual Studio needed.
+- **Owner's decisions (2026-10-18):** name reserved in Partner Center; package identity in
+  `Package.appxmanifest` (PR #68). First submission: **Private audience** (only the owner's personal
+  Microsoft account; Microsoft: once submitted as Public it can never go back to Private), then a
+  public submission after the owner's test. **OneDrive backup box: unticked** (Properties > Product
+  declarations). Privacy page: a Windows section (effective 18 October 2026).
 - **Earlier plan (replaced):** owner installs Visual Studio Community (WinUI workload) and checks
   its licence covers Connect AL; build and run on the PC; reserve the name in Partner Center and
   "Associate App with the Store" (fills the package identity); Windows App Certification Kit;
