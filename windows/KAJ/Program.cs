@@ -29,7 +29,7 @@ public static class Program
             return 0;
         }
         main.Activated += (_, _) => App.ShowWindow();
-        Microsoft.UI.Xaml.Application.Start(_ =>
+        Microsoft.UI.Xaml.Application.Start(p =>
         {
             SynchronizationContext.SetSynchronizationContext(
                 new DispatcherQueueSynchronizationContext(DispatcherQueue.GetForCurrentThread()));
