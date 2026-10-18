@@ -17,8 +17,6 @@
     <Nullable>enable</Nullable>
     <!-- Program.cs has its own Main: the game opens only once (two windows would overwrite each other's save). -->
     <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
-    <!-- As in Microsoft's samples (Directory.Build.targets) for Windows App SDK 2.x on .NET 8. -->
-    <WindowsSdkPackageVersion>$(TargetPlatformVersion.TrimEnd('0'))55</WindowsSdkPackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
