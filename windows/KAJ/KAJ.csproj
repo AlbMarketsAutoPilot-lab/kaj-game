@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The Windows app (task W): one window showing the game (Game\index.html, built from the web
+       code) in WebView2, packaged as MSIX for the Microsoft Store. Made like Microsoft's
+       WindowsAppSDK-Samples (packaged WinUI, C#). Game\index.html comes from: npm run windows:assets -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RootNamespace>KAJ</RootNamespace>
+    <AssemblyName>KAJ</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Platforms>x86;x64;ARM64</Platforms>
+    <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+    <UseWinUI>true</UseWinUI>
+    <EnableMsixTooling>true</EnableMsixTooling>
+    <PublishProfile>Properties\PublishProfiles\win-$(Platform).pubxml</PublishProfile>
+    <Nullable>enable</Nullable>
+    <!-- Program.cs has its own Main: the game opens only once (two windows would overwrite each other's save). -->
+    <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+    <!-- As in Microsoft's samples (Directory.Build.targets) for Windows App SDK 2.x on .NET 8. -->
+    <WindowsSdkPackageVersion>$(TargetPlatformVersion.TrimEnd('0'))55</WindowsSdkPackageVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.4.0" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.4654" />
+    <Manifest Include="$(ApplicationManifest)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Assets\SplashScreen.png" />
+    <Content Include="Assets\Square150x150Logo.png" />
+    <Content Include="Assets\Square44x44Logo.png" />
+    <Content Include="Assets\StoreLogo.png" />
+    <Content Include="Assets\Wide310x150Logo.png" />
+    <Content Include="Game\index.html" />
+  </ItemGroup>
+
+  <Target Name="CheckGameFile" BeforeTargets="Build" Condition="!Exists('Game\index.html')">
+    <Error Text="Game\index.html is missing. In the kaj-game folder run: npm run windows:assets" />
+  </Target>
+
+  <!-- Lets Visual Studio's MSIX packaging tools load before the NuGet packages are restored
+       (as in Microsoft's samples). -->
+  <ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnablePreviewMsixTooling)'=='true'">
+    <ProjectCapability Include="Msix" />
+  </ItemGroup>
+</Project>

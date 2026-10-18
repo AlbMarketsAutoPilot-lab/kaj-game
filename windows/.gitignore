@@ -1,0 +1,8 @@
+.vs/
+bin/
+obj/
+AppPackages/
+BundleArtifacts/
+*.user
+# Copied from dist/kaj.html by: npm run windows:assets
+KAJ/Game/

@@ -78,6 +78,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | B | Profile balance and planning robots, both games (test-only lab first, then the rules; saves v13) | **high** | — | 5 | ✅ done (owner, 2026-10-11): final freeze of the 30- and 50-turn games |
 | 19 | The car in Mexico (both games): rent 1 (Nomad, Business, Luxury), Backpacker hitchhikes (secret: even arrival round), USA +5 at once; turn buttons without "walk, fly and sail"; saves v14 | **high** | 1 | — | ✅ done (owner, 2026-10-11): the last change, then the final freeze |
 | L1 | 100-turn map: plan (`docs/map100.md`, made by `node scripts/map100-review.ts`) | **high** | 1 | 4 | ✅ proposal done; moved to the future standalone app (owner, 2026-10-11) |
+| W | Windows app for the Microsoft Store (WebView2 app packaged as MSIX): see section W | medium | 2–3 | — | session 1 code written (2026-10-18), not yet built: needs the owner's Visual Studio build and PC test |
 | L2 | 100-turn map: engine (map100, points for 4–5 parts, cards every 10, timing, stuck-state checker, 1,000 robot games, save stays 12) | **high** | 2 | standalone app | |
 | L3 | 100-turn map: shapes (new splits; 30- and 50-turn shape files unchanged) | medium | 1 | standalone app | |
 | L4 | 100-turn map: facts (sort the 50-turn facts, about 580 new ones; owner checks about 5 days) | medium | 2 | standalone app | |
@@ -435,6 +436,35 @@ least +2), the bus gives +5/+3 at once and the other parts still +1 each, saves 
   hole, opening screen), upload key, signed AAB, Play Console (privacy policy link, age groups,
   content rating, Data safety).
 - Updating the app later: replace `assets/index.html`, raise `versionCode`, sign with the same key.
+
+### W. Windows app for the Microsoft Store (owner-approved 2026-10-17/18)
+
+- **Decision (owner, way B):** a small C# WinUI 3 app shows `dist/kaj.html` in WebView2, packaged as
+  MSIX. Checked in Microsoft's documentation: the Store re-signs MSIX packages for free (no
+  certificate to buy); a WebView2 app counts as Win32, so the privacy policy URL is required (policy
+  10.5.1); age rating by the IARC questionnaire (the Google Play IARC rating ID can be reused); at
+  least 1 desktop screenshot of 1366×768 or larger; versions like 1.0.2.0 (last number 0). Not
+  chosen: a packaged PWA (needs internet at first, GitHub sees players' IP addresses, every push to
+  `main` would change the Store app without review, the game's CSP blocks a service worker).
+- **Session 1 (done, not yet built):** `windows/` (open `windows/KAJ.sln` in Visual Studio).
+  The game file is served from the package at `https://kaj.example/index.html` (copied by
+  `npm run windows:assets`, like `android:assets`); saves (localStorage) stay in the package's own
+  folder, which Windows deletes on uninstall. Opens once only (two windows would overwrite each
+  other's save), 1280×720 centred, minimum 800×480; no right-click menu, zoom, F5, developer tools;
+  a message when the WebView2 Runtime is missing; the game is reopened if the web engine stops.
+  Game changes only inside the Windows app (detected by WebView2's `chrome.webview`): Esc = Android's
+  back button (`kajBack`), F11 = full screen, "Leave" closes the app, no "Please turn your phone"
+  screen, no text selection. Checked in Chromium: a normal browser is unchanged.
+  Package images made from the Android icon (`windows/KAJ/Assets`). Windows App SDK 2.4.0 on .NET 8,
+  as in Microsoft's current WindowsAppSDK-Samples.
+- **Next (one step at a time):** owner installs Visual Studio Community (WinUI workload) and checks
+  its licence covers Connect AL; build and run on the PC; reserve the name in Partner Center and
+  "Associate App with the Store" (fills the package identity); Windows App Certification Kit;
+  privacy page: a Windows section and the OneDrive backup choice (ask the owner); listing
+  images and screenshots; upload `.msixupload`.
+- **Not verified yet:** that saves survive app updates (normal for MSIX, page not read); whether
+  music can start before the first click in WebView2 (now it starts at the first click, as in a
+  browser); the units of `PreferredMinimumWidth` (taken as screen pixels).
 
 ### 17. The train — 30-turn map only (owner-approved 2026-10-09; the 50-turn work waits)
 
