@@ -88,7 +88,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | L5 | 100-turn map: screens (turn picker, small areas, 4 wonder drawings, guide), web and APK | medium | 2 | standalone app | |
 | L6 | 100-turn map: full test games and fixes | medium (high if a rule changes) | 2 | standalone app | |
 | 2.1 | Question rotation: no repeat until the pool is used up, kept on the device; bigger airline-quiz pool | medium | 1 | — | ✅ done (one memory per device, owner's choice A; saves v15; lab before/after in `docs/balance-lab.md`) |
-| 2.2 | Flickering on slow tablets and Galaxy S25: measure, fix, owner's phone test | medium | 1 | — | |
+| 2.2 | Flickering on slow tablets and Galaxy S25: measure, fix, owner's phone test | medium | 1 | — | fix done (the walk glow is a still border, no pulse); waiting for the owner's phone test (old tablet, Galaxy S25) |
 | 2.3 | More geography questions: tag every fact, ~250 new geography facts (owner checks), script-made questions | medium | 2 | — | |
 | 2.4 | New ship and plane routes on both maps, map check, stuck-state checker | **high** | 1 | — | |
 | 2.5 | Travel by profile (turns, prices, quiz = Backpacker turns, quiz popup), bus and car whole country | **high** | 2 | — | |
@@ -653,6 +653,16 @@ rotation. Save version up.
 **2.2 (I) Flickering (medium, 1).** Measure with a slowed-down browser (paint and frame times), remove the
 real cause (if it is the glow around borders, remove it), then the owner's test on an old tablet and the
 Galaxy S25.
+- **Done (2026-11-16, owner-approved):** every frame Chromium showed was recorded with a popup open and
+  checked by its pixels, with weak-tablet settings (little graphics memory, CPU 6× slower, 1280×800 at
+  density 1.5). In many frames the **whole map under the popup vanished** (Mongolia 104 of 229 frames, Egypt
+  86/249, Algeria 76/212, USA East 80/222, China East 117/239). Switching off one thing at a time: only the
+  pulsing walk glow (`walk-glow`, added in M5) caused it; the drawn props, colour filters, popup animations
+  and the dark popup layer did not. The 15v fix had changed a different glow (the area you stand in).
+  Fix: the walkable areas keep their gold border, still (`web/style.css`). After: 0 vanishing frames in 13
+  areas on both maps; redraws under a still popup 598 → 0 in 5 s. The guide's tap glow in "How to play"
+  was measured too: no vanishing frames, so it is unchanged. Not reproduced with phone-like settings
+  (Galaxy S25): only the owner's phone test can confirm it there. No change to rules, saves or balance.
 
 **2.3 (A2) Geography questions (medium, 2).** Tag every fact with its type and count exactly; add 3 written
 geography facts per 50-turn area (rivers, mountains, deserts, climate; about 250, checked by the owner,
