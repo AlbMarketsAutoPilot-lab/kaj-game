@@ -88,7 +88,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | L5 | 100-turn map: screens (turn picker, small areas, 4 wonder drawings, guide), web and APK | medium | 2 | standalone app | |
 | L6 | 100-turn map: full test games and fixes | medium (high if a rule changes) | 2 | standalone app | |
 | 2.1 | Question rotation: no repeat until the pool is used up, kept on the device; bigger airline-quiz pool | medium | 1 | — | ✅ done (one memory per device, owner's choice A; saves v15; lab before/after in `docs/balance-lab.md`) |
-| 2.2 | Flickering on slow tablets and Galaxy S25: measure, fix, owner's phone test | medium | 1 | — | fix done (the walk glow is a still border, no pulse); waiting for the owner's phone test (old tablet, Galaxy S25) |
+| 2.2 | Flickering on slow tablets and Galaxy S25: measure, fix, owner's phone test | medium | 1 | — | ✅ done (walk glow and guide map glow still, no pulse; small drawings keep moving, owner); the owner's phone test runs over the coming months |
 | 2.3 | More geography questions: tag every fact, ~250 new geography facts (owner checks), script-made questions | medium | 2 | — | |
 | 2.4 | New ship and plane routes on both maps, map check, stuck-state checker | **high** | 1 | — | |
 | 2.5 | Travel by profile (turns, prices, quiz = Backpacker turns, quiz popup), bus and car whole country | **high** | 2 | — | |
@@ -663,6 +663,13 @@ Galaxy S25.
   areas on both maps; redraws under a still popup 598 → 0 in 5 s. The guide's tap glow in "How to play"
   was measured too: no vanishing frames, so it is unchanged. Not reproduced with phone-like settings
   (Galaxy S25): only the owner's phone test can confirm it there. No change to rules, saves or balance.
+- **Extra test (same day, owner-approved):** with the still walk glow, 0 vanishing frames on event cards
+  (8 areas), quizzes (6), the full world map with and without a popup, the board with no popup, the ⌛ pause
+  (old build 29–45 frames), 900×430, and the guide pages. Only at an extreme setting (phone size, 8 MB of
+  graphics memory) the map still vanished, from two other endless animations: the guide's map glow
+  (`glow-land`, about 100 frames in 5 s per page) and the small drawings on the map (wonder twinkle,
+  hovering bus: Egypt 42/84, Mongolia 123/233 frames). Owner: the guide's map glow is now a still bright
+  edge (0 frames after); the small drawings **keep moving** (owner's decision, not to be changed).
 
 **2.3 (A2) Geography questions (medium, 2).** Tag every fact with its type and count exactly; add 3 written
 geography facts per 50-turn area (rivers, mountains, deserts, climate; about 250, checked by the owner,

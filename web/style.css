@@ -337,8 +337,9 @@ button.link { background: none; border: none; padding: 0; text-align: left; font
 .guide-list .guide-line { text-align: left; }
 @keyframes glow { 50% { filter: brightness(1.35) drop-shadow(0 0 6px var(--glow)); } }
 /* On a map the tap glow is a brighter edge, not a drop-shadow, which grew with the zoom (2026-10-10). */
-.map-svg .land.guide-glow { animation-name: glow-land; }
-@keyframes glow-land { 50% { filter: brightness(1.35); stroke: var(--glow); stroke-width: 3px; } }
+/* Step 2.2 (owner-approved): a still bright edge, not pulsing. Measured with very little graphics
+   memory: the pulse made parts of the guide page vanish (about 100 frames in 5 s); still: none. */
+.map-svg .land.guide-glow { animation: none; stroke: var(--glow); stroke-width: 3px; }
 .guide-badge { font-weight: 700; color: var(--gold-bright); }
 .guide-badge img { height: 1em; vertical-align: -2px; }
 .guide-zero { fill: var(--glow); font-weight: 700; paint-order: stroke; stroke: var(--deep); stroke-width: 0.15px; }
