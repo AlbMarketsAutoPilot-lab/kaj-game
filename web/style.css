@@ -184,10 +184,11 @@ main:has(.game) { max-width: none; padding: calc(6px + var(--safe-t)) calc(6px +
 .map-svg .land.go { stroke: #eafff6; stroke-width: 1.2px; }
 .map-svg.turn .land.far, .map-svg.turn .land.near { filter: saturate(0.35) brightness(0.55); }
 /* Owner (M5): on your turn the areas you can walk to glow, only along their own border (a thin
-   line in screen pixels, whatever the zoom), so the glow never spills over other countries. */
-.map-svg.turn .land.go { animation: walk-glow 1.6s ease-in-out infinite; }
-@keyframes walk-glow { 50% { stroke: var(--glow); stroke-width: 2.6px; filter: brightness(1.15); } }
-@media (prefers-reduced-motion: reduce) { .map-svg.turn .land.go { animation: none; } }
+   line in screen pixels, whatever the zoom), so the glow never spills over other countries.
+   Step 2.2 (owner-approved): the border is still, not pulsing. Measured in a slowed-down browser with
+   little graphics memory: the pulse made the whole map vanish in about 4 frames of 10 (the flashing
+   under popups); a still border: none. */
+.map-svg.turn .land.go { stroke: var(--glow); stroke-width: 2.6px; }
 .areaview { position: relative; }
 .map-note, .map-ask { position: absolute; left: 50%; top: 52px; transform: translateX(-50%); width: min(88%, 440px); z-index: 5;
   background: rgba(8, 40, 44, 0.94); border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; font-size: 0.95rem; box-shadow: 0 6px 18px rgba(0,0,0,0.4); }
