@@ -87,7 +87,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | L4 | 100-turn map: facts (sort the 50-turn facts, about 580 new ones; owner checks about 5 days) | medium | 2 | standalone app | |
 | L5 | 100-turn map: screens (turn picker, small areas, 4 wonder drawings, guide), web and APK | medium | 2 | standalone app | |
 | L6 | 100-turn map: full test games and fixes | medium (high if a rule changes) | 2 | standalone app | |
-| 2.1 | Question rotation: no repeat until the pool is used up, kept on the device; bigger airline-quiz pool | medium | 1 | — | |
+| 2.1 | Question rotation: no repeat until the pool is used up, kept on the device; bigger airline-quiz pool | medium | 1 | — | ✅ done (one memory per device, owner's choice A; saves v15; lab before/after in `docs/balance-lab.md`) |
 | 2.2 | Flickering on slow tablets and Galaxy S25: measure, fix, owner's phone test | medium | 1 | — | |
 | 2.3 | More geography questions: tag every fact, ~250 new geography facts (owner checks), script-made questions | medium | 2 | — | |
 | 2.4 | New ship and plane routes on both maps, map check, stuck-state checker | **high** | 1 | — | |

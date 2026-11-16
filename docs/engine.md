@@ -669,6 +669,31 @@ the same rules on both maps, real-life rules, no caps; the numbers decide. Befor
   whole continents, profile bonuses) and counts a point k turns later as 0.85^k.
 - **Save version 13:** no older save is continued.
 
+## Question rotation (version 2.0, step 2.1, owner-approved 2026-11-16)
+
+- **No repeats until the pool is used up:** each player keeps the ids of the questions they were
+  asked (`Player.seen`, oldest first). Each question is drawn evenly among the pool's unseen ones
+  (`drawFresh` in `src/engine/quiz.ts`), so no place in a list is favoured. When a pool is used up it
+  starts again, and the question just asked never comes straight back.
+- **One rotation for everything:** the airline quiz, the citizenship test and the challenges share the
+  seen list (a fact's id is a short hash of its question and answer, `factId`, the same on both maps;
+  a challenge keeps its id).
+- **Airline-quiz pool:** the destination's facts plus the challenges about its countries (each
+  challenge now has `country`, made by `node scripts/challenges-make.ts`; the questions are unchanged).
+  A flag question shows its flag in the quiz.
+- **Citizenship test:** its 3 questions are the player's next unseen facts of the area; the other 3 study
+  lines are drawn at random. **Challenges:** a random type, then an unseen question of that type. The
+  visa test (step 2.6) will use the same rotation.
+- **On the device (owner's choice A):** one memory for all human players (`kaj-seen` in browser
+  storage). Every human seat starts a game from it (`SeatConfig.seen`); after every move it becomes
+  what the humans have seen. Robots start empty each game.
+- **Save version 15:** no older save is continued (a game in progress from version 14 or older is lost).
+- **Balance (`docs/balance-lab.md`, packages 2.1-BEFORE and 2.1-AFTER, 400 games per line):** robots
+  answer at a fixed rate whatever the question, so only random differences: fair results 12 → 16 of 16
+  (30 turns) and 11 → 10 of 16 (50 turns), average scores within 1.4 points; boredom 32–36% / 27–29%
+  and lead changes about the same. The lab report has two new columns, **boredom** (turns blocked,
+  lost or worth 0 points) and **excitement** (leader changes per game, games won by 3 points or less).
+
 ## Project setup
 
 - TypeScript, run directly by Node 22.18 or newer (no build step for tests).

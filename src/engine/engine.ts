@@ -35,7 +35,7 @@ import {
 import { CARDS } from '../cards/cards.ts';
 import { CHALLENGES } from '../challenges/challenges.ts';
 import { areaById, validateMap } from './map.ts';
-import { makeExam, makeQuestion } from './quiz.ts';
+import { drawFresh, makeExam, makeQuestion } from './quiz.ts';
 import { randomInt } from './rng.ts';
 import type {
   Action,
@@ -96,6 +96,7 @@ export function createGame(config: GameConfig, map: GameMap): GameState {
     visitedContinents: [],
     travel: null,
     quizWrong: 0,
+    seen: [...(s.seen ?? [])],
     askedCitizenship: false,
     citizenship: null,
     exam: null,
@@ -283,7 +284,7 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
     }
     case 'quiz': {
       // The question is about the destination. The turn goes on: the next move is the answer.
-      const [question, rng] = makeQuestion(map, action.to, next.rng);
+      const [question, rng] = makeQuestion(map, action.to, next.rng, me);
       next.rng = rng;
       next.quiz = { kind: action.kind, to: action.to, question };
       return next;
@@ -325,7 +326,7 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
       // (owner, like Madagascar's, never in the rules): on a ship, the 3rd press of the same trip
       // gives a real challenge, for insisting.
       if (action.challenge && (me.profile !== 'nomad' || nomadSurprise(me))) {
-        next.challenge = pickChallenge(next);
+        next.challenge = pickChallenge(next, me);
         return next;
       }
       if (action.challenge) me.travel!.workPresses = (me.travel!.workPresses ?? 0) + 1;
@@ -636,7 +637,7 @@ function submitCitizenship(state: GameState, map: GameMap, me: Player, areaId: s
     grantCitizenship(map, me);
     return;
   }
-  const [{ questions, study }, rng] = makeExam(map, areaId, EXAM_QUESTIONS, EXAM_FACTS, state.rng);
+  const [{ questions, study }, rng] = makeExam(map, areaId, EXAM_QUESTIONS, EXAM_FACTS, state.rng, me);
   state.rng = rng;
   me.exam = { area: areaId, stage: 'test', study, questions, answers: [] };
 }
@@ -756,14 +757,15 @@ function travelOn(state: GameState, map: GameMap, me: Player): void {
 
 export const CHALLENGE_TYPES: ChallengeType[] = ['flag', 'bigger', 'capital', 'continent', 'neighbour', 'currency'];
 
-// A random type, then a random question of that type (the same question can come again).
-// The random draw is hidden: no dice are shown.
-function pickChallenge(state: GameState): Challenge {
+// A random type, then a question of that type the player hasn't seen yet (step 2.1: the
+// rotation, see drawFresh). The random draw is hidden: no dice are shown.
+function pickChallenge(state: GameState, me: Player): Challenge {
   const [t, rng1] = randomInt(state.rng, CHALLENGE_TYPES.length);
   const list = CHALLENGES.filter((c) => c.type === CHALLENGE_TYPES[t]);
-  const [i, rng2] = randomInt(rng1, list.length);
+  const [[id], seen, rng2] = drawFresh(list.map((c) => c.id), me.seen, 1, rng1);
   state.rng = rng2;
-  return list[i];
+  me.seen = seen;
+  return list.find((c) => c.id === id)!;
 }
 
 // ---------- event cards (rulebook section 10, docs/engine.md tasks 11 and 12) ----------

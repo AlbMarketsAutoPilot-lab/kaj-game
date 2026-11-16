@@ -2,6 +2,8 @@
 // node measure.ts <job JSON>
 //   {kind:'versus', turns, a, b, games}  2 players, seats swapped every other game
 //   {kind:'profiles', turns, players, driver, games}  every seat the same driver
+// Boredom (owner, 2026-11-16): share of turns blocked, lost, or worth 0 points (waiting turns
+// included). Excitement: changes of the leader (checked after every round) and how close the finish is.
 // A driver: E, N, H (today's robots) or N2, H4, P4 (planning: accuracy of normal/hard, depth).
 import { apply, createGame, currentPlayer, finalScore } from '../../src/engine/engine.ts';
 import { robotAction } from '../../src/engine/normal-robot.ts';
@@ -19,20 +21,52 @@ const job = JSON.parse(process.argv[2]);
 const map = mapFor(job.turns as GameLength);
 const COLOURS = ['red', 'blue', 'green', 'yellow'];
 
+const feel = { turns: 0, dull: 0, leadChanges: 0, margin: 0, close: 0, games: 0 };
+
+function leader(s: GameState): number | null {
+  const scores = s.players.map((p) => finalScore(s, p));
+  const best = Math.max(...scores);
+  return scores.filter((x) => x === best).length === 1 ? scores.indexOf(best) : null;
+}
+
 function play(drivers: string[], seed: number): GameState {
   const seats = drivers.map((d, i) => ({ kind: i === 0 ? 'human' as const : 'robot' as const, colour: COLOURS[i], level: DRIVERS[d].accuracy as RobotLevel }));
   let s = createGame({ seats, seed }, map);
   let rs = seed ^ 0x5bd1e995;
   let steps = 0;
+  let turnKey = ''; let turnSeat = -1; let turnStart = 0; let turnDull = false;
+  let lastRound = 0; let lead: number | null = null;
+  const closeTurn = () => {
+    if (turnSeat < 0) return;
+    feel.turns++;
+    if (turnDull || finalScore(s, s.players[turnSeat]) <= turnStart) feel.dull++;
+  };
   while (s.phase !== 'finished') {
+    if (s.phase === 'play' && !s.offer) {
+      const key = `${s.round}:${s.current}`;
+      if (key !== turnKey) {
+        closeTurn();
+        turnKey = key; turnSeat = currentPlayer(s).seat; turnStart = finalScore(s, currentPlayer(s)); turnDull = false;
+        if (s.round !== lastRound) {
+          const now = leader(s);
+          if (lastRound > 0 && now !== null && lead !== null && now !== lead) feel.leadChanges++;
+          if (now !== null) lead = now;
+          lastRound = s.round;
+        }
+      }
+    }
     const seat = s.offer ? s.offer.to : currentPlayer(s).seat;
     const lvl = DRIVERS[drivers[seat]];
     let a: Action;
     // Sale answers and other players' choices: the driver of the seat that acts.
     [a, rs] = s.offer ? robotAction(s, map, rs, lvl.accuracy) : planAction(s, map, rs, lvl);
+    if (a.type === 'blocked' || a.type === 'lostTurn') turnDull = true;
     s = apply(s, map, a);
     if (++steps > 20000) throw new Error('never ends');
   }
+  closeTurn();
+  const end = s.players.map((p) => finalScore(s, p)).sort((x, y) => y - x);
+  feel.games++; feel.margin += end[0] - end[1]; if (end[0] - end[1] <= 3) feel.close++;
   return s;
 }
 
@@ -61,4 +95,5 @@ if (job.kind === 'versus') {
   }
   out.profiles = st;
 }
+out.feel = { boredom: feel.dull / feel.turns, leadChanges: feel.leadChanges / feel.games, margin: feel.margin / feel.games, close: feel.close / feel.games };
 console.log(JSON.stringify(out));
