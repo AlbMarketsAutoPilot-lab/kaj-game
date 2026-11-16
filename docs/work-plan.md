@@ -755,6 +755,32 @@ engine (high, 2), J3 shapes, J4 facts (2), J5 screens (2), J6 test games (2), me
 
 **2.12 (release) Release (medium, 1–2).** Full test games (2–4 players, all lengths), web at kaj.kritere.com and app.
 
+**How the Play Store app gets the 2.0 changes (checked 2026-11-16 in the 1.0.2 release chat):**
+- Every step is merged into `main` when it is done; GitHub Pages (`.github/workflows/pages.yml`) then
+  updates the web game by itself. The Play Store app does **not** update by itself: it holds its own copy of
+  the game file, so it needs a new signed build. The app's code is Java (`MainActivity.java`, no Kotlin);
+  2.1 and 2.2 changed only the web game, so no Java change was needed for them.
+- **A Gradle sync alone is not enough**: it does not change the game file inside the app.
+- Before the build, raise the version in `android/app/build.gradle.kts` (owner's approval first): today
+  `versionCode = 4`, `versionName = "1.0.2"`; Play accepts only a higher `versionCode` (next: 5).
+- The owner builds and signs on their PC in Android Studio (task 15). The project folder used for 1.0.2:
+  `C:\Users\grise\Desktop\kaj-game-main\android`. Steps used for 1.0.2, one at a time (`CLAUDE.md` rule 1):
+  1. Command Prompt: download the new game file into the app (it must be the merged `main` build):
+     `curl.exe -L -o "C:\Users\grise\Desktop\kaj-game-main\android\app\src\main\assets\index.html" https://albmarketsautopilot-lab.github.io/kaj-game/index.html`
+     (earlier releases ran `npm run android:assets` in PowerShell instead, which builds the same file).
+  2. Command Prompt: download the file with the new version number:
+     `curl.exe -L -o "C:\Users\grise\Desktop\kaj-game-main\android\app\build.gradle.kts" https://raw.githubusercontent.com/AlbMarketsAutoPilot-lab/kaj-game/main/android/app/build.gradle.kts`
+     and check it with `findstr /c:"versionCode" /c:"versionName" "C:\Users\grise\Desktop\kaj-game-main\android\app\build.gradle.kts"`.
+  3. Android Studio: **File → Sync Project with Gradle Files** ("Gradle sync finished", no red errors).
+  4. **Build → Assemble Project** (BUILD SUCCESSFUL).
+  5. **Build → Generate Signed App Bundle or APK…** with the existing upload key (passwords never in chat);
+     an AAB for Play, then upload it in Play Console with the release notes. R8 is on: upload the mapping file
+     `android\app\build\outputs\mapping\release\mapping.txt` when Play asks.
+- Before releasing, check with the owner which files besides `index.html` and `build.gradle.kts` changed in
+  `android/` since 1.0.2 (`git diff` from the 1.0.2 commit); each changed file must be copied too.
+- Saves: 2.1 raised the save version to 15, so a game in progress from 1.0.2 cannot be continued after the
+  update (say so in the release notes).
+
 ## Browser version or Android only?
 
 **Short answer: do both, because they are the same work.**
