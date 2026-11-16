@@ -126,4 +126,9 @@ export const PACKAGES: Package[] = [
   // The game as shipped after the balance change (2026-10-11): the real code, no patches.
   { name: 'SHIPPED-30', turns: [30], drivers: ['N2', 'P4'], ladder: [['E', 'N2'], ['N2', 'H3']], about: 'the balanced game as it is now in src/ (no patches), 30 turns', patches: [] },
   { name: 'SHIPPED-50', turns: [50], drivers: ['N2', 'P4'], ladder: [['E', 'N2'], ['N2', 'H3']], about: 'the balanced game as it is now in src/ (no patches), 50 turns', patches: [] },
+  // Version 2.0, step 2.1 (question rotation): the game before and after, 30 and 50 turns.
+  { name: '2.1-BEFORE-30', turns: [30], drivers: ['N2', 'P4'], ladder: [['E', 'N2'], ['N2', 'H3']], about: 'before step 2.1 (question rotation), 30 turns', patches: [] },
+  { name: '2.1-BEFORE-50', turns: [50], drivers: ['N2', 'P4'], ladder: [['E', 'N2'], ['N2', 'H3']], about: 'before step 2.1 (question rotation), 50 turns', patches: [] },
+  { name: '2.1-AFTER-30', turns: [30], drivers: ['N2', 'P4'], ladder: [['E', 'N2'], ['N2', 'H3']], about: 'after step 2.1 (question rotation), 30 turns', patches: [] },
+  { name: '2.1-AFTER-50', turns: [50], drivers: ['N2', 'P4'], ladder: [['E', 'N2'], ['N2', 'H3']], about: 'after step 2.1 (question rotation), 50 turns', patches: [] },
 ];

@@ -105,7 +105,7 @@ const out: Challenge[] = [];
 const add = (type: ChallengeType, c: Country, question: string, right: string, wrong: string, flag?: string) => {
   const correct = pick([0, 1] as const);
   const options: [string, string] = correct === 0 ? [right, wrong] : [wrong, right];
-  out.push({ id: `${type}-${c.cca3.toLowerCase()}`, type, question, options, correct, ...(flag ? { flag } : {}) });
+  out.push({ id: `${type}-${c.cca3.toLowerCase()}`, type, country: c.name, question, options, correct, ...(flag ? { flag } : {}) });
 };
 
 // Which flag? Wrong answer: any other country whose flag doesn't look the same.

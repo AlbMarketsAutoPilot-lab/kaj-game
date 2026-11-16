@@ -3,6 +3,7 @@ import { test } from 'node:test';
 import { POINTS_BUSINESS_CITIZENSHIP, VISA_PRICE } from '../src/engine/constants.ts';
 import { apply, canAskCitizenship, legalActions } from '../src/engine/engine.ts';
 import { makeExam, makeQuestion } from '../src/engine/quiz.ts';
+import { CHALLENGES } from '../src/challenges/challenges.ts';
 import type { Action, GameMap, GameState, Profile } from '../src/engine/types.ts';
 import { map30 } from '../src/maps/map30.ts';
 import { testMap, travelMap } from './fixtures/test-map.ts';
@@ -297,14 +298,17 @@ test('6 facts to read, in the area\'s order; the 3 questions come from 3 differe
   }
 });
 
-test('the airline quiz asks about the destination, from its facts', () => {
+test('the airline quiz asks about the destination, from its facts or the challenges about its countries', () => {
+  // Step 2.1: the pool is the destination's facts plus the challenges about its countries.
+  const japan = map30.areas.find((a) => a.id === 'japan')!;
   let seed = 3;
   for (let i = 0; i < 20; i++) {
     const [q, next] = makeQuestion(map30, 'japan', seed);
     seed = next;
     const fact = map30.facts!.japan.find((f) => f.question === q.text);
-    assert.ok(fact, q.text);
-    assert.equal(q.options[q.correct], fact.right);
+    const challenge = CHALLENGES.find((c) => c.id === q.id);
+    assert.ok(fact || (challenge && japan.countries!.includes(challenge.country)), q.text);
+    assert.equal(q.options[q.correct], fact ? fact.right : challenge!.options[challenge!.correct]);
   }
 });
 

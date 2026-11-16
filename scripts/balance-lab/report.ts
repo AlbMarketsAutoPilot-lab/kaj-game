@@ -12,6 +12,10 @@ const pct = (n: number, d: number) => Math.round((100 * n) / d);
 // Fair targets (owner, 2026-10-11): 20–30% with 4 players, 40–60% with 2.
 const fair = (w: number, players: number) => (players === 4 ? w >= 20 && w <= 30 : w >= 40 && w <= 60);
 
+// Boredom: share of turns blocked, lost or worth 0 points. Excitement: leader changes per game, and
+// games won by 3 points or less (owner, 2026-11-16).
+const feelCells = (f: any) => (f ? `${pct(f.boredom, 1)}% | ${f.leadChanges.toFixed(1)} lead changes, ${pct(f.close, 1)}% won by ≤3` : '— | —');
+
 let md = `# Balance lab — numbers before any change (owner, 2026-10-11)
 
 Made by \`node scripts/balance-lab/run.ts\` and \`node scripts/balance-lab/report.ts\`. **The game is not changed:**
@@ -36,7 +40,7 @@ for (const [name, pkg] of Object.entries<any>(R)) {
     for (const [, v] of versus) md += `| ${v.job.turns} turns | ${NAMES[v.job.a]} | ${NAMES[v.job.b]} | ${pct(v.winsA, v.job.games)}% | ${pct(v.winsB, v.job.games)}% |\n`;
   }
   if (!Object.keys(pkg.lines).some((k) => k.startsWith('profiles'))) continue;
-  md += `\n## Package "${name}": ${pkg.about}\n\n| Game | Robots | ${PROFILES.map((p) => p[0].toUpperCase() + p.slice(1)).join(' | ')} | Fair? |\n|---|---|---|---|---|---|---|\n`;
+  md += `\n## Package "${name}": ${pkg.about}\n\n| Game | Robots | ${PROFILES.map((p) => p[0].toUpperCase() + p.slice(1)).join(' | ')} | Boredom | Excitement | Fair? |\n|---|---|---|---|---|---|---|---|---|\n`;
   let ok = 0, all = 0;
   for (const [key, v] of Object.entries<any>(pkg.lines)) {
     if (!key.startsWith('profiles')) continue;
@@ -46,7 +50,7 @@ for (const [name, pkg] of Object.entries<any>(R)) {
       all++; if (f) ok++;
       return `${w}% ${f ? '✅' : '❌'} (${(s.score / s.games).toFixed(1)})`;
     });
-    md += `| ${v.job.turns} turns, ${v.job.players} players | ${({ N: 'normal (today)', N2: 'normal (plans 2)', P4: 'planning (plans 4)' } as Record<string, string>)[v.job.driver]} | ${cells.join(' | ')} | |\n`;
+    md += `| ${v.job.turns} turns, ${v.job.players} players | ${({ N: 'normal (today)', N2: 'normal (plans 2)', P4: 'planning (plans 4)' } as Record<string, string>)[v.job.driver]} | ${cells.join(' | ')} | ${feelCells(v.feel)} | |\n`;
   }
   md = md.replace(/\| \|\n(?![\s\S]*\| \|\n)/, `| ${ok}/${all} |\n`);
   md += `\n**${ok} of ${all}** profile results inside the target. (Wins %, with the average final score in brackets.)\n`;

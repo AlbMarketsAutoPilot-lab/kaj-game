@@ -5336,5 +5336,781 @@
     }
    }
   }
+ },
+ "2.1-BEFORE-30": {
+  "about": "before step 2.1 (question rotation), 30 turns",
+  "games": 400,
+  "lines": {
+   "profiles 30 2 N2": {
+    "job": {
+     "kind": "profiles",
+     "turns": 30,
+     "players": 2,
+     "driver": "N2",
+     "games": 400
+    },
+    "profiles": {
+     "backpacker": {
+      "score": 9386,
+      "wins": 80,
+      "games": 188
+     },
+     "nomad": {
+      "score": 9804,
+      "wins": 109,
+      "games": 199
+     },
+     "business": {
+      "score": 10751,
+      "wins": 123,
+      "games": 214
+     },
+     "luxury": {
+      "score": 9523,
+      "wins": 88,
+      "games": 199
+     }
+    },
+    "feel": {
+     "boredom": 0.31833333333333336,
+     "leadChanges": 2.655,
+     "margin": 7.845,
+     "close": 0.28
+    }
+   },
+   "versus 30 E N2": {
+    "job": {
+     "kind": "versus",
+     "turns": 30,
+     "a": "E",
+     "b": "N2",
+     "games": 400
+    },
+    "winsA": 166,
+    "winsB": 234,
+    "draws": 0,
+    "scoreA": 46.5025,
+    "scoreB": 48.1925,
+    "feel": {
+     "boredom": 0.35191666666666666,
+     "leadChanges": 2.5775,
+     "margin": 8.88,
+     "close": 0.235
+    }
+   },
+   "profiles 30 4 N2": {
+    "job": {
+     "kind": "profiles",
+     "turns": 30,
+     "players": 4,
+     "driver": "N2",
+     "games": 400
+    },
+    "profiles": {
+     "business": {
+      "score": 18408,
+      "wins": 80,
+      "games": 400
+     },
+     "luxury": {
+      "score": 19053,
+      "wins": 122,
+      "games": 400
+     },
+     "nomad": {
+      "score": 18917,
+      "wins": 90,
+      "games": 400
+     },
+     "backpacker": {
+      "score": 19662,
+      "wins": 106,
+      "games": 400
+     }
+    },
+    "feel": {
+     "boredom": 0.3594583333333333,
+     "leadChanges": 4.545,
+     "margin": 5.7325,
+     "close": 0.425
+    }
+   },
+   "versus 30 N2 H3": {
+    "job": {
+     "kind": "versus",
+     "turns": 30,
+     "a": "N2",
+     "b": "H3",
+     "games": 400
+    },
+    "winsA": 139,
+    "winsB": 260,
+    "draws": 1,
+    "scoreA": 48.51,
+    "scoreB": 53.1625,
+    "feel": {
+     "boredom": 0.32204166666666667,
+     "leadChanges": 2.4625,
+     "margin": 9.6475,
+     "close": 0.23
+    }
+   },
+   "profiles 30 2 P4": {
+    "job": {
+     "kind": "profiles",
+     "turns": 30,
+     "players": 2,
+     "driver": "P4",
+     "games": 400
+    },
+    "profiles": {
+     "backpacker": {
+      "score": 9855,
+      "wins": 89,
+      "games": 188
+     },
+     "nomad": {
+      "score": 10737,
+      "wins": 120,
+      "games": 199
+     },
+     "business": {
+      "score": 11337,
+      "wins": 118,
+      "games": 214
+     },
+     "luxury": {
+      "score": 10047,
+      "wins": 73,
+      "games": 199
+     }
+    },
+    "feel": {
+     "boredom": 0.35741666666666666,
+     "leadChanges": 2.82,
+     "margin": 7.76,
+     "close": 0.2875
+    }
+   },
+   "profiles 30 4 P4": {
+    "job": {
+     "kind": "profiles",
+     "turns": 30,
+     "players": 4,
+     "driver": "P4",
+     "games": 400
+    },
+    "profiles": {
+     "business": {
+      "score": 20487,
+      "wins": 125,
+      "games": 400
+     },
+     "luxury": {
+      "score": 20290,
+      "wins": 110,
+      "games": 400
+     },
+     "nomad": {
+      "score": 20264,
+      "wins": 97,
+      "games": 400
+     },
+     "backpacker": {
+      "score": 19745,
+      "wins": 68,
+      "games": 400
+     }
+    },
+    "feel": {
+     "boredom": 0.35225,
+     "leadChanges": 4.725,
+     "margin": 5.42,
+     "close": 0.4575
+    }
+   }
+  }
+ },
+ "2.1-BEFORE-50": {
+  "about": "before step 2.1 (question rotation), 50 turns",
+  "games": 400,
+  "lines": {
+   "profiles 50 2 N2": {
+    "job": {
+     "kind": "profiles",
+     "turns": 50,
+     "players": 2,
+     "driver": "N2",
+     "games": 400
+    },
+    "profiles": {
+     "backpacker": {
+      "score": 14153,
+      "wins": 115,
+      "games": 188
+     },
+     "nomad": {
+      "score": 14595,
+      "wins": 90,
+      "games": 199
+     },
+     "business": {
+      "score": 15014,
+      "wins": 95,
+      "games": 214
+     },
+     "luxury": {
+      "score": 14139,
+      "wins": 100,
+      "games": 199
+     }
+    },
+    "feel": {
+     "boredom": 0.27665,
+     "leadChanges": 3.2675,
+     "margin": 10.0675,
+     "close": 0.215
+    }
+   },
+   "profiles 50 4 N2": {
+    "job": {
+     "kind": "profiles",
+     "turns": 50,
+     "players": 4,
+     "driver": "N2",
+     "games": 400
+    },
+    "profiles": {
+     "business": {
+      "score": 28009,
+      "wins": 96,
+      "games": 400
+     },
+     "luxury": {
+      "score": 28147,
+      "wins": 108,
+      "games": 400
+     },
+     "nomad": {
+      "score": 27638,
+      "wins": 79,
+      "games": 400
+     },
+     "backpacker": {
+      "score": 28666,
+      "wins": 117,
+      "games": 400
+     }
+    },
+    "feel": {
+     "boredom": 0.27405,
+     "leadChanges": 5.585,
+     "margin": 7.3575,
+     "close": 0.305
+    }
+   },
+   "versus 50 E N2": {
+    "job": {
+     "kind": "versus",
+     "turns": 50,
+     "a": "E",
+     "b": "N2",
+     "games": 400
+    },
+    "winsA": 150,
+    "winsB": 250,
+    "draws": 0,
+    "scoreA": 68.755,
+    "scoreB": 72.8425,
+    "feel": {
+     "boredom": 0.285275,
+     "leadChanges": 3.3325,
+     "margin": 10.1075,
+     "close": 0.2325
+    }
+   },
+   "versus 50 N2 H3": {
+    "job": {
+     "kind": "versus",
+     "turns": 50,
+     "a": "N2",
+     "b": "H3",
+     "games": 400
+    },
+    "winsA": 130,
+    "winsB": 270,
+    "draws": 0,
+    "scoreA": 71.735,
+    "scoreB": 77.5775,
+    "feel": {
+     "boredom": 0.2757,
+     "leadChanges": 2.9625,
+     "margin": 10.1175,
+     "close": 0.2175
+    }
+   },
+   "profiles 50 2 P4": {
+    "job": {
+     "kind": "profiles",
+     "turns": 50,
+     "players": 2,
+     "driver": "P4",
+     "games": 400
+    },
+    "profiles": {
+     "backpacker": {
+      "score": 14210,
+      "wins": 74,
+      "games": 188
+     },
+     "nomad": {
+      "score": 15716,
+      "wins": 140,
+      "games": 199
+     },
+     "business": {
+      "score": 16127,
+      "wins": 95,
+      "games": 214
+     },
+     "luxury": {
+      "score": 14693,
+      "wins": 91,
+      "games": 199
+     }
+    },
+    "feel": {
+     "boredom": 0.277075,
+     "leadChanges": 3.6225,
+     "margin": 9.27,
+     "close": 0.225
+    }
+   },
+   "profiles 50 4 P4": {
+    "job": {
+     "kind": "profiles",
+     "turns": 50,
+     "players": 4,
+     "driver": "P4",
+     "games": 400
+    },
+    "profiles": {
+     "business": {
+      "score": 28722,
+      "wins": 83,
+      "games": 400
+     },
+     "luxury": {
+      "score": 29001,
+      "wins": 76,
+      "games": 400
+     },
+     "nomad": {
+      "score": 29942,
+      "wins": 110,
+      "games": 400
+     },
+     "backpacker": {
+      "score": 30371,
+      "wins": 131,
+      "games": 400
+     }
+    },
+    "feel": {
+     "boredom": 0.28855,
+     "leadChanges": 6.02,
+     "margin": 6.0725,
+     "close": 0.345
+    }
+   }
+  }
+ },
+ "2.1-AFTER-30": {
+  "about": "after step 2.1 (question rotation), 30 turns",
+  "games": 400,
+  "lines": {
+   "profiles 30 2 N2": {
+    "job": {
+     "kind": "profiles",
+     "turns": 30,
+     "players": 2,
+     "driver": "N2",
+     "games": 400
+    },
+    "profiles": {
+     "backpacker": {
+      "score": 9517,
+      "wins": 88,
+      "games": 188
+     },
+     "nomad": {
+      "score": 9790,
+      "wins": 101,
+      "games": 199
+     },
+     "business": {
+      "score": 10800,
+      "wins": 115,
+      "games": 214
+     },
+     "luxury": {
+      "score": 9619,
+      "wins": 95,
+      "games": 199
+     }
+    },
+    "feel": {
+     "boredom": 0.316875,
+     "leadChanges": 2.7275,
+     "margin": 8.175,
+     "close": 0.27
+    }
+   },
+   "versus 30 E N2": {
+    "job": {
+     "kind": "versus",
+     "turns": 30,
+     "a": "E",
+     "b": "N2",
+     "games": 400
+    },
+    "winsA": 155,
+    "winsB": 245,
+    "draws": 0,
+    "scoreA": 45.9675,
+    "scoreB": 48.565,
+    "feel": {
+     "boredom": 0.35541666666666666,
+     "leadChanges": 2.555,
+     "margin": 9.2575,
+     "close": 0.24
+    }
+   },
+   "profiles 30 4 N2": {
+    "job": {
+     "kind": "profiles",
+     "turns": 30,
+     "players": 4,
+     "driver": "N2",
+     "games": 400
+    },
+    "profiles": {
+     "business": {
+      "score": 18752,
+      "wins": 82,
+      "games": 400
+     },
+     "luxury": {
+      "score": 19550,
+      "wins": 120,
+      "games": 400
+     },
+     "nomad": {
+      "score": 18912,
+      "wins": 91,
+      "games": 400
+     },
+     "backpacker": {
+      "score": 19956,
+      "wins": 107,
+      "games": 400
+     }
+    },
+    "feel": {
+     "boredom": 0.3508541666666667,
+     "leadChanges": 4.9025,
+     "margin": 5.7325,
+     "close": 0.3925
+    }
+   },
+   "profiles 30 2 P4": {
+    "job": {
+     "kind": "profiles",
+     "turns": 30,
+     "players": 2,
+     "driver": "P4",
+     "games": 400
+    },
+    "profiles": {
+     "backpacker": {
+      "score": 9848,
+      "wins": 95,
+      "games": 188
+     },
+     "nomad": {
+      "score": 10606,
+      "wins": 116,
+      "games": 199
+     },
+     "business": {
+      "score": 11214,
+      "wins": 103,
+      "games": 214
+     },
+     "luxury": {
+      "score": 10106,
+      "wins": 85,
+      "games": 199
+     }
+    },
+    "feel": {
+     "boredom": 0.3596666666666667,
+     "leadChanges": 2.945,
+     "margin": 7.795,
+     "close": 0.285
+    }
+   },
+   "versus 30 N2 H3": {
+    "job": {
+     "kind": "versus",
+     "turns": 30,
+     "a": "N2",
+     "b": "H3",
+     "games": 400
+    },
+    "winsA": 158,
+    "winsB": 241,
+    "draws": 1,
+    "scoreA": 49.02,
+    "scoreB": 52.61,
+    "feel": {
+     "boredom": 0.32129166666666664,
+     "leadChanges": 2.5575,
+     "margin": 9.01,
+     "close": 0.2725
+    }
+   },
+   "profiles 30 4 P4": {
+    "job": {
+     "kind": "profiles",
+     "turns": 30,
+     "players": 4,
+     "driver": "P4",
+     "games": 400
+    },
+    "profiles": {
+     "business": {
+      "score": 20921,
+      "wins": 116,
+      "games": 400
+     },
+     "luxury": {
+      "score": 20241,
+      "wins": 90,
+      "games": 400
+     },
+     "nomad": {
+      "score": 20850,
+      "wins": 114,
+      "games": 400
+     },
+     "backpacker": {
+      "score": 19953,
+      "wins": 79,
+      "games": 400
+     }
+    },
+    "feel": {
+     "boredom": 0.3501458333333333,
+     "leadChanges": 4.69,
+     "margin": 5.39,
+     "close": 0.46
+    }
+   }
+  }
+ },
+ "2.1-AFTER-50": {
+  "about": "after step 2.1 (question rotation), 50 turns",
+  "games": 400,
+  "lines": {
+   "profiles 50 2 N2": {
+    "job": {
+     "kind": "profiles",
+     "turns": 50,
+     "players": 2,
+     "driver": "N2",
+     "games": 400
+    },
+    "profiles": {
+     "backpacker": {
+      "score": 14117,
+      "wins": 112,
+      "games": 188
+     },
+     "nomad": {
+      "score": 14566,
+      "wins": 95,
+      "games": 199
+     },
+     "business": {
+      "score": 15058,
+      "wins": 97,
+      "games": 214
+     },
+     "luxury": {
+      "score": 14066,
+      "wins": 95,
+      "games": 199
+     }
+    },
+    "feel": {
+     "boredom": 0.2757,
+     "leadChanges": 3.325,
+     "margin": 9.9425,
+     "close": 0.275
+    }
+   },
+   "profiles 50 4 N2": {
+    "job": {
+     "kind": "profiles",
+     "turns": 50,
+     "players": 4,
+     "driver": "N2",
+     "games": 400
+    },
+    "profiles": {
+     "business": {
+      "score": 27961,
+      "wins": 96,
+      "games": 400
+     },
+     "luxury": {
+      "score": 28025,
+      "wins": 109,
+      "games": 400
+     },
+     "nomad": {
+      "score": 27611,
+      "wins": 68,
+      "games": 400
+     },
+     "backpacker": {
+      "score": 28712,
+      "wins": 127,
+      "games": 400
+     }
+    },
+    "feel": {
+     "boredom": 0.2763875,
+     "leadChanges": 5.705,
+     "margin": 6.675,
+     "close": 0.3725
+    }
+   },
+   "versus 50 E N2": {
+    "job": {
+     "kind": "versus",
+     "turns": 50,
+     "a": "E",
+     "b": "N2",
+     "games": 400
+    },
+    "winsA": 135,
+    "winsB": 263,
+    "draws": 2,
+    "scoreA": 68.3525,
+    "scoreB": 72.81,
+    "feel": {
+     "boredom": 0.28825,
+     "leadChanges": 3.2075,
+     "margin": 9.9175,
+     "close": 0.2375
+    }
+   },
+   "versus 50 N2 H3": {
+    "job": {
+     "kind": "versus",
+     "turns": 50,
+     "a": "N2",
+     "b": "H3",
+     "games": 400
+    },
+    "winsA": 118,
+    "winsB": 282,
+    "draws": 0,
+    "scoreA": 71.8725,
+    "scoreB": 77.1375,
+    "feel": {
+     "boredom": 0.272625,
+     "leadChanges": 3.1125,
+     "margin": 9.565,
+     "close": 0.2325
+    }
+   },
+   "profiles 50 2 P4": {
+    "job": {
+     "kind": "profiles",
+     "turns": 50,
+     "players": 2,
+     "driver": "P4",
+     "games": 400
+    },
+    "profiles": {
+     "backpacker": {
+      "score": 14118,
+      "wins": 71,
+      "games": 188
+     },
+     "nomad": {
+      "score": 15695,
+      "wins": 144,
+      "games": 199
+     },
+     "business": {
+      "score": 16148,
+      "wins": 94,
+      "games": 214
+     },
+     "luxury": {
+      "score": 14699,
+      "wins": 90,
+      "games": 199
+     }
+    },
+    "feel": {
+     "boredom": 0.275,
+     "leadChanges": 3.535,
+     "margin": 9.005,
+     "close": 0.21
+    }
+   },
+   "profiles 50 4 P4": {
+    "job": {
+     "kind": "profiles",
+     "turns": 50,
+     "players": 4,
+     "driver": "P4",
+     "games": 400
+    },
+    "profiles": {
+     "business": {
+      "score": 28808,
+      "wins": 77,
+      "games": 400
+     },
+     "luxury": {
+      "score": 29259,
+      "wins": 90,
+      "games": 400
+     },
+     "nomad": {
+      "score": 29907,
+      "wins": 106,
+      "games": 400
+     },
+     "backpacker": {
+      "score": 30536,
+      "wins": 125,
+      "games": 400
+     }
+    },
+    "feel": {
+     "boredom": 0.2880875,
+     "leadChanges": 6.365,
+     "margin": 5.2375,
+     "close": 0.4325
+    }
+   }
+  }
  }
 }

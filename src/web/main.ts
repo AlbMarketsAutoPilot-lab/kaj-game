@@ -47,6 +47,8 @@ const WALK_MS = 1500;
 const POPUP_PAUSE_MS = 2000;
 const LEVEL_LABEL: Record<RobotLevel, string> = { easy: 'Easy', normal: 'Normal', hard: 'Hard' };
 const SAVE_KEY = 'kaj-save';
+// Step 2.1 (owner's choice A): one memory of seen questions for all human players on this device.
+const SEEN_KEY = 'kaj-seen';
 const QUIZ_SECONDS = 15;
 // Travel-turn challenges: 15 seconds, time out = wrong answer (v1 scope, section 6).
 const CHALLENGE_SECONDS = 15;
@@ -352,7 +354,7 @@ function renderSetup(): void {
     try {
       const seed = Math.floor(Math.random() * 2 ** 31);
       robotSeed = seed ^ 0x5bd1e995;
-      const seats = kinds.slice(0, count).map((kind, i) => ({ kind, colour: ['red', 'blue', 'green', 'yellow'][i], ...(kind === 'robot' ? { level: levels[i] } : {}) }));
+      const seats = kinds.slice(0, count).map((kind, i) => ({ kind, colour: ['red', 'blue', 'green', 'yellow'][i], ...(kind === 'robot' ? { level: levels[i] } : { seen: readSeen() }) }));
       zoom = null;
       pickedStart = null;
       seenCards.clear();
@@ -442,8 +444,31 @@ function readSave(): ReturnType<typeof loadGame> | null {
   }
 }
 
+// The questions seen by any human on this device (step 2.1), oldest first.
+function readSeen(): string[] {
+  try {
+    const list: unknown = JSON.parse(localStorage.getItem(SEEN_KEY) ?? '[]');
+    return Array.isArray(list) ? list.filter((x): x is string => typeof x === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
+// Every human started the game from the device's memory; the new memory is what they have all
+// seen now (a pool used up by one of them starts again for that player).
+function writeSeen(s: GameState): void {
+  const all = s.players.filter((p) => p.kind === 'human').flatMap((p) => p.seen);
+  const last = new Map(all.map((id, i) => [id, i]));
+  try {
+    localStorage.setItem(SEEN_KEY, JSON.stringify(all.filter((id, i) => last.get(id) === i)));
+  } catch {
+    // not kept
+  }
+}
+
 // Saved after every move; a finished game is removed, so "Continue" never shows it.
 function writeSave(s: GameState): void {
+  writeSeen(s);
   try {
     if (s.phase === 'finished') localStorage.removeItem(SAVE_KEY);
     else localStorage.setItem(SAVE_KEY, saveGame(s));
@@ -1178,9 +1203,10 @@ function renderBigCountries(me: GameState['players'][number]): HTMLElement {
 
 // The timed a/b question box (airline quiz, also used by the guide): the question, the answer
 // buttons, the 15-second clock and a note. Time out = the wrong answer.
-function timedQuestion(title: (Node | string)[], text: string, options: string[], correct: number, onAnswer: (i: number) => void, seconds: number, key: string, note: string): HTMLElement[] {
+function timedQuestion(title: (Node | string)[], text: string, options: string[], correct: number, onAnswer: (i: number) => void, seconds: number, key: string, note: string, flag?: string): HTMLElement[] {
   const clock = el('div', { className: 'clock' }, el('span', { className: 'secs', textContent: `⏱️ ${seconds} s` }), el('div', { className: 'timebar' }, el('span')));
   const nodes = [el('h2', {}, ...title),
+    ...(flag && FLAGS[flag] ? [el('img', { className: 'flag', src: FLAGS[flag], alt: 'A flag' })] : []),
     el('p', { textContent: text }),
     el('div', { className: 'row' }, ...options.map((o, i) => button(o, () => onAnswer(i)))),
     clock,
@@ -1195,7 +1221,7 @@ function renderQuiz(box: HTMLElement, s: GameState, who: HTMLElement): void {
   box.append(...timedQuestion([who, `: ${TRAVEL_WORDS[kind].promo} promotion — answer correctly and ${TRAVEL_WORDS[kind].verb} free to ${areaById.get(to)!.name}!`],
     question.text, question.options, question.correct, (i) => act({ type: 'answer', choice: i as 0 | 1 }), QUIZ_SECONDS,
     `answer-${s.round}-${currentPlayer(s).seat}-${question.text}-${currentPlayer(s).quizWrong}`,
-    `Wrong answers here so far: ${currentPlayer(s).quizWrong}. A wrong answer uses this turn.${forcedPayNote(s, kind, to)}`));
+    `Wrong answers here so far: ${currentPlayer(s).quizWrong}. A wrong answer uses this turn.${forcedPayNote(s, kind, to)}`, question.flag));
 }
 
 // Travel-turn challenge: one a/b question, 15 seconds. Time out = wrong answer.

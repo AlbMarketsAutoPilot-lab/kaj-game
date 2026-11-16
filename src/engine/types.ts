@@ -24,6 +24,9 @@ export interface SeatConfig {
   colour: string;
   // Robot seats only; default 'normal'.
   level?: RobotLevel;
+  // Questions already seen (step 2.1): the device's memory for human seats, so a new game goes
+  // on with the rotation. Default: none.
+  seen?: string[];
 }
 
 export interface GameConfig {
@@ -95,6 +98,9 @@ export interface Player {
   travel: Travel | null;
   // Wrong airline-quiz answers in the current area; back to 0 when the player leaves.
   quizWrong: number;
+  // Ids of the questions this player has been asked (step 2.1: airline quiz, citizenship test and
+  // challenges), oldest first. A question comes again only when its whole pool has been used up.
+  seen: string[];
   // A player may ask for citizenship once per game (never the Digital Nomad).
   askedCitizenship: boolean;
   // The areas this player's citizenship covers: one area, or every part of a big country.
@@ -204,6 +210,10 @@ export interface QuizQuestion {
   text: string;
   options: [string, string];
   correct: 0 | 1;
+  // The question's id in the rotation (step 2.1); none for the test maps' placeholder questions.
+  id?: string;
+  // A challenge flag question asked in the airline quiz: the flag to show.
+  flag?: string;
 }
 
 export interface PendingQuiz {
@@ -267,6 +277,9 @@ export type ChallengeType = 'flag' | 'bigger' | 'capital' | 'continent' | 'neigh
 export interface Challenge {
   id: string;
   type: ChallengeType;
+  // The country the question is about, as named in the maps' area lists (step 2.1: the airline
+  // quiz also asks the challenges about the destination's countries).
+  country: string;
   question: string;
   options: [string, string];
   correct: 0 | 1;

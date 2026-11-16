@@ -5,7 +5,8 @@ import type { GameState } from './types.ts';
 // Version 11: the 50-turn map (task M2). Version 12 (owner, M5): new rules for both games (the bus,
 // whole continents, Madagascar), so no older save is continued. Version 13 (owner, 2026-10-11): the
 // profile balance and the planning robots, for both games. Version 14 (owner, task 19): the car.
-export const SAVE_VERSION = 14;
+// Version 15 (2.0, step 2.1): each player's seen questions (the rotation); no older save is continued.
+export const SAVE_VERSION = 15;
 
 export function saveGame(state: GameState): string {
   return JSON.stringify({ version: SAVE_VERSION, state });
