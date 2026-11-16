@@ -33,6 +33,9 @@ Every task also adds its part to the test board, so there is **always a playable
   50-turn games: see `docs/engine.md` ("Profile balance and planning robots") and `docs/balance-lab.md`.
 - **100-turn map planned (L1, 2026-10-10):** proposal in `docs/map100.md`, waiting for the owner's answers. See section L.
 
+- **Version 2.0 (owner, 2026-11-16):** the 30- and 50-turn games are **unfrozen**; plan and order in
+  section "Version 2.0" below (status rows 2.1 … 2.12, one per step).
+
 ## Status table
 
 | # | Task | Effort | Sessions | Day | Status |
@@ -84,6 +87,18 @@ Every task also adds its part to the test board, so there is **always a playable
 | L4 | 100-turn map: facts (sort the 50-turn facts, about 580 new ones; owner checks about 5 days) | medium | 2 | standalone app | |
 | L5 | 100-turn map: screens (turn picker, small areas, 4 wonder drawings, guide), web and APK | medium | 2 | standalone app | |
 | L6 | 100-turn map: full test games and fixes | medium (high if a rule changes) | 2 | standalone app | |
+| 2.1 | Question rotation: no repeat until the pool is used up, kept on the device; bigger airline-quiz pool | medium | 1 | — | |
+| 2.2 | Flickering on slow tablets and Galaxy S25: measure, fix, owner's phone test | medium | 1 | — | |
+| 2.3 | More geography questions: tag every fact, ~250 new geography facts (owner checks), script-made questions | medium | 2 | — | |
+| 2.4 | New ship and plane routes on both maps, map check, stuck-state checker | **high** | 1 | — | |
+| 2.5 | Travel by profile (turns, prices, quiz = Backpacker turns, quiz popup), bus and car whole country | **high** | 2 | — | |
+| 2.6 | Citizenship from turn 1, Business buys 2nd/3rd, visa test | **high** | 2 | — | |
+| 2.7 | Balance tuning of all 2.0 rule changes (4 profiles, boredom, excitement) | **high** | 1 | — | |
+| 2.8 | Event cards as real geography news | medium | 1 | — | |
+| 2.9 | More wonders, history and curiosity for each, new design | medium | 2 | — | |
+| 2.10 | Passport with stamps, records on the device | medium | 1–2 | — | |
+| 2.11 | 100-turn map in this app (J1 plan high, J2 engine high, J3–J6 medium) | **high** / medium | ~10 | — | |
+| 2.12 | Full test games, release 2.0 (web on kaj.kritere.com and app) | medium | 1–2 | — | |
 
 ## The tasks
 
@@ -581,6 +596,147 @@ task 15 (the Play release) and task 16 (full-game tests) to the last days with n
 
 - The owner plays full games on a phone (2, 3 and 4 players, with robots).
 - Fix what they find. This day is also the buffer.
+
+## Version 2.0 (owner-approved plan, 2026-11-16)
+
+Owner (2026-11-16): this work is **version 2.0**; every step adds one: 2.1, 2.2 … 2.12 (the status rows),
+so each change can be tracked.
+
+Game design changes before web play on https://kaj.kritere.com. One task per session, in the order of the
+status rows (2.1 first). Each task: tests pass, web build works, docs updated, pull request (ask first).
+
+### Decisions taken (owner)
+
+- The **30- and 50-turn games are unfrozen** (2026-11-16).
+- The **100-turn game is part of 2.0**, with the same **4 profiles** (replaces "separate paid app" in
+  `KAJ-v1-scope.md` §10; `docs/profiles8.md` is not used).
+- The **passport screen** comes in 2.0 (was "Not in v1", scope §9).
+- **Balance rule:** no change goes in without an analysis of how it affects each profile (Backpacker,
+  Business, Luxury, Nomad), boredom and excitement, measured with the balance lab and planning robots
+  (`docs/balance-lab.md`) before and after, with fair/unfair results reported. The lab report gets two new
+  lines: **boredom** = share of turns blocked, lost, waiting or worth 0 points; **excitement** = lead changes
+  and how close the finish is.
+- **Saves:** every rule task raises the save version; the task says which older saves can't continue.
+- **Visa (owner's answer):** the visa stays **2 points**, paid **only after passing** the visa test.
+  A failed test costs nothing: no entry, the turn is used, the area is not visited.
+- **Big countries:** a citizenship keeps covering the **whole country** (also a start citizenship).
+- **Wonders:** big countries are **never** wonders (rulebook §3 kept).
+- **Luxury keeps the quiz** (rulebook §4 kept), so "anyone can always travel free" stays true for the
+  stuck-state checker.
+
+### Findings of the planning session
+
+- **Why questions repeat** (`src/engine/quiz.ts` `makeQuestion`, `engine.ts` `pickChallenge`): every
+  question is a new random draw from the full list, with no memory of what a player has seen, in the game
+  or between games; the airline quiz uses only the destination's 12 facts, and the same areas are
+  destinations every game. Measured (300 normal-robot games per map): the draw is not biased to the start of
+  a list (each of 12 facts 7–9%), but 6% of quiz questions repeat in one game, 3 tries at one airport repeat
+  a question 24% of the time, and across games everything repeats.
+- **Questions today:** 995 challenges (all geography, open data); facts 636 (30 turns) / 966 (50 turns),
+  with no type field. A keyword script puts at most about 45% as geography (an over-count).
+- **New routes, tested in memory:** small map 13 airports / 11 ports, big map 15 / 13, at most 2
+  destinations each; the one-citizenship check passes on both; two citizenships at once trap someone in
+  13 of 946 pairs (today 19) and 20 of 2,775 (today 18), mostly Iceland, UK & Ireland and Canada.
+  Madagascar: 2 planes (Gulf States, South Africa), no ship. No area has only one route.
+- **Flickering, likely cause (to be measured):** colour filters on every map area (`web/style.css`
+  182–211) and endless animations of filter and border width (`walk-glow` line 189, `glow-land` line 340)
+  make the phone redraw every filtered country every frame.
+
+### The tasks
+
+**2.1 (A1) Question rotation (medium, 1).** Each player draws from a shuffled pool without putting questions
+back; a question comes again only when the pool is used up. What a player has seen is kept on the device, so
+the next game goes on with the rotation. Airline-quiz pool: the destination's facts plus the challenge
+questions about the destination's countries. The citizenship test, visa test and challenges use the same
+rotation. Save version up.
+
+**2.2 (I) Flickering (medium, 1).** Measure with a slowed-down browser (paint and frame times), remove the
+real cause (if it is the glow around borders, remove it), then the owner's test on an old tablet and the
+Galaxy S25.
+
+**2.3 (A2) Geography questions (medium, 2).** Tag every fact with its type and count exactly; add 3 written
+geography facts per 50-turn area (rivers, mountains, deserts, climate; about 250, checked by the owner,
+reused by country on the 30-turn map) and script-made geography questions from open data. Target: at least
+half of what a player sees is geography. No other type is removed.
+
+**2.4 (D) Routes (high, 1).** All two-way; they replace today's airports and ports (the train stays).
+Area ids: Argentina = `southern-cone` (small) / `argentina` (big), Malay Islands = `maritime-asia`.
+- Small, ship: New Zealand–Chile; Argentina–South Africa; South Africa–Australia West; Alaska–Japan;
+  Canada East–Iceland; Iberia–Central America; Central America–Japan.
+- Small, plane: Alaska–USA West; Iceland–UK & Ireland; North Africa–Iberia; Japan–Korea;
+  Australia East–New Zealand; Australia East–Malay Islands; India–Malay Islands; India–Arabia.
+- Big, ship: New Zealand–Chile; Argentina–South Africa; South Africa–Australia West; Alaska–Japan;
+  Canada East–Iceland; Portugal–Central America; Central America–Japan; Brazil North–Nigeria.
+- Big, plane: Alaska–USA West; Iceland–UK & Ireland; Algeria–Spain; Japan–Korea; Australia East–New
+  Zealand; Australia East–Malay Islands; India–Malay Islands; India–Gulf States; Madagascar–Gulf States;
+  South Africa–Madagascar.
+Map check, stuck-state checker, businesses at the new airports and ports, map screens, guide.
+
+**2.5 (C+E) Travel by profile, bus and car (high, 2).** Replaces today's turns and prices (`docs/engine.md`):
+
+| Profile | Paid ticket | Travel turns when paid | With the quiz |
+|---|---|---|---|
+| Luxury | 3 | plane, ship, car 0 (no train, no bus) | 3 turns |
+| Business | 2 | plane, ship, car, train 1 | 3 turns |
+| Digital Nomad | 1 | plane, ship, car, bus, train 2; **+1 per travel turn** | 3 turns |
+| Backpacker | never pays | plane, ship, bus, train, hitchhiking 3 | quiz only (hitchhiking free, as today) |
+
+- **Quiz or pay is a strategy choice (owner):** before a Luxury, Business or Nomad player takes the quiz, a
+  popup says plainly what it costs: "The free quiz trip takes 3 turns. Paying takes 0 (Luxury) / 1
+  (Business) / 2 (Nomad): **you lose 3 / 2 / 1 extra turns** instead of points." The guide, the airport,
+  port and station menus and the profile cards say the same, so the choice between time and points is
+  part of the game.
+- **Robots and the new choice (to measure in this task):** robots must weigh the extra turns against the
+  ticket (the planner already counts turns, tickets and points). The lab reports, per profile and level,
+  how often robots pay and how often they take the quiz, before and after, with scores and win shares.
+- The Nomad's secret ship surprise (`nomadSurprise`) is removed.
+- **Bus** (Mongolia → Siberia or China West, Nomad and Backpacker) and **car** (Mexico → **USA East or
+  Canada West**): the whole country's points at once; its other parts then give **0** (replaces M5's +1).
+
+**2.6 (B) Citizenship and visa test (high, 2).** Replaces scope §9 "button in the area", tasks 14d/14f,
+Luxury's instant citizenship and Business's +6.
+- Every player except the Digital Nomad holds the citizenship of their **start area from turn 1**, with no
+  test (a big country: the whole country). The Nomad has none. Luxury and Business lose their citizenship
+  advantages.
+- **Business may buy a 2nd and a 3rd citizenship, 5 points each.** Proposal: bought in the area it stands
+  in, if nobody holds it; buying does not end the turn. Estimate: one citizenship earns about 1.3 points of
+  visas in a 30-turn game (1,400 visas × 2 / 2,200 citizenships, task 8), so 5 points spent is about −3.7
+  (too dear); **counted at the end like businesses** it is about +1.3 plus blocking (a small advantage).
+  Recommended: count it at the end; confirm with the lab.
+- **Visa test:** entering an area where another player has citizenship (bought ones too): read the area's
+  facts and answer 3 questions in the same turn (the citizenship test screens). **2 of 3 right:** pay the
+  2-point visa and enter; next turn move on. **Fewer:** nothing paid, no entry, the turn is used, the area is
+  not visited. Walking: the test comes before entering (refused: stay where you were). Plane or ship: the
+  test comes at boarding (fees are paid at boarding since task 11); refused: no trip, no ticket. Proposal:
+  the test is offered only with the 2 points in hand ("no money, no entry"). **Luxury never takes the test**,
+  only pays the visa.
+- Stuck-state checker with 3 citizenships from turn 1 (plus bought ones); robots; guide and help texts.
+
+**2.7 (balance) Balance tuning (high, 1).** All lab packages on both maps, 2 and 4 players, normal and planning
+robots; tune the numbers; report fair/unfair, boredom and excitement. Watch: Backpacker (much slower trips),
+Nomad (citizen areas from turn 1, none of its own), Luxury (faster ships).
+
+**2.8 (F) Breaking news (medium, 1).** Replace the personal event cards with short, all-ages geography news
+that is true every year, about the area (about 60 cards, same mix of effects; owner checks). Samples:
+"PERU — The Inca Trail closes every February for repairs. Walkers wait a day." (lose a turn);
+"INDIA — The monsoon arrives: four months of rain fill the rivers and flood the roads." (−1);
+"JAPAN — Cherry blossom season! Forecasters follow the 'sakura front' as it moves north." (+1).
+
+**2.9 (G) Wonders (medium, 2).** Proposal (none in a big country): 30-turn map +5: Parthenon (Greece), Eiffel
+Tower (France), Hagia Sophia (Turkey), Petra (Middle East), Angkor Wat (Indochina). 50-turn map +5: Eiffel
+Tower (France), Hagia Sophia (Turkey), Easter Island (Chile), Victoria Falls (Zambezi), Stonehenge
+(UK & Ireland). For every wonder, old and new: a short history and a short curiosity, shown with a proper
+design. Balance check (more wonder points and tours).
+
+**2.10 (H) Passport and records (medium, 1–2).** Each human player's passport at the end of the game, a stamp
+for every area visited. Records on this device only: the top 10 counts of games won by a human ("Your win
+country count ranks 3rd"). Proposal: count areas, one list per game length.
+
+**2.11 (J) 100-turn map (about 10 sessions + about 5 days of fact checking).** J1 (high): rework
+`docs/map100.md` to about 100–125 areas, 4 profiles, the new route style; ask its 8 open questions. J2
+engine (high, 2), J3 shapes, J4 facts (2), J5 screens (2), J6 test games (2), medium.
+
+**2.12 (release) Release (medium, 1–2).** Full test games (2–4 players, all lengths), web at kaj.kritere.com and app.
 
 ## Browser version or Android only?
 
