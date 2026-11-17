@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { CHALLENGES } from '../src/challenges/challenges.ts';
 import { apply, createGame } from '../src/engine/engine.ts';
-import { areaChallenges, drawFresh, factId, makeExam, makeQuestion } from '../src/engine/quiz.ts';
+import { AIRLINE_CHALLENGE_ONE_IN, areaChallenges, drawFresh, factId, makeExam, makeQuestion } from '../src/engine/quiz.ts';
 import { SAVE_VERSION, loadGame, saveGame } from '../src/engine/save.ts';
 import type { Player } from '../src/engine/types.ts';
 import { map30 } from '../src/maps/map30.ts';
@@ -79,21 +79,27 @@ test('every country on both maps has its challenges (except the 4 left out of th
   }
 });
 
-test('airline quiz pool: the destination facts plus the challenges about its countries, in rotation', () => {
+test('airline quiz (step 2.3): about 1 question in 10 is a challenge, the rest facts, each in rotation', () => {
   const area = map30.areas.find((a) => a.id === 'iberia')!;
-  const expected = new Set([...map30.facts!.iberia.map(factId), ...areaChallenges(area).map((c) => c.id)]);
-  assert.ok(areaChallenges(area).length > 0);
+  const facts = map30.facts!.iberia.map(factId);
+  const challenges = new Set(areaChallenges(area).map((c) => c.id));
+  assert.ok(challenges.size > 0);
+  assert.equal(AIRLINE_CHALLENGE_ONE_IN, 10);
   const me = { seen: [] as string[] } as Player;
   let seed = 1;
-  const got: string[] = [];
-  for (let k = 0; k < expected.size; k++) {
+  const asked: string[] = [];
+  for (let k = 0; k < 600; k++) {
     const [q, next] = makeQuestion(map30, 'iberia', seed, me);
     seed = next;
-    got.push(q.id!);
+    asked.push(q.id!);
     if (q.id!.startsWith('flag-')) assert.ok(q.flag, 'a flag question shows its flag');
   }
-  assert.deepEqual(new Set(got), expected, 'the whole pool, each question once');
-  assert.equal(me.seen.length, expected.size);
+  const fromChallenges = asked.filter((id) => challenges.has(id));
+  const fromFacts = asked.filter((id) => !challenges.has(id));
+  assert.ok(fromFacts.every((id) => facts.includes(id)));
+  assert.ok(fromChallenges.length >= 35 && fromChallenges.length <= 90, `challenges asked: ${fromChallenges.length} of 600`);
+  assert.equal(new Set(fromFacts.slice(0, facts.length)).size, facts.length, 'every fact once before any comes again');
+  assert.equal(new Set(fromChallenges.slice(0, challenges.size)).size, challenges.size, 'every challenge once before any comes again');
 });
 
 test('citizenship test: the 3 questions come from the rotation and are among the 6 study lines', () => {
@@ -123,12 +129,14 @@ test('challenges and the quiz share one rotation per player, carried into the ne
   // Japan's flag was seen (in a challenge or a game before): the airline quiz to Japan asks every
   // other question of its pool first.
   const me = s.players[0];
-  const size = map30.facts!.japan.length + areaChallenges(map30.areas.find((a) => a.id === 'japan')!).length;
+  const others = areaChallenges(map30.areas.find((a) => a.id === 'japan')!).length - 1;
   let seed = 8;
-  for (let k = 0; k < size - 1; k++) {
+  let challengesAsked = 0;
+  while (challengesAsked < others) {
     const [q, next] = makeQuestion(map30, 'japan', seed, me);
     seed = next;
     assert.notEqual(q.id, 'flag-jpn');
+    if (CHALLENGES.some((c) => c.id === q.id)) challengesAsked++;
   }
 });
 
