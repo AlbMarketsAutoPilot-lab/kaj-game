@@ -128,6 +128,9 @@ export interface Player {
   arrivedRound: number;
   // The round of a hitchhike that failed: no second try in the same turn (task 19).
   hitchFailedRound: number | null;
+  // The area the player walked from on their last move; null after a trip, going home or the start
+  // (step 2.4). Only the robots use it: they don't walk straight back for nothing.
+  cameFrom?: string | null;
 }
 
 // A special reward given by the last move (owner, M5), so the screens can show it.

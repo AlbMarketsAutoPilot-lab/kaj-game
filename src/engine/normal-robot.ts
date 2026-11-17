@@ -54,9 +54,10 @@ const TRIP_EXTRA = 0.99;
 const BUY_ORDER: BusinessKind[] = ['tours', 'airline', 'ferry', 'train', 'bus', 'car'];
 
 export function robotAction(state: GameState, map: GameMap, seed: number, level?: RobotLevel): [action: Action, nextSeed: number] {
-  const actions = legalActions(state, map);
-  if (actions.length === 0) throw new Error('No legal actions: the game is over');
+  const all = legalActions(state, map);
+  if (all.length === 0) throw new Error('No legal actions: the game is over');
   const me = currentPlayer(state);
+  const actions = state.offer ? all : noWalkBack(state, map, me, all);
   // During a sale offer the buyer answers.
   const actor = state.offer ? state.players[state.offer.to] : me;
   const settings = levelSettings(level ?? actor.level ?? 'normal', state.totalRounds);
@@ -66,6 +67,20 @@ export function robotAction(state: GameState, map: GameMap, seed: number, level?
   const isMove = action.type === 'walk' || action.type === 'board' || action.type === 'quiz' || action.type === 'hitchhike';
   const planned = isMove && !state.offer && settings.depth > 1 ? planMove(state, map, me, actions, settings.depth, settings.reserve, settings.accuracy) : null;
   return [planned ?? action, rnd.seed];
+}
+
+// Step 2.4 (owner-approved): a robot doesn't walk straight back to the area it just walked from,
+// unless that gives points or it has no other move. With depth-2 plans, robots could swing back and
+// forth beside areas worth nothing yet (a big country's parts before the last one).
+export function noWalkBack(state: GameState, map: GameMap, me: Player, actions: Action[]): Action[] {
+  const back = me.cameFrom;
+  if (!back) return actions;
+  const isBack = (a: Action) => a.type === 'walk' && a.to === back;
+  if (!actions.some(isBack)) return actions;
+  if (arrivalValue(map, me, back) - feeTotal(entryFees(state, me, me.area, back)) > 0) return actions;
+  const moves = ['walk', 'board', 'quiz', 'hitchhike'];
+  if (!actions.some((a) => moves.includes(a.type) && !isBack(a))) return actions;
+  return actions.filter((a) => !isBack(a));
 }
 
 class Rand {

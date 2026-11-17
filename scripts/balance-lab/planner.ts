@@ -7,7 +7,7 @@
 // the best plan, by discounted points. Other players are not predicted (only the first move checks them).
 import { canPayAfterQuiz, continentReward, currentPlayer, destinations, entryFees, feeTotal, legalActions } from '../../src/engine/engine.ts';
 import { bigCountryPoints, CONTINENT_BONUS, POINTS_NEW_CONTINENT, QUIZ_TRIES, ROUTE_KINDS, ticketPrice, TRAVEL_TURNS } from '../../src/engine/constants.ts';
-import { ROBOT_LEVELS, robotAction } from '../../src/engine/normal-robot.ts';
+import { noWalkBack, ROBOT_LEVELS, robotAction } from '../../src/engine/normal-robot.ts';
 import { areaById } from '../../src/engine/map.ts';
 import type { Action, GameMap, GameState, Player, RobotLevel, RouteKind } from '../../src/engine/types.ts';
 
@@ -109,7 +109,8 @@ export function planAction(state: GameState, map: GameMap, seed: number, level: 
   if (!isMove || level.depth <= 1) return [base, next];
   const me = currentPlayer(state);
   const settings = ROBOT_LEVELS[level.accuracy];
-  const legal = legalActions(state, map);
+  // Step 2.4: no walking straight back for nothing, as the game's robot.
+  const legal = noWalkBack(state, map, me, legalActions(state, map));
   const s: Sim = {
     area: me.area!, visited: new Set(me.visitedAreas), conts: new Set(me.visitedContinents), bigs: new Set(me.bigCountries),
     full: new Set(me.fullContinents), points: me.points,

@@ -6,7 +6,7 @@ import { validateMap, walkingGroups } from '../src/engine/map.ts';
 import { robotAction, robotRound } from '../src/engine/normal-robot.ts';
 import { randomRobotAction } from '../src/engine/robot.ts';
 import { loadGame, saveGame } from '../src/engine/save.ts';
-import { stuckProblems, travelGroups } from '../src/engine/stuck-check.ts';
+import { stuckProblems, travelGroups, visaUnits } from '../src/engine/stuck-check.ts';
 import type { GameState, RobotLevel } from '../src/engine/types.ts';
 import { mapById, mapFor } from '../src/maps/index.ts';
 import { map30 } from '../src/maps/map30.ts';
@@ -37,25 +37,53 @@ test('50-turn map: valid, two-way links, no duplicates, nothing unreachable, nob
   assert.deepEqual(stuckProblems(map50), []);
 });
 
-test('50-turn map: 84 areas, 11 wonders, 13 airports, 15 ports, 23 connections, 150 walking links', () => {
+test('50-turn map: 84 areas, 11 wonders, 15 airports, 13 ports, 18 connections, 150 walking links', () => {
   assert.equal(areas.length, 84);
   assert.deepEqual(areas.filter((a) => a.wonder).map((a) => a.id).sort(), [
     'cambodia-laos-vietnam', 'egypt', 'greece', 'india', 'italy', 'japan', 'jordan', 'mexico', 'new-zealand', 'peru', 'tanzania',
   ]);
-  assert.equal(sites('airport').size, 13);
-  assert.equal(sites('port').size, 15);
-  assert.equal(routes.filter((r) => r.kind === 'airport' || r.kind === 'port').length, 23);
+  assert.equal(sites('airport').size, 15);
+  assert.equal(sites('port').size, 13);
+  assert.equal(routes.filter((r) => r.kind === 'airport' || r.kind === 'port').length, 18);
+  // Step 2.4: every plane and ship route two-way, at most 2 destinations each.
+  for (const a of areas) for (const kind of ['airport', 'port']) {
+    assert.ok(routes.filter((r) => r.kind === kind && (r.a === a.id || r.b === a.id)).length <= 2, `${a.id} ${kind}`);
+  }
+  assert.ok(routes.filter((r) => r.kind === 'airport' || r.kind === 'port').every((r) => !r.oneWay));
   assert.equal(areas.reduce((n, a) => n + a.neighbours.length, 0) / 2, 150);
   for (const c of START_CONTINENTS) assert.ok(areas.some((a) => a.continent === c), c);
 });
 
-test('owner fixes: the ship to UK & Ireland leaves from Portugal (M2); Madagascar by ship only, to 3 places (M5); no Spain ↔ Morocco', () => {
-  assert.ok(routes.some((r) => r.kind === 'port' && r.a === 'portugal' && r.b === 'uk-ireland'));
+test('owner fixes: Portugal sails to Central America (step 2.4, was UK & Ireland in M2); Madagascar by plane only, to 2 places (step 2.4); no Spain ↔ Morocco', () => {
+  assert.ok(routes.some((r) => r.kind === 'port' && r.a === 'portugal' && r.b === 'central-america'));
   assert.ok(!sites('port').has('spain'));
   assert.deepEqual(areas.find((a) => a.id === 'madagascar')!.neighbours, []);
-  assert.deepEqual(destinations(map50, 'madagascar', 'port', 'nomad').sort(), ['south-africa', 'tanzania', 'zambezi']);
+  assert.ok(!sites('port').has('madagascar'));
+  assert.deepEqual(destinations(map50, 'madagascar', 'airport', 'nomad').sort(), ['gulf-states', 'south-africa']);
   assert.equal(areas.find((a) => a.id === 'tanzania')!.name, 'Tanzania');
   assert.ok(!areas.find((a) => a.id === 'spain')!.neighbours.includes('morocco'));
+});
+
+// Step 2.4 (owner-approved): the stuck-state checker needs exactly these 7 plane and ship routes.
+test('50-turn map: the stuck-state checker needs exactly 7 routes', () => {
+  const kept = routes.filter((r) => r.kind === 'airport' || r.kind === 'port');
+  const needed = kept.filter((r) => stuckProblems({ ...map50, routes: kept.filter((x) => x !== r) }).length > 0).map((r) => `${r.a} ${r.b}`);
+  assert.deepEqual(needed.sort(), ['australia-east new-zealand', 'canada-east iceland', 'iceland uk-ireland', 'madagascar gulf-states', 'new-zealand chile', 'portugal central-america', 'south-africa madagascar']);
+});
+
+// Step 2.4: 20 pairs (18 with the old routes). Mostly Iceland, UK & Ireland and Canada.
+test('50-turn map: two visa areas at once trap someone in at most 20 of 2,775 pairs', () => {
+  const units = visaUnits(map50);
+  let pairs = 0;
+  let traps = 0;
+  for (let i = 0; i < units.length; i++) {
+    for (let j = i + 1; j < units.length; j++) {
+      pairs++;
+      if (travelGroups(map50, new Set([...units[i], ...units[j]])).length > 1) traps++;
+    }
+  }
+  assert.equal(pairs, 2775);
+  assert.ok(traps <= 20, `${traps} trapping pairs`);
 });
 
 test('every 50-turn area lies inside one 30-turn area, and every country of that area is used once', () => {
@@ -73,9 +101,9 @@ test('the same big countries in the same parts; never wonders; parts linked', ()
   assert.deepEqual(names, ['Australia', 'Brazil', 'Canada', 'China', 'Russia', 'United States']);
   for (const c of names) {
     assert.deepEqual(parts(map50, c), parts(map30, c), c);
-    // Alaska joins the rest of the USA through Canada or by its ferry to USA West (as on the 30-turn map).
+    // Alaska joins the rest of the USA through Canada or by its plane to USA West (step 2.4; a ferry before).
     const own = parts(map50, c);
-    const ships = routes.filter((r) => r.kind === 'port' && own.includes(r.a) && own.includes(r.b));
+    const ships = routes.filter((r) => (r.kind === 'port' || r.kind === 'airport') && own.includes(r.a) && own.includes(r.b));
     const linked = (id: string) => ships.flatMap((r) => (r.a === id ? [r.b] : r.b === id ? [r.a] : []));
     const inner = { id: c, areas: areas.filter((a) => a.bigCountry === c).map((a) => ({ ...a, neighbours: [...a.neighbours.filter((n) => own.includes(n)), ...linked(a.id)] })) };
     assert.equal(walkingGroups(inner).length, 1, c);
@@ -83,9 +111,9 @@ test('the same big countries in the same parts; never wonders; parts linked', ()
   assert.ok(!areas.some((a) => a.bigCountry && a.wonder));
 });
 
-test('businesses: 11 guided tours, 13 airlines, 15 ferries, 3 train booths, 1 bus booth, 1 car rental', () => {
+test('businesses: 11 guided tours, 15 airlines, 13 ferries, 3 train booths, 1 bus booth, 1 car rental', () => {
   const count = (kind: string) => mapBusinesses(map50).filter((b) => b.kind === kind).length;
-  assert.deepEqual(['tours', 'airline', 'ferry', 'train', 'bus', 'car'].map(count), [11, 13, 15, 3, 1, 1]);
+  assert.deepEqual(['tours', 'airline', 'ferry', 'train', 'bus', 'car'].map(count), [11, 15, 13, 3, 1, 1]);
 });
 
 test('train: France ↔ Russia West or Turkey (not the Caucasus); Luxury can\'t take it', () => {

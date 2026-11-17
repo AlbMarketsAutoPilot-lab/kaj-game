@@ -118,7 +118,7 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
     const buy = button(`✈️ Buy the airline (${BUSINESS_PRICE.airline} points)`, () => { play('coins'); gain(-BUSINESS_PRICE.airline); done(); });
     buy.className = 'primary guide-glow';
     return el('div', {}, airportView(false),
-      el('p', { className: 'small', textContent: '🇬🇧 UK & Ireland: its airport flies to Arabia' }),
+      el('p', { className: 'small', textContent: '🇬🇧 UK & Ireland: its airport flies to Iceland' }),
       el('div', { className: 'row' }, buy));
   };
 
@@ -160,7 +160,7 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
       tries++;
       box.closest('.guide')?.classList.add('quiz-on'); // only the question now (owner, M5)
       box.replaceChildren(el('section', { className: 'card turn guide-quiz' },
-        ...kit.question('✈️ Airline promotion — answer correctly and fly free to Arabia!',
+        ...kit.question('✈️ Airline promotion — answer correctly and fly free to Iceland!',
           'What is the capital of France?', ['Rome', 'Paris'], 1,
           (i) => {
             kit.stopClock();

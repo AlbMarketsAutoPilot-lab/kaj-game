@@ -90,7 +90,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | 2.1 | Question rotation: no repeat until the pool is used up, kept on the device; bigger airline-quiz pool | medium | 1 | — | ✅ done (one memory per device, owner's choice A; saves v15; lab before/after in `docs/balance-lab.md`) |
 | 2.2 | Flickering on slow tablets and Galaxy S25: measure, fix, owner's phone test | medium | 1 | — | ✅ done (walk glow and guide map glow still, no pulse; small drawings keep moving, owner); the owner's phone test runs over the coming months |
 | 2.3 | More geography questions: tag every fact, ~250 new geography facts (owner checks), script-made questions | medium | 2 | — | ✅ done (owner-approved): every fact tagged, airline quiz 1 challenge in 10, 168 test-only geography facts, travel challenges geography 1 in 3; 37% / 32–33% geography (was 48–50%); script-made questions not needed; save stays 15 |
-| 2.4 | New ship and plane routes on both maps, map check, stuck-state checker | **high** | 1 | — | |
+| 2.4 | New ship and plane routes on both maps, map check, stuck-state checker | **high** | 1 | — | ✅ done (owner-approved): the owner's routes on both maps (30 turns 13 airports / 11 ports / 15 connections, 50 turns 15 / 13 / 18), robots no longer walk straight back for nothing, Pacific route lines from both ends, guide says Iceland; fair 13 → 10 of 16 (30) and 12 → 14 of 16 (50), tuning in 2.7; saves v16 |
 | 2.5 | Travel by profile (turns, prices, quiz = Backpacker turns, quiz popup), bus and car whole country | **high** | 2 | — | |
 | 2.6 | Citizenship from turn 1, Business buys 2nd/3rd, visa test | **high** | 2 | — | |
 | 2.7 | Balance tuning of all 2.0 rule changes (4 profiles, boredom, excitement) | **high** | 1 | — | |
@@ -688,6 +688,12 @@ Area ids: Argentina = `southern-cone` (small) / `argentina` (big), Malay Islands
   Zealand; Australia East–Malay Islands; India–Malay Islands; India–Gulf States; Madagascar–Gulf States;
   South Africa–Madagascar.
 Map check, stuck-state checker, businesses at the new airports and ports, map screens, guide.
+- **Done (2026-11-17, owner-approved):** rules and numbers in `docs/engine.md` ("New plane and ship routes"). Checked
+  numbers: today 8 / 9 / 13 and 13 / 15 / 23; the planning session's trapped pairs confirmed (13 of 946, 20 of 2,775;
+  19 and 18 before). Its "no area has only one route" holds per walking group (each has 2 or more routes out), not per
+  area (9 and 12 areas have one). Found on the way: robots planning 2 moves swung back and forth beside areas worth
+  nothing yet (USA West ↔ Canada Central); owner's choice B: they no longer walk straight back for nothing
+  (`Player.cameFrom`). Watch in 2.7: the Nomad with 4 players and Luxury with planning robots on the 30-turn map.
 
 **2.5 (C+E) Travel by profile, bus and car (high, 2).** Replaces today's turns and prices (`docs/engine.md`):
 

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { apply, createGame, currentPlayer, legalActions } from '../src/engine/engine.ts';
-import { robotAction, ROBOT_LEVELS, EASY_ACCURACY_LONG_GAME } from '../src/engine/normal-robot.ts';
+import { noWalkBack, robotAction, ROBOT_LEVELS, EASY_ACCURACY_LONG_GAME } from '../src/engine/normal-robot.ts';
 import { loadGame, saveGame } from '../src/engine/save.ts';
 import type { Action, GameState, RobotLevel } from '../src/engine/types.ts';
 import { map30 } from '../src/maps/map30.ts';
@@ -184,4 +184,34 @@ for (const level of LEVELS) {
 test('levels: planning depth and the easy robot in the 50-turn game', () => {
   assert.deepEqual([ROBOT_LEVELS.easy.depth, ROBOT_LEVELS.normal.depth, ROBOT_LEVELS.hard.depth], [1, 2, 3]);
   assert.equal(EASY_ACCURACY_LONG_GAME, 0.7);
+});
+
+// Step 2.4 (owner-approved): robots swung back and forth beside areas worth nothing yet (USA West ↔
+// Canada Central). The engine remembers where a player walked from; a robot doesn't walk straight back
+// unless that gives points or it has no other move.
+test('the engine remembers the area a player walked from; a trip clears it', () => {
+  let s = startedGame(['iberia', 'egypt'], 1, map30, ['business', 'nomad']);
+  const me = () => s.players.find((p) => p.home === 'iberia')!;
+  assert.equal(me().cameFrom, null);
+  s = apply(s, map30, { type: 'walk', to: 'france' });
+  assert.equal(me().cameFrom, 'iberia');
+  s = startedGame(['iberia', 'egypt'], 1, map30, ['business', 'nomad']);
+  s = apply(s, map30, { type: 'board', kind: 'airport', to: 'north-africa' }); // Business: lands at once
+  assert.equal(me().area, 'north-africa');
+  assert.equal(me().cameFrom, null);
+});
+
+test('robots don\'t walk straight back for nothing', () => {
+  const s = startedGame(['usa-west', 'egypt'], 1, map30, ['luxury', 'nomad']);
+  const me = s.players.find((p) => p.home === 'usa-west')!;
+  me.cameFrom = 'canada-central';
+  const walks = (list: Action[]) => list.filter((a) => a.type === 'walk').map((a) => (a as { to: string }).to);
+  // Canada Central not visited yet: a new part is worth something, so going there stays allowed.
+  assert.ok(walks(noWalkBack(s, map30, me, legalActions(s, map30))).includes('canada-central'));
+  // Visited: worth nothing, so the robot doesn't go straight back (it has other moves).
+  me.visitedAreas.push('canada-central');
+  assert.ok(!walks(noWalkBack(s, map30, me, legalActions(s, map30))).includes('canada-central'));
+  // The only move: kept.
+  const only: Action[] = [{ type: 'walk', to: 'canada-central' }];
+  assert.deepEqual(noWalkBack(s, map30, me, only), only);
 });

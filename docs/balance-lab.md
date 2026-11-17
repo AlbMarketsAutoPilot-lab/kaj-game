@@ -620,3 +620,39 @@ With 400 games per line a win share is accurate to about ±2–4 points.
 | 50 turns, 4 players | planning (plans 4) | 38% ❌ (76.9) | 16% ❌ (71.7) | 20% ✅ (72.5) | 26% ✅ (74.8) | 29% | 6.3 lead changes, 39% won by ≤3 | 12/16 |
 
 **12 of 16** profile results inside the target. (Wins %, with the average final score in brackets.)
+
+## Robot variant "2.4-AFTER-30": after step 2.4 (new plane and ship routes), 30 turns
+
+| Game | A | B | A wins | B wins |
+|---|---|---|---|---|
+| 30 turns | easy | normal, plans 2 moves | 28% | 73% |
+| 30 turns | normal, plans 2 moves | hard, plans 3 moves | 33% | 67% |
+
+## Package "2.4-AFTER-30": after step 2.4 (new plane and ship routes), 30 turns
+
+| Game | Robots | Backpacker | Business | Luxury | Nomad | Boredom | Excitement | Fair? |
+|---|---|---|---|---|---|---|---|---|
+| 30 turns, 2 players | normal (plans 2) | 46% ✅ (49.4) | 51% ✅ (49.6) | 52% ✅ (49.9) | 50% ✅ (47.9) | 34% | 2.6 lead changes, 25% won by ≤3 | |
+| 30 turns, 4 players | normal (plans 2) | 26% ✅ (49.2) | 36% ❌ (49.8) | 25% ✅ (47.8) | 13% ❌ (45.8) | 35% | 4.4 lead changes, 42% won by ≤3 | |
+| 30 turns, 2 players | planning (plans 4) | 38% ❌ (50.9) | 54% ✅ (50.7) | 66% ❌ (53.0) | 40% ✅ (49.8) | 33% | 2.6 lead changes, 27% won by ≤3 | |
+| 30 turns, 4 players | planning (plans 4) | 20% ✅ (50.2) | 30% ✅ (50.4) | 34% ❌ (51.2) | 16% ❌ (47.6) | 34% | 4.7 lead changes, 45% won by ≤3 | 10/16 |
+
+**10 of 16** profile results inside the target. (Wins %, with the average final score in brackets.)
+
+## Robot variant "2.4-AFTER-50": after step 2.4 (new plane and ship routes), 50 turns
+
+| Game | A | B | A wins | B wins |
+|---|---|---|---|---|
+| 50 turns | easy | normal, plans 2 moves | 35% | 65% |
+| 50 turns | normal, plans 2 moves | hard, plans 3 moves | 26% | 74% |
+
+## Package "2.4-AFTER-50": after step 2.4 (new plane and ship routes), 50 turns
+
+| Game | Robots | Backpacker | Business | Luxury | Nomad | Boredom | Excitement | Fair? |
+|---|---|---|---|---|---|---|---|---|
+| 50 turns, 4 players | normal (plans 2) | 29% ✅ (71.1) | 27% ✅ (69.5) | 26% ✅ (67.4) | 18% ❌ (68.8) | 28% | 5.6 lead changes, 35% won by ≤3 | |
+| 50 turns, 2 players | normal (plans 2) | 52% ✅ (72.6) | 56% ✅ (71.3) | 40% ✅ (68.6) | 52% ✅ (71.7) | 27% | 3.3 lead changes, 24% won by ≤3 | |
+| 50 turns, 2 players | planning (plans 4) | 45% ✅ (78.5) | 60% ✅ (77.2) | 52% ✅ (75.3) | 42% ✅ (75.5) | 28% | 3.2 lead changes, 26% won by ≤3 | |
+| 50 turns, 4 players | planning (plans 4) | 33% ❌ (74.8) | 23% ✅ (72.2) | 23% ✅ (71.7) | 21% ✅ (72.2) | 27% | 5.6 lead changes, 41% won by ≤3 | 14/16 |
+
+**14 of 16** profile results inside the target. (Wins %, with the average final score in brackets.)

@@ -137,4 +137,7 @@ export const PACKAGES: Package[] = [
   // Step 2.3, final (owner): travel challenges geography 1 in 3. Before = 2.3-AFTER.
   { name: '2.3-FINAL-30', turns: [30], drivers: ['N2', 'P4'], ladder: [['E', 'N2'], ['N2', 'H3']], about: 'step 2.3 final (also travel challenges geography 1 in 3), 30 turns', patches: [] },
   { name: '2.3-FINAL-50', turns: [50], drivers: ['N2', 'P4'], ladder: [['E', 'N2'], ['N2', 'H3']], about: 'step 2.3 final (also travel challenges geography 1 in 3), 50 turns', patches: [] },
+  // Step 2.4: new plane and ship routes on both maps (owner's lists). Before = 2.3-FINAL.
+  { name: '2.4-AFTER-30', turns: [30], drivers: ['N2', 'P4'], ladder: [['E', 'N2'], ['N2', 'H3']], about: 'after step 2.4 (new plane and ship routes), 30 turns', patches: [] },
+  { name: '2.4-AFTER-50', turns: [50], drivers: ['N2', 'P4'], ladder: [['E', 'N2'], ['N2', 'H3']], about: 'after step 2.4 (new plane and ship routes), 50 turns', patches: [] },
 ];

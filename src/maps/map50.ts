@@ -6,7 +6,7 @@ import { GEO_EXAM_50 } from '../facts/geo-exam.ts';
 import { map30 } from './map30.ts';
 
 // The 50-turn map (task M2, from the owner-approved list in docs/map50.md): 84 areas, 11 wonders,
-// 13 airports and 15 ports (23 connections since M5), the train and the bus. Every area lies inside one
+// 15 airports and 13 ports (18 connections since step 2.4), the train and the bus. Every area lies inside one
 // area of the 30-turn map (`inside`), whose continent it keeps. An area that is the same place as
 // on the 30-turn map keeps its id, so its place cards and wonder drawing still work.
 // Each walking link is written once in BORDERS below (owner-approved in M2); neighbours are built from it.
@@ -140,7 +140,7 @@ const AREAS: AreaInfo[] = [
 
 // Walking links (owner-approved, M2): real land borders and the Channel Tunnel (France ↔ UK & Ireland,
 // as on the 30-turn map). No Spain ↔ Morocco (owner). Owner (M5): no walk to Madagascar & Islands
-// (the M2 sea crossing to Zambezi is gone); it is reached by ship only.
+// (the M2 sea crossing to Zambezi is gone); it is reached by plane only (step 2.4).
 const BORDERS: [string, string][] = [
   // Europe
   ['spain', 'portugal'], ['spain', 'france'], ['france', 'benelux'], ['france', 'germany'], ['france', 'alps'],
@@ -191,34 +191,31 @@ const BORDERS: [string, string][] = [
   ['australia-west', 'australia-east'],
 ];
 
-// Airports and ports (owner-approved, M1): the 13 connections of the 30-turn map on the matching
-// part, plus 8 new ones. Owner (M2): the ship to UK & Ireland leaves from Portugal (not Spain), so
-// a citizenship of Spain can't trap Portugal.
+// Airports and ports (version 2.0, step 2.4, owner-approved 2026-11-17): every route two-way, at most
+// 2 destinations each; they replace the routes of M1, M2 and M5 (the train, bus and car stay).
+// Portugal's ship to Central America keeps a citizenship of Spain from trapping Portugal; Madagascar
+// (no walking link) flies to the Gulf States and South Africa. The stuck-state checker needs 7 of them.
 const ROUTES: Route[] = [
-  { kind: 'port', a: 'portugal', b: 'uk-ireland' },
-  { kind: 'port', a: 'uk-ireland', b: 'iceland' },
-  { kind: 'port', a: 'iceland', b: 'canada-east' },
-  { kind: 'port', a: 'japan', b: 'usa-west' },
-  { kind: 'port', a: 'australia-east', b: 'new-zealand' },
-  { kind: 'port', a: 'usa-west', b: 'alaska' },
-  { kind: 'port', a: 'madagascar', b: 'tanzania' },
-  // Owner (M5): Madagascar's port has 3 destinations, so a citizenship of Tanzania can't trap it.
-  { kind: 'port', a: 'madagascar', b: 'zambezi' },
-  { kind: 'port', a: 'madagascar', b: 'south-africa' },
-  { kind: 'port', a: 'west-coast', b: 'brazil-north' },
-  { kind: 'airport', a: 'gulf-states', b: 'australia-west' },
-  { kind: 'airport', a: 'australia-west', b: 'maritime-asia' },
-  { kind: 'airport', a: 'maritime-asia', b: 'japan' },
-  { kind: 'airport', a: 'japan', b: 'new-zealand' },
-  { kind: 'airport', a: 'new-zealand', b: 'chile' },
-  { kind: 'airport', a: 'south-africa', b: 'chile' },
-  { kind: 'airport', a: 'uk-ireland', b: 'gulf-states' },
-  { kind: 'airport', a: 'uk-ireland', b: 'usa-east' },
-  { kind: 'airport', a: 'usa-east', b: 'brazil-south' },
-  { kind: 'airport', a: 'brazil-south', b: 'nigeria' },
-  { kind: 'airport', a: 'india', b: 'gulf-states' },
+  // Ships
+  { kind: 'port', a: 'new-zealand', b: 'chile' },
+  { kind: 'port', a: 'argentina', b: 'south-africa' },
+  { kind: 'port', a: 'south-africa', b: 'australia-west' },
+  { kind: 'port', a: 'alaska', b: 'japan' },
+  { kind: 'port', a: 'canada-east', b: 'iceland' },
+  { kind: 'port', a: 'portugal', b: 'central-america' },
+  { kind: 'port', a: 'central-america', b: 'japan' },
+  { kind: 'port', a: 'brazil-north', b: 'nigeria' },
+  // Planes
+  { kind: 'airport', a: 'alaska', b: 'usa-west' },
+  { kind: 'airport', a: 'iceland', b: 'uk-ireland' },
+  { kind: 'airport', a: 'algeria', b: 'spain' },
+  { kind: 'airport', a: 'japan', b: 'korea' },
+  { kind: 'airport', a: 'australia-east', b: 'new-zealand' },
+  { kind: 'airport', a: 'australia-east', b: 'maritime-asia' },
   { kind: 'airport', a: 'india', b: 'maritime-asia' },
-  { kind: 'airport', a: 'india', b: 'kenya-uganda' },
+  { kind: 'airport', a: 'india', b: 'gulf-states' },
+  { kind: 'airport', a: 'madagascar', b: 'gulf-states' },
+  { kind: 'airport', a: 'south-africa', b: 'madagascar' },
   // The train (owner, M1): France ↔ Russia West and France ↔ Turkey; the Caucasus has no train.
   { kind: 'station', a: 'france', b: 'russia-west' },
   { kind: 'station', a: 'france', b: 'turkey' },
