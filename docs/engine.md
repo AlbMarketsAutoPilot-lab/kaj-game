@@ -715,13 +715,16 @@ the same rules on both maps, real-life rules, no caps; the numbers decide. Befor
   kept in `GameMap.examFacts`: asked and read in the citizenship test, **never in the airline quiz**. The
   30-turn map takes at most 3 per area: the 1st fact of each part in map order, then the 2nd
   (`GEO_EXAM_30_PICKS`). This also makes each area's test rotation 2–3 questions longer.
-- **After (200 games per line):** all questions asked 43–45% geography (30 turns), 40–41% (50 turns);
-  the citizenship test 38–39% / 29–35% (was 23–27%), the airline quiz 32–37%. Travel challenges are not
-  changed; they are two-thirds geography and keep the 30-turn map a little above 40%.
-- **Balance (`docs/balance-lab.md`, packages 2.1-AFTER = before, 2.3-AFTER = after, 400 games per line):**
-  robots answer at a fixed rate whatever the question, so only random differences: fair results 16 → 14 of
-  16 (30 turns) and 10 → 11 of 16 (50 turns), average scores within about 1 point; boredom 32–36% / 27–29%
-  and lead changes about the same.
+- **Travel challenges (owner, still over 40% without this):** 1 in 3 (`TRAVEL_GEOGRAPHY_ONE_IN`) is a
+  geography type (capital, continent, neighbours, bigger), the other 2 a flag or a currency (was: one of
+  the 6 types at random, so 4 in 6 geography). Replaces task 12's "a random type".
+- **After (200 games per line):** all questions asked **37% geography (30 turns), 32–33% (50 turns)**
+  (before 48–50%); the citizenship test 29–39% (was 23–27%), the airline quiz 32–37%, travel challenges
+  33–35%. Without the travel-challenge change: 43–45% / 40–41%.
+- **Balance (`docs/balance-lab.md`, 400 games per line; before = 2.1-AFTER, then 2.3-AFTER without the
+  travel-challenge change, then 2.3-FINAL):** robots answer at a fixed rate whatever the question, so only
+  random differences: fair results 16 → 14 → 13 of 16 (30 turns) and 10 → 11 → 12 of 16 (50 turns),
+  average scores within about 1 point; boredom 32–36% / 27–29% and lead changes about the same.
 - **No rule changes; save version stays 15** (only which question is drawn changes, and saves hold only
   question ids).
 

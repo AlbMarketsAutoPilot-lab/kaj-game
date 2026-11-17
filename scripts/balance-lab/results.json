@@ -6500,5 +6500,393 @@
     }
    }
   }
+ },
+ "2.3-FINAL-30": {
+  "about": "step 2.3 final (also travel challenges geography 1 in 3), 30 turns",
+  "games": 400,
+  "lines": {
+   "profiles 30 2 N2": {
+    "job": {
+     "kind": "profiles",
+     "turns": 30,
+     "players": 2,
+     "driver": "N2",
+     "games": 400
+    },
+    "profiles": {
+     "backpacker": {
+      "score": 9589,
+      "wins": 100,
+      "games": 188
+     },
+     "nomad": {
+      "score": 9799,
+      "wins": 91,
+      "games": 199
+     },
+     "business": {
+      "score": 10616,
+      "wins": 109,
+      "games": 214
+     },
+     "luxury": {
+      "score": 9501,
+      "wins": 99,
+      "games": 199
+     }
+    },
+    "feel": {
+     "boredom": 0.321625,
+     "leadChanges": 2.49,
+     "margin": 8.5175,
+     "close": 0.29
+    }
+   },
+   "versus 30 E N2": {
+    "job": {
+     "kind": "versus",
+     "turns": 30,
+     "a": "E",
+     "b": "N2",
+     "games": 400
+    },
+    "winsA": 164,
+    "winsB": 235,
+    "draws": 1,
+    "scoreA": 45.955,
+    "scoreB": 47.975,
+    "feel": {
+     "boredom": 0.35783333333333334,
+     "leadChanges": 2.3325,
+     "margin": 9.535,
+     "close": 0.185
+    }
+   },
+   "profiles 30 4 N2": {
+    "job": {
+     "kind": "profiles",
+     "turns": 30,
+     "players": 4,
+     "driver": "N2",
+     "games": 400
+    },
+    "profiles": {
+     "business": {
+      "score": 18775,
+      "wins": 102,
+      "games": 400
+     },
+     "luxury": {
+      "score": 19257,
+      "wins": 117,
+      "games": 400
+     },
+     "nomad": {
+      "score": 18860,
+      "wins": 83,
+      "games": 400
+     },
+     "backpacker": {
+      "score": 19724,
+      "wins": 98,
+      "games": 400
+     }
+    },
+    "feel": {
+     "boredom": 0.3579583333333333,
+     "leadChanges": 4.5875,
+     "margin": 5.6975,
+     "close": 0.4
+    }
+   },
+   "profiles 30 2 P4": {
+    "job": {
+     "kind": "profiles",
+     "turns": 30,
+     "players": 2,
+     "driver": "P4",
+     "games": 400
+    },
+    "profiles": {
+     "backpacker": {
+      "score": 10029,
+      "wins": 92,
+      "games": 188
+     },
+     "nomad": {
+      "score": 10675,
+      "wins": 122,
+      "games": 199
+     },
+     "business": {
+      "score": 11136,
+      "wins": 108,
+      "games": 214
+     },
+     "luxury": {
+      "score": 9892,
+      "wins": 78,
+      "games": 199
+     }
+    },
+    "feel": {
+     "boredom": 0.35783333333333334,
+     "leadChanges": 2.78,
+     "margin": 8.31,
+     "close": 0.2475
+    }
+   },
+   "versus 30 N2 H3": {
+    "job": {
+     "kind": "versus",
+     "turns": 30,
+     "a": "N2",
+     "b": "H3",
+     "games": 400
+    },
+    "winsA": 150,
+    "winsB": 250,
+    "draws": 0,
+    "scoreA": 48.655,
+    "scoreB": 52.655,
+    "feel": {
+     "boredom": 0.31995833333333334,
+     "leadChanges": 2.615,
+     "margin": 8.87,
+     "close": 0.265
+    }
+   },
+   "profiles 30 4 P4": {
+    "job": {
+     "kind": "profiles",
+     "turns": 30,
+     "players": 4,
+     "driver": "P4",
+     "games": 400
+    },
+    "profiles": {
+     "business": {
+      "score": 20572,
+      "wins": 109,
+      "games": 400
+     },
+     "luxury": {
+      "score": 20176,
+      "wins": 110,
+      "games": 400
+     },
+     "nomad": {
+      "score": 20526,
+      "wins": 106,
+      "games": 400
+     },
+     "backpacker": {
+      "score": 19754,
+      "wins": 75,
+      "games": 400
+     }
+    },
+    "feel": {
+     "boredom": 0.3519583333333333,
+     "leadChanges": 4.835,
+     "margin": 5.2825,
+     "close": 0.4475
+    }
+   }
+  }
+ },
+ "2.3-FINAL-50": {
+  "about": "step 2.3 final (also travel challenges geography 1 in 3), 50 turns",
+  "games": 400,
+  "lines": {
+   "profiles 50 2 N2": {
+    "job": {
+     "kind": "profiles",
+     "turns": 50,
+     "players": 2,
+     "driver": "N2",
+     "games": 400
+    },
+    "profiles": {
+     "backpacker": {
+      "score": 14044,
+      "wins": 107,
+      "games": 188
+     },
+     "nomad": {
+      "score": 14491,
+      "wins": 95,
+      "games": 199
+     },
+     "business": {
+      "score": 14944,
+      "wins": 89,
+      "games": 214
+     },
+     "luxury": {
+      "score": 14216,
+      "wins": 109,
+      "games": 199
+     }
+    },
+    "feel": {
+     "boredom": 0.2729,
+     "leadChanges": 3.1025,
+     "margin": 10.2825,
+     "close": 0.1875
+    }
+   },
+   "profiles 50 4 N2": {
+    "job": {
+     "kind": "profiles",
+     "turns": 50,
+     "players": 4,
+     "driver": "N2",
+     "games": 400
+    },
+    "profiles": {
+     "business": {
+      "score": 28219,
+      "wins": 106,
+      "games": 400
+     },
+     "luxury": {
+      "score": 28185,
+      "wins": 104,
+      "games": 400
+     },
+     "nomad": {
+      "score": 27753,
+      "wins": 72,
+      "games": 400
+     },
+     "backpacker": {
+      "score": 28930,
+      "wins": 118,
+      "games": 400
+     }
+    },
+    "feel": {
+     "boredom": 0.2728625,
+     "leadChanges": 5.7175,
+     "margin": 7.01,
+     "close": 0.3225
+    }
+   },
+   "versus 50 E N2": {
+    "job": {
+     "kind": "versus",
+     "turns": 50,
+     "a": "E",
+     "b": "N2",
+     "games": 400
+    },
+    "winsA": 144,
+    "winsB": 255,
+    "draws": 1,
+    "scoreA": 68.6675,
+    "scoreB": 72.41,
+    "feel": {
+     "boredom": 0.2864,
+     "leadChanges": 3.2075,
+     "margin": 9.7575,
+     "close": 0.2375
+    }
+   },
+   "versus 50 N2 H3": {
+    "job": {
+     "kind": "versus",
+     "turns": 50,
+     "a": "N2",
+     "b": "H3",
+     "games": 400
+    },
+    "winsA": 122,
+    "winsB": 277,
+    "draws": 1,
+    "scoreA": 71.8775,
+    "scoreB": 77.3975,
+    "feel": {
+     "boredom": 0.272825,
+     "leadChanges": 2.9425,
+     "margin": 9.63,
+     "close": 0.21
+    }
+   },
+   "profiles 50 2 P4": {
+    "job": {
+     "kind": "profiles",
+     "turns": 50,
+     "players": 2,
+     "driver": "P4",
+     "games": 400
+    },
+    "profiles": {
+     "backpacker": {
+      "score": 14357,
+      "wins": 85,
+      "games": 188
+     },
+     "nomad": {
+      "score": 15797,
+      "wins": 131,
+      "games": 199
+     },
+     "business": {
+      "score": 16175,
+      "wins": 95,
+      "games": 214
+     },
+     "luxury": {
+      "score": 14695,
+      "wins": 88,
+      "games": 199
+     }
+    },
+    "feel": {
+     "boredom": 0.274825,
+     "leadChanges": 3.565,
+     "margin": 8.875,
+     "close": 0.2525
+    }
+   },
+   "profiles 50 4 P4": {
+    "job": {
+     "kind": "profiles",
+     "turns": 50,
+     "players": 4,
+     "driver": "P4",
+     "games": 400
+    },
+    "profiles": {
+     "business": {
+      "score": 28672,
+      "wins": 65,
+      "games": 400
+     },
+     "luxury": {
+      "score": 29013,
+      "wins": 79,
+      "games": 400
+     },
+     "nomad": {
+      "score": 29920,
+      "wins": 103,
+      "games": 400
+     },
+     "backpacker": {
+      "score": 30768,
+      "wins": 151,
+      "games": 400
+     }
+    },
+    "feel": {
+     "boredom": 0.28715,
+     "leadChanges": 6.2725,
+     "margin": 5.76,
+     "close": 0.3925
+    }
+   }
+  }
  }
 }

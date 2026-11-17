@@ -757,11 +757,20 @@ function travelOn(state: GameState, map: GameMap, me: Player): void {
 
 export const CHALLENGE_TYPES: ChallengeType[] = ['flag', 'bigger', 'capital', 'continent', 'neighbour', 'currency'];
 
-// A random type, then a question of that type the player hasn't seen yet (step 2.1: the
-// rotation, see drawFresh). The random draw is hidden: no dice are shown.
+// Step 2.3 (owner): 1 travel challenge in TRAVEL_GEOGRAPHY_ONE_IN is a geography type (capital,
+// continent, neighbours, bigger), the others a flag or a currency, so geography is fairly
+// represented (about 35% of all questions asked, measured with scripts/geo-count.ts).
+export const TRAVEL_GEOGRAPHY_ONE_IN = 3;
+const GEOGRAPHY_TYPES: ChallengeType[] = ['bigger', 'capital', 'continent', 'neighbour'];
+const OTHER_TYPES: ChallengeType[] = ['flag', 'currency'];
+
+// A random type (see above), then a question of that type the player hasn't seen yet (step 2.1:
+// the rotation, see drawFresh). The random draw is hidden: no dice are shown.
 function pickChallenge(state: GameState, me: Player): Challenge {
-  const [t, rng1] = randomInt(state.rng, CHALLENGE_TYPES.length);
-  const list = CHALLENGES.filter((c) => c.type === CHALLENGE_TYPES[t]);
+  const [roll, rng0] = randomInt(state.rng, TRAVEL_GEOGRAPHY_ONE_IN);
+  const types = roll === 0 ? GEOGRAPHY_TYPES : OTHER_TYPES;
+  const [t, rng1] = randomInt(rng0, types.length);
+  const list = CHALLENGES.filter((c) => c.type === types[t]);
   const [[id], seen, rng2] = drawFresh(list.map((c) => c.id), me.seen, 1, rng1);
   state.rng = rng2;
   me.seen = seen;
