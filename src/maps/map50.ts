@@ -2,6 +2,7 @@ import type { Area, GameMap, Route } from '../engine/types.ts';
 import type { Fact } from '../facts/types.ts';
 import { FACTS_50_NEW } from '../facts/new50.ts';
 import { SORT_50 } from '../facts/sort50.ts';
+import { GEO_EXAM_50 } from '../facts/geo-exam.ts';
 import { map30 } from './map30.ts';
 
 // The 50-turn map (task M2, from the owner-approved list in docs/map50.md): 84 areas, 11 wonders,
@@ -258,7 +259,7 @@ function build(): GameMap {
     from.neighbours.push(b);
     to.neighbours.push(a);
   }
-  return { id: 'map50', rounds: 50, areas, routes: ROUTES, facts: facts50() };
+  return { id: 'map50', rounds: 50, areas, routes: ROUTES, facts: facts50(), examFacts: GEO_EXAM_50 };
 }
 
 export const map50: GameMap = build();

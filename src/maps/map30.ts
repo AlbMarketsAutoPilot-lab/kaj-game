@@ -1,5 +1,6 @@
 import type { Area, Continent, GameMap, Route } from '../engine/types.ts';
 import { FACT_BATCHES } from '../facts/index.ts';
+import { geoExam30 } from '../facts/geo-exam.ts';
 
 // The 30-turn map: 53 areas, 8 airports and 9 ports (13 connections).
 // Task 14a (owner-approved): Canada and Russia in 3 parts (50 → 52 areas).
@@ -261,7 +262,7 @@ function build(): GameMap {
     from.neighbours.push(b);
     to.neighbours.push(a);
   }
-  return { id: 'map30', areas, routes: ROUTES, facts: Object.assign({}, ...FACT_BATCHES) };
+  return { id: 'map30', areas, routes: ROUTES, facts: Object.assign({}, ...FACT_BATCHES), examFacts: geoExam30() };
 }
 
 export const map30: GameMap = build();

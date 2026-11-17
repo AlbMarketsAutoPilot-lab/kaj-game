@@ -80,6 +80,8 @@ export interface GameMap {
   // Area id -> facts for the airline quiz and the citizenship exam.
   // Areas without facts get placeholder questions made from the map data.
   facts?: Record<string, Fact[]>;
+  // Area id -> extra facts for the citizenship test only (step 2.3: geography, not in the airline quiz).
+  examFacts?: Record<string, Fact[]>;
 }
 
 export interface Player {

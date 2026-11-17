@@ -284,7 +284,8 @@ test('6 facts to read, in the area\'s order; the 3 questions come from 3 differe
   for (const area of ['france', 'japan', 'chile']) {
     const [{ questions, study }, next] = makeExam(map30, area, 3, 6, seed);
     seed = next;
-    const facts = map30.facts![area];
+    // The area's facts, then its test-only geography facts (step 2.3).
+    const facts = [...map30.facts![area], ...map30.examFacts![area]];
     assert.equal(new Set(study).size, 6);
     const order = study.map((t) => facts.findIndex((f) => f.text === t));
     assert.ok(order.every((i, k) => i >= 0 && (k === 0 || i > order[k - 1])));

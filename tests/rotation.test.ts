@@ -104,7 +104,7 @@ test('airline quiz (step 2.3): about 1 question in 10 is a challenge, the rest f
 
 test('citizenship test: the 3 questions come from the rotation and are among the 6 study lines', () => {
   const me = { seen: [] as string[] } as Player;
-  const facts = map30.facts!.japan;
+  const facts = [...map30.facts!.japan, ...map30.examFacts!.japan];
   const asked: string[] = [];
   let seed = 4;
   for (let k = 0; k < 4; k++) {
@@ -117,7 +117,7 @@ test('citizenship test: the 3 questions come from the rotation and are among the
       asked.push(q.id!);
     }
   }
-  // 12 facts: 4 tests of 3 questions ask every fact once.
+  // 14 facts (12 + 2 test-only, step 2.3): 4 tests of 3 questions never repeat one.
   assert.equal(new Set(asked).size, 12);
 });
 

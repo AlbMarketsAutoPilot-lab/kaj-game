@@ -1330,7 +1330,7 @@ function startCountdown(key: string, seconds: number, clock: HTMLElement, onTime
 
 // The study line behind a quiz or test question (every fact has one).
 function factFor(area: string, question: string): string {
-  return gameMap.facts?.[area]?.find((f) => f.question === question)?.text ?? '';
+  return [...(gameMap.facts?.[area] ?? []), ...(gameMap.examFacts?.[area] ?? [])].find((f) => f.question === question)?.text ?? '';
 }
 
 // A line that teaches something after a challenge answer.

@@ -112,7 +112,8 @@ export function makeQuestion(map: GameMap, to: string, seed: number, me?: Player
 // study lines keep the area's own order, so they don't show which facts are asked. An area
 // without facts (the test maps) gets placeholder questions, each with its answer as the study line.
 export function makeExam(map: GameMap, areaId: string, count: number, studied: number, seed: number, me?: Player): [{ questions: QuizQuestion[]; study: string[] }, number] {
-  const all = map.facts?.[areaId] ?? [];
+  // The area's facts plus its test-only geography facts (step 2.3).
+  const all = [...(map.facts?.[areaId] ?? []), ...(map.examFacts?.[areaId] ?? [])];
   const ids = all.map(factId);
   let [asked, seen, rng] = drawFresh(ids, me?.seen ?? [], Math.min(count, studied), seed);
   if (me) me.seen = seen;

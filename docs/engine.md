@@ -680,6 +680,7 @@ the same rules on both maps, real-life rules, no caps; the numbers decide. Befor
   a challenge keeps its id).
 - **Airline-quiz pool:** the destination's facts plus the challenges about its countries (each
   challenge now has `country`, made by `node scripts/challenges-make.ts`; the questions are unchanged).
+  Step 2.3 changed this: 1 question in 10 is a challenge, the others are facts (below).
   A flag question shows its flag in the quiz.
 - **Citizenship test:** its 3 questions are the player's next unseen facts of the area; the other 3 study
   lines are drawn at random. **Challenges:** a random type, then an unseen question of that type. The
@@ -693,6 +694,36 @@ the same rules on both maps, real-life rules, no caps; the numbers decide. Befor
   (30 turns) and 11 → 10 of 16 (50 turns), average scores within 1.4 points; boredom 32–36% / 27–29%
   and lead changes about the same. The lab report has two new columns, **boredom** (turns blocked,
   lost or worth 0 points) and **excitement** (leader changes per game, games won by 3 points or less).
+
+## Geography questions (version 2.0, step 2.3, owner-approved 2026-11-17)
+
+- **Owner's aim:** geography fairly represented, about 35–40% of what a player is asked, never dominating.
+  **Geography** = places and the land: rivers, mountains, seas, islands, deserts, climate, where a place is,
+  borders, size, capitals, population. Not geography: animals and plants, flags, currencies, history,
+  culture, science.
+- **Every fact has a type** (`src/facts/tags.ts`, keyed by `factId`): geography, culture, history, nature
+  or science, tagged by Claude fact by fact. Of the 966 different facts: geography 302, culture 330,
+  history 132, nature 111, science 91. Challenges: capital, continent, neighbour and bigger are geography;
+  flag and currency are not.
+- **Count:** `node scripts/geo-count.ts [games]` plays normal-robot games (2 and 4 players, both maps) and
+  reports every question asked, by screen. Before step 2.3: 48–50% geography (the airline quiz drew
+  evenly from the destination's facts and its challenges, so about half of all questions were challenges).
+- **Airline quiz:** 1 question in 10 (`AIRLINE_CHALLENGE_ONE_IN`) is a challenge about the destination's
+  countries, the others are its facts; each part keeps its own rotation (replaces step 2.1's single pool).
+- **Citizenship test:** 2 extra geography facts per 50-turn area (`src/facts/geo-exam.ts`, 168, checked and
+  approved by the owner; review page `docs/facts/geo-exam.md`, made by `node scripts/geo-exam-review.ts`),
+  kept in `GameMap.examFacts`: asked and read in the citizenship test, **never in the airline quiz**. The
+  30-turn map takes at most 3 per area: the 1st fact of each part in map order, then the 2nd
+  (`GEO_EXAM_30_PICKS`). This also makes each area's test rotation 2–3 questions longer.
+- **After (200 games per line):** all questions asked 43–45% geography (30 turns), 40–41% (50 turns);
+  the citizenship test 38–39% / 29–35% (was 23–27%), the airline quiz 32–37%. Travel challenges are not
+  changed; they are two-thirds geography and keep the 30-turn map a little above 40%.
+- **Balance (`docs/balance-lab.md`, packages 2.1-AFTER = before, 2.3-AFTER = after, 400 games per line):**
+  robots answer at a fixed rate whatever the question, so only random differences: fair results 16 → 14 of
+  16 (30 turns) and 10 → 11 of 16 (50 turns), average scores within about 1 point; boredom 32–36% / 27–29%
+  and lead changes about the same.
+- **No rule changes; save version stays 15** (only which question is drawn changes, and saves hold only
+  question ids).
 
 ## Project setup
 

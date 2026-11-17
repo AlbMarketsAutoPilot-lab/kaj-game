@@ -131,4 +131,7 @@ export const PACKAGES: Package[] = [
   { name: '2.1-BEFORE-50', turns: [50], drivers: ['N2', 'P4'], ladder: [['E', 'N2'], ['N2', 'H3']], about: 'before step 2.1 (question rotation), 50 turns', patches: [] },
   { name: '2.1-AFTER-30', turns: [30], drivers: ['N2', 'P4'], ladder: [['E', 'N2'], ['N2', 'H3']], about: 'after step 2.1 (question rotation), 30 turns', patches: [] },
   { name: '2.1-AFTER-50', turns: [50], drivers: ['N2', 'P4'], ladder: [['E', 'N2'], ['N2', 'H3']], about: 'after step 2.1 (question rotation), 50 turns', patches: [] },
+  // Step 2.3 (geography questions): before = 2.1-AFTER (the game was not changed in between).
+  { name: '2.3-AFTER-30', turns: [30], drivers: ['N2', 'P4'], ladder: [['E', 'N2'], ['N2', 'H3']], about: 'after step 2.3 (airline quiz 1 challenge in 10, test-only geography facts), 30 turns', patches: [] },
+  { name: '2.3-AFTER-50', turns: [50], drivers: ['N2', 'P4'], ladder: [['E', 'N2'], ['N2', 'H3']], about: 'after step 2.3 (airline quiz 1 challenge in 10, test-only geography facts), 50 turns', patches: [] },
 ];

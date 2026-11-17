@@ -67,7 +67,7 @@ function play(map: GameMap, players: number, seed: number, tally: Tally) {
       if (p.exam && p.exam.stage === 'test' && p.exam.questions.length && (!was || was.stage !== 'test')) {
         for (const q of p.exam.questions) add('citizenship test', q.id);
         for (const line of p.exam.study) {
-          const fact = (map.facts?.[p.exam.area] ?? []).find((f) => f.text === line);
+          const fact = [...(map.facts?.[p.exam.area] ?? []), ...(map.examFacts?.[p.exam.area] ?? [])].find((f) => f.text === line);
           add('citizenship study lines', fact ? factId(fact) : undefined);
         }
       }
