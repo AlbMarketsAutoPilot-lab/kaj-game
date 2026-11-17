@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { CHALLENGES } from '../src/challenges/challenges.ts';
-import { apply, CHALLENGE_TYPES, legalActions } from '../src/engine/engine.ts';
+import { apply, CHALLENGE_TYPES, legalActions, TRAVEL_GEOGRAPHY_ONE_IN } from '../src/engine/engine.ts';
 import type { Action, GameState, Profile } from '../src/engine/types.ts';
 import { travelMap as map } from './fixtures/test-map.ts';
 import { seatOf, startedGame } from './helpers.ts';
@@ -121,15 +121,21 @@ test('the last travel turn lands first, then the challenge counts', () => {
 
 test('the challenge is random but replays the same with the same seed', () => {
   const ids = new Set<string>();
-  for (let r = 1; r < 200; r++) {
+  let geography = 0;
+  const tries = 600;
+  for (let r = 1; r <= tries; r++) {
     const s = backpackerAtSea();
     s.rng = r;
     const a = go(s, { type: 'travel', challenge: true });
     const b = go(s, { type: 'travel', challenge: true });
     assert.deepEqual(a.challenge, b.challenge);
     ids.add(a.challenge!.type);
+    if (!['flag', 'currency'].includes(a.challenge!.type)) geography++;
   }
   assert.equal(ids.size, CHALLENGE_TYPES.length, 'every type comes up');
+  // Step 2.3: about 1 in TRAVEL_GEOGRAPHY_ONE_IN (3) is a geography type, the others a flag or a currency.
+  assert.equal(TRAVEL_GEOGRAPHY_ONE_IN, 3);
+  assert.ok(geography > tries / 3 - 60 && geography < tries / 3 + 60, `geography challenges: ${geography} of ${tries}`);
 });
 
 // Owner's secret (2026-10-11, never in the rules, like Madagascar's): on a ship, the Nomad's 3rd press

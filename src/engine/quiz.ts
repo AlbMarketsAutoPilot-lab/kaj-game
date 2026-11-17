@@ -84,14 +84,18 @@ export function areaChallenges(area: Area): Challenge[] {
   return CHALLENGES.filter((c) => countries.has(c.country));
 }
 
-// Airline quiz: one question about the destination, from its facts and the challenges about its
-// countries, in the player's rotation (`me.seen` is updated).
+// Airline quiz: 1 question in AIRLINE_CHALLENGE_ONE_IN is a challenge about the destination's
+// countries, the others are its facts (step 2.3, owner: geography fairly represented, not dominating;
+// measured with scripts/geo-count.ts). Each in the player's rotation (`me.seen` is updated).
+export const AIRLINE_CHALLENGE_ONE_IN = 10;
+
 export function makeQuestion(map: GameMap, to: string, seed: number, me?: Player): [QuizQuestion, number] {
   const facts = map.facts?.[to] ?? [];
   if (facts.length === 0) return placeholderQuestion(map, to, seed);
   const challenges = areaChallenges(areaById(map, to));
-  const pool = [...facts.map(factId), ...challenges.map((c) => c.id)];
-  const [[id], seen, rng] = drawFresh(pool, me?.seen ?? [], 1, seed);
+  const [roll, seed2] = randomInt(seed, AIRLINE_CHALLENGE_ONE_IN);
+  const pool = challenges.length > 0 && roll === 0 ? challenges.map((c) => c.id) : facts.map(factId);
+  const [[id], seen, rng] = drawFresh(pool, me?.seen ?? [], 1, seed2);
   if (me) me.seen = seen;
   const challenge = challenges.find((c) => c.id === id);
   if (challenge) {
@@ -108,7 +112,8 @@ export function makeQuestion(map: GameMap, to: string, seed: number, me?: Player
 // study lines keep the area's own order, so they don't show which facts are asked. An area
 // without facts (the test maps) gets placeholder questions, each with its answer as the study line.
 export function makeExam(map: GameMap, areaId: string, count: number, studied: number, seed: number, me?: Player): [{ questions: QuizQuestion[]; study: string[] }, number] {
-  const all = map.facts?.[areaId] ?? [];
+  // The area's facts plus its test-only geography facts (step 2.3).
+  const all = [...(map.facts?.[areaId] ?? []), ...(map.examFacts?.[areaId] ?? [])];
   const ids = all.map(factId);
   let [asked, seen, rng] = drawFresh(ids, me?.seen ?? [], Math.min(count, studied), seed);
   if (me) me.seen = seen;

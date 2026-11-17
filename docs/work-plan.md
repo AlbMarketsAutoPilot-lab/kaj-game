@@ -89,7 +89,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | L6 | 100-turn map: full test games and fixes | medium (high if a rule changes) | 2 | standalone app | |
 | 2.1 | Question rotation: no repeat until the pool is used up, kept on the device; bigger airline-quiz pool | medium | 1 | — | ✅ done (one memory per device, owner's choice A; saves v15; lab before/after in `docs/balance-lab.md`) |
 | 2.2 | Flickering on slow tablets and Galaxy S25: measure, fix, owner's phone test | medium | 1 | — | ✅ done (walk glow and guide map glow still, no pulse; small drawings keep moving, owner); the owner's phone test runs over the coming months |
-| 2.3 | More geography questions: tag every fact, ~250 new geography facts (owner checks), script-made questions | medium | 2 | — | |
+| 2.3 | More geography questions: tag every fact, ~250 new geography facts (owner checks), script-made questions | medium | 2 | — | ✅ done (owner-approved): every fact tagged, airline quiz 1 challenge in 10, 168 test-only geography facts, travel challenges geography 1 in 3; 37% / 32–33% geography (was 48–50%); script-made questions not needed; save stays 15 |
 | 2.4 | New ship and plane routes on both maps, map check, stuck-state checker | **high** | 1 | — | |
 | 2.5 | Travel by profile (turns, prices, quiz = Backpacker turns, quiz popup), bus and car whole country | **high** | 2 | — | |
 | 2.6 | Citizenship from turn 1, Business buys 2nd/3rd, visa test | **high** | 2 | — | |
