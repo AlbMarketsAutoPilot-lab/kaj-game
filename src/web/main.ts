@@ -2249,10 +2249,12 @@ function renderWorld(s: GameState): HTMLElement {
   const centre = (id: string) => geo.get(id)!.centre;
   for (const r of gameMap.routes ?? []) {
     const [ax, ay] = centre(r.a);
-    let [bx, by] = centre(r.b);
-    if (bx - ax > 180) bx -= 360;
-    if (ax - bx > 180) bx += 360;
-    d.labels.append(svg('line', { x1: ax, y1: ay, x2: bx, y2: by, class: `route ${r.kind}` }));
+    const [bx, by] = centre(r.b);
+    // A route across the date line (e.g. Japan – Alaska) leaves the map at one edge and comes back
+    // at the other: drawn from both ends (step 2.4), so each end shows its line.
+    const shift = bx - ax > 180 ? -360 : ax - bx > 180 ? 360 : 0;
+    d.labels.append(svg('line', { x1: ax, y1: ay, x2: bx + shift, y2: by, class: `route ${r.kind}` }));
+    if (shift) d.labels.append(svg('line', { x1: bx, y1: by, x2: ax - shift, y2: ay, class: `route ${r.kind}` }));
   }
   for (const p of s.players) {
     if (!p.travel) continue;

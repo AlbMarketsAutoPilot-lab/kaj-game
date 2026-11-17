@@ -30,6 +30,7 @@ Target: a complete, playable v1 within about 15 days of work.
 
 ## 4. Map
 
+- **Version 2.0, step 2.4 (owner, 2026-11-17):** new plane and ship routes on both maps, all two-way, 1 or 2 destinations each: the 30-turn map has **13 airports** and **11 ports** with **15 connections**, the 50-turn map 15 airports and 13 ports with 18 (`docs/engine.md`, "New plane and ship routes"). The v1 text below is kept as history.
 - **Only the 30-turn map:** 53 areas (50 until task 14a, 52 until task 14b), 7 wonders, **8 airports** and **9 ports** with **13 two-way connections**. (Task 14b, owner-approved: ships Australia East ↔ New Zealand and USA West ↔ Alaska.) (Task 9b, owner-approved: UK & Ireland gets an airport to the Arabian Peninsula and Japan a port to USA West, so UK & Ireland and Japan have both.) An airport or port has **1 to 3 fixed destinations**; the traveller chooses one when boarding. Luxury can choose any airport or port. (Changed in task 2b, owner-approved: 6 airports + 4 ports with one destination each could not pass the map check.)
 - **50-turn map added to v1 (owner, 2026-10-09), see work-plan section M.**
 - **Starting continents: 6 choices**, all different between players: Europe, Asia, Africa, **North America**, **South America**, Oceania.

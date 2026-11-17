@@ -108,6 +108,7 @@ export function createGame(config: GameConfig, map: GameMap): GameState {
     fullContinents: [],
     arrivedRound: 1,
     hitchFailedRound: null,
+    cameFrom: null,
   }));
 
   return {
@@ -253,8 +254,10 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
     }
     case 'walk': {
       me.quizWrong = 0;
+      const from = me.area;
       payFees(next, me, entryFees(next, me, me.area, action.to), action.to);
       arrive(next, map, me, areaById(map, action.to));
+      me.cameFrom = from;
       endTurn(next, map);
       return next;
     }
@@ -687,6 +690,7 @@ function startTurn(state: GameState, map: GameMap): void {
 function arrive(state: GameState, map: GameMap, me: Player, area: Area, byBus = false): void {
   me.area = area.id;
   me.arrivedRound = state.round;
+  me.cameFrom = null;
   const country = area.bigCountry;
   const countryDone = country !== undefined && me.bigCountries.includes(country);
   const giveCountry = (c: string) => {

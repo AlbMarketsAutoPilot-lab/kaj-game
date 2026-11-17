@@ -6,7 +6,8 @@ import type { GameState } from './types.ts';
 // whole continents, Madagascar), so no older save is continued. Version 13 (owner, 2026-10-11): the
 // profile balance and the planning robots, for both games. Version 14 (owner, task 19): the car.
 // Version 15 (2.0, step 2.1): each player's seen questions (the rotation); no older save is continued.
-export const SAVE_VERSION = 15;
+// Version 16 (2.0, step 2.4): new plane and ship routes on both maps; no older save is continued.
+export const SAVE_VERSION = 16;
 
 export function saveGame(state: GameState): string {
   return JSON.stringify({ version: SAVE_VERSION, state });

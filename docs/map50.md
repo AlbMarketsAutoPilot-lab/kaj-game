@@ -1,5 +1,10 @@
 # 50-turn map — area list for review (task M1)
 
+> **Routes changed in version 2.0, step 2.4 (owner-approved 2026-11-17):** the airports, ports and connections below are
+> the M1/M5 ones. Today: 15 airports, 13 ports, 18 two-way connections (`src/maps/map50.ts`, `docs/engine.md` "New plane
+> and ship routes"). Madagascar & Islands now flies to the Gulf States and South Africa (no port); Portugal sails to
+> Central America (not UK & Ireland).
+
 Owner-approved basis: 80–90 areas, same big-country splits as the 30-turn map, islands kept inside their bigger 30-turn areas (owner), 11 wonders, about 13 airports and 13 ports with about 21 connections, every rule and design from the 30-turn game (which stays frozen). Every 50-turn area lies inside one 30-turn area, so its facts can be sorted by country (M3).
 
 **Totals:** 84 areas · 11 wonders (🏛️) · 13 airports · 15 ports · 23 connections.

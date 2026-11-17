@@ -728,6 +728,63 @@ the same rules on both maps, real-life rules, no caps; the numbers decide. Befor
 - **No rule changes; save version stays 15** (only which question is drawn changes, and saves hold only
   question ids).
 
+## New plane and ship routes (version 2.0, step 2.4, owner-approved 2026-11-17)
+
+- **Routes (owner's lists, `src/maps/map30.ts` and `src/maps/map50.ts`):** every plane and ship route is two-way,
+  with 1 or 2 destinations; they replace all earlier airports and ports (tasks 2b, 9b, 14b, M1, M2, M5). The
+  train, the bus and the car are unchanged. Luxury still flies to any airport and sails to any port.
+  - 30 turns, ships: New Zealand–Chile, Río de la Plata–Southern Africa, Southern Africa–Australia West,
+    Alaska–Japan, Canada East–Iceland, Iberia–Central America, Central America–Japan. Planes: Alaska–USA West,
+    Iceland–UK & Ireland, North Africa–Iberia, Japan–Korea, Australia East–New Zealand, Australia East–Malay
+    Islands, India–Malay Islands, India–Arabia.
+  - 50 turns, ships: New Zealand–Chile, Argentina–South Africa, South Africa–Australia West, Alaska–Japan,
+    Canada East–Iceland, Portugal–Central America, Central America–Japan, Brazil North–Nigeria. Planes:
+    Alaska–USA West, Iceland–UK & Ireland, Algeria–Spain, Japan–Korea, Australia East–New Zealand, Australia
+    East–Malay Islands, India–Malay Islands, India–Gulf States, Madagascar–Gulf States, South Africa–Madagascar.
+- **Counts (before → after):** 30 turns: airports 8 → 13, ports 9 → 11, connections 13 → 15, airlines and ferry
+  agencies 17 → 24 (all businesses 29 → 36). 50 turns: airports 13 → 15, ports 15 → 13, connections 23 → 18,
+  airlines and ferry agencies 28 → 28 (all businesses 44). At most 2 destinations everywhere (was 3 on the 50-turn
+  map; the limit `MAX_DESTINATIONS` stays 3).
+- **Gained / lost:** 30 turns: airports gained in Alaska, USA West, Iceland, North Africa, Iberia, Korea, Australia
+  East, India; lost in Australia West, Chile, Southern Africa. Ports gained in Chile, Río de la Plata, Southern
+  Africa, Australia West, Central America; lost in UK & Ireland, USA West, Australia East. 50 turns: airports
+  gained in Alaska, USA West, Iceland, Algeria, Spain, Korea, Australia East, Madagascar; lost in Australia West,
+  Chile, USA East, Brazil South, Nigeria, Kenya-Uganda. Ports gained in Chile, Argentina, Australia West, Central
+  America, Nigeria; lost in UK & Ireland, USA West, Australia East, Madagascar, Tanzania, Zambezi, West Coast.
+- **Map check and stuck-state checker:** pass on both maps (one citizenship). The checker needs exactly 5 routes
+  on the 30-turn map (New Zealand–Chile, Canada East–Iceland, Iceland–UK & Ireland, Australia East–New Zealand,
+  India–Arabia) and 7 on the 50-turn map (the same first four, Portugal–Central America, and Madagascar's two
+  planes); these tests replace task 2b's "each of the 9 connections is needed". Two citizenships at once trap
+  someone in **13 of 946 pairs** (30 turns, was 19) and **20 of 2,775** (50 turns, was 18), mostly Iceland,
+  UK & Ireland and the 3 parts of Canada; the known limit stays (only while the player has fewer than 2 points;
+  "go home" is the way out). Every walking group has at least 2 routes out; 9 (30 turns) and 12 (50 turns)
+  areas have a single route.
+- **Madagascar (50 turns):** no walk and no port; planes to the Gulf States and South Africa (both needed). Its
+  SURPRISE +3 is unchanged. **Alaska:** its plane to USA West links the 3 parts of the USA (was the ferry).
+  **Portugal:** its ship to Central America keeps a citizenship of Spain from trapping Portugal (M2's reason).
+- **Robots (owner-approved):** with the new map, robots planning 2 moves ahead swung back and forth beside areas
+  worth nothing yet (USA West ↔ Canada Central, Mexico ↔ USA West): per player per 50-turn game, Backpacker
+  0.3 → 3.4, Luxury 0.3 → 2.2 (the lab's planner Luxury 0.6 → 7.7). The engine now remembers where a player
+  walked from (`Player.cameFrom`, null after a trip, going home or the start), and a robot doesn't walk straight
+  back there unless that gives points or it has no other move (`noWalkBack` in `src/engine/normal-robot.ts`, also
+  in the lab's planner). After: under 0.1 per game for every profile.
+- **Screens:** no code change for airports, ports, menus, area details and trip scenes (they read the map). A
+  route across the date line (Japan–Alaska, Japan–Central America, New Zealand–Chile) is drawn from both ends
+  on the world map. The guide's airport page: "UK & Ireland: its airport flies to Iceland" (was Arabia).
+- **Saves: version 16.** No older save is continued (a game in progress from version 15 or older is lost).
+- **Balance (`docs/balance-lab.md`, 400 games per line; before = 2.3-FINAL, after = 2.4-AFTER with the robot
+  fix):** fair results **13 → 10 of 16 (30 turns)** and **12 → 14 of 16 (50 turns)**. Boredom 32–36% → 33–35%
+  (30 turns) and 27–29% → 27–28% (50 turns); lead changes and close finishes about the same. Outside the target
+  on the 30-turn map: Nomad with 4 players (normal robots 21% → 13%, planning 27% → 16%), Luxury with planning
+  robots (2 players 39% → 66%, 4 players 28% → 34%), Business with 4 normal robots (26% → 36%), Backpacker with
+  2 planning robots (49% → 38%). 50 turns: Nomad with 4 normal robots 18% (was 18%), Backpacker with 4 planning
+  robots 33% (was 38%). Left for step 2.7 (balance tuning).
+- **Trips (game robots, normal, per player per game, 300 games per line, scratch script):** Backpacker and Nomad
+  fly about half as often and sail about twice as often (30 turns, 2 players: Nomad planes 3.1 → 1.7, ships
+  1.2 → 2.3; Backpacker planes 2.2 → 1.2, ships 0.5 → 1.0); Luxury flies more (3.5 → 4.8). Areas visited: about the
+  same for Backpacker, Business and Luxury; the Nomad about 1 fewer on the 30-turn map (21.1 → 19.7), the same on
+  the 50-turn map.
+
 ## Project setup
 
 - TypeScript, run directly by Node 22.18 or newer (no build step for tests).

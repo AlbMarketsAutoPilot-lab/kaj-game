@@ -37,11 +37,10 @@ test('rewards can be switched off for exact-point rule tests only', () => {
 });
 
 function toMadagascar(s: GameState): GameState {
-  seatOf(s, 0).area = 'tanzania';
+  // Step 2.4: Madagascar is reached by plane only (from South Africa or the Gulf States).
+  seatOf(s, 0).area = 'south-africa';
   seatOf(s, 0).points = 10;
-  s = apply(s, map50, { type: 'board', kind: 'port', to: 'madagascar' }); // Business: ticket 2, 1 travel turn
-  s = apply(s, map50, legalActions(s, map50).find((a) => a.type === 'walk')!);
-  return apply(s, map50, { type: 'travel' });
+  return apply(s, map50, { type: 'board', kind: 'airport', to: 'madagascar' }); // Business: ticket 2, lands at once
 }
 
 test('Madagascar: SURPRISE! +3 on the first arrival, once', () => {

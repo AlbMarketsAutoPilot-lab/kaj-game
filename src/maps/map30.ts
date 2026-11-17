@@ -2,9 +2,9 @@ import type { Area, Continent, GameMap, Route } from '../engine/types.ts';
 import { FACT_BATCHES } from '../facts/index.ts';
 import { geoExam30 } from '../facts/geo-exam.ts';
 
-// The 30-turn map: 53 areas, 8 airports and 9 ports (13 connections).
+// The 30-turn map: 53 areas, 13 airports and 11 ports (15 connections, version 2.0 step 2.4).
 // Task 14a (owner-approved): Canada and Russia in 3 parts (50 → 52 areas).
-// Task 14b (owner-approved): Alaska is a 3rd part of the USA (53 areas); ships Australia East ↔ New Zealand and USA West ↔ Alaska.
+// Task 14b (owner-approved): Alaska is a 3rd part of the USA (53 areas); since step 2.4 it flies to USA West.
 // Each walking link is written once in BORDERS below; neighbours are built from it.
 
 interface AreaInfo {
@@ -221,25 +221,27 @@ const BORDERS: [string, string][] = [
   ['australia-west', 'australia-east'],
 ];
 
-// Airports and ports (owner-approved, task 2b). Some have 2 destinations.
-// The stuck-state checker needs every one of these 9 connections.
+// Airports and ports (version 2.0, step 2.4, owner-approved 2026-11-17): every route two-way, at most
+// 2 destinations each; they replace the routes of tasks 2b, 9b and 14b (the train, bus and car stay).
+// The stuck-state checker needs 5 of them (tests/map30.test.ts).
 const ROUTES: Route[] = [
-  { kind: 'port', a: 'iberia', b: 'uk-ireland' },
-  { kind: 'port', a: 'uk-ireland', b: 'iceland' },
-  { kind: 'port', a: 'iceland', b: 'canada-east' },
-  { kind: 'airport', a: 'arabia', b: 'australia-west' },
-  { kind: 'airport', a: 'australia-west', b: 'maritime-asia' },
-  { kind: 'airport', a: 'maritime-asia', b: 'japan' },
-  { kind: 'airport', a: 'japan', b: 'new-zealand' },
-  { kind: 'airport', a: 'new-zealand', b: 'chile' },
-  { kind: 'airport', a: 'southern-africa', b: 'chile' },
-  // Task 9b (owner-approved): two areas with both an airport and a port.
-  { kind: 'airport', a: 'uk-ireland', b: 'arabia' },
-  { kind: 'port', a: 'japan', b: 'usa-west' },
-  // Task 14b (owner-approved): New Zealand can be reached by sea from Australia.
-  { kind: 'port', a: 'australia-east', b: 'new-zealand' },
-  // Task 14b (owner-approved): Alaska's ferry to USA West, so a Canadian citizenship can't trap it.
-  { kind: 'port', a: 'usa-west', b: 'alaska' },
+  // Ships
+  { kind: 'port', a: 'new-zealand', b: 'chile' },
+  { kind: 'port', a: 'southern-cone', b: 'southern-africa' },
+  { kind: 'port', a: 'southern-africa', b: 'australia-west' },
+  { kind: 'port', a: 'alaska', b: 'japan' },
+  { kind: 'port', a: 'canada-east', b: 'iceland' },
+  { kind: 'port', a: 'iberia', b: 'central-america' },
+  { kind: 'port', a: 'central-america', b: 'japan' },
+  // Planes
+  { kind: 'airport', a: 'alaska', b: 'usa-west' },
+  { kind: 'airport', a: 'iceland', b: 'uk-ireland' },
+  { kind: 'airport', a: 'north-africa', b: 'iberia' },
+  { kind: 'airport', a: 'japan', b: 'korea' },
+  { kind: 'airport', a: 'australia-east', b: 'new-zealand' },
+  { kind: 'airport', a: 'australia-east', b: 'maritime-asia' },
+  { kind: 'airport', a: 'india', b: 'maritime-asia' },
+  { kind: 'airport', a: 'india', b: 'arabia' },
   // Task 17 (owner-approved): the train from France to Russia West or Turkey, and back.
   { kind: 'station', a: 'france', b: 'russia-west' },
   { kind: 'station', a: 'france', b: 'turkey-caucasus' },
