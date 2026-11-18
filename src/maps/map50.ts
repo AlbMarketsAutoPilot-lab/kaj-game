@@ -222,8 +222,8 @@ const ROUTES: Route[] = [
   // The bus (owner, M1): from Mongolia one way to Siberia or China West, as on the 30-turn map.
   { kind: 'bus', a: 'mongolia', b: 'russia-east', oneWay: true },
   { kind: 'bus', a: 'mongolia', b: 'china-west', oneWay: true },
-  // The car (owner, task 19): from Mexico one way to USA West or USA East, as on the 30-turn map.
-  { kind: 'car', a: 'mexico', b: 'usa-west', oneWay: true },
+  // The car (owner, task 19): from Mexico one way; step 2.5 (owner): to Canada West or USA East, as on the 30-turn map.
+  { kind: 'car', a: 'mexico', b: 'canada-west', oneWay: true },
   { kind: 'car', a: 'mexico', b: 'usa-east', oneWay: true },
 ];
 

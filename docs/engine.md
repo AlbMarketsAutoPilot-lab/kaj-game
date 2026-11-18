@@ -785,6 +785,34 @@ the same rules on both maps, real-life rules, no caps; the numbers decide. Befor
   same for Backpacker, Business and Luxury; the Nomad about 1 fewer on the 30-turn map (21.1 → 19.7), the same on
   the 50-turn map.
 
+## Nomad boss alerts and the car to Canada (version 2.0, step 2.5, owner's final decision 2026-11-18)
+
+The owner's decision after measuring: of the planned step 2.5 only these changes; everything else stays as it was
+(travel turns, prices, the quiz for every profile, "+1 for the other parts" after the bus or car).
+
+- **Nomad, +1 per trip only to a new area** (`POINTS_NOMAD_TRIP`, `travelOn`): a trip to an area the Nomad has
+  already visited gives 0, and brings no alert.
+- **Nomad boss alerts (replace the secret ship surprise of 2026-10-11, now removed):** a ship trip to an area not
+  visited yet brings, at the start of its 3rd (last) travel turn, a phone message from the boss (the event-news
+  phone), by turns (`Player.nomadShips`, `Travel.alert`, `nomadAlert()`):
+  - 1st, 3rd, 5th … such trip: *"Your boss appreciates you working hard, so he has changed his mind! You can accept
+    a challenge this turn if you want."* The Nomad may play one challenge that turn (+1 / −1, as for everyone).
+  - 2nd, 4th … such trip: *"Your boss is very happy with your work! You receive a bonus +1 point for this trip."*
+    (`POINTS_NOMAD_BONUS`, paid on that turn). So such a trip gives +2 in all.
+  - On the other travel turns "Play" still brings the boss's "back to work" message. Robots play the challenge
+    on their challenge turn and value the alerts when they plan (`nomadTripValue` in `src/engine/planner.ts`).
+- **Car (both maps):** from Mexico one way to **USA East or Canada West** (was USA West or USA East). Canada West
+  gives Canada's +5 at once, like the USA; the other parts still give +1 each (M5). Hitchhiking works the same
+  (the even-round secret), to both destinations.
+- **Robot fix:** a robot left with no move it wants (a ticket below its reserve, the walk back filtered out) now
+  takes the first legal move (found with the new car route: a Nomad in Mexico with 2 points).
+- **Screens:** the boss's phone alert; the trip panel (the challenge on the boss's turn, the bonus line); car texts
+  "all of the USA or all of Canada (+5)"; the Nomad's profile card and guide ("+1 for every trip to a new area").
+- **Save version 17:** a game in progress from version 16 or older can't be continued.
+- **Balance (robot games, 1,600 per line, measured during the session, not kept in the lab report):** fair results
+  today 24 of 32 (30 turns 11, 50 turns 13); with these changes 22 of 32 (10 and 12). The owner chose them for the
+  story (no secret surprise, the boss alerts) and a second car destination; tuning is step 2.7. Tests: 224 pass.
+
 ## Project setup
 
 - TypeScript, run directly by Node 22.18 or newer (no build step for tests).

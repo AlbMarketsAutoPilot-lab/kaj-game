@@ -6,12 +6,20 @@
 // GAMMA^k. Other players are not predicted (only the first move checks them). The same algorithm as the
 // balance lab's test robot (scripts/balance-lab/planner.ts).
 import { canPayAfterQuiz, continentReward, destinations, entryFees, feeTotal } from './engine.ts';
-import { bigCountryPoints, CONTINENT_BONUS, POINTS_NEW_CONTINENT, POINTS_NOMAD_TRIP, QUIZ_TRIES, ROUTE_KINDS, ticketPrice, TRAVEL_TURNS, wholeCountryTrip } from './constants.ts';
+import { bigCountryPoints, CONTINENT_BONUS, POINTS_NEW_CONTINENT, POINTS_NOMAD_BONUS, POINTS_NOMAD_TRIP, QUIZ_TRIES, ROUTE_KINDS, ticketPrice, TRAVEL_TURNS, wholeCountryTrip } from './constants.ts';
 import { areaById } from './map.ts';
 import type { Action, GameMap, GameState, Player, RouteKind } from './types.ts';
 
 interface Sim { area: string; visited: Set<string>; conts: Set<string>; bigs: Set<string>; full: Set<string>; points: number }
 interface Step { to: string; kind: RouteKind | 'walk'; gain: number; turns: number; sim: Sim }
+
+// What a trip is worth to a robot Nomad (step 2.5): +1 only to a new area; a ship to a new area also
+// brings the boss's next alert, a challenge (worth 2 × accuracy − 1 on average) or a sure +1 bonus.
+export function nomadTripValue(me: Player, kind: RouteKind, visited: boolean, accuracy: number): number {
+  if (visited) return 0;
+  if (kind !== 'port') return POINTS_NOMAD_TRIP;
+  return POINTS_NOMAD_TRIP + (me.nomadShips % 2 === 0 ? Math.max(0, 2 * accuracy - 1) : POINTS_NOMAD_BONUS);
+}
 
 const partsCache = new WeakMap<GameMap, Map<string, string[]>>();
 function parts(map: GameMap, country: string): string[] {
@@ -72,7 +80,7 @@ function steps(state: GameState, map: GameMap, me: Player, s: Sim, reserve: numb
       const wait = pay || kind === 'car' ? 0 : Math.min(QUIZ_TRIES - 1, (1 - p) / p);
       const travel = TRAVEL_TURNS[me.profile!][kind];
       const [g, n] = arrive(map, me, s, to, wholeCountryTrip(kind));
-      const nomad = me.profile === 'nomad' && travel > 0 ? POINTS_NOMAD_TRIP : 0;
+      const nomad = me.profile === 'nomad' && travel > 0 ? nomadTripValue(me, kind, s.visited.has(to), p) : 0;
       const gain = g + nomad - f - (pay ? ticket! : 0);
       n.points += gain;
       // Boarding uses a turn (the area was entered on an earlier turn, except on the first step).

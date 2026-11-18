@@ -1,11 +1,12 @@
 import {
   bigCountryParts, blockedByMoney, continentReward, canPayAfterQuiz, currentPlayer, entryFees, feeTotal, legalActions,
+  nomadAlert,
 } from './engine.ts';
-import { BUSINESS_PRICE, bigCountryPoints, CONTINENT_BONUS, POINTS_NOMAD_TRIP, QUIZ_TRIES, canRide, ticketPrice, TRAVEL_TURNS, WELCOME_BONUS, wholeCountryTrip } from './constants.ts';
+import { BUSINESS_PRICE, bigCountryPoints, CONTINENT_BONUS, QUIZ_TRIES, canRide, ticketPrice, TRAVEL_TURNS, WELCOME_BONUS, wholeCountryTrip } from './constants.ts';
 import { areaById } from './map.ts';
-import { planMove } from './planner.ts';
+import { nomadTripValue, planMove } from './planner.ts';
 import { nextRandom } from './rng.ts';
-import type { Action, BusinessKind, Continent, GameMap, GameState, Player, RobotLevel } from './types.ts';
+import type { Action, BusinessKind, Continent, GameMap, GameState, Player, RobotLevel, RouteKind } from './types.ts';
 
 // The robot (task 13): the random robot plus simple rules. It scores the legal moves and picks
 // the best one, with a hidden random tie-break. One robot, three levels (owner's change, task 13).
@@ -121,8 +122,9 @@ function choose(state: GameState, map: GameMap, actions: Action[], me: Player, s
     return { type: 'examAnswer', choice: answer(exam.questions[exam.answers.length].correct, settings, rnd) };
   }
   if (first.type === 'travel') {
-    // A robot Nomad works on its trips and never presses "Play" (owner, 2026-10-11).
-    const play = me.points >= settings.challengeFrom && me.profile !== 'nomad';
+    // A robot Nomad works on its trips and never presses "Play" (owner, 2026-10-11), except on its
+    // boss's challenge turn (step 2.5).
+    const play = me.points >= settings.challengeFrom && (me.profile !== 'nomad' || nomadAlert(me) === 'challenge');
     return actions.find((a) => a.type === 'travel' && (a.challenge === true) === play) ?? first;
   }
   if (first.type === 'chooseProfile') return actions[Math.floor(rnd.next() * actions.length)];
@@ -200,7 +202,7 @@ function chooseMove(state: GameState, map: GameMap, moves: Action[], me: Player,
       const lastTry = action === quiz && me.quizWrong >= QUIZ_TRIES - 1 && !canPayAfterQuiz(state, me, a.kind, a.to);
       if (lastTry && plain.some((b) => b.type === 'walk')) continue;
       const travel = TRAVEL_TURNS[me.profile!][a.kind];
-      const nomad = me.profile === 'nomad' && travel > 0 ? POINTS_NOMAD_TRIP : 0;
+      const nomad = me.profile === 'nomad' && travel > 0 ? nomadTripValue(me, a.kind, me.visitedAreas.includes(a.to), settings.accuracy) : 0;
       // The bus and the car give the whole country's points at once (owner's rule, M5, task 19).
       const value = wholeCountryTrip(a.kind) ? busArrivalValue(map, me, a.to) : arrivalValue(map, me, a.to);
       options.push({
@@ -210,6 +212,9 @@ function chooseMove(state: GameState, map: GameMap, moves: Action[], me: Player,
     }
   }
 
+  // Nothing it wants (e.g. a ticket below its reserve, and the walk back filtered out): the first
+  // legal move, so a robot is never left without one (found in step 2.5, Mexico with 2 points).
+  if (options.length === 0) return plain[0];
   let chosen: Move;
   const nomadTarget = me.profile === 'nomad' && state.round >= robotRound(ROBOT_NOMAD_ROUND, state.totalRounds) && me.visitedContinents.length < CONTINENT_BONUS.nomad!.continents;
   if (nomadTarget) {

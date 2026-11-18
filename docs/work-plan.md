@@ -91,7 +91,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | 2.2 | Flickering on slow tablets and Galaxy S25: measure, fix, owner's phone test | medium | 1 | — | ✅ done (walk glow and guide map glow still, no pulse; small drawings keep moving, owner); the owner's phone test runs over the coming months |
 | 2.3 | More geography questions: tag every fact, ~250 new geography facts (owner checks), script-made questions | medium | 2 | — | ✅ done (owner-approved): every fact tagged, airline quiz 1 challenge in 10, 168 test-only geography facts, travel challenges geography 1 in 3; 37% / 32–33% geography (was 48–50%); script-made questions not needed; save stays 15 |
 | 2.4 | New ship and plane routes on both maps, map check, stuck-state checker | **high** | 1 | — | ✅ done (owner-approved): the owner's routes on both maps (30 turns 13 airports / 11 ports / 15 connections, 50 turns 15 / 13 / 18), robots no longer walk straight back for nothing, Pacific route lines from both ends, guide says Iceland; fair 13 → 10 of 16 (30) and 12 → 14 of 16 (50), tuning in 2.7; saves v16 |
-| 2.5 | Travel by profile (turns, prices, quiz = Backpacker turns, quiz popup), bus and car whole country | **high** | 2 | — | |
+| 2.5 | Travel by profile (turns, prices, quiz = Backpacker turns, quiz popup), bus and car whole country | **high** | 2 | — | ✅ done (owner's final decision, 2026-11-18): only the Nomad boss alerts (+1 per trip to new areas only; ship alerts: a challenge, then a +1 bonus, by turns; surprise removed) and the car to USA East or Canada West; the rest of 2.5 dropped; saves v17 |
 | 2.6 | Citizenship from turn 1, Business buys 2nd/3rd, visa test | **high** | 2 | — | |
 | 2.7 | Balance tuning of all 2.0 rule changes (4 profiles, boredom, excitement) | **high** | 1 | — | |
 | 2.8 | Event cards as real geography news | medium | 1 | — | |
@@ -715,6 +715,15 @@ Map check, stuck-state checker, businesses at the new airports and ports, map sc
 - The Nomad's secret ship surprise (`nomadSurprise`) is removed.
 - **Bus** (Mongolia → Siberia or China West, Nomad and Backpacker) and **car** (Mexico → **USA East or
   Canada West**): the whole country's points at once; its other parts then give **0** (replaces M5's +1).
+
+- **Done (2026-11-18, owner's final decision after measuring):** the travel table, the 3-turn quiz trips and "other
+  parts 0" were measured and **dropped** (a 3-turn free trip failed the random-robot visa test; no version improved
+  fairness on both maps). Kept: the Nomad's +1 only for trips to new areas, its boss alerts on ship trips to new
+  areas (a challenge, then a +1 bonus, by turns; the secret surprise removed), the car to USA East or Canada West,
+  and a robot fix. Rules in `docs/engine.md` ("Nomad boss alerts and the car to Canada"). Also measured, not
+  adopted: Luxury without the quiz (fixes the 30-turn map, too weak on the 50-turn map; it would also need "go home"
+  to count tickets it can't pay) and quiz discounts for Business and Luxury (same pattern). Robot-game fairness at
+  1,600 games per line: today 24 of 32, with this step 22 of 32. Saves v17.
 
 **2.6 (B) Citizenship and visa test (high, 2).** Replaces scope §9 "button in the area", tasks 14d/14f,
 Luxury's instant citizenship and Business's +6.

@@ -116,8 +116,12 @@ export const TRAVEL_TURNS: Readonly<Record<Profile, Readonly<Record<RouteKind, n
 export const QUIZ_TRIES = 3;
 
 // Digital Nomad: +1 for every trip by plane, ship, train, bus or car (balance, owner 2026-10-11: per trip,
-// no longer per travel turn, so a 3-turn ship trip gives +1 like a plane).
+// no longer per travel turn, so a 3-turn ship trip gives +1 like a plane). Step 2.5 (owner): only on a
+// trip to an area the Nomad has not visited yet; a repeated trip gives 0.
 export const POINTS_NOMAD_TRIP = 1;
+// Step 2.5 (owner): the boss's bonus on every second ship trip to a new area (the other one brings a
+// challenge offer instead; see nomadAlert in engine.ts).
+export const POINTS_NOMAD_BONUS = 1;
 
 // Visa: paid to the citizen each time another player enters their area (rulebook section 7).
 export const VISA_PRICE = 2;

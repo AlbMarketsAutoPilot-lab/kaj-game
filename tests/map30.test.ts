@@ -81,7 +81,7 @@ test('30-turn map: 13 airports, 11 ports, 3 stations, 1 bus stop, 1 car rental, 
   assert.equal(at('port'), 11);
   assert.equal(at('station'), 3);
   assert.deepEqual(routes.filter((r) => r.kind === 'bus').map((r) => `${r.a} ${r.b} ${r.oneWay}`), ['mongolia russia-east true', 'mongolia china-west true']);
-  assert.deepEqual(routes.filter((r) => r.kind === 'car').map((r) => `${r.a} ${r.b} ${r.oneWay}`), ['mexico usa-west true', 'mexico usa-east true']);
+  assert.deepEqual(routes.filter((r) => r.kind === 'car').map((r) => `${r.a} ${r.b} ${r.oneWay}`), ['mexico canada-west true', 'mexico usa-east true']);
   for (const a of areas) {
     for (const kind of ['airport', 'port', 'station', 'bus', 'car']) {
       const n = routes.filter((r) => r.kind === kind && (r.a === a.id || r.b === a.id)).length;

@@ -8,6 +8,7 @@
 import { canPayAfterQuiz, continentReward, currentPlayer, destinations, entryFees, feeTotal, legalActions } from '../../src/engine/engine.ts';
 import { bigCountryPoints, CONTINENT_BONUS, POINTS_NEW_CONTINENT, QUIZ_TRIES, ROUTE_KINDS, ticketPrice, TRAVEL_TURNS } from '../../src/engine/constants.ts';
 import { noWalkBack, ROBOT_LEVELS, robotAction } from '../../src/engine/normal-robot.ts';
+import { nomadTripValue } from '../../src/engine/planner.ts';
 import { areaById } from '../../src/engine/map.ts';
 import type { Action, GameMap, GameState, Player, RobotLevel, RouteKind } from '../../src/engine/types.ts';
 
@@ -73,8 +74,8 @@ function steps(state: GameState, map: GameMap, me: Player, s: Sim, reserve: numb
       const wait = pay ? 0 : Math.min(QUIZ_TRIES - 1, (1 - p) / p);
       const travel = TRAVEL_TURNS[me.profile!][kind];
       const [g, n] = arrive(map, me, s, to, kind === 'bus');
-      // The Nomad: +1 per trip (the game's rule since 2026-10-11).
-      const nomad = me.profile === 'nomad' && travel > 0 ? 1 : 0;
+      // The Nomad: +1 per trip to a new area, and its boss's alerts on ships (the game's rule, step 2.5).
+      const nomad = me.profile === 'nomad' && travel > 0 ? nomadTripValue(me, kind, s.visited.has(to), p) : 0;
       const gain = g + nomad - f - (pay ? ticket! : 0);
       n.points += gain;
       // Boarding uses a turn (the area was entered on an earlier turn, except on the first step).

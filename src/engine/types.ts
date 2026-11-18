@@ -128,6 +128,8 @@ export interface Player {
   arrivedRound: number;
   // The round of a hitchhike that failed: no second try in the same turn (task 19).
   hitchFailedRound: number | null;
+  // The Nomad's ship trips to new areas so far (step 2.5): its boss alerts alternate.
+  nomadShips: number;
   // The area the player walked from on their last move; null after a trip, going home or the start
   // (step 2.4). Only the robots use it: they don't walk straight back for nothing.
   cameFrom?: string | null;
@@ -199,15 +201,18 @@ export interface Exam {
   answers: (0 | 1)[];
 }
 
+// The Nomad's boss alert (step 2.5): the challenge offer, or the +1 bonus.
+export type NomadAlert = 'challenge' | 'bonus';
+
 export interface Travel {
   kind: RouteKind;
   from: string;
   to: string;
   // Travel turns still to come. At 0 the player lands, or waits if the destination is taken.
   turnsLeft: number;
-  // The Nomad's presses of "Play the challenge" on this trip (owner, 2026-10-11: a secret, see
-  // nomadSurprise in engine.ts).
-  workPresses?: number;
+  // The Nomad's boss alert on a ship trip to a new area (step 2.5, owner): at the start of the 3rd
+  // travel turn, by turns a challenge offer, then a +1 bonus (see nomadAlert in engine.ts).
+  alert?: NomadAlert;
 }
 
 // One a/b airline-quiz question. Nothing is secret in v1, so it can sit in the state.

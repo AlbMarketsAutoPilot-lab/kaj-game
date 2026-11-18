@@ -16,6 +16,7 @@ import {
   POINTS_BUSINESS_CITIZENSHIP,
   POINTS_NEW_AREA,
   POINTS_NEW_CONTINENT,
+  POINTS_NOMAD_BONUS,
   POINTS_NOMAD_TRIP,
   POINTS_WONDER,
   PROFILES,
@@ -57,6 +58,7 @@ import type {
   Player,
   Profile,
   RouteKind,
+  NomadAlert,
 } from './types.ts';
 
 export function createGame(config: GameConfig, map: GameMap): GameState {
@@ -108,6 +110,7 @@ export function createGame(config: GameConfig, map: GameMap): GameState {
     fullContinents: [],
     arrivedRound: 1,
     hitchFailedRound: null,
+    nomadShips: 0,
     cameFrom: null,
   }));
 
@@ -325,14 +328,12 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
       // No event cards on trips (owner's rule, task 12). A challenge, if the player wants one,
       // is drawn now and answered with the next move; the trip goes on after the answer.
       // The Nomad works on its trips (owner, 2026-10-11): it may press "Play", but it gets no
-      // challenge (the screens tell it to get back to work), and the trip goes on. Secret surprise
-      // (owner, like Madagascar's, never in the rules): on a ship, the 3rd press of the same trip
-      // gives a real challenge, for insisting.
-      if (action.challenge && (me.profile !== 'nomad' || nomadSurprise(me))) {
+      // challenge (the screens tell it to get back to work), and the trip goes on. Step 2.5 (owner,
+      // replaces the secret ship surprise): on the boss's challenge turn it may play one.
+      if (action.challenge && (me.profile !== 'nomad' || nomadAlert(me) === 'challenge')) {
         next.challenge = pickChallenge(next, me);
         return next;
       }
-      if (action.challenge) me.travel!.workPresses = (me.travel!.workPresses ?? 0) + 1;
       travelOn(next, map, me);
       endTurn(next, map);
       return next;
@@ -447,6 +448,12 @@ function depart(
   // so nothing is owed on landing; a citizenship or tours that appear during the trip are free.
   payFees(state, me, entryFees(state, me, me.area, to), to);
   me.travel = { kind, from: me.area!, to, turnsLeft: TRAVEL_TURNS[me.profile!][kind] };
+  // Step 2.5 (owner): a Nomad's ship trip to a new area brings a boss alert on its 3rd travel turn,
+  // by turns: first a challenge offer, then a +1 bonus.
+  if (me.profile === 'nomad' && kind === 'port' && !me.visitedAreas.includes(to)) {
+    me.travel.alert = me.nomadShips % 2 === 0 ? 'challenge' : 'bonus';
+    me.nomadShips += 1;
+  }
   me.area = null;
   me.quizWrong = 0;
   if (me.travel.turnsLeft === 0) land(state, map, me);
@@ -686,7 +693,7 @@ function startTurn(state: GameState, map: GameMap): void {
 // is marked visited. After that every other part still gives +1 when first visited (owner: this
 // rewards the Nomad and the Backpacker, who alone can take the bus). A country whose points were
 // already given gives nothing more by bus.
-// The car (task 19) works like the bus: from Mexico, the USA's points at once.
+// The car (task 19) works like the bus: from Mexico, the USA's or (step 2.5) Canada's points at once.
 function arrive(state: GameState, map: GameMap, me: Player, area: Area, byBus = false): void {
   me.area = area.id;
   me.arrivedRound = state.round;
@@ -740,19 +747,22 @@ function wholeContinent(state: GameState, map: GameMap, me: Player, continent: C
   state.rewards.push({ seat: me.seat, kind: 'continent', points, continent });
 }
 
-// The Nomad's secret surprise (owner, 2026-10-11): on a ship trip, after 2 presses of "Play the
-// challenge" (each answered by the boss), the 3rd press gives a real challenge.
-export const NOMAD_SURPRISE_PRESSES = 2;
-export function nomadSurprise(me: Player): boolean {
-  return me.profile === 'nomad' && me.travel?.kind === 'port' && (me.travel.workPresses ?? 0) >= NOMAD_SURPRISE_PRESSES;
+// The Nomad's boss alert of this travel turn (step 2.5, owner; replaces the secret ship surprise of
+// 2026-10-11): on a ship trip to a new area, the 3rd (last) travel turn brings a challenge offer or a
+// +1 bonus, by turns. Null on any other turn, and while waiting for a taken destination.
+export function nomadAlert(me: Player): NomadAlert | null {
+  const trip = me.travel;
+  return me.profile === 'nomad' && trip?.alert && trip.turnsLeft === 1 ? trip.alert : null;
 }
 
 // One travel turn: the player lands at the end of the last one. The Nomad gets +1 once per trip,
 // on its first travel turn (owner, 2026-10-11: per trip, not per travel turn; a wait for a taken
-// destination gives nothing).
+// destination gives nothing), only on a trip to an area it has not visited (step 2.5, owner), and
+// the boss's +1 bonus on the bonus turn.
 function travelOn(state: GameState, map: GameMap, me: Player): void {
   const trip = me.travel!;
-  if (me.profile === 'nomad' && trip.turnsLeft === TRAVEL_TURNS.nomad[trip.kind]) me.points = addPoints(me.points, POINTS_NOMAD_TRIP);
+  if (me.profile === 'nomad' && trip.turnsLeft === TRAVEL_TURNS.nomad[trip.kind] && !me.visitedAreas.includes(trip.to)) me.points = addPoints(me.points, POINTS_NOMAD_TRIP);
+  if (nomadAlert(me) === 'bonus') me.points = addPoints(me.points, POINTS_NOMAD_BONUS);
   if (trip.turnsLeft > 0) trip.turnsLeft -= 1;
   if (trip.turnsLeft === 0) land(state, map, me);
 }
