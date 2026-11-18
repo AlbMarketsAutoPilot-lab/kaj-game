@@ -2,13 +2,13 @@
 // landscape board (left: the current area drawn; right: the world map and the turn panel).
 // Robots play with simple rules, at the level chosen for each seat (task 13).
 
-import { BUSINESS_PRICE, cardEvery, CHALLENGE_POINTS, GAME_LENGTHS, CONTINENT_BONUS, EXAM_FACTS, EXAM_PASS, POINTS_NOMAD_TRIP, POINTS_NEW_AREA, POINTS_NEW_CONTINENT, POINTS_WONDER, GO_HOME_TURNS, POINTS_BUSINESS_CITIZENSHIP, QUIZ_TRIES, ROUTE_KINDS, bigCountryPoints, canRide, TICKET_BUSINESS, TICKET_PRICE, ticketPrice, TOUR_FEE, TRAVEL_TURNS, VISA_PRICE } from '../engine/constants.ts';
+import { BUSINESS_PRICE, cardEvery, CHALLENGE_POINTS, GAME_LENGTHS, CONTINENT_BONUS, EXAM_FACTS, EXAM_PASS, POINTS_NOMAD_BONUS, POINTS_NOMAD_TRIP, POINTS_NEW_AREA, POINTS_NEW_CONTINENT, POINTS_WONDER, GO_HOME_TURNS, POINTS_BUSINESS_CITIZENSHIP, QUIZ_TRIES, ROUTE_KINDS, bigCountryPoints, canRide, TICKET_BUSINESS, TICKET_PRICE, ticketPrice, TOUR_FEE, TRAVEL_TURNS, VISA_PRICE } from '../engine/constants.ts';
 import {
-  apply, blockedByMoney, continentReward, examPassed, bookedBy, businessAt, canPayAfterQuiz, destinations, businessValue, createGame, currentPlayer, entryFees, feeTotal, finalScore, homeFor, landTurnsToCard, legalActions, nomadSurprise,
+  apply, blockedByMoney, continentReward, examPassed, bookedBy, businessAt, canPayAfterQuiz, destinations, businessValue, createGame, currentPlayer, entryFees, feeTotal, finalScore, homeFor, landTurnsToCard, legalActions, nomadAlert,
 } from '../engine/engine.ts';
 import { robotAction } from '../engine/normal-robot.ts';
 import { loadGame, saveGame } from '../engine/save.ts';
-import type { Action, Area, BusinessKind, Reward, Challenge, ChallengeResult, ChallengeType, Continent, Deck, DrawnCard, GameState, Payment, Player, Profile, RobotLevel, RouteKind, SeatKind } from '../engine/types.ts';
+import type { Action, Area, BusinessKind, Reward, Challenge, ChallengeResult, ChallengeType, Continent, Deck, DrawnCard, GameState, NomadAlert, Payment, Player, Profile, RobotLevel, RouteKind, SeatKind } from '../engine/types.ts';
 import type { GameLength } from '../engine/constants.ts';
 import type { GameMap } from '../engine/types.ts';
 import { mapById, mapFor } from '../maps/index.ts';
@@ -413,18 +413,18 @@ function profileNote(p: Profile, who = ''): HTMLElement {
   const plane = TRAVEL_TURNS[p].airport;
   const ship = TRAVEL_TURNS[p].port;
   const trips = `planes ${plane ? plural(plane, 'travel turn') : 'arrive right away'}, ships ${plural(ship, 'travel turn')}`;
-  const CAR_LINE = `Can rent a car in Mexico (${plural(ticketPrice('nomad', 'car') ?? 0, 'point')}): all of the USA (+5) at once.`;
+  const CAR_LINE = `Can rent a car in Mexico (${plural(ticketPrice('nomad', 'car') ?? 0, 'point')}): all of the USA or all of Canada (+5) at once.`;
   const good: Record<Profile, string[]> = {
-    backpacker: ['Never pays for a ticket: always the free quiz.', 'Can take the bus from Mongolia: all of Russia (+5) or all of China (+3) at once.', 'Can try to hitchhike from Mexico: all of the USA (+5) at once, if a car stops.', `+${CONTINENT_BONUS.backpacker!.points} for visiting ${CONTINENT_BONUS.backpacker!.continents} continents.`, 'Its own Backpacker event cards.'],
+    backpacker: ['Never pays for a ticket: always the free quiz.', 'Can take the bus from Mongolia: all of Russia (+5) or all of China (+3) at once.', 'Can try to hitchhike from Mexico: all of the USA or all of Canada (+5) at once, if a car stops.', `+${CONTINENT_BONUS.backpacker!.points} for visiting ${CONTINENT_BONUS.backpacker!.continents} continents.`, 'Its own Backpacker event cards.'],
     business: [`+${plural(POINTS_BUSINESS_CITIZENSHIP, 'point')} when you get citizenship (any area).`, `Fast: ${trips}.`, CAR_LINE],
     luxury: ['Can fly or sail to any airport or port.', 'Citizenship at once, with no test.', `Fast: ${trips}.`, CAR_LINE],
-    nomad: [`Cheapest plane and ship ticket: ${plural(price ?? 0, 'point')}.`, `+${POINTS_NOMAD_TRIP} for every trip by plane, ship, train, bus or car (it works on the way).`, `+${CONTINENT_BONUS.nomad!.points} for visiting ${CONTINENT_BONUS.nomad!.continents} continents.`, 'Can take the bus from Mongolia: all of Russia (+5) or all of China (+3) at once.', CAR_LINE],
+    nomad: [`Cheapest plane and ship ticket: ${plural(price ?? 0, 'point')}.`, `+${POINTS_NOMAD_TRIP} for every trip to a new area by plane, ship, train, bus or car (it works on the way).`, 'Long ship trips to new areas: its boss sends a challenge or a +1 bonus, by turns.', `+${CONTINENT_BONUS.nomad!.points} for visiting ${CONTINENT_BONUS.nomad!.continents} continents.`, 'Can take the bus from Mongolia: all of Russia (+5) or all of China (+3) at once.', CAR_LINE],
   };
   const bad: Record<Profile, string[]> = {
     backpacker: ['Travels by plane, ship, train or bus only with the quiz (one try per turn), and never rents a car.', `Slow: ${trips}.`],
     business: [`Ticket ${plural(price ?? 0, 'point')}.`, 'Can\'t take the bus.'],
     luxury: [`The highest ticket: ${plural(price ?? 0, 'point')}.`, 'Can\'t take the train or the bus.'],
-    nomad: [`Train ticket ${plural(ticketPrice('nomad', 'station') ?? 0, 'point')}.`, 'Can never ask for citizenship.', 'Works on trips: no travel challenges.', `Slow: ${trips}.`],
+    nomad: [`Train ticket ${plural(ticketPrice('nomad', 'station') ?? 0, 'point')}.`, 'Can never ask for citizenship.', 'Works on trips: no travel challenges (except when its boss allows one).', `Slow: ${trips}.`],
   };
   return el('div', { className: 'note profile-note' },
     el('strong', {}, who ? '' : 'You chose ', iconEl(p), ` ${PROFILE_LABEL[p]}${who ? '' : '.'}`),
@@ -648,6 +648,27 @@ function phoneNews(c: DrawnCard, onRead: () => void): HTMLElement {
         el('div', { className: 'phone-app' }, el('span', { className: 'phone-badge', textContent: 'K' }), 'KAJ News', el('span', { className: 'phone-now', textContent: 'now' })),
         el('h4', {}, dot(c.seat), ` ${nameOf(c.seat)}, breaking news!`),
         el('p', { textContent: area ? `📍 From ${areaById.get(area)!.name}, where you are now…` : '📍 Where you are now…' })),
+      el('div', { className: 'phone-read' }, read))));
+}
+
+// The Nomad's boss alert (step 2.5, owner): on a ship trip to a new area, at the start of the 3rd turn,
+// by turns a challenge offer or a +1 bonus. The same phone as the event news.
+const BOSS_ALERT: Record<NomadAlert, string> = {
+  challenge: 'Your boss appreciates you working hard, so he has changed his mind! You can accept a challenge this turn if you want.',
+  bonus: `Your boss is very happy with your work! You receive a bonus +${plural(POINTS_NOMAD_BONUS, 'point')} for this trip.`,
+};
+function phoneBoss(seat: number, alert: NomadAlert, onRead: () => void): HTMLElement {
+  const read = button('👍 OK', onRead);
+  read.className = 'primary';
+  return el('div', { className: 'phone-wrap' },
+    el('div', { className: 'phone' }, el('div', { className: 'phone-screen' },
+      el('div', { className: 'phone-notch' }),
+      el('div', { className: 'phone-time', textContent: new Date().toTimeString().slice(0, 5) }),
+      el('div', { className: 'phone-date', textContent: `Round ${state?.round} of ${state?.totalRounds}` }),
+      el('div', { className: 'phone-note' },
+        el('div', { className: 'phone-app' }, el('span', { className: 'phone-badge', textContent: '💼' }), 'Message from your boss', el('span', { className: 'phone-now', textContent: 'now' })),
+        el('h4', {}, dot(seat), ` ${nameOf(seat)}, ${alert === 'bonus' ? 'a bonus!' : 'good news!'}`),
+        el('p', { textContent: BOSS_ALERT[alert] })),
       el('div', { className: 'phone-read' }, read))));
 }
 
@@ -985,7 +1006,7 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
         : 'Tap a continent on the map. Each player starts on a different continent. Welcome bonus: Europe, Asia, Africa +3 · Americas +4 · Oceania +5.' }),
       zoom ? el('p', { className: 'small', textContent: `🏛️ Areas with this sign have a wonder: your first visit there gives +${plural(POINTS_WONDER, 'point')} more. Each wonder has Guided Tours that one player can buy for ${plural(BUSINESS_PRICE.tours, 'point')}; after that, every other player who visits pays the owner a ${TOUR_FEE}-point tour fee.` }) : '',
       me.profile === 'backpacker'
-        ? el('p', { className: 'small', textContent: `🎒 Tip: from Europe, Asia or Africa you can walk to 3 continents (+${CONTINENT_BONUS.backpacker!.points} Backpacker bonus). Your free quiz works on every plane, ship, train and bus: a right answer is a free trip. In Mongolia, the bus gives you all of Russia's points (+5) or all of China's (+3) at once. In Mexico, try to hitchhike: if a car stops, all of the USA's points (+5) at once.` })
+        ? el('p', { className: 'small', textContent: `🎒 Tip: from Europe, Asia or Africa you can walk to 3 continents (+${CONTINENT_BONUS.backpacker!.points} Backpacker bonus). Your free quiz works on every plane, ship, train and bus: a right answer is a free trip. In Mongolia, the bus gives you all of Russia's points (+5) or all of China's (+3) at once. In Mexico, try to hitchhike: if a car stops, all of the USA's or Canada's points (+5) at once.` })
         : '');
   } else if (s.quiz) {
     renderQuiz(box, s, who);
@@ -1020,8 +1041,8 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
       ? `Clickety-clack through the night. In the dining car someone unfolds a map: "A geography challenge? Right +${CHALLENGE_POINTS}, wrong −${CHALLENGE_POINTS}."`
       : `Calm water, a sky full of stars. In the ship's lounge someone sets up a quiz table: "A geography challenge? Right +${CHALLENGE_POINTS}, wrong −${CHALLENGE_POINTS}."`;
     const play = button('🌍 Play the challenge', () => {
-      // The boss answers, except for the secret surprise (a real challenge, engine.ts nomadSurprise).
-      if (me.profile === 'nomad' && !nomadSurprise(me)) { nomadAtWork = true; render(); return; }
+      // The boss answers, except on its challenge turn (step 2.5, engine.ts nomadAlert).
+      if (me.profile === 'nomad' && nomadAlert(me) !== 'challenge') { nomadAtWork = true; render(); return; }
       act({ type: 'travel', challenge: true });
     });
     play.className = 'primary';
@@ -1038,9 +1059,9 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
       el('p', { className: 'small', textContent: challenge
         ? `${offer} One question, ${CHALLENGE_SECONDS} seconds. You don't have to play.`
         : `A challenge needs at least ${plural(CHALLENGE_POINTS, 'point')}, so there is none this turn.` }),
-      me.profile === 'nomad' ? el('p', { className: 'small', textContent: `💻 Digital Nomad: +${POINTS_NOMAD_TRIP} for every trip, paid on its first travel turn.` }) : '',
+      me.profile === 'nomad' ? el('p', { className: 'small', textContent: nomadAlert(me) === 'bonus' ? `🎁 Your boss's bonus: +${plural(POINTS_NOMAD_BONUS, 'point')} on this trip.` : `💻 Digital Nomad: +${POINTS_NOMAD_TRIP} for every trip to a new area, paid on its first travel turn.` }) : '',
       el('div', { className: 'row' }, ...(challenge
-        ? [play, button(me.profile === 'nomad' ? '💻 Keep working' : plane || train || bus || car ? '😴 No thanks' : '🌅 No thanks', () => act({ type: 'travel' }))]
+        ? [play, button(me.profile === 'nomad' && nomadAlert(me) !== 'challenge' ? '💻 Keep working' : plane || train || bus || car ? '😴 No thanks' : '🌅 No thanks', () => act({ type: 'travel' }))]
         : [button('Continue the trip', () => act({ type: 'travel' }))]))));
   } else {
     const here = areaById.get(me.area!)!;
@@ -1505,8 +1526,8 @@ function renderGuide(s: GameState, actions: Action[]): HTMLElement | string {
     const turns = TRAVEL_TURNS[me.profile!][kind];
     if (kind === 'car') {
       lines.push(price === null
-        ? `👍 Cars drive from here to ${to.join(' or ')}. Want to try to hitchhike? If a car stops, you ride for free and get all of the USA's points (+5) at once; its other parts still give +1 each. If none stops, walk on. Tap the hitchhiker.`
-        : `🚗 There is a car rental here: rent a car to ${to.join(' or ')} for ${plural(price, 'point')} (no quiz) and get all of the USA's points (+5) at once; its other parts still give +1 each. ${plural(turns, 'travel turn')}. Tap the car.`);
+        ? `👍 Cars drive from here to ${to.join(' or ')}. Want to try to hitchhike? If a car stops, you ride for free and get all of the USA's or Canada's points (+5) at once; its other parts still give +1 each. If none stops, walk on. Tap the hitchhiker.`
+        : `🚗 There is a car rental here: rent a car to ${to.join(' or ')} for ${plural(price, 'point')} (no quiz) and get all of the USA's or Canada's points (+5) at once; its other parts still give +1 each. ${plural(turns, 'travel turn')}. Tap the car.`);
       continue;
     }
     lines.push(`${VEHICLE[kind]} There is ${placeName} here: ${words.verb} to ${to.join(' or ')}. ${
@@ -1649,6 +1670,12 @@ function renderModal(s: GameState, actions: Action[], isRobot: boolean): Modal |
       return { turn: false, node: wrap(phoneNews(s.card, () => { seenCards.add(`${key}-phone`); render(); }), 'phone-modal'), sound: 'tap', soundKey: `${key}-phone` };
     }
     return { turn: false, node: wrap(el('div', {}, eventCard(s.card), ok(() => { seenCards.add(key); render(); })), 'event'), sound: bad ? 'card-bad' : 'card-good', soundKey: key };
+  }
+  // The Nomad's boss alert (step 2.5, owner): shown once, at the start of the travel turn it is for.
+  const bossAlert = s.phase === 'play' && me.kind === 'human' && !isRobot && !s.challenge ? nomadAlert(me) : null;
+  const bossKey = `boss-${s.round}-${me.seat}`;
+  if (bossAlert && !seenCards.has(bossKey)) {
+    return { turn: false, node: wrap(phoneBoss(me.seat, bossAlert, () => { seenCards.add(bossKey); render(); }), 'phone-modal'), sound: 'tap', soundKey: bossKey };
   }
   // A wonder poster (task M6, owner's rules): a person's turn begins in a wonder area they
   // reached on their last turn; shown once per wonder per game, never for robots and never for
@@ -2203,8 +2230,8 @@ function carPopup(
   const tried = me.area === areaId && me.hitchFailedRound === s.round;
   box.append(el('div', { className: 'row spread' }, el('h3', { textContent: hiker ? `👍 Hitchhiking in ${area.name}` : `🚗 Car rental of ${area.name}` }), close),
     el('p', { className: 'small', textContent: hiker
-      ? `Want to try to hitchhike, so you can see all of the USA? Raise your thumb: if a car stops, you ride for free (${plural(turns, 'travel turn')}) and get all of the USA's points (+5) at once. If none stops, you walk on.`
-      : `Want to rent a car to see all of the USA? ${plural(price ?? 0, 'point')}, no quiz, ${plural(turns, 'travel turn')}: all of the USA's points (+5) at once; its other parts still give +1 each.` }),
+      ? `Want to try to hitchhike, so you can see all of the USA or Canada? Raise your thumb: if a car stops, you ride for free (${plural(turns, 'travel turn')}) and get all of the USA's or Canada's points (+5) at once. If none stops, you walk on.`
+      : `Want to rent a car to see all of the USA or Canada? ${plural(price ?? 0, 'point')}, no quiz, ${plural(turns, 'travel turn')}: all of the USA's or Canada's points (+5) at once; its other parts still give +1 each.` }),
     businessLine('car'),
     el('div', { className: 'row' }, buyButton('car')));
   if (tried) box.append(el('p', { className: 'note', textContent: '👍 No car stopped this turn. Walk on to another area.' }));
@@ -2308,8 +2335,8 @@ function renderAreaDetails(s: GameState, id: string): HTMLElement {
     routes('station').length ? `🚆 Station: trains to ${routes('station').join(', ')} (not for Luxury)` : '',
     routes('bus').length ? `🚌 Bus stop: buses to ${routes('bus').join(' or ')}, one way (Nomad and Backpacker only): the whole country\'s points at once` : '',
     routes('car').length ? (me.profile === 'backpacker'
-      ? `👍 Hitchhiking to ${routes('car').join(' or ')}, one way, free if a car stops: all of the USA\'s points at once`
-      : `🚗 Car rental: cars to ${routes('car').join(' or ')}, one way, ${plural(ticketPrice('nomad', 'car') ?? 0, 'point')} (no quiz): all of the USA\'s points at once`) : '',
+      ? `👍 Hitchhiking to ${routes('car').join(' or ')}, one way, free if a car stops: all of the USA\'s or Canada\'s points at once`
+      : `🚗 Car rental: cars to ${routes('car').join(' or ')}, one way, ${plural(ticketPrice('nomad', 'car') ?? 0, 'point')} (no quiz): all of the USA\'s or Canada\'s points at once`) : '',
     `🚶 Walk to: ${a.neighbours.map((n) => areaById.get(n)!.name).join(', ') || 'nowhere (plane or ship only)'}`,
     ...s.businesses.filter((b) => b.area === id).map((b) => `${BUSINESS_ICON[b.kind]} ${capital(BUSINESS_NAME[b.kind])}: ${b.owner === null ? `for sale, ${plural(BUSINESS_PRICE[b.kind], 'point')}` : `owned by ${nameOf(b.owner)}`}`),
     ...s.players.filter((p) => p.citizenship?.includes(id)).map((p) => `🛂 ${nameOf(p.seat)} is a citizen here: others pay a ${VISA_PRICE}-point visa`),

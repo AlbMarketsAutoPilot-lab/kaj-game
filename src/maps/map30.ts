@@ -249,8 +249,8 @@ const ROUTES: Route[] = [
   // or China West (no bus back).
   { kind: 'bus', a: 'mongolia', b: 'russia-east', oneWay: true },
   { kind: 'bus', a: 'mongolia', b: 'china-west', oneWay: true },
-  // Task 19 (owner-approved): the car leaves only from Mexico, one way to USA West or USA East.
-  { kind: 'car', a: 'mexico', b: 'usa-west', oneWay: true },
+  // Task 19 (owner-approved): the car leaves only from Mexico, one way; step 2.5 (owner): to Canada West or USA East.
+  { kind: 'car', a: 'mexico', b: 'canada-west', oneWay: true },
   { kind: 'car', a: 'mexico', b: 'usa-east', oneWay: true },
 ];
 

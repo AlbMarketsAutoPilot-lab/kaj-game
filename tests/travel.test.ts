@@ -98,6 +98,16 @@ test('Nomad ship: 3 travel turns, +1 for the trip (owner, 2026-10-11); Business 
   assert.equal(seatOf(b, 0).points, 3 - 2 + 1 + 2);
 });
 
+test('Nomad (step 2.5): +1 for a trip only to an area not visited yet', () => {
+  let s = game(['eu-west', 'af-north'], 'nomad');
+  seatOf(s, 0).visitedAreas.push('as-east');
+  seatOf(s, 0).visitedContinents.push('Asia');
+  s = board(s, 'as-east');
+  s = travel(walk(s, 'af-south'));
+  assert.equal(seatOf(s, 0).area, 'as-east');
+  assert.equal(seatOf(s, 0).points, 3 - 1); // the ticket only: no trip point, nothing new on arrival
+});
+
 // Owner's rule (task 13): a booked area (someone is travelling there) is closed, as if the
 // traveller were already there; and nobody boards for an area where someone stands.
 test('booked: nobody walks into or boards for an area someone is travelling to', () => {
