@@ -4,7 +4,7 @@ import { BUSINESS_PRICE, GO_HOME_TURNS, TOUR_FEE, VISA_PRICE } from '../src/engi
 import { apply, businessAt, finalScore, legalActions, mapBusinesses, rank } from '../src/engine/engine.ts';
 import type { Action, BusinessKind, GameMap, GameState, Player, Profile } from '../src/engine/types.ts';
 import { testMap, travelMap } from './fixtures/test-map.ts';
-import { seatOf, startedGame } from './helpers.ts';
+import { passVisaTest, seatOf, startedGame } from './helpers.ts';
 
 // The travel test map with two wonders: West Asia and North America.
 //   eu-north — eu-east — as-west⭐ — as-east — na-one⭐       ✈️ eu-west ↔ as-east ↔ af-south
@@ -32,7 +32,7 @@ const canWalk = (s: GameState, to: string) => legalActions(s, map).some((a) => a
 
 // The current player's first plain move (never a purchase or a citizenship request).
 function pass(s: GameState): GameState {
-  return go(s, legalActions(s, map).find((a) => a.type !== 'buy' && a.type !== 'askCitizenship')!);
+  return go(s, legalActions(s, map).find((a) => a.type !== 'buy' && a.type !== 'buyCitizenship')!);
 }
 
 test('the map has guided tours at each wonder, an airline at each airport and a ferry agency at each port', () => {
@@ -196,10 +196,11 @@ test('tours bought while the player is at sea cost nothing on landing', () => {
 // Two players. p1 stands in af-south with 1 point: the walk to af-north and the plane to
 // as-east both need p2's 2-point visa. p2 starts in na-one and walks away from p1's home.
 // The moves, without asking for citizenship (also possible when out of money, task 14d).
-const moves = (s: GameState) => legalActions(s, map).filter((a) => a.type !== 'askCitizenship');
+const moves = (s: GameState) => legalActions(s, map).filter((a) => a.type !== 'buyCitizenship');
 
+// A Nomad out of money (step 2.6: not the Business, which never pays a visa).
 function brokeGame(): GameState {
-  const s = game(['eu-west', 'na-one']);
+  const s = game(['eu-west', 'na-one'], ['nomad', 'business', 'luxury', 'backpacker']);
   p1(s).area = 'af-south';
   p1(s).visitedAreas.push('af-south');
   p1(s).points = 1;
@@ -321,7 +322,7 @@ test('out of money: selling gives the points to move on in the same turn', () =>
   s = go(s, { type: 'sell', business: 'tours', area: 'na-one', to: p2(s).seat });
   s = go(s, { type: 'sellAnswer', accept: true });
   assert.equal(p1(s).points, 3);
-  s = go(s, { type: 'walk', to: 'af-north' }); // the 2-point visa
+  s = passVisaTest(go(s, { type: 'walk', to: 'af-north' }), map); // the visa test, then the 2-point visa
   assert.equal(p1(s).area, 'af-north');
   assert.equal(p1(s).broke, 0);
 });

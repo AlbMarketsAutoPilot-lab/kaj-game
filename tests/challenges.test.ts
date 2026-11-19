@@ -65,22 +65,22 @@ test('no challenge with 0 points', () => {
   assert.deepEqual(legalActions(s, map), [{ type: 'travel' }]);
 });
 
-test('saying no: nothing happens, the trip goes on (Nomad +1)', () => {
+test('saying no: nothing happens, the trip goes on (Nomad ship +2, step 2.6)', () => {
   const s = atSea();
   const t = go(s, { type: 'travel' });
   assert.equal(p1(t).travel!.turnsLeft, 2);
-  assert.equal(p1(t).points, p1(s).points + 1);
+  assert.equal(p1(t).points, p1(s).points + 2);
   assert.equal(t.challenged, null);
   assert.deepEqual(t.drawn, []);
 });
 
-test('the Nomad works on trips (owner, 2026-10-11): "Play" gives no challenge, the trip goes on, +1 once per trip', () => {
+test('the Nomad works on trips (owner, 2026-10-11): "Play" gives no challenge, the trip goes on, +2 once per ship trip (step 2.6)', () => {
   const s = atSea();
   assert.deepEqual(legalActions(s, map), [{ type: 'travel' }, { type: 'travel', challenge: true }], 'the button stays');
   const t = go(s, { type: 'travel', challenge: true });
   assert.equal(t.challenge, null);
   assert.equal(p1(t).travel!.turnsLeft, 2);
-  assert.equal(p1(t).points, p1(s).points + 1);
+  assert.equal(p1(t).points, p1(s).points + 2);
 });
 
 test('playing: the question comes now, the answer is the next move', () => {

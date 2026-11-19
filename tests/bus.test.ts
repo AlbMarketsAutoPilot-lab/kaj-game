@@ -6,7 +6,7 @@ import { robotAction } from '../src/engine/normal-robot.ts';
 import { stuckProblems } from '../src/engine/stuck-check.ts';
 import type { Action, GameState, Profile } from '../src/engine/types.ts';
 import { map30 } from '../src/maps/map30.ts';
-import { seatOf, startedGame } from './helpers.ts';
+import { passVisaTest, seatOf, startedGame } from './helpers.ts';
 
 // The bus (task 18, owner's rules): one bus stop, in Mongolia, one way to Siberia or China West.
 // Its points changed in M5 (owner): the country's points at once, the other parts +1 each later.
@@ -40,7 +40,7 @@ function answer(s: GameState, right: boolean): GameState {
 // Player 2's turn: a plain walk, so the trip goes on.
 function pass(s: GameState): GameState {
   const actions = legalActions(s, map30);
-  return go(s, actions.find((a) => a.type === 'walk') ?? actions.find((a) => a.type !== 'buy' && a.type !== 'askCitizenship')!);
+  return go(s, actions.find((a) => a.type === 'walk') ?? actions.find((a) => a.type !== 'buy' && a.type !== 'buyCitizenship')!);
 }
 
 // Board (Nomad: pay 1) or win the quiz (Backpacker), then ride the 1 travel turn.
@@ -143,7 +143,8 @@ test('booth: one bus ticket booth, in Mongolia, 2 points, anyone may buy; the ti
 test('fees and booked areas as usual: the visa is paid on boarding; no bus to a booked area', () => {
   let s = game('nomad');
   other(s).citizenship = [...RUSSIA];
-  s = go(s, { type: 'board', kind: 'bus', to: 'russia-east' });
+  // Step 2.6: the visa test at boarding, then the ticket and the visa together.
+  s = passVisaTest(go(s, { type: 'board', kind: 'bus', to: 'russia-east' }), map30);
   assert.equal(me(s).points, 10 - 1 - 2);
   s = game('nomad');
   other(s).area = null;
@@ -171,7 +172,6 @@ test('the stuck-state checker leaves the bus out', () => {
 test('the Nomad robot takes the bus for Russia; Business and Luxury robots never do', () => {
   let s = game('nomad');
   businessAt(s, 'mongolia', 'bus')!.owner = other(s).seat;
-  me(s).askedCitizenship = true;
   me(s).visitedContinents.push('Asia');
   me(s).visitedAreas.push('mongolia', 'china-west', 'china-east');
   const [action] = robotAction(s, map30, 1, 'hard');

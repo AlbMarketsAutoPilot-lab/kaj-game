@@ -6,7 +6,7 @@ import { robotAction } from '../src/engine/normal-robot.ts';
 import { stuckProblems } from '../src/engine/stuck-check.ts';
 import type { Action, GameState, Profile } from '../src/engine/types.ts';
 import { map30 } from '../src/maps/map30.ts';
-import { seatOf, startedGame } from './helpers.ts';
+import { passVisaTest, seatOf, startedGame } from './helpers.ts';
 
 // The train (task 17, owner's rules): France <-> Russia West and France <-> Turkey, 30-turn map.
 
@@ -36,7 +36,7 @@ function answer(s: GameState, right: boolean): GameState {
 // Player 2's turn: a plain walk (never a purchase), so the trip goes on.
 function pass(s: GameState): GameState {
   const actions = legalActions(s, map30);
-  return go(s, actions.find((a) => a.type === 'walk') ?? actions.find((a) => a.type !== 'buy' && a.type !== 'askCitizenship')!);
+  return go(s, actions.find((a) => a.type === 'walk') ?? actions.find((a) => a.type !== 'buy' && a.type !== 'buyCitizenship')!);
 }
 
 test('routes: in France a choice of Russia West or Turkey; from either, only back to France', () => {
@@ -110,14 +110,16 @@ test('booths: 3 train ticket booths at 2 points; the ticket goes to the departur
 });
 
 test('fees: the visa is paid on boarding, and with no money for it there is no train', () => {
-  let s = game('business');
+  let s = game('nomad');
   other(s).citizenship = ['turkey-caucasus'];
   const before = other(s).points;
-  s = go(s, { type: 'board', kind: 'station', to: 'turkey-caucasus' });
+  // Step 2.6: the visa test at boarding; then the ticket and the visa together. (A Nomad: the Business
+  // never pays a visa.)
+  s = passVisaTest(go(s, { type: 'board', kind: 'station', to: 'turkey-caucasus' }), map30);
   assert.equal(me(s).points, 10 - 2 - 2);
   assert.equal(other(s).points, before + 2);
   // 1 point: neither the visa nor the quiz trip to Turkey; Russia West is still open.
-  s = game('business', 'france', 1);
+  s = game('nomad', 'france', 1);
   other(s).citizenship = ['turkey-caucasus'];
   assert.deepEqual(trains(s), ['quiz russia-west']);
 });
@@ -156,7 +158,7 @@ test('the robot takes the train when it gains a new continent, and Luxury never 
   // Nothing to buy or ask for, every neighbour already visited.
   let s = game('business');
   businessAt(s, 'france', 'train')!.owner = other(s).seat;
-  me(s).askedCitizenship = true;
+  me(s).bought = ['italy']; // its 2nd citizenship is already taken (step 2.6)
   me(s).visitedAreas.push('central-europe', 'italy', 'uk-ireland', 'russia-west');
   const [action] = robotAction(s, map30, 1, 'hard');
   assert.deepEqual(action, { type: 'quiz', kind: 'station', to: 'turkey-caucasus' });

@@ -122,18 +122,21 @@ export const POINTS_NOMAD_TRIP = 1;
 // Step 2.5 (owner): the boss's bonus on every second ship trip to a new area (the other one brings a
 // challenge offer instead; see nomadAlert in engine.ts).
 export const POINTS_NOMAD_BONUS = 1;
+// Step 2.6 (owner, measured): a Nomad ship trip to a new area gives +2 (other trips to new areas +1).
+export const POINTS_NOMAD_SHIP = 2;
 
-// Visa: paid to the citizen each time another player enters their area (rulebook section 7).
+// Visa: paid to the citizen each time another player enters their country from outside (rulebook
+// section 7; step 2.6: every entry). The Business never pays a visa; Luxury pays but takes no test.
 export const VISA_PRICE = 2;
 
-// Business Traveler: +6 when granted citizenship (rulebook section 12: +3; balance, owner 2026-10-11).
-export const POINTS_BUSINESS_CITIZENSHIP = 6;
+// Step 2.6 (owner): the Business's one 2nd citizenship is free. (The +6 for citizenship is gone.)
+export const SECOND_CITIZENSHIP_PRICE = 0;
 
-// Citizenship test (owner's change, after task 14e): read 6 facts, then 3 a/b questions about
-// them in the same turn; 2 right answers or more pass, fewer: no citizenship.
-export const EXAM_FACTS = 6;
-export const EXAM_QUESTIONS = 3;
-export const EXAM_PASS = 2;
+// Visa test (step 2.6, the screens of the old citizenship test): read 6 facts, then 3 a/b questions
+// about them in the same turn; 2 right answers or more pass.
+export const VISA_TEST_FACTS = 6;
+export const VISA_TEST_QUESTIONS = 3;
+export const VISA_TEST_PASS = 2;
 
 // Businesses (rulebook section 6). At the end of the game each one counts for its price.
 export const BUSINESS_PRICE: Readonly<Record<BusinessKind, number>> = {
@@ -191,6 +194,25 @@ export const CARD_EVERY = 3;
 export const CARD_EVERY_50 = 5;
 export function cardEvery(totalRounds: number): number {
   return totalRounds >= 50 ? CARD_EVERY_50 : CARD_EVERY;
+}
+
+// Event-card mix by profile and number of players (step 2.6, owner-approved mix "G", measured in robot
+// games): the same cards for everyone; only how often good and bad ones come. A good card (points above
+// 0) counts `good` times, a bad one (points below 0, or losing a turn) `bad` times. 3 players use the
+// 4-player mix. Not listed: the normal deck (1 and 1). The Backpacker's helper cards b1–b8 are no longer
+// drawn (kept in cards.ts, owner: a possible lever for step 2.7).
+export interface CardMix { good: number; bad: number }
+export const EVENT_MIX: Readonly<Record<'2' | '4', Partial<Record<Profile, CardMix>>>> = {
+  2: { business: { good: 1.1, bad: 0.95 } },
+  4: {
+    backpacker: { good: 1, bad: 1.2 },
+    business: { good: 1.1, bad: 0.95 },
+    luxury: { good: 1.15, bad: 0.9 },
+    nomad: { good: 1.25, bad: 0.85 },
+  },
+};
+export function cardMix(profile: Profile, players: number): CardMix {
+  return EVENT_MIX[players <= 2 ? '2' : '4'][profile] ?? { good: 1, bad: 1 };
 }
 
 // Travel-turn challenges (task 12): right +1, wrong −1; not offered with 0 points.

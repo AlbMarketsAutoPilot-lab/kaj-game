@@ -112,6 +112,7 @@ Target: a complete, playable v1 within about 15 days of work.
 | Profile bonuses: Backpacker +3, Luxury +5 for 5 continents, Business +3, Nomad +1 per travel turn and −5 below 3 continents | **Balanced (owner, 2026-10-11, measured):** Backpacker +7 (helper cards b1–b8), Luxury no continent bonus, Business +6, Nomad +1 per trip, +5 for 3 continents, no travel challenges (it works); robots plan ahead (normal 2 moves, hard 3) |
 | "Ask for citizenship here?" on arrival | **A button in the area you stand in** (any area but your home country); the turn ends, test next turn; Luxury: granted at once, and the turn goes on (owner's change, task 14d) |
 | Any wrong answer: one learning turn, then granted anyway | **2 of 3 right to pass**, after reading 6 facts in the test turn; fewer: no citizenship, and the one request of the game is used up (owner's change, task 14f) |
+| Citizenship asked during the game (the two rows above, tasks 14d and 14f) | **Version 2.0, step 2.6 (owner):** everyone but the Digital Nomad is a citizen of the start country from turn 1; the Business may take one free 2nd citizenship where it stands; entering another player's country means a **visa test** (read 6 facts, 3 questions, 2 right) on every entry: passed, pay the 2-point visa and enter; failed, nothing paid and the turn is used. Luxury pays with no test; the Business takes the test but never pays. Business +6 and Luxury's instant citizenship removed. See `docs/engine.md`, step 2.6, and `docs/rules-now.md`. |
 
 ## 10. Deferred (after v1, only with the owner's agreement)
 

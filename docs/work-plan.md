@@ -92,7 +92,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | 2.3 | More geography questions: tag every fact, ~250 new geography facts (owner checks), script-made questions | medium | 2 | — | ✅ done (owner-approved): every fact tagged, airline quiz 1 challenge in 10, 168 test-only geography facts, travel challenges geography 1 in 3; 37% / 32–33% geography (was 48–50%); script-made questions not needed; save stays 15 |
 | 2.4 | New ship and plane routes on both maps, map check, stuck-state checker | **high** | 1 | — | ✅ done (owner-approved): the owner's routes on both maps (30 turns 13 airports / 11 ports / 15 connections, 50 turns 15 / 13 / 18), robots no longer walk straight back for nothing, Pacific route lines from both ends, guide says Iceland; fair 13 → 10 of 16 (30) and 12 → 14 of 16 (50), tuning in 2.7; saves v16 |
 | 2.5 | Travel by profile (turns, prices, quiz = Backpacker turns, quiz popup), bus and car whole country | **high** | 2 | — | ✅ done (owner's final decision, 2026-11-18): only the Nomad boss alerts (+1 per trip to new areas only; ship alerts: a challenge, then a +1 bonus, by turns; surprise removed) and the car to USA East or Canada West; the rest of 2.5 dropped; saves v17 |
-| 2.6 | Citizenship from turn 1, Business buys 2nd/3rd, visa test | **high** | 2 | — | |
+| 2.6 | Citizenship from turn 1, Business buys 2nd/3rd, visa test | **high** | 2 | — | ✅ done (owner's final rules, 2026-11-19): start citizenship for all but the Nomad, the Business's one free 2nd citizenship (never pays visas), visa test on every entry (Luxury pays with no test), Nomad ship +2, event-card mix "G" (helpers b1–b8 kept, not drawn); fair 21 → 29 of 32 at 1,600 games per line; saves v18; `docs/rules-now.md` lists every rule |
 | 2.7 | Balance tuning of all 2.0 rule changes (4 profiles, boredom, excitement) | **high** | 1 | — | |
 | 2.8 | Event cards as real geography news | medium | 1 | — | |
 | 2.9 | More wonders, history and curiosity for each, new design | medium | 2 | — | |
@@ -786,6 +786,10 @@ Luxury's instant citizenship and Business's +6.
   - **Map traps (known limit):** the 3 start citizenships cut off some area in 3.9% (30 turns) and 1.7%
     (50 turns) of possible start sets; with a bought one, more. "Go home" remains the way out; it never
     triggered in robot games.
+- **Session 2 done (2026-11-19):** built as decided (`docs/engine.md`, step 2.6). The build measured the same as the
+  scratch copy, 29 of 32, every line identical. 221 tests pass; the web build works. The rule tests on the tiny test
+  maps switch the start citizenships off (like event cards); the walking-only random-robot test plays with no
+  citizenships, as owner-approved in task 8 for asking. No test limit changed.
 
 **2.7 (balance) Balance tuning (high, 1).** All lab packages on both maps, 2 and 4 players, normal and planning
 robots; tune the numbers; report fair/unfair, boredom and excitement. Watch: Backpacker (much slower trips),

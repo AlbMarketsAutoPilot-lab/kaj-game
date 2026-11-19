@@ -2,7 +2,7 @@ import {
   bigCountryParts, blockedByMoney, continentReward, canPayAfterQuiz, currentPlayer, entryFees, feeTotal, legalActions,
   nomadAlert,
 } from './engine.ts';
-import { BUSINESS_PRICE, bigCountryPoints, CONTINENT_BONUS, QUIZ_TRIES, canRide, ticketPrice, TRAVEL_TURNS, WELCOME_BONUS, wholeCountryTrip } from './constants.ts';
+import { BUSINESS_PRICE, bigCountryPoints, SECOND_CITIZENSHIP_PRICE, CONTINENT_BONUS, QUIZ_TRIES, canRide, ticketPrice, TRAVEL_TURNS, WELCOME_BONUS, wholeCountryTrip } from './constants.ts';
 import { areaById } from './map.ts';
 import { nomadTripValue, planMove } from './planner.ts';
 import { nextRandom } from './rng.ts';
@@ -38,8 +38,6 @@ function levelSettings(level: RobotLevel, totalRounds: number): LevelSettings {
   return level === 'easy' && totalRounds >= 50 ? { ...s, accuracy: EASY_ACCURACY_LONG_GAME } : s;
 }
 
-// Asks for citizenship in the first area it can (not its home country) before this round.
-export const ROBOT_CITIZENSHIP_BEFORE = 10;
 // From this round the Nomad heads for a 3rd continent.
 export const ROBOT_NOMAD_ROUND = 18;
 
@@ -117,9 +115,10 @@ function choose(state: GameState, map: GameMap, actions: Action[], me: Player, s
   if (first.type === 'sellAnswer') return actions.find((a) => a.type === 'sellAnswer' && a.accept) ?? first;
   if (first.type === 'answer') return { type: 'answer', choice: answer(state.quiz!.question.correct, settings, rnd) };
   if (first.type === 'challengeAnswer') return { type: 'challengeAnswer', choice: answer(state.challenge!.correct, settings, rnd) };
-  if (first.type === 'examAnswer') {
-    const exam = me.exam!;
-    return { type: 'examAnswer', choice: answer(exam.questions[exam.answers.length].correct, settings, rnd) };
+  // The visa test (step 2.6): answered at the level's rate, like every question.
+  if (first.type === 'visaAnswer') {
+    const test = state.visa!;
+    return { type: 'visaAnswer', choice: answer(test.questions[test.answers.length].correct, settings, rnd) };
   }
   if (first.type === 'travel') {
     // A robot Nomad works on its trips and never presses "Play" (owner, 2026-10-11), except on its
@@ -135,10 +134,11 @@ function choose(state: GameState, map: GameMap, actions: Action[], me: Player, s
     .find((a) => a && me.points - BUSINESS_PRICE[(a as { business: BusinessKind }).business] >= settings.reserve);
   if (buy) return buy;
 
-  // Citizenship: once, in the first area where it can ask, before round 10 (task 14d: asked in
-  // the area it stands in; the engine never offers it to the Nomad or in the home country).
-  const ask = actions.find((a) => a.type === 'askCitizenship');
-  if (ask && state.round < robotRound(ROBOT_CITIZENSHIP_BEFORE, state.totalRounds)) return ask;
+  // The Business's 2nd citizenship (step 2.6, owner-approved): taken when it keeps the reserve, after
+  // the businesses (it is free, so in the first area where the engine offers it).
+  if (actions.some((a) => a.type === 'buyCitizenship') && me.points - SECOND_CITIZENSHIP_PRICE >= settings.reserve) {
+    return { type: 'buyCitizenship' };
+  }
 
   const moves = actions.filter((a) => a.type === 'walk' || a.type === 'board' || a.type === 'quiz' || a.type === 'hitchhike');
   if (moves.length === 0) {

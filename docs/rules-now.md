@@ -1,8 +1,8 @@
 # KAJ — all game rules as of 2026-11-19
 
 Checked against the code (`src/engine/`, `src/maps/`, `src/cards/`) and `docs/engine.md`.
-Rules marked **[2.6]** are the ones decided in step 2.6, session 1. They are **not in the game yet**;
-session 2 builds them. Where a [2.6] rule replaces an older one, the old one is shown ~~struck out~~.
+Rules marked **[2.6]** came with step 2.6 (2026-11-19). Where a [2.6] rule replaced an older one, the old one is
+shown ~~struck out~~.
 
 ## 1. Players and setup
 
@@ -182,4 +182,4 @@ test next turn (read 6 facts, 3 questions, 2 right to pass), Luxury granted at o
 ## 10. Saves
 
 - The game saves after every move; one save slot.
-- A save from another version can't be continued. Today the version is 17; **[2.6]** makes it 18.
+- A save from another version can't be continued. The version is 18 **[2.6]** (was 17).

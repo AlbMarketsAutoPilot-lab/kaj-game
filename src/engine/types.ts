@@ -100,15 +100,14 @@ export interface Player {
   travel: Travel | null;
   // Wrong airline-quiz answers in the current area; back to 0 when the player leaves.
   quizWrong: number;
-  // Ids of the questions this player has been asked (step 2.1: airline quiz, citizenship test and
+  // Ids of the questions this player has been asked (step 2.1: airline quiz, visa test and
   // challenges), oldest first. A question comes again only when its whole pool has been used up.
   seen: string[];
-  // A player may ask for citizenship once per game (never the Digital Nomad).
-  askedCitizenship: boolean;
-  // The areas this player's citizenship covers: one area, or every part of a big country.
+  // The areas this player's citizenship covers: one area, or every part of a big country. Step 2.6
+  // (owner): the start country from turn 1, for everyone but the Digital Nomad (who has none).
   citizenship: string[] | null;
-  // The citizenship request in progress (the player stays in the area until it ends).
-  exam: Exam | null;
+  // Step 2.6: the Business's one 2nd citizenship (free, taken where it stands); null for everyone else.
+  bought: string[] | null;
   // The starting area: where "go home" sends a player who has run out of money.
   home: string | null;
   // Turns in a row blocked because the player can't pay (a visa, tour fee or ticket).
@@ -181,20 +180,18 @@ export interface Payment {
   business?: BusinessKind;
 }
 
-// Citizenship steps (docs/engine.md, tasks 8 and 14d). Turn 1: the player asks in the area they
-// stand in ("askCitizenship"), and the turn ends: "request approved, the test is next turn".
-// - test: turn 2: read 6 facts, then 3 a/b questions about them; the player stays;
-// - result: the answers are in, until the player's next turn;
-// - granted: 2 or more right: citizenship was granted and the player moves (turn 3;
-//   Luxury: at once when asking, no test, and the turn goes on);
-// - failed: fewer than 2 right: no citizenship, and the player moves (turn 3). The one request
-//   of the game is used up (owner's change, after task 14e).
-export type ExamStage = 'test' | 'result' | 'granted' | 'failed';
-
-export interface Exam {
-  area: string;
-  stage: ExamStage;
-  // The facts to read before the questions (turn 2).
+// A visa test in progress (step 2.6, owner): entering another player's citizenship country from
+// outside means reading 6 facts of the area and answering 3 a/b questions, in the same turn; 2 right:
+// the visa is paid and the move goes ahead; fewer: nothing paid, no entry, the turn is used.
+// `via` is the move that is waiting for the test: a walk, a paid boarding, a right airline-quiz answer,
+// the paid trip forced after the 3rd wrong quiz answer, or a car that stopped for a hitchhiker.
+export interface VisaTest {
+  to: string;
+  via: 'walk' | 'board' | 'quiz' | 'forced' | 'hitch';
+  // The kind of trip (null for a walk) and the ticket to pay if the test is passed.
+  kind: RouteKind | null;
+  ticket: number;
+  // The facts to read before the questions.
   study: string[];
   questions: QuizQuestion[];
   // The answers given so far, in question order.
@@ -248,6 +245,10 @@ export interface GameState {
   totalRounds: number;
   // The airline-quiz question the current player must answer now.
   quiz: PendingQuiz | null;
+  // The visa test the current player must answer now (step 2.6), and the result of the last one
+  // (cleared by every move, like `payments`), so the screens can say what happened.
+  visa: VisaTest | null;
+  visaTested: { seat: number; to: string; passed: boolean; right: number; test: VisaTest } | null;
   // Every business on the map, with its owner.
   businesses: Business[];
   // The payments made by the last move (empty when nothing was paid).
@@ -347,13 +348,11 @@ export type Action =
   | { type: 'hitchhike'; to: string }
   // Try the airline quiz for this trip (never for the car); the next move is the answer.
   | { type: 'quiz'; kind: RouteKind; to: string }
-  // Ask for citizenship of the area the player stands in (owner's rule, task 14d): never the
-  // home country, once per game, never the Nomad, where nobody holds or is asking for it.
-  // Luxury: granted at once and the turn goes on. Others: the turn ends, the test is next turn.
-  | { type: 'askCitizenship' }
   | { type: 'answer'; choice: 0 | 1 }
-  // One answer in the citizenship test (turn 2); the turn ends after the 3rd.
-  | { type: 'examAnswer'; choice: 0 | 1 }
+  // One answer in the visa test (step 2.6); after the 3rd the move goes ahead or not, and the turn ends.
+  | { type: 'visaAnswer'; choice: 0 | 1 }
+  // The Business takes its one 2nd citizenship, of the area it stands in (step 2.6). The turn goes on.
+  | { type: 'buyCitizenship' }
   // A turn in the air, at sea or on the train. With `challenge` the player plays a challenge: the turn goes
   // on, and the next move is the answer (task 12). Without it nothing happens.
   | { type: 'travel'; challenge?: true }

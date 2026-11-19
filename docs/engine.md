@@ -813,6 +813,61 @@ The owner's decision after measuring: of the planned step 2.5 only these changes
   today 24 of 32 (30 turns 11, 50 turns 13); with these changes 22 of 32 (10 and 12). The owner chose them for the
   story (no secret surprise, the boss alerts) and a second car destination; tuning is step 2.7. Tests: 224 pass.
 
+## Citizenship from turn 1, the visa test and the card mix (version 2.0, step 2.6, owner-approved 2026-11-19)
+
+Replaces task 8's asking on a move, tasks 14d and 14f (the "Ask for citizenship" button and the citizenship test),
+Luxury's instant citizenship and the Business's +6. Rules in full: `docs/rules-now.md`.
+
+- **Citizenship from turn 1:** everyone but the Digital Nomad is a citizen of the start country (a big country: all
+  its parts; `Player.citizenship`, set on `chooseStart`). No asking, no citizenship test. **One start per country**
+  (only Russia has parts on two start continents: once anyone starts in it, its other parts can't be chosen).
+- **Business, a 2nd citizenship** (`buyCitizenship`, `canBuyCitizenship`, `Player.bought`): free
+  (`SECOND_CITIZENSHIP_PRICE = 0`), once, of the area (or big country) it stands in, if nobody holds it and it is not
+  the Nomad's start country. It doesn't end the turn, is not counted at the end and can't be sold.
+  Backpacker and Luxury: only the start citizenship.
+- **Visa** (`visaOwner`, `entryFees`): 2 points to the citizen on **every entry** from outside; moving inside a big
+  country is free; the citizen enters free. **The Business never pays a visa.** No money, no entry, as before.
+- **Visa test** (`GameState.visa`, `visaAnswer`, `needsVisaTest`): entering another player's country (not Luxury)
+  means reading 6 facts of the area and answering 3 a/b questions in the same turn (`VISA_TEST_*`, the question
+  rotation of step 2.1). 2 right: the move goes ahead and everything is paid together; fewer: nothing paid, no
+  entry, the turn is used (`GameState.visaTested` tells the screens). **Luxury** pays with no test; the
+  **Business** takes the test but pays nothing.
+  - Walking: the test before entering; failed, the player stays.
+  - Plane, ship, train, bus, rented car: the ticket first (pay, or a right airline-quiz answer), then the test.
+    Failed: no trip, nothing paid; the free quiz ticket is lost and the failure is not a quiz try.
+  - After the 3rd wrong quiz answer (the forced paid trip): the test too; failed: no trip, nothing paid, the count
+    starts again. Hitchhiking: the test only if a car stops; failed: no trip, the turn ends.
+  - Going home is free: no test, no visa. "Go home" still counts only ways out closed by money.
+- **Nomad:** a ship trip to a new area gives **+2** (`POINTS_NOMAD_SHIP`; other trips to new areas +1), plus the
+  step 2.5 boss alerts.
+- **Event cards, mix "G"** (`EVENT_MIX`, `cardMix()`): the same cards for everyone; a good card counts `good` times
+  and a bad one (points below 0 or a lost turn) `bad` times in the draw. Business 1.1 / 0.95 (2 and 4 players); with
+  3 or 4 players Backpacker 1 / 1.2, Luxury 1.15 / 0.9, Nomad 1.25 / 0.85; otherwise the normal deck. The
+  Backpacker's helper cards b1–b8 are **no longer drawn** but kept in `src/cards/cards.ts` (owner: a possible lever
+  for step 2.7). The "no card during a citizenship request" rule is gone with the request.
+- **Robots (owner-approved):** answer the visa test at their level's rate; the Business takes its 2nd citizenship when
+  it keeps its reserve, after businesses; the "ask before round 10" rule is removed; the planner's Nomad trip value
+  counts +2 for ships (`nomadTripValue`, also used by the lab's planning robot).
+- **Screens:** the visa test uses the old citizenship test screens (read the facts, "I'm ready", "Start", 15 s per
+  question) with the rule in one sentence; the warning before a move says a test comes first; the Business's
+  "🛂 Take citizenship of …" button and popup; "Citizen of …" on the players; the home-country popup, profile cards,
+  area details and the guide's citizenship slide explain the new rules.
+- **Tests:** `tests/citizenship.test.ts` rewritten (start citizenship, one start per country, the test when walking,
+  flying, after the quiz and the forced trip, every entry, big countries, Luxury, Business, buying); the card mix
+  (`tests/cards.test.ts`); 3 start citizenships at once trap someone in at most **261 of 6,667** start sets (30 turns)
+  and **530 of 30,301** (50 turns) (`tests/map30.test.ts`, `tests/map50.test.ts`; the known limit: only while a player
+  has fewer than 2 points, and "go home" is the way out). The rule tests on the tiny test maps switch the start
+  citizenships off (`startedGame`, like the event cards); on the walking-only test map the random robots play with no
+  citizenships (as owner-approved in task 8). The test limits are unchanged. 221 tests pass.
+- **Save version 18:** a game in progress from version 17 or older can't be continued.
+- **Balance (robot games, 1,600 per line, both maps, 2 and 4 players, normal and planning robots):** fair results
+  **21 of 32 before → 29 of 32** with this step (the build matches the scratch measurement exactly). Outside the
+  target: Nomad 19.6% (30 turns, 4 normal robots), Backpacker 16% (30 turns, 4 planning robots), Luxury 31% (50 turns,
+  4 normal robots). Boredom 26–34% (unchanged), close finishes 39–40% in every 4-player line. Nobody went home, longest
+  blocked streak 2, 15–16% of visa tests failed. Tried and dropped (see `docs/work-plan.md`, step 2.6): the bought
+  citizenship at 5 points, the rule without card changes (10 of 32), Backpacker +1 travel turn (21 of 32), 10 other
+  card mixes.
+
 ## Project setup
 
 - TypeScript, run directly by Node 22.18 or newer (no build step for tests).

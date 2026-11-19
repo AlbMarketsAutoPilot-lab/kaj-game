@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { CARDS } from '../src/cards/cards.ts';
+import { cardMix } from '../src/engine/constants.ts';
 import { apply, createGame, eligibleCards, landTurnsToCard, legalActions } from '../src/engine/engine.ts';
 import { randomRobotAction } from '../src/engine/robot.ts';
 import { loadGame, saveGame } from '../src/engine/save.ts';
@@ -120,14 +121,6 @@ test('lose a turn in an area: the only move is "lostTurn"; it changes nothing el
   assert.equal(p2(s).loseTurn, false);
 });
 
-test('no scheduled card during a citizenship request (the exam is the event)', () => {
-  let s = game(['eu-west', 'as-east']);
-  p2(s).landTurns = 2;
-  p2(s).exam = { area: 'as-east', stage: 'test', study: [], questions: [], answers: [] };
-  s = go(s, { type: 'walk', to: 'eu-north' });
-  assert.equal(s.card, null);
-});
-
 test('no card on a trip: a travel turn draws nothing and does not count', () => {
   let s = game(['eu-north', 'as-east'], ['nomad', 'luxury']); // Nomad: ship 3 turns
   s = go(s, { type: 'board', kind: 'port', to: 'na-one' }); // land turn 1
@@ -136,8 +129,8 @@ test('no card on a trip: a travel turn draws nothing and does not count', () => 
     const before = p1(s).points;
     s = go(s, { type: 'travel' });
     assert.ok(s.drawn.every((c) => c.seat !== p1(s).seat), 'no travel card');
-    // Nomad +1 once per trip, on the first travel turn (owner, 2026-10-11); landing: area +1, continent +2
-    assert.equal(p1(s).points, before + (i === 0 ? 1 : 0) + (i === 2 ? 1 + 2 : 0));
+    // Nomad: a ship trip to a new area +2 (step 2.6), once, on the first travel turn; landing: area +1, continent +2
+    assert.equal(p1(s).points, before + (i === 0 ? 2 : 0) + (i === 2 ? 1 + 2 : 0));
     assert.equal(p1(s).landTurns, 1, 'trip turns are not counted');
     s = pass(s);
   }
@@ -189,4 +182,36 @@ test('the same seed draws the same cards; saves from versions 1 and 2 are not co
     const old = JSON.stringify({ version, state: JSON.parse(saveGame(createGame({ seats: seats(2), seed: 1 }, map30))).state });
     assert.ok('error' in loadGame(old));
   }
+});
+
+// Step 2.6 (owner-approved mix "G"): the same cards for everyone, but how often good and bad ones come
+// depends on the profile and the number of players (3 players use the 4-player mix). The Backpacker's
+// helper cards b1–b8 are kept in cards.ts but never drawn.
+test('the card mix by profile and number of players; the Backpacker\'s helper cards are not drawn', () => {
+  assert.deepEqual(cardMix('business', 2), { good: 1.1, bad: 0.95 });
+  assert.deepEqual(cardMix('nomad', 2), { good: 1, bad: 1 });
+  assert.deepEqual(cardMix('nomad', 3), cardMix('nomad', 4));
+  assert.deepEqual(cardMix('backpacker', 4), { good: 1, bad: 1.2 });
+  assert.ok(CARDS.filter((c) => c.deck === 'backpacker').length === 8, 'b1–b8 kept');
+  const bad = (c: DrawnCard) => c.card.loseTurn === true || c.card.points < 0;
+  const drawn: Record<string, { all: number; bad: number }> = {};
+  for (let g = 0; g < 150; g++) {
+    let s = createGame({ seats: seats(4, 3), seed: g * 31 + 7 }, map30);
+    let r = g + 5;
+    while (s.phase !== 'finished') {
+      let a: Action;
+      [a, r] = randomRobotAction(s, map30, r);
+      s = apply(s, map30, a);
+      for (const c of s.drawn) {
+        const p = s.players[c.seat].profile!;
+        assert.notEqual(c.card.deck, 'backpacker', `helper card drawn: ${c.card.id}`);
+        drawn[p] ??= { all: 0, bad: 0 };
+        drawn[p].all++;
+        if (bad(c)) drawn[p].bad++;
+      }
+    }
+  }
+  const share = (p: Profile) => drawn[p].bad / drawn[p].all;
+  // 4 players: Backpacker 59% bad, Business 51%, Luxury 48%, Nomad 45% (in theory).
+  assert.ok(share('backpacker') > share('business') && share('business') > share('nomad'), JSON.stringify(drawn));
 });
