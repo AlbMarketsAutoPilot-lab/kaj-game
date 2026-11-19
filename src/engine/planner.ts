@@ -6,19 +6,21 @@
 // GAMMA^k. Other players are not predicted (only the first move checks them). The same algorithm as the
 // balance lab's test robot (scripts/balance-lab/planner.ts).
 import { canPayAfterQuiz, continentReward, destinations, entryFees, feeTotal } from './engine.ts';
-import { bigCountryPoints, CONTINENT_BONUS, POINTS_NEW_CONTINENT, POINTS_NOMAD_BONUS, POINTS_NOMAD_SHIP, POINTS_NOMAD_TRIP, QUIZ_TRIES, ROUTE_KINDS, ticketPrice, TRAVEL_TURNS, wholeCountryTrip } from './constants.ts';
+import { bigCountryPoints, CONTINENT_BONUS, POINTS_NEW_CONTINENT, POINTS_NOMAD_BONUS, POINTS_NOMAD_TRIP, QUIZ_TRIES, ROUTE_KINDS, ticketPrice, travelTurns, wholeCountryTrip } from './constants.ts';
 import { areaById } from './map.ts';
 import type { Action, GameMap, GameState, Player, RouteKind } from './types.ts';
 
 interface Sim { area: string; visited: Set<string>; conts: Set<string>; bigs: Set<string>; full: Set<string>; points: number }
-interface Step { to: string; kind: RouteKind | 'walk'; gain: number; turns: number; sim: Sim }
+// paid: a paid ticket (fast) or a free one, by quiz or hitchhiking (slow; step 2.7).
+interface Step { to: string; kind: RouteKind | 'walk'; gain: number; turns: number; sim: Sim; paid: boolean }
 
-// What a trip is worth to a robot Nomad (step 2.5): +1 only to a new area (step 2.6: a ship +2); a ship also
-// brings the boss's next alert, a challenge (worth 2 × accuracy − 1 on average) or a sure +1 bonus.
-export function nomadTripValue(me: Player, kind: RouteKind, visited: boolean, accuracy: number): number {
-  if (visited) return 0;
-  if (kind !== 'port') return POINTS_NOMAD_TRIP;
-  return POINTS_NOMAD_SHIP + (me.nomadShips % 2 === 0 ? Math.max(0, 2 * accuracy - 1) : POINTS_NOMAD_BONUS);
+// What a trip is worth to a robot Nomad (step 2.5; step 2.7): +1 only to a new area and only with at least
+// 1 travel turn (a paid plane, train or bus trip gives nothing); a free (quiz) ship trip also brings the
+// boss's next alert, a challenge (worth 2 × accuracy − 1 on average) or a sure +1 bonus.
+export function nomadTripValue(me: Player, kind: RouteKind, visited: boolean, accuracy: number, paid: boolean): number {
+  if (visited || travelTurns('nomad', kind, paid) === 0) return 0;
+  if (kind !== 'port' || paid) return POINTS_NOMAD_TRIP;
+  return POINTS_NOMAD_TRIP + (me.nomadShips % 2 === 0 ? Math.max(0, 2 * accuracy - 1) : POINTS_NOMAD_BONUS);
 }
 
 const partsCache = new WeakMap<GameMap, Map<string, string[]>>();
@@ -62,7 +64,7 @@ function steps(state: GameState, map: GameMap, me: Player, s: Sim, reserve: numb
     if (f > s.points) continue;
     const [g, n] = arrive(map, me, s, to, false);
     n.points += g - f;
-    out.push({ to, kind: 'walk', gain: g - f, turns: 1, sim: n });
+    out.push({ to, kind: 'walk', gain: g - f, turns: 1, sim: n, paid: false });
   }
   for (const kind of ROUTE_KINDS) {
     let dests = destinations(map, s.area, kind, me.profile!);
@@ -72,23 +74,38 @@ function steps(state: GameState, map: GameMap, me: Player, s: Sim, reserve: numb
     for (const to of dests) {
       const f = fees(to);
       const ticket = ticketPrice(me.profile!, kind);
-      const pay = ticket !== null && s.points - ticket - f >= reserve;
-      if (!pay && f > s.points) continue;
-      // The car has no quiz (task 19): pay, or the Backpacker hitchhikes (robots don't know the secret).
-      if (kind === 'car' && !pay && ticket !== null) continue;
-      // Quiz: each wrong try uses a turn; at most QUIZ_TRIES tries.
-      const wait = pay || kind === 'car' ? 0 : Math.min(QUIZ_TRIES - 1, (1 - p) / p);
-      const travel = TRAVEL_TURNS[me.profile!][kind];
-      const [g, n] = arrive(map, me, s, to, wholeCountryTrip(kind));
-      const nomad = me.profile === 'nomad' && travel > 0 ? nomadTripValue(me, kind, s.visited.has(to), p) : 0;
-      const gain = g + nomad - f - (pay ? ticket! : 0);
-      n.points += gain;
-      // Boarding uses a turn (the area was entered on an earlier turn, except on the first step).
-      out.push({ to, kind, gain, turns: 1 + travel + wait, sim: n });
+      // Step 2.7: paying (fast) and the free way (slow) are two different steps; the plan picks.
+      // The free way: the quiz (not for the car), or the Backpacker's hitchhike (robots don't know the secret).
+      const ways: boolean[] = [];
+      if (ticket !== null && s.points - ticket - f >= reserve) ways.push(true);
+      if (f <= s.points && (kind !== 'car' || ticket === null)) ways.push(false);
+      // Step 2.7 (owner-approved, measured): when both are possible, pay or take the quiz by value: each
+      // turn saved by paying (and the expected quiz wait) is worth TURN_VALUE points.
+      if (ways.length === 2) {
+        const nv = (pd: boolean) => (me.profile === 'nomad' ? nomadTripValue(me, kind, s.visited.has(to), p, pd) : 0);
+        const waitFree = kind === 'car' ? 0 : Math.min(QUIZ_TRIES - 1, (1 - p) / p);
+        const d = -ticket! + nv(true) - nv(false) + TURN_VALUE * (travelTurns(me.profile!, kind, false) + waitFree - travelTurns(me.profile!, kind, true));
+        ways.splice(0, 2, d >= 0);
+      }
+      for (const paid of ways) {
+        // Quiz: each wrong try uses a turn; at most QUIZ_TRIES tries.
+        const wait = paid || kind === 'car' ? 0 : Math.min(QUIZ_TRIES - 1, (1 - p) / p);
+        const [g, n] = arrive(map, me, s, to, wholeCountryTrip(kind));
+        const nomad = me.profile === 'nomad' ? nomadTripValue(me, kind, s.visited.has(to), p, paid) : 0;
+        const gain = g + nomad - f - (paid ? ticket! : 0);
+        n.points += gain;
+        // Boarding uses a turn (the area was entered on an earlier turn, except on the first step).
+        out.push({ to, kind, gain, turns: 1 + travelTurns(me.profile!, kind, paid) + wait, sim: n, paid });
+      }
     }
   }
   return out;
 }
+
+// Step 2.7 (owner-approved, measured in docs/balance-lab.md): what one travel turn saved by paying is worth
+// to a robot when it chooses between a paid ticket (fast) and the quiz (slow). 2.5 gave every profile its
+// highest average score of the styles tried (quiz first, always pay, 1.5, 2.5).
+export const TURN_VALUE = 2.5;
 
 // Discount: a point k turns later is worth GAMMA^k now. At the end of a plan, each unvisited
 // neighbour (at most 3) is worth FRONTIER, so a plan doesn't end in a dead end.
@@ -122,12 +139,10 @@ export function planMove(state: GameState, map: GameMap, me: Player, legal: Acti
     if (st.kind === 'walk') action = legal.find((a) => a.type === 'walk' && a.to === st.to);
     else if (st.kind === 'car' && ticketPrice(me.profile!, 'car') === null) action = legal.find((a) => a.type === 'hitchhike' && a.to === st.to);
     else {
+      // Step 2.7: the step says whether to pay (fast) or take the quiz (slow).
       const quiz = legal.find((a) => a.type === 'quiz' && a.kind === st.kind && a.to === st.to);
       const board = legal.find((a) => a.type === 'board' && a.kind === st.kind && a.to === st.to);
-      const ticket = ticketPrice(me.profile!, st.kind);
-      const fees = feeTotal(entryFees(state, me, me.area, st.to));
-      const pay = board && ticket !== null && (me.quizWrong > 0 || !quiz) && me.points - ticket - fees >= reserve;
-      action = pay ? board : quiz;
+      action = st.paid ? board : quiz;
       // A last quiz try that would send it home: only when it can't walk (as the robot).
       if (action === quiz && me.quizWrong >= QUIZ_TRIES - 1 && !canPayAfterQuiz(state, me, st.kind, st.to) && legal.some((a) => a.type === 'walk')) action = undefined;
     }

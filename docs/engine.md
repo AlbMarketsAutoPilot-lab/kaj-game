@@ -868,6 +868,52 @@ Luxury's instant citizenship and the Business's +6. Rules in full: `docs/rules-n
   citizenship at 5 points, the rule without card changes (10 of 32), Backpacker +1 travel turn (21 of 32), 10 other
   card mixes.
 
+## Paid trips fast, new prices, go home +2 and the card mix D1 (version 2.0, step 2.7, owner-approved 2026-11-19)
+
+The owner's new rules, then the balance tuning. Rules in full: `docs/rules-now.md` ([2.7]).
+
+- **Travel turns** (`PAID_TRAVEL_TURNS`, `FREE_TRAVEL_TURNS`, `travelTurns(profile, kind, paid)`, `Travel.paid`): a paid
+  ticket is fast (plane, train, bus 0; ship 1; car 1), a free one, the quiz or hitchhiking, slow (plane, train, bus 1;
+  ship 2; car 1), for every profile. The Backpacker never pays. A paid trip after the 3rd wrong quiz answer is fast.
+- **Tickets:** train for the Nomad 1 (was 2); car rental for Business and Luxury 2 (was 1), the Nomad 1.
+- **Nomad:** +1 only for a trip to a new area of at least 1 travel turn (a paid plane, train or bus gives nothing); the
+  ship +2 of step 2.6 and the +5 for 3 continents are removed; the boss alerts come only on free ship trips to new areas,
+  on the 2nd (last) travel turn, by turns (challenge, then +1). The robot Nomad's "rush to a 3rd continent" rule is off
+  (it followed the +5).
+- **Businesses** (`BUSINESS_PRICE`): tours 1, airline 2, ferry 2, train, bus and car booths 1. At the end every player
+  owning the most businesses (at least 1) gets +1 (`MOST_BUSINESSES_BONUS`, `mostBusinessesBonus`, counted in
+  `finalScore`); ties go to more businesses (`businessCount`), then continents, then areas (`rank`).
+- **Go home +2** (`GO_HOME_POINTS`): every time, also after the 3rd wrong quiz answer and when already at home
+  (a `home` reward, shown as "🏠 Home again!").
+- **Luxury +5 at the start:** proposed by the owner, measured, and **dropped** (owner's decision, see Balance).
+- **Event cards, mix "D1"** (`EVENT_MIX`, replaces 2.6's "G"): 2 players: Business 1.1 / 0.95, the others the normal
+  deck; 3–4 players: Backpacker 0.93 / 1.3, Business 1.2 / 0.87, Luxury 1.3 / 0.85, Nomad 1.1 / 0.92 (good / bad).
+- **Robots** (owner-approved): the planning robots (`src/engine/planner.ts`, the lab's planner) weigh paying against
+  the quiz: each travel turn saved (and the expected quiz wait) is worth `TURN_VALUE` = 2.5 points; a ticket is paid
+  when it is worth it. Measured with the Luxury +5: 2.5 gave every profile its highest average score of 5 styles (the first new
+  version, quiz first as before, always pay, 1.5, 2.5); checked again without the +5 against always pay and 1.5: still
+  the best on average (Luxury level with 1.5). Robots now pay for 40–60% of their trips
+  (before 2–12%). The easy robot still tries the quiz first.
+- **Screens:** before a quiz trip, a player who could pay sees "⚠️ Attention! The quiz trip is slower" (the quiz time,
+  the paid time, "Take the quiz", "Pay N instead", "Cancel"); the airport, port, station and bus menus and the area panel
+  give both times; profile cards ("fast when it pays", "slower with the free quiz"); the guide ("Paying is faster, the
+  quiz is slower"; businesses decide close games; the welcome slide's tie rule); a 0-points reminder that selling a
+  business brings points; the end screens show the score's parts, the business count, the +1 and the tie rule; the
+  score chips show ⭐+1 for the most businesses; "go home" texts say +2.
+- **Save version 19:** a game in progress from version 18 or older can't be continued.
+- **Tests:** updated to the new rules (no test limit changed), new tests for paid and quiz travel times, go home +2
+  (also at home), the most-businesses +1 and the tie order, the car and train prices, the card mix D1.
+- **Balance (robot games, 1,600 per line, both maps, 2 and 4 players, normal and planning robots; details in
+  `docs/balance-lab.md`, step 2.7):** before (the 2.6 game) **29 of 32**; the owner's rules with the Luxury +5 and the
+  corrected robots 11 of 32 (Luxury 39–48% of 4-player wins); undoing one change at a time showed the **Luxury +5 as the
+  cause** (without it 26 of 32; every other change 1–13). Final, without the +5 and with mix D1: **29 of 32**. Misses:
+  Backpacker 18% and Business 32% (30 turns, 4 players, planning), Backpacker 31% (50 turns, 4 players, normal); the two
+  maps need opposite changes there, which one card mix can't give. Boredom 23–28% (was 27–34%), lead changes 2.2–5.7,
+  games won by 3 points or less 20–39%, draws 0–1 per 1,600, go home after 3 turns without money 0, longest blocked
+  streak 2, failed visa tests 15–18%.
+- **Measured and not adopted:** card mixes inside 45–59% bad cards (best 27 of 32); keeping the +5 with stronger cards
+  (best 28 of 32, Luxury 78% bad cards); 8 rule simplifications together (26 of 32); one mission per player (26 of 32).
+
 ## Project setup
 
 - TypeScript, run directly by Node 22.18 or newer (no build step for tests).

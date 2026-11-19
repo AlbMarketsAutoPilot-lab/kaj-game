@@ -137,7 +137,8 @@ export interface Player {
 // A special reward given by the last move (owner, M5), so the screens can show it.
 export interface Reward {
   seat: number;
-  kind: 'surprise' | 'continent';
+  // Step 2.7: 'home', the +2 for going home.
+  kind: 'surprise' | 'continent' | 'home';
   points: number;
   area?: string;
   continent?: Continent;
@@ -207,8 +208,10 @@ export interface Travel {
   to: string;
   // Travel turns still to come. At 0 the player lands, or waits if the destination is taken.
   turnsLeft: number;
-  // The Nomad's boss alert on a ship trip to a new area (step 2.5, owner): at the start of the 3rd
-  // travel turn, by turns a challenge offer, then a +1 bonus (see nomadAlert in engine.ts).
+  // Step 2.7 (owner): a paid ticket (fast) or a free one, by quiz or hitchhiking (slow); see travelTurns.
+  paid: boolean;
+  // The Nomad's boss alert on a free ship trip to a new area (step 2.5, owner; step 2.7: free trips
+  // only): on the last travel turn, by turns a challenge offer, then a +1 bonus (see nomadAlert).
   alert?: NomadAlert;
 }
 

@@ -5,7 +5,9 @@ import {
   CHALLENGE_POINTS,
   CONTINENT_BONUS,
   continentRewardFor,
+  GO_HOME_POINTS,
   GO_HOME_TURNS,
+  MOST_BUSINESSES_BONUS,
   MAX_ROBOTS,
   MAX_SEATS,
   MIN_SEATS,
@@ -13,7 +15,6 @@ import {
   POINTS_NEW_AREA,
   POINTS_NEW_CONTINENT,
   POINTS_NOMAD_BONUS,
-  POINTS_NOMAD_SHIP,
   POINTS_NOMAD_TRIP,
   POINTS_WONDER,
   PROFILES,
@@ -26,7 +27,7 @@ import {
   ticketPrice,
   TOTAL_ROUNDS,
   TOUR_FEE,
-  TRAVEL_TURNS,
+  travelTurns,
   VISA_PRICE,
   VISA_TEST_FACTS,
   VISA_TEST_PASS,
@@ -481,10 +482,13 @@ function depart(
   // The visa and tour fee due now are paid at boarding, with the ticket (owner's rule, task 11),
   // so nothing is owed on landing; a citizenship or tours that appear during the trip are free.
   payFees(state, me, entryFees(state, me, me.area, to), to);
-  me.travel = { kind, from: me.area!, to, turnsLeft: TRAVEL_TURNS[me.profile!][kind] };
-  // Step 2.5 (owner): a Nomad's ship trip to a new area brings a boss alert on its 3rd travel turn,
-  // by turns: first a challenge offer, then a +1 bonus.
-  if (me.profile === 'nomad' && kind === 'port' && !me.visitedAreas.includes(to)) {
+  // Step 2.7 (owner): a paid ticket is fast, a free one (quiz, hitchhiking) is slow (travelTurns).
+  const paid = ticket > 0;
+  me.travel = { kind, from: me.area!, to, turnsLeft: travelTurns(me.profile!, kind, paid), paid };
+  // Step 2.5 (owner): a Nomad's ship trip to a new area brings a boss alert on its last travel turn,
+  // by turns: first a challenge offer, then a +1 bonus. Step 2.7: only on a free (quiz) ship trip,
+  // which takes 2 turns; the alert comes on the 2nd.
+  if (me.profile === 'nomad' && kind === 'port' && !paid && !me.visitedAreas.includes(to)) {
     me.travel.alert = me.nomadShips % 2 === 0 ? 'challenge' : 'bonus';
     me.nomadShips += 1;
   }
@@ -590,7 +594,21 @@ export function finalScore(state: GameState, p: Player): number {
 
 function scoreWith(businesses: Business[], p: Player): number {
   const value = businesses.filter((b) => b.owner === p.seat).reduce((sum, b) => sum + BUSINESS_PRICE[b.kind], 0);
-  return addPoints(p.points + value, 0);
+  return addPoints(p.points + value + mostBusinessesBonus(businesses, p.seat), 0);
+}
+
+// How many businesses a player owns.
+export function businessCount(businesses: Business[], seat: number): number {
+  return businesses.filter((b) => b.owner === seat).length;
+}
+
+// Step 2.7 (owner): every player owning the most businesses (at least 1) gets +1 at the end. It is
+// counted in the final score shown during the game too ("if the game ended now").
+export function mostBusinessesBonus(businesses: Business[], seat: number): number {
+  const counts = new Map<number, number>();
+  for (const b of businesses) if (b.owner !== null) counts.set(b.owner, (counts.get(b.owner) ?? 0) + 1);
+  const most = Math.max(0, ...counts.values());
+  return most > 0 && counts.get(seat) === most ? MOST_BUSINESSES_BONUS : 0;
 }
 
 // The player standing in an area may buy its business if nobody owns it and they can pay.
@@ -686,11 +704,14 @@ export function canPayAfterQuiz(state: GameState, me: Player, kind: RouteKind, t
 }
 
 // Go home: free (no visa, no tour fee: the game moves the player), with the normal arrival
-// points (usually 0, as home is already visited).
+// points (usually 0, as home is already visited). Step 2.7 (owner): +2 every time, also when the
+// player already stands at home, so they can pay a visa and start again.
 function goHome(state: GameState, map: GameMap, me: Player): void {
   const to = homeFor(state, map, me);
   me.quizWrong = 0;
   if (to !== me.area) arrive(state, map, me, areaById(map, to));
+  me.points = addPoints(me.points, GO_HOME_POINTS);
+  state.rewards.push({ seat: me.seat, kind: 'home', points: GO_HOME_POINTS, area: me.area! });
 }
 
 // Step 2.6 (owner): the Business may take one 2nd citizenship, free, of the area (or big country) it
@@ -788,9 +809,10 @@ export function nomadAlert(me: Player): NomadAlert | null {
 // the boss's +1 bonus on the bonus turn.
 function travelOn(state: GameState, map: GameMap, me: Player): void {
   const trip = me.travel!;
-  if (me.profile === 'nomad' && trip.turnsLeft === TRAVEL_TURNS.nomad[trip.kind] && !me.visitedAreas.includes(trip.to)) {
-    // Step 2.6: a ship trip to a new area gives +2.
-    me.points = addPoints(me.points, trip.kind === 'port' ? POINTS_NOMAD_SHIP : POINTS_NOMAD_TRIP);
+  const total = travelTurns('nomad', trip.kind, trip.paid);
+  if (me.profile === 'nomad' && total > 0 && trip.turnsLeft === total && !me.visitedAreas.includes(trip.to)) {
+    // Step 2.7 (owner): +1 for a trip to a new area with at least 1 travel turn (no more +2 by ship).
+    me.points = addPoints(me.points, POINTS_NOMAD_TRIP);
   }
   if (nomadAlert(me) === 'bonus') me.points = addPoints(me.points, POINTS_NOMAD_BONUS);
   if (trip.turnsLeft > 0) trip.turnsLeft -= 1;
@@ -950,9 +972,10 @@ function endTurn(state: GameState, map: GameMap): void {
   startTurn(state, map);
 }
 
-// The best final score (see finalScore) wins; ties go to more continents, then more areas.
+// The best final score (see finalScore) wins; ties go to more businesses (step 2.7, owner), then more
+// continents, then more areas.
 export function rank(players: Player[], businesses: Business[] = []): GameResult {
-  const key = (p: Player) => [scoreWith(businesses, p), p.visitedContinents.length, p.visitedAreas.length];
+  const key = (p: Player) => [scoreWith(businesses, p), businessCount(businesses, p.seat), p.visitedContinents.length, p.visitedAreas.length];
   const compare = (a: Player, b: Player) => {
     const ka = key(a);
     const kb = key(b);

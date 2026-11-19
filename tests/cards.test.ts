@@ -122,22 +122,24 @@ test('lose a turn in an area: the only move is "lostTurn"; it changes nothing el
 });
 
 test('no card on a trip: a travel turn draws nothing and does not count', () => {
-  let s = game(['eu-north', 'as-east'], ['nomad', 'luxury']); // Nomad: ship 3 turns
-  s = go(s, { type: 'board', kind: 'port', to: 'na-one' }); // land turn 1
+  let s = game(['eu-north', 'as-east'], ['nomad', 'luxury']); // Nomad by quiz: ship 2 turns (step 2.7)
+  s = go(s, { type: 'quiz', kind: 'port', to: 'na-one' }); // land turn 1
+  s = go(s, { type: 'answer', choice: s.quiz!.question.correct });
   s = pass(s);
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 2; i++) {
     const before = p1(s).points;
     s = go(s, { type: 'travel' });
     assert.ok(s.drawn.every((c) => c.seat !== p1(s).seat), 'no travel card');
-    // Nomad: a ship trip to a new area +2 (step 2.6), once, on the first travel turn; landing: area +1, continent +2
-    assert.equal(p1(s).points, before + (i === 0 ? 2 : 0) + (i === 2 ? 1 + 2 : 0));
+    // Nomad: a trip to a new area +1, once, on the first travel turn; landing: area +1, continent +2.
+    // (The boss's alert of the 2nd turn is a challenge offer here, not played.)
+    assert.equal(p1(s).points, before + (i === 0 ? 1 : 0) + (i === 1 ? 1 + 2 : 0));
     assert.equal(p1(s).landTurns, 1, 'trip turns are not counted');
     s = pass(s);
   }
-  // Rounds 2–4 were at sea, so the card comes on land turns 3 (round 6), not in round 3.
-  assert.equal(s.round, 5);
+  // Rounds 2–3 were at sea, so the card comes on land turn 3 (round 5), not in round 3.
+  assert.equal(s.round, 4);
   assert.equal(p1(s).landTurns, 2);
-  assert.equal(s.card, null);
+  assert.ok(s.card === null || s.card.seat !== p1(s).seat, 'no card for the traveller yet');
   s = pass(s);
   s = pass(s);
   assert.equal(s.card!.seat, p1(s).seat);
@@ -184,14 +186,17 @@ test('the same seed draws the same cards; saves from versions 1 and 2 are not co
   }
 });
 
-// Step 2.6 (owner-approved mix "G"): the same cards for everyone, but how often good and bad ones come
-// depends on the profile and the number of players (3 players use the 4-player mix). The Backpacker's
+// Step 2.6; step 2.7 (owner's final mix "D1"): the same cards for everyone, but how often good and bad ones
+// come depends on the profile and the number of players (3 players use the 4-player mix). The Backpacker's
 // helper cards b1–b8 are kept in cards.ts but never drawn.
 test('the card mix by profile and number of players; the Backpacker\'s helper cards are not drawn', () => {
   assert.deepEqual(cardMix('business', 2), { good: 1.1, bad: 0.95 });
   assert.deepEqual(cardMix('nomad', 2), { good: 1, bad: 1 });
   assert.deepEqual(cardMix('nomad', 3), cardMix('nomad', 4));
-  assert.deepEqual(cardMix('backpacker', 4), { good: 1, bad: 1.2 });
+  assert.deepEqual(cardMix('backpacker', 4), { good: 0.93, bad: 1.3 });
+  assert.deepEqual(cardMix('business', 4), { good: 1.2, bad: 0.87 });
+  assert.deepEqual(cardMix('luxury', 4), { good: 1.3, bad: 0.85 });
+  assert.deepEqual(cardMix('nomad', 4), { good: 1.1, bad: 0.92 });
   assert.ok(CARDS.filter((c) => c.deck === 'backpacker').length === 8, 'b1–b8 kept');
   const bad = (c: DrawnCard) => c.card.loseTurn === true || c.card.points < 0;
   const drawn: Record<string, { all: number; bad: number }> = {};
@@ -212,6 +217,6 @@ test('the card mix by profile and number of players; the Backpacker\'s helper ca
     }
   }
   const share = (p: Profile) => drawn[p].bad / drawn[p].all;
-  // 4 players: Backpacker 59% bad, Business 51%, Luxury 48%, Nomad 45% (in theory).
-  assert.ok(share('backpacker') > share('business') && share('business') > share('nomad'), JSON.stringify(drawn));
+  // 4 players: Backpacker 63% bad, Nomad 50%, Business 47%, Luxury 44% (in theory, the 33 cards for anywhere).
+  assert.ok(share('backpacker') > share('business') && share('backpacker') > share('nomad') && share('nomad') > share('luxury'), JSON.stringify(drawn));
 });

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { apply, destinations, legalActions } from '../src/engine/engine.ts';
 import type { Action, GameMap, GameState, Profile } from '../src/engine/types.ts';
-import { canRide, PROFILES } from '../src/engine/constants.ts';
+import { canRide, GO_HOME_POINTS, PROFILES } from '../src/engine/constants.ts';
 import { placeholderQuestion } from '../src/engine/quiz.ts';
 import { map30 } from '../src/maps/map30.ts';
 import { travelMap } from './fixtures/test-map.ts';
@@ -66,29 +66,48 @@ test('Business plane: pay 2, 0 travel turns, land on the boarding turn with the 
   assert.equal(currentPlayer(s).seat, seatOf(s, 1).seat);
 });
 
-test('Nomad plane: pay 1, 1 travel turn (+1), then land', () => {
+test('Nomad plane, paid: 0 travel turns, no Nomad +1 (step 2.7)', () => {
   let s = game(['eu-west', 'af-north'], 'nomad');
   s = board(s, 'as-east');
+  assert.equal(seatOf(s, 0).area, 'as-east');
+  assert.equal(seatOf(s, 0).travel, null);
+  assert.equal(seatOf(s, 0).points, 3 - 1 + 1 + 2);
+});
+
+test('plane by quiz: 1 travel turn for every profile (step 2.7); the Nomad +1, then land', () => {
+  for (const profile of ['business', 'luxury', 'backpacker'] as const) {
+    const s = answer(quiz(game(['eu-west', 'af-north'], profile), 'as-east'), true);
+    assert.deepEqual(seatOf(s, 0).travel, { kind: 'airport', from: 'eu-west', to: 'as-east', turnsLeft: 1, paid: false }, profile);
+  }
+  let s = answer(quiz(game(['eu-west', 'af-north'], 'nomad'), 'as-east'), true);
   assert.equal(seatOf(s, 0).area, null);
-  assert.equal(seatOf(s, 0).points, 3 - 1);
+  assert.equal(seatOf(s, 0).points, 3);
   s = walk(s, 'af-south');
   // A challenge is offered too (task 12); saying no is the plain travel turn.
   assert.deepEqual(legalActions(s, travelMap), [{ type: 'travel' }, { type: 'travel', challenge: true }]);
   s = travel(s);
   assert.equal(seatOf(s, 0).area, 'as-east');
-  assert.equal(seatOf(s, 0).points, 3 - 1 + 1 + 1 + 2);
+  assert.equal(seatOf(s, 0).points, 3 + 1 + 1 + 2);
 });
 
-test('Nomad ship: 3 travel turns, +2 for a ship trip to a new area (step 2.6); Business ship: 1 travel turn', () => {
+test('ship (step 2.7): paid 1 travel turn (Nomad +1), by quiz 2 travel turns; Business ship paid: 1 travel turn', () => {
   let s = game(['eu-north', 'af-north'], 'nomad');
   s = board(s, 'na-one', 'port');
-  for (const p2 of ['af-south', 'af-north', 'af-south']) {
-    s = walk(s, p2);
-    assert.equal(seatOf(s, 0).area, null);
-    s = travel(s);
-  }
+  s = walk(s, 'af-south');
+  assert.equal(seatOf(s, 0).area, null);
+  s = travel(s);
   assert.equal(seatOf(s, 0).area, 'na-one');
-  assert.equal(seatOf(s, 0).points, 3 - 1 + 2 + 1 + 2);
+  assert.equal(seatOf(s, 0).points, 3 - 1 + 1 + 1 + 2);
+
+  let q = game(['eu-north', 'af-north'], 'luxury');
+  q = go(q, { type: 'quiz', kind: 'port', to: 'na-one' });
+  q = answer(q, true);
+  for (const p2 of ['af-south', 'af-north']) {
+    q = walk(q, p2);
+    assert.equal(seatOf(q, 0).area, null);
+    q = travel(q);
+  }
+  assert.equal(seatOf(q, 0).area, 'na-one');
 
   let b = game(['eu-north', 'af-north'], 'business');
   b = board(b, 'na-one', 'port');
@@ -102,17 +121,17 @@ test('Nomad (step 2.5): +1 for a trip only to an area not visited yet', () => {
   let s = game(['eu-west', 'af-north'], 'nomad');
   seatOf(s, 0).visitedAreas.push('as-east');
   seatOf(s, 0).visitedContinents.push('Asia');
-  s = board(s, 'as-east');
+  s = answer(quiz(s, 'as-east'), true); // by quiz: 1 travel turn
   s = travel(walk(s, 'af-south'));
   assert.equal(seatOf(s, 0).area, 'as-east');
-  assert.equal(seatOf(s, 0).points, 3 - 1); // the ticket only: no trip point, nothing new on arrival
+  assert.equal(seatOf(s, 0).points, 3); // no trip point, nothing new on arrival
 });
 
 // Owner's rule (task 13): a booked area (someone is travelling there) is closed, as if the
 // traveller were already there; and nobody boards for an area where someone stands.
 test('booked: nobody walks into or boards for an area someone is travelling to', () => {
   let s = game(['eu-west', 'as-west'], 'nomad');
-  s = board(s, 'as-east');
+  s = answer(quiz(s, 'as-east'), true);
   assert.equal(seatOf(s, 0).travel?.to, 'as-east');
   const moves = legalActions(s, travelMap);
   assert.ok(!moves.some((a) => 'to' in a && a.to === 'as-east'), 'as-east is booked');
@@ -133,7 +152,7 @@ test("booked: no trip to an area where someone stands", () => {
 
 test('destination taken at landing (safety net): wait one more travel turn (Nomad +1), then land', () => {
   let s = game(['eu-west', 'as-west'], 'nomad');
-  s = board(s, 'as-east');
+  s = answer(quiz(s, 'as-east'), true);
   s = walk(s, 'eu-east');
   seatOf(s, 1).area = 'as-east'; // only possible by changing the state by hand
   s = travel(s);
@@ -143,13 +162,15 @@ test('destination taken at landing (safety net): wait one more travel turn (Noma
   assert.equal(seatOf(s, 0).area, 'as-east');
 });
 
-test('quiz: the answer comes in the same turn; right = free ticket, board now', () => {
+test('quiz: the answer comes in the same turn; right = free ticket, board now (1 travel turn, step 2.7)', () => {
   let s = game(['eu-west', 'af-north'], 'business');
   s = quiz(s, 'as-east');
   assert.equal(currentPlayer(s).seat, seatOf(s, 0).seat);
   assert.deepEqual(legalActions(s, travelMap), [{ type: 'answer', choice: 0 }, { type: 'answer', choice: 1 }]);
   s = answer(s, true);
   assert.equal(s.quiz, null);
+  assert.equal(seatOf(s, 0).travel?.turnsLeft, 1);
+  s = travel(walk(s, 'af-south'));
   assert.equal(seatOf(s, 0).area, 'as-east');
   assert.equal(seatOf(s, 0).points, 3 + 1 + 2); // no ticket paid
 });
@@ -186,7 +207,7 @@ function threeWrong(profile: Profile, points: number): GameState {
 test("quiz: can't pay after 3 wrong answers → go home", () => {
   const s = threeWrong('luxury', 2); // ticket 3
   assert.equal(seatOf(s, 0).area, 'eu-north');
-  assert.equal(seatOf(s, 0).points, 2 + 1); // no fees, a new area +1
+  assert.equal(seatOf(s, 0).points, 2 + 1 + GO_HOME_POINTS); // no fees, a new area +1, going home +2 (step 2.7)
   assert.equal(seatOf(s, 0).quizWrong, 0);
   assert.deepEqual(s.payments, []);
 });

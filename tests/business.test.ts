@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { BUSINESS_PRICE, GO_HOME_TURNS, TOUR_FEE, VISA_PRICE } from '../src/engine/constants.ts';
+import { BUSINESS_PRICE, GO_HOME_POINTS, GO_HOME_TURNS, MOST_BUSINESSES_BONUS, TOUR_FEE, VISA_PRICE } from '../src/engine/constants.ts';
 import { apply, businessAt, finalScore, legalActions, mapBusinesses, rank } from '../src/engine/engine.ts';
 import type { Action, BusinessKind, GameMap, GameState, Player, Profile } from '../src/engine/types.ts';
 import { testMap, travelMap } from './fixtures/test-map.ts';
@@ -38,7 +38,8 @@ function pass(s: GameState): GameState {
 test('the map has guided tours at each wonder, an airline at each airport and a ferry agency at each port', () => {
   const list = mapBusinesses(map).map((b) => `${b.kind} ${b.area}`).sort();
   assert.deepEqual(list, ['airline af-south', 'airline as-east', 'airline eu-west', 'ferry eu-north', 'ferry na-one', 'tours as-west', 'tours na-one']);
-  assert.deepEqual(BUSINESS_PRICE, { tours: 2, airline: 3, ferry: 2, train: 2, bus: 2, car: 2 });
+  // Step 2.7 (owner): airline and ferry 2; tours, train, bus and car 1.
+  assert.deepEqual(BUSINESS_PRICE, { tours: 1, airline: 2, ferry: 2, train: 1, bus: 1, car: 1 });
 });
 
 test('buying: the player standing there may buy; it costs the price and the turn goes on', () => {
@@ -47,8 +48,8 @@ test('buying: the player standing there may buy; it costs the price and the turn
   assert.deepEqual(buys(s), [{ type: 'buy', business: 'tours' }]);
   s = go(s, { type: 'buy', business: 'tours' });
   assert.equal(owner(s, 'as-west', 'tours'), p1(s).seat);
-  assert.equal(p1(s).points, 1);
-  assert.deepEqual(s.payments, [{ reason: 'buy', from: p1(s).seat, to: null, amount: 2, area: 'as-west', business: 'tours' }]);
+  assert.equal(p1(s).points, 2);
+  assert.deepEqual(s.payments, [{ reason: 'buy', from: p1(s).seat, to: null, amount: 1, area: 'as-west', business: 'tours' }]);
   // Still the same player's turn, now without the buy option.
   assert.equal(s.turnOrder[s.current], p1(s).seat);
   assert.deepEqual(buys(s), []);
@@ -58,9 +59,9 @@ test('buying: the player standing there may buy; it costs the price and the turn
 
 test('buying needs the full price, and nobody can buy what someone owns', () => {
   let s = game(['af-south', 'eu-west']);
+  p1(s).points = 1;
+  assert.deepEqual(buys(s), []); // the airline costs 2
   p1(s).points = 2;
-  assert.deepEqual(buys(s), []); // the airline costs 3
-  p1(s).points = 3;
   assert.deepEqual(buys(s), [{ type: 'buy', business: 'airline' }]);
   own(s, 'af-south', 'airline', p2(s));
   assert.deepEqual(buys(s), []);
@@ -129,7 +130,7 @@ test('tickets go to the owner of the departure airport; the owner pays themselve
   p2(s).points = 10;
   s = go(s, { type: 'buy', business: 'airline' });
   s = go(s, { type: 'board', kind: 'airport', to: 'eu-west' });
-  assert.equal(p2(s).points, 7 + 1 + 2); // ticket paid and received; +1 area +2 Europe
+  assert.equal(p2(s).points, 8 + 1 + 2); // airline 2; ticket paid and received; +1 area +2 Europe
   assert.deepEqual(s.payments, [{ reason: 'ticket', from: p2(s).seat, to: p2(s).seat, amount: 3, area: 'af-south', business: 'airline' }]);
 });
 
@@ -163,7 +164,7 @@ test('the Backpacker never pays a ticket, so an owner earns nothing from its tri
 });
 
 test('by ship: the ferry owner gets the ticket; the tour fee is paid at boarding', () => {
-  let s = game(['eu-north', 'as-east'], ['nomad', 'luxury']); // Nomad: ticket 1, ship 3 turns
+  let s = game(['eu-north', 'as-east'], ['nomad', 'luxury']); // Nomad: ticket 1, a paid ship 1 turn (step 2.7)
   own(s, 'eu-north', 'ferry', p2(s));
   own(s, 'na-one', 'tours', p2(s));
   p1(s).points = 0;
@@ -176,9 +177,8 @@ test('by ship: the ferry owner gets the ticket; the tour fee is paid at boarding
     { reason: 'tour', from: p1(s).seat, to: p2(s).seat, amount: 1, area: 'na-one' },
   ]);
   s = pass(s);
-  let landing = s;
-  for (let i = 0; i < 3; i++) s = pass((landing = go(s, { type: 'travel' })));
-  assert.equal(p1(s).area, 'na-one');
+  const landing = go(s, { type: 'travel' });
+  assert.equal(p1(landing).area, 'na-one');
   assert.deepEqual(landing.payments, []); // nothing is owed on landing
 });
 
@@ -187,9 +187,8 @@ test('tours bought while the player is at sea cost nothing on landing', () => {
   s = go(s, { type: 'board', kind: 'port', to: 'na-one' });
   own(s, 'na-one', 'tours', p2(s));
   s = pass(s);
-  let landing = s;
-  for (let i = 0; i < 3; i++) s = pass((landing = go(s, { type: 'travel' })));
-  assert.equal(p1(s).area, 'na-one');
+  const landing = go(s, { type: 'travel' });
+  assert.equal(p1(landing).area, 'na-one');
   assert.deepEqual(landing.payments, []);
 });
 
@@ -208,7 +207,7 @@ function brokeGame(): GameState {
   return s;
 }
 
-test(`go home: blocked by lack of money ${GO_HOME_TURNS} turns in a row sends the player home, for free`, () => {
+test(`go home: blocked by lack of money ${GO_HOME_TURNS} turns in a row sends the player home, for free, +${GO_HOME_POINTS}`, () => {
   let s = brokeGame();
   for (let turn = 1; turn < GO_HOME_TURNS; turn++) {
     assert.deepEqual(moves(s), [{ type: 'blocked' }]);
@@ -221,7 +220,8 @@ test(`go home: blocked by lack of money ${GO_HOME_TURNS} turns in a row sends th
   p2(s).citizenship!.push('eu-west');
   s = go(s, { type: 'goHome' });
   assert.equal(p1(s).area, 'eu-west');
-  assert.equal(p1(s).points, 1);
+  // Step 2.7 (owner): +2 for going home, so the player can pay a visa again.
+  assert.equal(p1(s).points, 1 + GO_HOME_POINTS);
   assert.equal(p1(s).broke, 0);
   assert.deepEqual(s.payments, []);
 });
@@ -232,6 +232,23 @@ test('go home: if someone stands at home, the nearest free area', () => {
   p2(s).area = 'eu-west';
   s = go(s, { type: 'goHome' });
   assert.equal(p1(s).area, 'eu-north');
+  assert.equal(p1(s).points, 1 + 1 + GO_HOME_POINTS); // +1 for eu-north, a new area, and +2
+});
+
+test('go home when already at home: the player stays, and still gets +2 (step 2.7)', () => {
+  let s = brokeGame();
+  p1(s).area = 'eu-west';
+  p2(s).citizenship = ['eu-north', 'eu-east', 'af-north', 'as-east'];
+  p1(s).points = 0;
+  own(s, 'eu-west', 'airline', p2(s));
+  for (let turn = 1; turn < GO_HOME_TURNS; turn++) {
+    assert.deepEqual(moves(s).filter((a) => a.type !== 'sell'), [{ type: 'blocked' }]);
+    s = pass(go(s, { type: 'blocked' }));
+  }
+  s = go(s, { type: 'goHome' });
+  assert.equal(p1(s).area, 'eu-west');
+  assert.equal(p1(s).points, GO_HOME_POINTS);
+  assert.deepEqual(s.rewards, [{ seat: p1(s).seat, kind: 'home', points: GO_HOME_POINTS, area: 'eu-west' }]);
 });
 
 test('a move, or being blocked only by players, ends the "no money" count', () => {
@@ -252,12 +269,13 @@ test('a move, or being blocked only by players, ends the "no money" count', () =
   assert.equal(p1(s).broke, 0);
 });
 
-test('final score: points plus the price of every business owned', () => {
+test('final score: points plus the price of every business owned, +1 for owning the most (step 2.7)', () => {
   const s = game(['as-west', 'eu-west']);
   p1(s).points = 5;
   p2(s).points = 4;
   own(s, 'eu-west', 'airline', p2(s));
-  assert.equal(finalScore(s, p2(s)), 7);
+  assert.equal(finalScore(s, p2(s)), 4 + 2 + MOST_BUSINESSES_BONUS);
+  assert.equal(finalScore(s, p1(s)), 5);
   assert.deepEqual(rank(s.players, s.businesses).winners, [p2(s).seat]);
   assert.deepEqual(rank(s.players).winners, [p1(s).seat]);
 });
@@ -270,20 +288,20 @@ test('selling: any business the player owns, to a player who can pay, at the pri
   let s = game(['eu-west', 'af-south']); // p1 Business, p2 Luxury
   own(s, 'eu-west', 'airline', p1(s));
   own(s, 'na-one', 'tours', p1(s)); // far away: can still be sold
-  p2(s).points = 2;
-  // p2 can pay the tours (2) but not the airline (3).
+  p2(s).points = 1;
+  // p2 can pay the tours (1) but not the airline (2).
   assert.deepEqual(sells(s), [{ type: 'sell', business: 'tours', area: 'na-one', to: p2(s).seat }]);
   p2(s).points = 5;
   assert.equal(sells(s).length, 2);
   const mine = p1(s).points;
   s = go(s, { type: 'sell', business: 'airline', area: 'eu-west', to: p2(s).seat });
-  assert.deepEqual(s.offer, { business: 'airline', area: 'eu-west', from: p1(s).seat, to: p2(s).seat, price: 3 });
+  assert.deepEqual(s.offer, { business: 'airline', area: 'eu-west', from: p1(s).seat, to: p2(s).seat, price: 2 });
   assert.deepEqual(legalActions(s, map), [{ type: 'sellAnswer', accept: true }, { type: 'sellAnswer', accept: false }]);
   s = go(s, { type: 'sellAnswer', accept: true });
   assert.equal(owner(s, 'eu-west', 'airline'), p2(s).seat);
-  assert.equal(p1(s).points, mine + 3);
-  assert.equal(p2(s).points, 2);
-  assert.deepEqual(s.payments, [{ reason: 'sale', from: p2(s).seat, to: p1(s).seat, amount: 3, area: 'eu-west', business: 'airline' }]);
+  assert.equal(p1(s).points, mine + 2);
+  assert.equal(p2(s).points, 3);
+  assert.deepEqual(s.payments, [{ reason: 'sale', from: p2(s).seat, to: p1(s).seat, amount: 2, area: 'eu-west', business: 'airline' }]);
   // Still p1's turn; one offer per turn, so no more selling now.
   assert.equal(s.turnOrder[s.current], p1(s).seat);
   assert.deepEqual(sells(s), []);
@@ -321,7 +339,7 @@ test('out of money: selling gives the points to move on in the same turn', () =>
   assert.equal(p1(s).broke, 1);
   s = go(s, { type: 'sell', business: 'tours', area: 'na-one', to: p2(s).seat });
   s = go(s, { type: 'sellAnswer', accept: true });
-  assert.equal(p1(s).points, 3);
+  assert.equal(p1(s).points, 2); // 1 + the tours' price 1: enough for the 2-point visa
   s = passVisaTest(go(s, { type: 'walk', to: 'af-north' }), map); // the visa test, then the 2-point visa
   assert.equal(p1(s).area, 'af-north');
   assert.equal(p1(s).broke, 0);
@@ -332,6 +350,25 @@ test('a sold business counts for its new owner at the end', () => {
   own(s, 'eu-west', 'airline', p1(s));
   s = go(s, { type: 'sell', business: 'airline', area: 'eu-west', to: p2(s).seat });
   s = go(s, { type: 'sellAnswer', accept: true });
-  assert.equal(finalScore(s, p2(s)), p2(s).points + 3);
+  assert.equal(finalScore(s, p2(s)), p2(s).points + BUSINESS_PRICE.airline + MOST_BUSINESSES_BONUS);
   assert.equal(finalScore(s, p1(s)), p1(s).points);
+});
+
+test('the most businesses: +1 to everyone tied for the most; ties broken by businesses, then continents (step 2.7)', () => {
+  const s = game(['as-west', 'eu-west', 'na-one'], ['business', 'luxury', 'nomad']);
+  const p3 = seatOf(s, 2);
+  own(s, 'eu-west', 'airline', p1(s));
+  own(s, 'as-west', 'tours', p2(s));
+  // 1 business each for p1 and p2: both get +1; p3 owns none.
+  assert.equal(finalScore(s, p1(s)), p1(s).points + 2 + 1);
+  assert.equal(finalScore(s, p2(s)), p2(s).points + 1 + 1);
+  assert.equal(finalScore(s, p3), p3.points);
+  // Equal scores: more businesses wins, before more continents.
+  p1(s).points = 10; p2(s).points = 0; p3.points = 13;
+  own(s, 'na-one', 'tours', p2(s)); // p2: 2 businesses (the only one with the most)
+  p2(s).points = 13 - 2 - 1;
+  p3.visitedContinents.push('Asia', 'Europe');
+  assert.equal(finalScore(s, p2(s)), 13);
+  assert.equal(finalScore(s, p3), 13);
+  assert.deepEqual(rank(s.players, s.businesses).winners, [p2(s).seat]);
 });

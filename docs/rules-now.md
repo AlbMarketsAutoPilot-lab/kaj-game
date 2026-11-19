@@ -1,8 +1,8 @@
 # KAJ — all game rules as of 2026-11-19
 
 Checked against the code (`src/engine/`, `src/maps/`, `src/cards/`) and `docs/engine.md`.
-Rules marked **[2.6]** came with step 2.6 (2026-11-19). Where a [2.6] rule replaced an older one, the old one is
-shown ~~struck out~~.
+Rules marked **[2.6]** came with step 2.6 and **[2.7]** with step 2.7 (both 2026-11-19). Where a new rule replaced
+an older one, the old one is shown ~~struck out~~.
 
 ## 1. Players and setup
 
@@ -29,6 +29,8 @@ shown ~~struck out~~.
   closed by money (not only by players in the way). Home is the start area, or the nearest free area
   if someone stands there. Going home is free, with the normal arrival points. Nobody is ever
   eliminated.
+- **[2.7] Going home gives +2**, every time (also after the 3rd wrong quiz answer, section 4, and also when
+  the player already stands at home), so the player can pay a visa and start again.
 
 ## 3. Points
 
@@ -43,18 +45,27 @@ shown ~~struck out~~.
   - 50 turns: Europe 6, Asia 8, Africa 6, North America 3, South America 3, Oceania 2.
 - **Madagascar** (50 turns): a secret SURPRISE +3 on the first arrival. It is never announced.
 - Points never go below 0.
-- **End of the game:** points plus the price of every business owned. Ties are broken by more
-  continents, then more areas; a full tie is a draw.
+- **End of the game:** points plus the price of every business owned.
+  - **[2.7]** Every player owning the most businesses (at least 1) gets **+1**.
+  - ~~Ties are broken by more continents, then more areas.~~ **[2.7]** Ties are broken by **more businesses**,
+    then more continents, then more areas; a full tie is a draw.
 
 ## 4. Trips
 
-| Kind | Who | Ticket | Travel turns |
+| Kind | Who | Ticket | **[2.7]** Travel turns: paid / free (quiz or hitchhiking) |
 |---|---|---|---|
-| Plane | everyone | Nomad 1, Business 2, Luxury 3, Backpacker quiz only | Backpacker and Nomad 1; Business and Luxury 0 |
-| Ship | everyone | the same | Backpacker and Nomad 3; Business and Luxury 1 |
-| Train (France ↔ Russia West or Turkey) | not Luxury | Business 2, Nomad 2, Backpacker quiz only | 1 |
-| Bus (Mongolia → Siberia or China West, one way) | Nomad and Backpacker only | Nomad 1, Backpacker quiz only | 1 |
-| Car (Mexico → USA East or Canada West, one way) | everyone | Nomad, Business, Luxury rent for 1 (no quiz); the Backpacker hitchhikes | 1 |
+| Plane | everyone | Nomad 1, Business 2, Luxury 3, Backpacker quiz only | 0 / 1 |
+| Ship | everyone | the same | 1 / 2 |
+| Train (France ↔ Russia West or Turkey) | not Luxury | Business 2, Nomad ~~2~~ **[2.7] 1**, Backpacker quiz only | 0 / 1 |
+| Bus (Mongolia → Siberia or China West, one way) | Nomad and Backpacker only | Nomad 1, Backpacker quiz only | 0 / 1 |
+| Car (Mexico → USA East or Canada West, one way) | everyone | Nomad 1, Business and Luxury ~~1~~ **[2.7] 2** (no quiz); the Backpacker hitchhikes | 1 / 1 |
+
+- **[2.7] Paid is fast, free is slow, for every profile.** The Backpacker never pays, so its trips always
+  take the free time. ~~Old travel turns by profile: plane Backpacker and Nomad 1, Business and Luxury 0;
+  ship Backpacker and Nomad 3, Business and Luxury 1; train, bus and car 1.~~ A paid trip after the 3rd
+  wrong quiz answer is a paid trip (fast).
+- **[2.7]** Before a quiz trip, a player who could pay (Nomad, Business, Luxury) sees a notice: the quiz
+  trip takes longer than the paid one.
 
 - **Routes:** fixed routes, 1 or 2 destinations each; all plane and ship routes are two-way.
   - 30 turns: 13 airports, 11 ports.
@@ -89,12 +100,15 @@ shown ~~struck out~~.
   - **[2.6]** Never pays a visa, but takes the visa test.
 - **Luxury:** fastest trips, flies and sails anywhere, can't take the train or the bus.
   - ~~Citizenship granted at once~~ **[2.6]** Never takes the visa test, but pays the visa.
-- **Digital Nomad:** ticket 1.
-  - +1 for every trip to an area it has not visited yet (0 to a visited one).
-  - **[2.6]** A ship trip to a new area gives +2.
-  - **Boss alerts:** on ship trips to new areas, on the 3rd travel turn, by turns. The 1st, 3rd, 5th …
-    such trip may play one challenge; the 2nd, 4th … get a +1 bonus.
-  - +5 on reaching a 3rd continent.
+- **Digital Nomad:** ticket 1 (plane, ship, train, bus, car).
+  - +1 for every trip to an area it has not visited yet (0 to a visited one). **[2.7]** Only for a trip
+    of at least 1 travel turn: a paid plane, train or bus (0 turns) gives nothing; a paid ship or car, and
+    every quiz trip, gives +1.
+  - ~~**[2.6]** A ship trip to a new area gives +2.~~ **[2.7]** removed.
+  - **Boss alerts:** **[2.7]** only on free (quiz) ship trips to new areas, on the 2nd (last) travel turn,
+    by turns. The 1st, 3rd, 5th … such trip may play one challenge; the 2nd, 4th … get a +1 bonus. A paid
+    ship brings no alert.
+  - ~~+5 on reaching a 3rd continent.~~ **[2.7]** removed.
   - Never holds a citizenship.
 
 ## 6. Citizenship and visas
@@ -138,21 +152,23 @@ test next turn (read 6 facts, 3 questions, 2 right to pass), Luxury granted at o
 
 ## 7. Businesses
 
-| Business | Where | Price | Earns |
+| Business | Where | Price **[2.7]** (was) | Earns |
 |---|---|---|---|
-| Guided tours | each wonder | 2 | 1 point each time another player enters the area |
-| Airline | each airport | 3 | paid plane tickets from there |
-| Ferry agency | each port | 2 | paid ship tickets from there |
-| Train booth | France, Russia West, Turkey | 2 | paid train tickets |
-| Bus booth | Mongolia | 2 | paid bus tickets |
-| Car rental | Mexico | 2 | paid car rentals |
+| Guided tours | each wonder | 1 (2) | 1 point each time another player enters the area |
+| Airline | each airport | 2 (3) | paid plane tickets from there |
+| Ferry agency | each port | 2 (2) | paid ship tickets from there |
+| Train booth | France, Russia West, Turkey | 1 (2) | paid train tickets |
+| Bus booth | Mongolia | 1 (2) | paid bus tickets |
+| Car rental | Mexico | 1 (2) | paid car rentals |
 
 - **Buying:** the player standing in the area may buy, if nobody owns it and they can pay. It does
   not end the turn, and there is no limit per player.
 - **Selling:** on their own turn, before moving, a player may offer one business to another player
   who can pay its price; the buyer answers yes or no. One offer per turn, never to a player who is
   travelling.
-- **At the end:** each business counts its price.
+- **At the end:** each business counts its price; **[2.7]** owning the most businesses gives +1, and more
+  businesses break a tie (section 3).
+- **[2.7]** A player with 0 points who owns a business sees a reminder that selling one brings points back.
 - **Strict fees:** no money, no entry. A visa and a tour fee must be in hand to enter (with the ticket
   for a trip).
 
@@ -164,14 +180,15 @@ test next turn (read 6 facts, 3 questions, 2 right to pass), Luxury granted at o
   ±5, or lose a turn.
 - The Backpacker's 8 helper cards (b1–b8, all +1 or +2) stay in the files, but **[2.6]** nobody draws
   them. They are kept as a possible balance lever for step 2.7.
-- **[2.6] Card mix by profile.** The same cards; only how often good and bad ones come:
+- **Card mix by profile** (**[2.7]** mix "D1", replaces 2.6's mix "G"). The same cards; only how often good
+  and bad ones come (bad shares counted on the 33 cards for anywhere):
 
   | Profile | 2 players | 3 or 4 players |
   |---|---|---|
-  | Backpacker | normal deck: 55% bad | bad cards 1.2× as often: 59% bad |
-  | Business | good 1.1×, bad 0.95×: 51% bad | the same: 51% bad |
-  | Luxury | normal deck: 55% bad | good 1.15×, bad 0.9×: 48% bad |
-  | Nomad | normal deck: 55% bad | good 1.25×, bad 0.85×: 45% bad |
+  | Backpacker | normal deck: 55% bad | good 0.93×, bad 1.3×: 63% bad (was 59%) |
+  | Business | good 1.1×, bad 0.95×: 51% bad | good 1.2×, bad 0.87×: 47% bad (was 51%) |
+  | Luxury | normal deck: 55% bad | good 1.3×, bad 0.85×: 44% bad (was 48%) |
+  | Nomad | normal deck: 55% bad | good 1.1×, bad 0.92×: 50% bad (was 45%) |
 
 ## 9. Questions
 
@@ -182,4 +199,4 @@ test next turn (read 6 facts, 3 questions, 2 right to pass), Luxury granted at o
 ## 10. Saves
 
 - The game saves after every move; one save slot.
-- A save from another version can't be continued. The version is 18 **[2.6]** (was 17).
+- A save from another version can't be continued. The version is **[2.7] 19** (2.6: 18).

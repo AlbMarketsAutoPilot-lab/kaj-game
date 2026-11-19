@@ -4,7 +4,7 @@
 // comes back with "📖 How to play". It is a practice board of its own: the saved game is never
 // touched.
 
-import { bigCountryPoints, BUSINESS_PRICE, CONTINENT_BONUS, VISA_TEST_FACTS, VISA_TEST_PASS, POINTS_BIG_COUNTRY_3_PARTS, POINTS_NEW_CONTINENT, POINTS_NOMAD_SHIP, POINTS_NOMAD_TRIP, POINTS_WONDER, TICKET_PRICE, VISA_PRICE } from '../engine/constants.ts';
+import { bigCountryPoints, BUSINESS_PRICE, CONTINENT_BONUS, MOST_BUSINESSES_BONUS, VISA_TEST_FACTS, VISA_TEST_PASS, POINTS_BIG_COUNTRY_3_PARTS, POINTS_NEW_CONTINENT, POINTS_NOMAD_TRIP, POINTS_WONDER, TICKET_PRICE, VISA_PRICE } from '../engine/constants.ts';
 import type { AreaGeo } from './maps.ts';
 import { glowFor, pad, squeeze, svg, unionBox } from './maps.ts';
 import { airport, citizenFlag, pawn, place } from './props.ts';
@@ -181,25 +181,25 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
   };
 
   // The owner's texts (M5). **…** is shown in bold.
-  const nomad = CONTINENT_BONUS.nomad!, bag = CONTINENT_BONUS.backpacker!;
+  const bag = CONTINENT_BONUS.backpacker!;
   const steps: Step[] = [
     { title: '🌍 Welcome, traveller!', task: true, picture: firstTrip,
-      lines: ['This is a **short guide (about 5 minutes) before your first game**. Nothing here counts: it\'s just practice.', '**KAJ is simple: the more you travel, the more points you collect!** But your turns are limited, so make every move count. When the last turn ends, the player with the **most points wins**.', "Let's take your first trip!"],
+      lines: ['This is a **short guide (about 5 minutes) before your first game**. Nothing here counts: it\'s just practice.', '**KAJ is simple: the more you travel, the more points you collect!** But your turns are limited, so make every move count. When the last turn ends, the player with the **most points wins** (on equal points, **more businesses** wins).', "Let's take your first trip!"],
       after: { title: '🎉 Your first trip!', lines: ['Every **new country** you visit gives you **+1 point**.', 'You also **pay with your points** for faster travel (**planes, ferries, trains, buses and cars**) and for fees such as visas and guided tours at wonders.'] } },
     { title: '💡 More points, the easy way', lines: [`Reach a **new continent: +${POINTS_NEW_CONTINENT} points**.`, `Countries with a famous **wonder 🏛️ give +${POINTS_WONDER} extra**.`, `Visit **every part of a big country** like the USA or Canada: **+${bigCountryPoints(2)} or +${POINTS_BIG_COUNTRY_3_PARTS}**.`, 'Visit **every country of a continent: a big reward**, bigger for bigger continents.'] },
     { title: '💡 Big countries, big bonus', task: true, picture: crossCanada,
       lines: ['Big countries like Canada and Russia come in parts. Visit every part for a big bonus.', '**Cross Canada to continue the guide!**'],
       after: { title: `🎉 All of Canada! +${POINTS_BIG_COUNTRY_3_PARTS}`, lines: [`You visited all 3 parts of Canada: +${POINTS_BIG_COUNTRY_3_PARTS} points.`] } },
     { title: '🚀 Travel faster', task: true, picture: quiz,
-      lines: ['In KAJ you usually travel **on foot**. To go faster, take a **plane ✈️, ferry ⛴️, train 🚆, bus 🚌 or car 🚗**.', 'Faster travel **costs points**… unless you\'re smart and **pay with your knowledge!**', '**Short on points, or want to save them?** Planes, ferries, trains and buses give you a **free ticket if you pass their quiz**. If you don\'t, **you lose the turn**.', '**In Mexico, rent a car 🚗** (no quiz) and get **all of the USA or all of Canada at once**. The Backpacker can\'t rent: it **tries to hitchhike** 👍.', 'On long trips, other passengers may **challenge you** with quizzes too. Accept, and you **win points if you\'re right** or **lose points if you\'re wrong**.'],
+      lines: ['In KAJ you usually travel **on foot**. To go faster, take a **plane ✈️, ferry ⛴️, train 🚆, bus 🚌 or car 🚗**.', 'Faster travel **costs points**… unless you\'re smart and **pay with your knowledge!**', '**Short on points, or want to save them?** Planes, ferries, trains and buses give you a **free ticket if you pass their quiz**. If you don\'t, **you lose the turn**.', '**Paying is faster, the quiz is slower.** A paid plane, train or bus arrives **right away** and a paid ship takes **1 travel turn**. With the free quiz a plane, train or bus takes **1 travel turn** and a ship **2**.', '**In Mexico, rent a car 🚗** (no quiz) and get **all of the USA or all of Canada at once**. The Backpacker can\'t rent: it **tries to hitchhike** 👍.', 'On long trips, other passengers may **challenge you** with quizzes too. Accept, and you **win points if you\'re right** or **lose points if you\'re wrong**.'],
       after: { title: '✅ Right!', lines: ['Free ticket! If only real life worked like that!'] } },
     { title: '🧳 Your profile\'s bonuses', cls: 'guide-list', lines: [
-      `1. 🎒 **Backpacker: +${bag.points} for reaching ${bag.continents} continents.** Never pays for tickets (always the free quiz), can take the bus and try to hitchhike. *But:* slow trips.`,
-      `2. 💼 **Business Traveler: never pays a visa** (it still takes the test), **takes a free 2nd citizenship** once, fast trips, and can rent a car in Mexico. *But:* tickets cost ${TICKET_PRICE.business}, and no bus.`,
-      `3. 💎 **Luxury Traveler: flies or sails to any airport or port**, **never takes a visa test** (it pays the visa), and can rent a car in Mexico. *But:* tickets cost ${TICKET_PRICE.luxury}, and no train or bus.`,
-      `4. 💻 **Digital Nomad: +${POINTS_NOMAD_TRIP} for every trip to a new area, +${POINTS_NOMAD_SHIP} by ship** (it works on the way), **+${nomad.points} for reaching ${nomad.continents} continents**, the **cheapest tickets**, and can take the bus and rent a car. *But:* never citizenship, no travel challenges (it's working!, though its boss sometimes rewards long ship trips), and slow trips.`] },
+      `1. 🎒 **Backpacker: +${bag.points} for reaching ${bag.continents} continents.** Never pays for tickets (always the free quiz), can take the bus and try to hitchhike. *But:* its trips are always the slower quiz trips.`,
+      `2. 💼 **Business Traveler: never pays a visa** (it still takes the test), **takes a free 2nd citizenship** once, fast trips when it pays, and can rent a car in Mexico. *But:* tickets cost ${TICKET_PRICE.business}, and no bus.`,
+      `3. 💎 **Luxury Traveler: flies or sails to any airport or port**, **never takes a visa test** (it pays the visa), fast trips when it pays, and can rent a car in Mexico. *But:* tickets cost ${TICKET_PRICE.luxury}, and no train or bus.`,
+      `4. 💻 **Digital Nomad: +${POINTS_NOMAD_TRIP} for every trip to a new area** that takes at least 1 travel turn (it works on the way), the **cheapest tickets** and fast trips when it pays, and can take the bus and rent a car. *But:* never citizenship, and no travel challenges (it's working!, though its boss sometimes rewards free ship trips).`] },
     { title: '💼 Own a business', task: true, picture: buyAirline,
-      lines: ['Want more? Own a business, and the other players pay you:', '✈️ an airline at an airport · ⚓ a ferry agency at a port · 🚆 a train ticket booth at a station · 🚌 a bus ticket booth at the bus stop · 🚗 a car rental in Mexico · 🏛️ guided tours at a wonder.', '**Buy the airline at this airport to continue the guide.**'],
+      lines: ['Want more? Own a business, and the other players pay you:', `**Businesses decide close games:** each one counts its price at the end, owning **the most businesses gives +${MOST_BUSINESSES_BONUS}**, and on equal points **more businesses wins**.`, '✈️ an airline at an airport · ⚓ a ferry agency at a port · 🚆 a train ticket booth at a station · 🚌 a bus ticket booth at the bus stop · 🚗 a car rental in Mexico · 🏛️ guided tours at a wonder.', '**Buy the airline at this airport to continue the guide.**'],
       after: { title: '🎉 You own the airline of UK & Ireland!', picture: () => airportView(true),
         lines: ['Your flag now flies over the airport. Every time another player flies from UK & Ireland, the ticket money goes to you.'] } },
     { title: '🛂 Citizenship and visas', task: true, picture: askCitizenship,

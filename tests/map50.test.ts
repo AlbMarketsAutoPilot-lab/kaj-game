@@ -130,9 +130,7 @@ test('bus: Mongolia one way to Siberia or China West; Russia\'s +5 at once by bu
   let s = startedGame(['egypt', 'spain'], 1, map50, ['nomad', ...PROFILES]);
   seatOf(s, 0).area = 'mongolia';
   seatOf(s, 0).points = 10;
-  s = apply(s, map50, { type: 'board', kind: 'bus', to: 'russia-east' });
-  s = apply(s, map50, legalActions(s, map50).find((a) => a.type === 'walk')!);
-  s = apply(s, map50, { type: 'travel' });
+  s = apply(s, map50, { type: 'board', kind: 'bus', to: 'russia-east' }); // paid: 0 travel turns (step 2.7)
   const me = seatOf(s, 0);
   assert.equal(me.area, 'russia-east');
   assert.deepEqual(me.bigCountries, ['Russia']);

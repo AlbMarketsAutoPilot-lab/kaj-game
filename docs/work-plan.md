@@ -93,7 +93,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | 2.4 | New ship and plane routes on both maps, map check, stuck-state checker | **high** | 1 | — | ✅ done (owner-approved): the owner's routes on both maps (30 turns 13 airports / 11 ports / 15 connections, 50 turns 15 / 13 / 18), robots no longer walk straight back for nothing, Pacific route lines from both ends, guide says Iceland; fair 13 → 10 of 16 (30) and 12 → 14 of 16 (50), tuning in 2.7; saves v16 |
 | 2.5 | Travel by profile (turns, prices, quiz = Backpacker turns, quiz popup), bus and car whole country | **high** | 2 | — | ✅ done (owner's final decision, 2026-11-18): only the Nomad boss alerts (+1 per trip to new areas only; ship alerts: a challenge, then a +1 bonus, by turns; surprise removed) and the car to USA East or Canada West; the rest of 2.5 dropped; saves v17 |
 | 2.6 | Citizenship from turn 1, Business buys 2nd/3rd, visa test | **high** | 2 | — | ✅ done (owner's final rules, 2026-11-19): start citizenship for all but the Nomad, the Business's one free 2nd citizenship (never pays visas), visa test on every entry (Luxury pays with no test), Nomad ship +2, event-card mix "G" (helpers b1–b8 kept, not drawn); fair 21 → 29 of 32 at 1,600 games per line; saves v18; `docs/rules-now.md` lists every rule |
-| 2.7 | Balance tuning of all 2.0 rule changes (4 profiles, boredom, excitement) | **high** | 1 | — | |
+| 2.7 | Balance tuning of all 2.0 rule changes (4 profiles, boredom, excitement) | **high** | 1 | — | ✅ done (owner's final decision, 2026-11-19): paid trips fast, quiz trips slow (with a notice), train Nomad 1, car Business/Luxury 2, cheaper businesses, +1 for the most businesses and business tiebreak, go home +2, Nomad changes; the Luxury +5 measured and dropped; robots weigh paying (2.5 points per saved turn); card mix D1; fair 29 of 32 (as before); saves v19 |
 | 2.8 | Event cards as real geography news | medium | 1 | — | |
 | 2.9 | More wonders, history and curiosity for each, new design | medium | 2 | — | |
 | 2.10 | Passport with stamps, records on the device | medium | 1–2 | — | |
@@ -794,6 +794,15 @@ Luxury's instant citizenship and Business's +6.
 **2.7 (balance) Balance tuning (high, 1).** All lab packages on both maps, 2 and 4 players, normal and planning
 robots; tune the numbers; report fair/unfair, boredom and excitement. Watch: Backpacker (much slower trips),
 Nomad (citizen areas from turn 1, none of its own), Luxury (faster ships).
+
+- **Done (2026-11-19, owner's final decisions):** the owner's new rules (travel turns paid 0/1, free 1/2; train Nomad 1;
+  car Business and Luxury 2; businesses 1 or 2; +1 for the most businesses, ties by businesses first; go home +2; Nomad
+  +1 only for trips of 1 turn or more, no ship +2, no +5 for 3 continents, boss alerts only on free ships; a quiz notice;
+  a 0-points sell reminder). Measured at 1,600 games per line: the robots first had to learn when paying is worth it
+  (2.5 points per saved turn, the best of 5 styles); then the owner's rules gave 11 of 32, and undoing one rule at a time
+  showed the Luxury +5 as the cause (owner: dropped). Card mix D1: **29 of 32** (the 2.6 game: 29). Not adopted after
+  measuring: cards with the +5 (best 28), cards inside 45–59% bad (27), 8 simplifications (26), missions (26), challenges
+  without −1 (not measured, owner). Details: `docs/engine.md` and `docs/balance-lab.md`, step 2.7. Saves v19.
 
 **2.8 (F) Breaking news (medium, 1).** Replace the personal event cards with short, all-ages geography news
 that is true every year, about the area (about 60 cards, same mix of effects; owner checks). Samples:

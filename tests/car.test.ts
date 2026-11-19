@@ -1,14 +1,14 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { apply, businessAt, destinations, hitchhikeStops, legalActions, mapBusinesses } from '../src/engine/engine.ts';
-import { PROFILES } from '../src/engine/constants.ts';
+import { CAR_TICKET_PRICE, PROFILES } from '../src/engine/constants.ts';
 import type { Action, GameState, Profile } from '../src/engine/types.ts';
 import { map30 } from '../src/maps/map30.ts';
 import { map50 } from '../src/maps/map50.ts';
 import { seatOf, startedGame } from './helpers.ts';
 
 // The car (task 19, owner's rules): a car rental in Mexico, one way to USA East or (step 2.5) Canada West.
-// Nomad, Business and Luxury pay 1 (no quiz); the Backpacker hitchhikes, and a car stops only
+// Nomad pays 1, Business and Luxury 2 (step 2.7; no quiz); the Backpacker hitchhikes, and a car stops only
 // when it arrived in Mexico on an even round (a secret). The country's points at once, like the bus.
 
 const USA = ['usa-west', 'alaska', 'usa-east'];
@@ -47,20 +47,22 @@ test('routes: from Mexico only, one way to USA East or Canada West, on both maps
   }
 });
 
-test('Nomad, Business and Luxury rent the car for 1 point, never by quiz', () => {
+test('the Nomad rents the car for 1 point, Business and Luxury for 2 (step 2.7), never by quiz; 1 travel turn', () => {
+  assert.deepEqual(CAR_TICKET_PRICE, { backpacker: null, business: 2, luxury: 2, nomad: 1 });
   for (const profile of ['nomad', 'business', 'luxury'] as const) {
+    const rent: number = CAR_TICKET_PRICE[profile]!;
     assert.deepEqual(cars(game(profile)), ['board canada-west', 'board usa-east'], profile);
-    assert.deepEqual(cars(game(profile, 'mexico', 0)), [], `${profile} with 0 points`);
+    assert.deepEqual(cars(game(profile, 'mexico', rent - 1)), [], `${profile} with ${rent - 1} points`);
     const s = go(game(profile), { type: 'board', kind: 'car', to: 'usa-east' });
-    assert.deepEqual(s.payments, [{ reason: 'ticket', from: me(s).seat, to: null, amount: 1, area: 'mexico', business: 'car' }]);
-    assert.deepEqual(me(s).travel, { kind: 'car', from: 'mexico', to: 'usa-east', turnsLeft: 1 });
+    assert.deepEqual(s.payments, [{ reason: 'ticket', from: me(s).seat, to: null, amount: rent, area: 'mexico', business: 'car' }]);
+    assert.deepEqual(me(s).travel, { kind: 'car', from: 'mexico', to: 'usa-east', turnsLeft: 1, paid: true });
   }
 });
 
-test('the rent goes to the owner of the car rental (2 points to buy)', () => {
+test('the rent goes to the owner of the car rental (1 point to buy, step 2.7)', () => {
   let s = game('business');
   s = go(s, { type: 'buy', business: 'car' });
-  assert.equal(me(s).points, 8);
+  assert.equal(me(s).points, 9);
   assert.equal(businessAt(s, 'mexico', 'car')!.owner, me(s).seat);
   s = game('nomad');
   businessAt(s, 'mexico', 'car')!.owner = seatOf(s, 1).seat;
@@ -89,9 +91,9 @@ test('car to Canada West (step 2.5): Canada\'s +5 at once, only Canada West mark
   assert.equal(me(s).area, 'canada-west');
   assert.deepEqual(CANADA.filter((id) => me(s).visitedAreas.includes(id)), ['canada-west']);
   assert.deepEqual(me(s).bigCountries, ['Canada']);
-  assert.equal(me(s).points, 10 - 1 + 5 + 2); // rent, Canada, North America
+  assert.equal(me(s).points, 10 - 2 + 5 + 2); // rent, Canada, North America
   s = go(pass(s), { type: 'walk', to: 'canada-central' });
-  assert.equal(me(s).points, 17); // the other parts still give +1 (M5)
+  assert.equal(me(s).points, 16); // the other parts still give +1 (M5)
 });
 
 test('the Backpacker hitchhikes to Canada West on both maps: Canada\'s +5, and the even-round secret holds', () => {
@@ -120,7 +122,7 @@ test('the Backpacker hitchhikes: free, and a car stops after arriving on an even
   assert.deepEqual(s.hitchhiked, { seat: me(s).seat, to: 'canada-west', stopped: true });
   assert.deepEqual(s.payments, []);
   assert.equal(me(s).points, 0);
-  assert.deepEqual(me(s).travel, { kind: 'car', from: 'mexico', to: 'canada-west', turnsLeft: 1 });
+  assert.deepEqual(me(s).travel, { kind: 'car', from: 'mexico', to: 'canada-west', turnsLeft: 1, paid: false });
   assert.notEqual(s.turnOrder[s.current], me(s).seat);
 });
 

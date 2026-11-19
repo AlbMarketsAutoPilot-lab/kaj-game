@@ -9,8 +9,9 @@ import type { GameState } from './types.ts';
 // Version 16 (2.0, step 2.4): new plane and ship routes on both maps; no older save is continued.
 // Version 17 (2.0, step 2.5): Nomad boss alerts, the car to Canada West. Version 18 (2.0, step 2.6):
 // citizenship from turn 1, the visa test, the Business's 2nd citizenship, the event-card mix; no older
-// save is continued.
-export const SAVE_VERSION = 18;
+// save is continued. Version 19 (2.0, step 2.7): paid trips fast, free trips slow, new prices, go home +2,
+// Luxury +5 at the start, the most-businesses bonus; no older save is continued.
+export const SAVE_VERSION = 19;
 
 export function saveGame(state: GameState): string {
   return JSON.stringify({ version: SAVE_VERSION, state });
