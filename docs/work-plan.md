@@ -92,7 +92,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | 2.3 | More geography questions: tag every fact, ~250 new geography facts (owner checks), script-made questions | medium | 2 | — | ✅ done (owner-approved): every fact tagged, airline quiz 1 challenge in 10, 168 test-only geography facts, travel challenges geography 1 in 3; 37% / 32–33% geography (was 48–50%); script-made questions not needed; save stays 15 |
 | 2.4 | New ship and plane routes on both maps, map check, stuck-state checker | **high** | 1 | — | ✅ done (owner-approved): the owner's routes on both maps (30 turns 13 airports / 11 ports / 15 connections, 50 turns 15 / 13 / 18), robots no longer walk straight back for nothing, Pacific route lines from both ends, guide says Iceland; fair 13 → 10 of 16 (30) and 12 → 14 of 16 (50), tuning in 2.7; saves v16 |
 | 2.5 | Travel by profile (turns, prices, quiz = Backpacker turns, quiz popup), bus and car whole country | **high** | 2 | — | ✅ done (owner's final decision, 2026-11-18): only the Nomad boss alerts (+1 per trip to new areas only; ship alerts: a challenge, then a +1 bonus, by turns; surprise removed) and the car to USA East or Canada West; the rest of 2.5 dropped; saves v17 |
-| 2.6 | Citizenship from turn 1, Business buys 2nd/3rd, visa test | **high** | 2 | — | |
+| 2.6 | Citizenship from turn 1, Business buys 2nd/3rd, visa test | **high** | 2 | — | ✅ done (owner's final rules, 2026-11-19): start citizenship for all but the Nomad, the Business's one free 2nd citizenship (never pays visas), visa test on every entry (Luxury pays with no test), Nomad ship +2, event-card mix "G" (helpers b1–b8 kept, not drawn); fair 21 → 29 of 32 at 1,600 games per line; saves v18; `docs/rules-now.md` lists every rule |
 | 2.7 | Balance tuning of all 2.0 rule changes (4 profiles, boredom, excitement) | **high** | 1 | — | |
 | 2.8 | Event cards as real geography news | medium | 1 | — | |
 | 2.9 | More wonders, history and curiosity for each, new design | medium | 2 | — | |
@@ -743,6 +743,53 @@ Luxury's instant citizenship and Business's +6.
   the test is offered only with the 2 points in hand ("no money, no entry"). **Luxury never takes the test**,
   only pays the visa.
 - Stuck-state checker with 3 citizenships from turn 1 (plus bought ones); robots; guide and help texts.
+- **Session 1 done (2026-11-19, owner's final decisions; nothing built yet, session 2 builds it).** Measured in
+  scratch copies (robot games, 1,600 per line, normal and planning robots, 2 and 4 players, both maps).
+  - **Rules:**
+    - Citizenship of the start country from turn 1 for all but the Nomad; one start per country
+      (Russia: only one player may start in it).
+    - No asking button, no citizenship test, no Business +6, no Luxury instant citizenship.
+      Backpacker and Luxury: one citizenship only.
+    - **Business:** may take one 2nd citizenship, **free**, in the area it stands in, if nobody holds
+      it and it is not the Nomad's start country. It doesn't end the turn, is not counted at the end
+      and can't be sold. The Business **never pays a visa but takes the test.**
+    - **Luxury** pays the visa but never takes the test.
+    - **Visa and test on every entry** from outside (2 points to the citizen); moving inside a big
+      country is free.
+    - **Visa test:** read 6 facts, 3 questions, 2 right to pass. Offered only with the money in hand.
+      Failed: nothing paid, no entry, the turn is used.
+    - **On a trip:** ticket first (pay or a right quiz), then the test, then everything is paid.
+      Failed: no trip, the free quiz ticket is lost, and it is not a quiz try. After the 3rd wrong
+      quiz answer the test comes too (failed: no trip, nothing paid, the count starts again).
+      Hitchhiking: the test only if a car stops. Going home is free.
+    - **Nomad:** a ship trip to a new area gives **+2** (other trips +1), plus the boss alerts as
+      in 2.5.
+    - **Event cards by profile and player count** (mix "G"; 3 players use the 4-player mix): the
+      Backpacker no longer draws its helper cards b1–b8. Owner: **keep them in `src/cards/cards.ts`,
+      unused**, as a possible lever for step 2.7. Each draw is weighted (good / bad):
+      - Business 1.1 / 0.95 (2 and 4 players);
+      - with 4 players: Backpacker 1 / 1.2, Luxury 1.15 / 0.9, Nomad 1.25 / 0.85;
+      - with 2 players: Backpacker, Luxury and Nomad use the normal deck.
+    - Save version 18.
+  - **Robots (owner-approved):** answer the visa test at their level's rate; the Business buys its 2nd
+    citizenship when it keeps its reserve, after businesses; the "ask" rule is removed; the planner's
+    Nomad trip value counts +2 for ships.
+  - **Fairness, 1,600 games per line:** 21 of 32 before the change → **29 of 32** after. Misses:
+    Nomad 19.6% and Backpacker 16% (30 turns, 4 players), Luxury 31% (50 turns, 4 players).
+    Boredom unchanged (26–34%), close finishes 39–40% in every 4-player line. Nobody went home,
+    longest blocked streak 2, 15–16% of visa tests failed.
+  - **Tried and dropped:**
+    - the bought citizenship at 5 points (Business 8–31%), then the corrected rule without
+      card changes (10 of 32);
+    - Backpacker +1 travel turn per trip (21 of 32);
+    - 10 other card mixes (8–28 of 32).
+  - **Map traps (known limit):** the 3 start citizenships cut off some area in 3.9% (30 turns) and 1.7%
+    (50 turns) of possible start sets; with a bought one, more. "Go home" remains the way out; it never
+    triggered in robot games.
+- **Session 2 done (2026-11-19):** built as decided (`docs/engine.md`, step 2.6). The build measured the same as the
+  scratch copy, 29 of 32, every line identical. 221 tests pass; the web build works. The rule tests on the tiny test
+  maps switch the start citizenships off (like event cards); the walking-only random-robot test plays with no
+  citizenships, as owner-approved in task 8 for asking. No test limit changed.
 
 **2.7 (balance) Balance tuning (high, 1).** All lab packages on both maps, 2 and 4 players, normal and planning
 robots; tune the numbers; report fair/unfair, boredom and excitement. Watch: Backpacker (much slower trips),

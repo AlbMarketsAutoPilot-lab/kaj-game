@@ -59,7 +59,7 @@ export const CARDS: readonly EventCard[] = [
   { id: 'a11', title: '🌌 Northern lights', deck: 'country', area: 'scandinavia', points: 2, text: 'You see the northern lights dance across the sky.' },
   { id: 'a12', title: '🧱 On the Great Wall', deck: 'country', area: 'china-east', points: 1, text: 'You walk along the Great Wall on a clear day.' },
 
-  // ---------- Backpacker cards (helpers, only for the Backpacker, in an area) ----------
+  // ---------- Backpacker cards (helpers; not drawn since step 2.6, kept by the owner as a lever for step 2.7) ----------
   { id: 'b1', title: '🚚 A free ride', deck: 'backpacker', points: 2, text: 'A truck driver takes you further down the road for free.' },
   { id: 'b2', title: '🎟️ A friend pays the bus', deck: 'backpacker', points: 2, text: 'A friend you met on the road pays your next bus ticket.' },
   { id: 'b3', title: '🌾 A week on a farm', deck: 'backpacker', points: 2, text: 'You work a week on a farm and get free food and a bed.' },

@@ -34,7 +34,7 @@ const cars = (s: GameState) =>
 // Player 2's turn: a plain walk, so the trip goes on.
 function pass(s: GameState): GameState {
   const actions = legalActions(s, map30);
-  return go(s, actions.find((a) => a.type === 'walk') ?? actions.find((a) => a.type !== 'buy' && a.type !== 'askCitizenship')!);
+  return go(s, actions.find((a) => a.type === 'walk') ?? actions.find((a) => a.type !== 'buy' && a.type !== 'buyCitizenship')!);
 }
 
 test('routes: from Mexico only, one way to USA East or Canada West, on both maps', () => {

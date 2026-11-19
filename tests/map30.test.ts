@@ -5,7 +5,7 @@ import { createGame } from '../src/engine/engine.ts';
 import { validateMap, walkingGroups } from '../src/engine/map.ts';
 import { stuckProblems, travelGroups, visaUnits } from '../src/engine/stuck-check.ts';
 import { map30 } from '../src/maps/map30.ts';
-import { seats } from './helpers.ts';
+import { seats, startTriples } from './helpers.ts';
 
 const areas = map30.areas;
 
@@ -119,4 +119,13 @@ test('30-turn map: two visa areas at once trap someone in at most 13 of 946 pair
   }
   assert.equal(pairs, 946);
   assert.ok(traps <= 13, `${traps} trapping pairs`);
+});
+
+// Step 2.6 (owner): 2–3 start citizenships from turn 1. Measured in session 1: 261 of 6,667 possible
+// start sets cut some area off (3.9%; most with the USA, France, Canada, UK & Ireland, Australia West,
+// Chile). The known limit stays: only while a player has fewer than 2 points, and "go home" is the way out.
+test('30-turn map: 3 start citizenships at once trap someone in at most 261 of 6,667 start sets', () => {
+  const { sets, traps } = startTriples(map30);
+  assert.equal(sets, 6667);
+  assert.ok(traps <= 261, `${traps} trapping start sets`);
 });

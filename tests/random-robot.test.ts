@@ -17,11 +17,12 @@ function checkInvariants(s: GameState): void {
   assert.equal(new Set(areas).size, areas.length, `two players share an area: ${areas}`);
 }
 
-// This tiny map has no airports or ports, so (unlike the real map) a visa area or a player
-// staying for citizenship can trap others here. On it the robots never ask for citizenship
-// (owner-approved, task 8); citizenship and visas are checked on the real map below.
+// This tiny map has no airports or ports, so (unlike the real map) a visa area can trap others here.
+// On it nobody holds a citizenship (owner-approved in task 8 for asking; step 2.6: the start
+// citizenships are taken away after the setup, and the Business takes no 2nd one); citizenship and
+// visas are checked on the real map below.
 function plainRobotAction(s: GameState, seed: number): [Action, number] {
-  const plain = legalActions(s, testMap).filter((a) => a.type !== 'askCitizenship');
+  const plain = legalActions(s, testMap).filter((a) => a.type !== 'buyCitizenship');
   const [i, next] = randomInt(seed, plain.length);
   return [plain[i], next];
 }
@@ -45,6 +46,7 @@ test(`random robots play ${GAMES} games: nobody stuck, points ≥ 0, never two i
         longestBlock = Math.max(longestBlock, blockedInARow[seat]);
       }
       s = apply(s, testMap, action);
+      if (action.type === 'chooseStart') for (const p of s.players) p.citizenship = null;
       checkInvariants(s);
       assert.ok(++steps < 1000, `game ${g} never ends`);
     }
@@ -144,7 +146,7 @@ test(`random robots play ${GAMES} games on the 30-turn map with planes and ships
     assert.equal(s.round, 30);
     assert.equal(s.result!.ranking.length, n);
     // One citizen per area or big country.
-    const held = s.players.flatMap((q) => q.citizenship ?? []);
+    const held = s.players.flatMap((q) => [...(q.citizenship ?? []), ...(q.bought ?? [])]);
     assert.equal(new Set(held).size, held.length, `game ${g}: two citizens in one area`);
     citizens += s.players.filter((q) => q.citizenship).length;
     // Profile bonuses (task 10).

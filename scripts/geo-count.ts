@@ -2,8 +2,8 @@
 //
 // 1. Facts per type on each map (from src/facts/tags.ts; challenges are all geography).
 // 2. Robot games (normal robots, 2 and 4 players, both maps): every question actually asked, by screen
-//    (airline quiz, citizenship test, travel challenge), with the question rotation of step 2.1.
-//    The 6 study lines of the citizenship test are counted apart (they are read, not answered).
+//    (airline quiz, visa test, travel challenge), with the question rotation of step 2.1.
+//    The 6 study lines of the visa test are counted apart (they are read, not answered).
 import { apply, createGame } from '../src/engine/engine.ts';
 import { robotAction } from '../src/engine/normal-robot.ts';
 import { mapFor } from '../src/maps/index.ts';
@@ -53,7 +53,7 @@ function play(map: GameMap, players: number, seed: number, tally: Tally) {
     tally[screen] ??= { geo: 0, all: 0 };
     tally[screen].all++;
     if (typeOf(id) === 'geography') tally[screen].geo++;
-    if (screen !== 'citizenship study lines') mix[kindOf(id)] = (mix[kindOf(id)] ?? 0) + 1;
+    if (screen !== 'visa test study lines') mix[kindOf(id)] = (mix[kindOf(id)] ?? 0) + 1;
   };
   while (s.phase !== 'finished') {
     const before = s;
@@ -62,16 +62,14 @@ function play(map: GameMap, players: number, seed: number, tally: Tally) {
     s = apply(s, map, a);
     if (s.quiz && s.quiz !== before.quiz && s.quiz.question !== before.quiz?.question) add('airline quiz', s.quiz.question.id);
     if (s.challenge && s.challenge !== before.challenge) add('travel challenge', s.challenge.id);
-    s.players.forEach((p, i) => {
-      const was = before.players[i].exam;
-      if (p.exam && p.exam.stage === 'test' && p.exam.questions.length && (!was || was.stage !== 'test')) {
-        for (const q of p.exam.questions) add('citizenship test', q.id);
-        for (const line of p.exam.study) {
-          const fact = [...(map.facts?.[p.exam.area] ?? []), ...(map.examFacts?.[p.exam.area] ?? [])].find((f) => f.text === line);
-          add('citizenship study lines', fact ? factId(fact) : undefined);
-        }
+    // The visa test (step 2.6; it replaced the citizenship test): its questions and study lines.
+    if (s.visa && !before.visa) {
+      for (const q of s.visa.questions) add('visa test', q.id);
+      for (const line of s.visa.study) {
+        const fact = [...(map.facts?.[s.visa.to] ?? []), ...(map.examFacts?.[s.visa.to] ?? [])].find((f) => f.text === line);
+        add('visa test study lines', fact ? factId(fact) : undefined);
       }
-    });
+    }
     if (++steps > 20000) throw new Error('never ends');
   }
 }
@@ -84,7 +82,7 @@ for (const turns of [30, 50] as GameLength[]) {
     for (let g = 0; g < GAMES; g++) play(map, players, g * 7919 + 3, tally);
     let geo = 0, all = 0;
     const parts = Object.entries(tally).map(([k, v]) => {
-      if (k !== 'citizenship study lines') { geo += v.geo; all += v.all; }
+      if (k !== 'visa test study lines') { geo += v.geo; all += v.all; }
       return `${k} ${(v.all / GAMES).toFixed(1)}/game, ${pct(v.geo, v.all)} geography`;
     });
     console.log(`  ${players} players, ${GAMES} games: questions asked ${(all / GAMES).toFixed(1)}/game, ${pct(geo, all)} geography`);

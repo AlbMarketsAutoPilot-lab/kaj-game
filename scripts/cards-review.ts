@@ -9,7 +9,7 @@ const effect = (points: number, loseTurn?: true) => (loseTurn ? 'lose a turn' : 
 const groups = [
   { title: 'Country cards: anywhere', cards: CARDS.filter((c) => c.deck === 'country' && !c.area) },
   { title: 'Country cards: one area only', cards: CARDS.filter((c) => c.deck === 'country' && c.area) },
-  { title: 'Backpacker cards (only the Backpacker, drawn with the country cards)', cards: CARDS.filter((c) => c.deck === 'backpacker') },
+  { title: 'Backpacker cards (kept, not drawn since step 2.6)', cards: CARDS.filter((c) => c.deck === 'backpacker') },
 ];
 const count = (f: (p: number, l?: true) => boolean) => CARDS.filter((c) => f(c.points, c.loseTurn)).length;
 const lines = [
@@ -18,9 +18,13 @@ const lines = [
   `${CARDS.length} cards. Source: \`src/cards/cards.ts\`. ` +
     `±1: ${count((p) => Math.abs(p) === 1)} · ±2: ${count((p) => Math.abs(p) === 2)} · lose a turn: ${count((_, l) => l === true)} · ±5: ${count((p) => Math.abs(p) === 5)}.`,
   '',
-  "When: at the start of each player's 3rd, 6th, 9th … turn that begins in an area (trip turns don't count;",
-  'not during a citizenship request; none in the last round). No cards on trips since task 12 (challenges instead).',
+  "When: at the start of each player's 3rd, 6th, 9th … turn that begins in an area (every 5th in the 50-turn game;",
+  "trip turns don't count; none in the last round). No cards on trips since task 12 (challenges instead).",
   'Points never go below 0.',
+  '',
+  'Step 2.6 (owner-approved mix "G", `EVENT_MIX` in `src/engine/constants.ts`): everyone draws the country cards;',
+  'how often good and bad ones come depends on the profile and the number of players (3 players use the 4-player mix).',
+  'The Backpacker cards below are kept but **not drawn** (owner: a possible lever for step 2.7).',
   '',
   'To report a problem, give the id (for example "c7: too harsh", or "c7 headline: …").',
   'Headlines (task 14k) were written by Claude and need the owner\'s check.',

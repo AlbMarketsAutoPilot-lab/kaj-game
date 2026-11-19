@@ -46,7 +46,8 @@ test('start area: the highest welcome bonus, then the most neighbours; the Backp
 
 // The easy robot doesn't plan (owner, 2026-10-11): it takes the most points now.
 test('walking (easy): most points now (a wonder), less after fees', () => {
-  const s = startedGame(['central-europe', 'egypt'], 1, map30, ['business', 'luxury']);
+  // Luxury: it pays the visa (step 2.6: the Business never does).
+  const s = startedGame(['central-europe', 'egypt'], 1, map30, ['luxury', 'business']);
   const a = act(s, 'easy');
   assert.deepEqual(a, { type: 'walk', to: 'italy' });
 
@@ -57,16 +58,20 @@ test('walking (easy): most points now (a wonder), less after fees', () => {
   assert.ok(b.type === 'walk' && b.to !== 'italy');
 });
 
-// Task 14d: asked in the area it stands in, before round 10; never in the home country.
-test('citizenship: asked in the first area where it can, before round 10', () => {
-  const home = startedGame(['central-europe', 'egypt'], 1, map30, ['business', 'luxury']);
-  assert.notEqual(act(home).type, 'askCitizenship'); // the home country
+// Step 2.6 (owner-approved): the Business takes its free 2nd citizenship where the engine offers it,
+// when it keeps its reserve; never in its own country, and only once.
+test('the Business takes its 2nd citizenship when it keeps the reserve', () => {
+  const home = startedGame(['central-europe', 'egypt'], 1, map30, ['business', 'luxury'], false, false, true);
+  assert.notEqual(act(home).type, 'buyCitizenship'); // its own country
   const away = structuredClone(home);
   currentPlayer(away).area = 'italy';
-  assert.deepEqual(act(away), { type: 'askCitizenship' });
-  const late = structuredClone(away);
-  late.round = 10;
-  assert.notEqual(act(late).type, 'askCitizenship');
+  assert.deepEqual(act(away), { type: 'buyCitizenship' });
+  const poor = structuredClone(away);
+  currentPlayer(poor).points = 2; // below the normal robot's reserve of 3
+  assert.notEqual(act(poor).type, 'buyCitizenship');
+  const twice = structuredClone(away);
+  currentPlayer(twice).bought = ['balkans'];
+  assert.notEqual(act(twice).type, 'buyCitizenship');
 });
 
 test('businesses: bought only when the reserve is kept (easy 4, normal 3, hard 2)', () => {

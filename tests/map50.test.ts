@@ -11,7 +11,7 @@ import type { GameState, RobotLevel } from '../src/engine/types.ts';
 import { mapById, mapFor } from '../src/maps/index.ts';
 import { map30 } from '../src/maps/map30.ts';
 import { INSIDE_30, map50 } from '../src/maps/map50.ts';
-import { seatOf, seats, startedGame } from './helpers.ts';
+import { seatOf, seats, startedGame, startTriples } from './helpers.ts';
 
 // The 50-turn map (task M2, owner-approved list in docs/map50.md and walking links in M2).
 
@@ -218,4 +218,11 @@ test('saves version 12 (owner, M5): games resume; older saves (10, 11) are not c
   const s30 = createGame({ seats: seats(2), seed: 1 }, map30);
   assert.deepEqual(loadGame(saveGame(s30)), { state: s30 });
   for (const version of [10, 11]) assert.ok('error' in loadGame(JSON.stringify({ version, state: s30 })));
+});
+
+// Step 2.6 (owner): measured in session 1: 530 of 30,301 start sets (1.7%). The known limit stays.
+test('50-turn map: 3 start citizenships at once trap someone in at most 530 of 30,301 start sets', () => {
+  const { sets, traps } = startTriples(map50);
+  assert.equal(sets, 30301);
+  assert.ok(traps <= 530, `${traps} trapping start sets`);
 });

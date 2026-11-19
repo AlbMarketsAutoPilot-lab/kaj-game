@@ -1,10 +1,10 @@
 // The guide for new players (owner's script, 2026-10-09): about 5 minutes, one step at a time,
-// and the player does each thing once (travel, cross Canada, buy, ask for citizenship, answer
+// and the player does each thing once (travel, cross Canada, buy, raise a citizenship flag, answer
 // the game's own timed quiz). Owner's new texts and order in M5 (11 slides). It starts by itself on the very first ▶ Play, can be skipped, and
 // comes back with "📖 How to play". It is a practice board of its own: the saved game is never
 // touched.
 
-import { bigCountryPoints, BUSINESS_PRICE, CONTINENT_BONUS, EXAM_FACTS, EXAM_PASS, POINTS_BIG_COUNTRY_3_PARTS, POINTS_BUSINESS_CITIZENSHIP, POINTS_NEW_CONTINENT, POINTS_NOMAD_TRIP, POINTS_WONDER, TICKET_PRICE, VISA_PRICE } from '../engine/constants.ts';
+import { bigCountryPoints, BUSINESS_PRICE, CONTINENT_BONUS, VISA_TEST_FACTS, VISA_TEST_PASS, POINTS_BIG_COUNTRY_3_PARTS, POINTS_NEW_CONTINENT, POINTS_NOMAD_SHIP, POINTS_NOMAD_TRIP, POINTS_WONDER, TICKET_PRICE, VISA_PRICE } from '../engine/constants.ts';
 import type { AreaGeo } from './maps.ts';
 import { glowFor, pad, squeeze, svg, unionBox } from './maps.ts';
 import { airport, citizenFlag, pawn, place } from './props.ts';
@@ -123,7 +123,7 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
   };
 
   const askCitizenship = (done: () => void): Node => {
-    const ask = button('🛂 Ask for citizenship of France…', () => { play('citizenship'); done(); });
+    const ask = button('🛂 Raise your flag over France', () => { play('citizenship'); done(); });
     ask.className = 'primary guide-glow';
     return el('div', {}, view(['france'], () => 'here'), el('div', { className: 'row' }, ask));
   };
@@ -195,17 +195,17 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
       after: { title: '✅ Right!', lines: ['Free ticket! If only real life worked like that!'] } },
     { title: '🧳 Your profile\'s bonuses', cls: 'guide-list', lines: [
       `1. 🎒 **Backpacker: +${bag.points} for reaching ${bag.continents} continents.** Never pays for tickets (always the free quiz), can take the bus and try to hitchhike. *But:* slow trips.`,
-      `2. 💼 **Business Traveler: +${POINTS_BUSINESS_CITIZENSHIP} when granted citizenship**, fast trips, and can rent a car in Mexico. *But:* tickets cost ${TICKET_PRICE.business}, and no bus.`,
-      `3. 💎 **Luxury Traveler: flies or sails to any airport or port**, gets **citizenship with no test**, and can rent a car in Mexico. *But:* tickets cost ${TICKET_PRICE.luxury}, and no train or bus.`,
-      `4. 💻 **Digital Nomad: +${POINTS_NOMAD_TRIP} for every trip to a new area** (it works on the way), **+${nomad.points} for reaching ${nomad.continents} continents**, the **cheapest tickets**, and can take the bus and rent a car. *But:* never citizenship, no travel challenges (it's working!, though its boss sometimes rewards long ship trips), and slow trips.`] },
+      `2. 💼 **Business Traveler: never pays a visa** (it still takes the test), **takes a free 2nd citizenship** once, fast trips, and can rent a car in Mexico. *But:* tickets cost ${TICKET_PRICE.business}, and no bus.`,
+      `3. 💎 **Luxury Traveler: flies or sails to any airport or port**, **never takes a visa test** (it pays the visa), and can rent a car in Mexico. *But:* tickets cost ${TICKET_PRICE.luxury}, and no train or bus.`,
+      `4. 💻 **Digital Nomad: +${POINTS_NOMAD_TRIP} for every trip to a new area, +${POINTS_NOMAD_SHIP} by ship** (it works on the way), **+${nomad.points} for reaching ${nomad.continents} continents**, the **cheapest tickets**, and can take the bus and rent a car. *But:* never citizenship, no travel challenges (it's working!, though its boss sometimes rewards long ship trips), and slow trips.`] },
     { title: '💼 Own a business', task: true, picture: buyAirline,
       lines: ['Want more? Own a business, and the other players pay you:', '✈️ an airline at an airport · ⚓ a ferry agency at a port · 🚆 a train ticket booth at a station · 🚌 a bus ticket booth at the bus stop · 🚗 a car rental in Mexico · 🏛️ guided tours at a wonder.', '**Buy the airline at this airport to continue the guide.**'],
       after: { title: '🎉 You own the airline of UK & Ireland!', picture: () => airportView(true),
         lines: ['Your flag now flies over the airport. Every time another player flies from UK & Ireland, the ticket money goes to you.'] } },
-    { title: '🛂 Citizenship', task: true, picture: askCitizenship,
-      lines: ['One more trick: become a citizen of one country. Try it!', `In the game there is a short test first: read ${EXAM_FACTS} facts about the country, then answer 3 questions. ${EXAM_PASS} right answers or more, and citizenship is yours.`, '**Ask for citizenship of France to continue the guide.**'],
-      after: { title: '🎉 Citizenship granted!', picture: citizenView,
-        lines: [`Now every other player pays you a ${VISA_PRICE}-point visa to enter France.`, 'Choose a country that people pass through a lot. Choose wisely!'] } },
+    { title: '🛂 Citizenship and visas', task: true, picture: askCitizenship,
+      lines: ['From the first turn you are a **citizen of your home country** (the Digital Nomad is a citizen nowhere). Say you started in France.', `Every other player who enters it takes a **visa test**: read ${VISA_TEST_FACTS} facts about the country, then answer 3 questions. ${VISA_TEST_PASS} right answers or more: they pay you a ${VISA_PRICE}-point visa and go in. Fewer: they stay out, and their turn is gone.`, '**Raise your flag over France to continue the guide.**'],
+      after: { title: '🎉 France is your country!', picture: citizenView,
+        lines: [`Every other player now takes the test and pays you a ${VISA_PRICE}-point visa to enter France (Luxury pays without a test; the Business Traveler takes the test but never pays).`, 'So choose a home country that people pass through a lot. Choose wisely!'] } },
     { title: '🤔 Sounds too easy?', lines: ['Here is the catch: **everything you can own, the other players can own too.**', '**Be smart about where you go and what you do!**'] },
     { title: '⏳ Don\'t waste turns', picture: revisitView, lines: ['Going back to a country you already visited gives 0 points, and the turn is gone.', 'Your turns are limited!'] },
     { title: '📱 Breaking news!', task: true, picture: protest, cls: 'event',
