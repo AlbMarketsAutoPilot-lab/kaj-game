@@ -6,6 +6,14 @@ Owner's targets: each profile wins **20–30%** of 4-player games and **40–60%
 at 30 and 50 turns, with today's normal robots (N) and with planning robots (P4: normal answers, plans 4 moves).
 With 400 games per line a win share is accurate to about ±2–4 points.
 
+**Extended lab (step 2.7), for every fairness report from now on:**
+`node scripts/balance-lab/lab2.ts <label> [games per line, default 1600] [source folder]` plays the 8 lines
+(30 and 50 turns, 2 and 4 players, normal and planning robots) on a temporary copy of the source folder (default:
+this project; give a scratch copy with a changed rule to measure that rule) and also counts go home, blocked turns,
+the longest blocked streak, failed visa tests, draws and how often robots pay (the robot check). About 7–20 minutes.
+`node scripts/balance-lab/report2.ts <label>` prints the full report; `report2.ts <before> <after>` compares two.
+Results are kept in the system's temporary folder (`kaj-lab2/`), not in the project.
+
 ## Robots: head to head (2 players, today's rules)
 
 | Game | A | B | A wins | B wins | Average score A – B |
