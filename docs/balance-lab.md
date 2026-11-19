@@ -656,3 +656,58 @@ With 400 games per line a win share is accurate to about ±2–4 points.
 | 50 turns, 4 players | planning (plans 4) | 33% ❌ (74.8) | 23% ✅ (72.2) | 23% ✅ (71.7) | 21% ✅ (72.2) | 27% | 5.6 lead changes, 41% won by ≤3 | 14/16 |
 
 **14 of 16** profile results inside the target. (Wins %, with the average final score in brackets.)
+
+
+## Step 2.7 (2026-11-19): paid trips fast, new prices, go home +2, card mix D1 — before and after
+
+Measured during the session with scratch copies of the game (not with `run.ts`, so not in `results.json`): 1,600 games
+per line, the same seeds for every version, robots in every seat, normal robots (plans 2) and planning robots (plans 4).
+At 1,600 games a 4-player win share is accurate to about ±1 point, a 2-player one to about ±1.5.
+
+### Before: the game of step 2.6
+
+| Game | Robots | Backpacker | Business | Luxury | Nomad | Boredom | Excitement |
+|---|---|---|---|---|---|---|---|
+| 30 turns, 2 players | normal (plans 2) | 48% ✅ (50.4) | 49% ✅ (48.9) | 50% ✅ (48.9) | 53% ✅ (50.6) | 34% | 3.0 lead changes, 28% won by ≤3 |
+| 30 turns, 2 players | planning (plans 4) | 43% ✅ (51.8) | 48% ✅ (50.5) | 54% ✅ (51.7) | 55% ✅ (53.2) | 31% | 3.0 lead changes, 27% won by ≤3 |
+| 30 turns, 4 players | normal (plans 2) | 25% ✅ (48.8) | 29% ✅ (49.1) | 27% ✅ (48.3) | 20% ❌ (48.5) | 33% | 4.5 lead changes, 40% won by ≤3 |
+| 30 turns, 4 players | planning (plans 4) | 16% ❌ (49.2) | 30% ✅ (51.7) | 29% ✅ (51.0) | 25% ✅ (51.3) | 32% | 4.7 lead changes, 39% won by ≤3 |
+| 50 turns, 2 players | normal (plans 2) | 44% ✅ (72.1) | 47% ✅ (70.6) | 51% ✅ (71.0) | 58% ✅ (74.0) | 28% | 3.9 lead changes, 24% won by ≤3 |
+| 50 turns, 2 players | planning (plans 4) | 52% ✅ (77.7) | 59% ✅ (76.6) | 43% ✅ (73.7) | 47% ✅ (76.7) | 27% | 3.8 lead changes, 25% won by ≤3 |
+| 50 turns, 4 players | normal (plans 2) | 26% ✅ (70.8) | 22% ✅ (68.6) | 31% ❌ (69.6) | 21% ✅ (70.7) | 27% | 5.8 lead changes, 39% won by ≤3 |
+| 50 turns, 4 players | planning (plans 4) | 30% ✅ (75.1) | 24% ✅ (72.9) | 21% ✅ (72.4) | 25% ✅ (74.5) | 27% | 5.7 lead changes, 39% won by ≤3 |
+
+**29 of 32** inside the target. (Wins %, with the average final score in brackets.)
+
+### After: the owner's final rules, without the Luxury +5, card mix D1, robots weighing paid against quiz trips (2.5)
+
+| Game | Robots | Backpacker | Business | Luxury | Nomad | Boredom | Excitement |
+|---|---|---|---|---|---|---|---|
+| 30 turns, 2 players | normal (plans 2) | 55% ✅ (50.9) | 44% ✅ (47.3) | 45% ✅ (48.1) | 56% ✅ (49.8) | 28% | 2.2 lead changes, 25% won by ≤3 |
+| 30 turns, 2 players | planning (plans 4) | 57% ✅ (55.5) | 51% ✅ (51.4) | 43% ✅ (50.7) | 49% ✅ (52.4) | 26% | 2.5 lead changes, 26% won by ≤3 |
+| 30 turns, 4 players | normal (plans 2) | 28% ✅ (49.8) | 25% ✅ (48.3) | 25% ✅ (48.1) | 22% ✅ (47.7) | 28% | 3.9 lead changes, 39% won by ≤3 |
+| 30 turns, 4 players | planning (plans 4) | 18% ❌ (50.6) | 32% ❌ (53.2) | 24% ✅ (51.1) | 26% ✅ (51.6) | 27% | 4.4 lead changes, 38% won by ≤3 |
+| 50 turns, 2 players | normal (plans 2) | 60% ✅ (73.3) | 43% ✅ (67.7) | 53% ✅ (69.9) | 44% ✅ (70.2) | 23% | 3.0 lead changes, 20% won by ≤3 |
+| 50 turns, 2 players | planning (plans 4) | 60% ✅ (77.3) | 48% ✅ (75.8) | 48% ✅ (74.8) | 44% ✅ (75.5) | 23% | 3.5 lead changes, 23% won by ≤3 |
+| 50 turns, 4 players | normal (plans 2) | 31% ❌ (72.8) | 23% ✅ (69.3) | 25% ✅ (70.0) | 20% ✅ (68.8) | 23% | 5.5 lead changes, 33% won by ≤3 |
+| 50 turns, 4 players | planning (plans 4) | 25% ✅ (74.4) | 24% ✅ (73.6) | 25% ✅ (73.1) | 26% ✅ (73.6) | 24% | 5.7 lead changes, 37% won by ≤3 |
+
+**29 of 32** inside the target. (Wins %, with the average final score in brackets.)
+
+Go home after 3 turns without money: 0 in every line; go home after a 3rd wrong quiz answer 15–58 per 1,600 games;
+longest blocked streak 2; failed visa tests 15–18%; draws 0–1 per 1,600 games; robots pay for 39–59% of their trips.
+
+### How the answer was found
+
+- **Robots first.** With the owner's rules the old robot paid for only 2–12% of its trips. 5 ways of choosing between
+  paying and the quiz were measured (average score per profile, every line): counting a saved turn as 2.5 points scored
+  highest for every profile on average; checked again without the Luxury +5.
+- **The owner's rules with the Luxury +5:** 11 of 32 (Luxury 39–48% of 4-player wins, 70–83% of 2-player wins).
+- **One change undone at a time** (fair results / points outside the target): Luxury +5 26 / 8; car price 13 / 174;
+  train price 11 / 172; the most-businesses +1 and tie order 11 / 164; go home +2 11 / 174; business prices 10 / 151;
+  Nomad +5 for 3 continents 7 / 207; travel times 6 / 380; Nomad trip points 1 / 296.
+- **Card mixes tried:** with the +5, 26, 27, 27 and 28 of 32 (the best gives Luxury 78% bad cards with 2 players);
+  without the +5: D1 29 of 32 (largest bad share 63%), two mixes inside 45–59% bad cards 27 of 32.
+- **Also measured, not adopted:** 8 rule simplifications together 26 of 32; one mission per player 26 of 32.
+- **Misses no card mix can fix:** in 30 turns, 4 players, planning, the Backpacker is weak and Business strong; in 50
+  turns, 4 players, normal, the reverse. The card mix is the same on both maps.

@@ -84,12 +84,13 @@ test('businesses: bought only when the reserve is kept (easy 4, normal 3, hard 2
   };
   assert.equal(me.points, 3);
   const buys = (level: RobotLevel, points: number) => act(withPoints(points), level).type === 'buy';
-  assert.equal(buys('hard', 3), false); // 3 − 2 = 1 < 2
-  assert.equal(buys('hard', 4), true);
-  assert.equal(buys('normal', 4), false);
-  assert.equal(buys('normal', 5), true);
-  assert.equal(buys('easy', 5), false);
-  assert.equal(buys('easy', 6), true);
+  // Italy's guided tours cost 1 (step 2.7).
+  assert.equal(buys('hard', 2), false); // 2 − 1 = 1 < 2
+  assert.equal(buys('hard', 3), true);
+  assert.equal(buys('normal', 3), false);
+  assert.equal(buys('normal', 4), true);
+  assert.equal(buys('easy', 4), false);
+  assert.equal(buys('easy', 5), true);
 });
 
 test('a last quiz try that would send it home: the robot walks instead, if it can', () => {
@@ -109,7 +110,7 @@ test('challenges: played only with enough points (easy 5, normal 3, hard 1)', ()
   const travelling = (points: number) => {
     const t = structuredClone(s);
     const me = currentPlayer(t);
-    me.travel = { kind: 'port', from: 'iberia', to: 'uk-ireland', turnsLeft: 1 };
+    me.travel = { kind: 'port', from: 'iberia', to: 'uk-ireland', turnsLeft: 1, paid: false };
     me.area = null;
     me.points = points;
     return t;

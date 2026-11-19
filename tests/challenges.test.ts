@@ -19,14 +19,16 @@ const go = (s: GameState, action: Action) => apply(s, map, action);
 const p1 = (s: GameState) => seatOf(s, 0);
 const pass = (s: GameState) => go(s, legalActions(s, map).find((a) => a.type === 'walk' || a.type === 'blocked')!);
 
-// The Nomad is at sea (ship: 3 travel turns), on their first travel turn.
+// A free (quiz) ship trip: 2 travel turns (step 2.7). The Nomad at sea, on its first travel turn.
+function quizShip(s: GameState, to = 'na-one'): GameState {
+  s = go(s, { type: 'quiz', kind: 'port', to });
+  return go(s, { type: 'answer', choice: s.quiz!.question.correct });
+}
 function atSea(): GameState {
-  let s = game(['eu-north', 'as-east'], ['nomad', 'luxury']);
-  s = go(s, { type: 'board', kind: 'port', to: 'na-one' });
-  return pass(s);
+  return pass(quizShip(game(['eu-north', 'as-east'], ['nomad', 'luxury'])));
 }
 
-// A Backpacker at sea (free quiz ticket, 3 travel turns): the Nomad plays no challenges (owner, 2026-10-11).
+// A Backpacker at sea (free quiz ticket, 2 travel turns): the Nomad plays no challenges (owner, 2026-10-11).
 function backpackerAtSea(): GameState {
   let s = game(['eu-north', 'as-east'], ['backpacker', 'luxury']);
   s = go(s, { type: 'quiz', kind: 'port', to: 'na-one' });
@@ -65,29 +67,48 @@ test('no challenge with 0 points', () => {
   assert.deepEqual(legalActions(s, map), [{ type: 'travel' }]);
 });
 
-test('saying no: nothing happens, the trip goes on (Nomad ship +2, step 2.6)', () => {
+test('saying no: nothing happens, the trip goes on (the Nomad\'s +1 for a trip to a new area)', () => {
   const s = atSea();
   const t = go(s, { type: 'travel' });
-  assert.equal(p1(t).travel!.turnsLeft, 2);
-  assert.equal(p1(t).points, p1(s).points + 2);
+  assert.equal(p1(t).travel!.turnsLeft, 1);
+  assert.equal(p1(t).points, p1(s).points + 1);
   assert.equal(t.challenged, null);
   assert.deepEqual(t.drawn, []);
 });
 
-test('the Nomad works on trips (owner, 2026-10-11): "Play" gives no challenge, the trip goes on, +2 once per ship trip (step 2.6)', () => {
+test('the Nomad works on trips (owner, 2026-10-11): "Play" gives no challenge, the trip goes on, +1 once per trip', () => {
   const s = atSea();
   assert.deepEqual(legalActions(s, map), [{ type: 'travel' }, { type: 'travel', challenge: true }], 'the button stays');
   const t = go(s, { type: 'travel', challenge: true });
   assert.equal(t.challenge, null);
-  assert.equal(p1(t).travel!.turnsLeft, 2);
-  assert.equal(p1(t).points, p1(s).points + 2);
+  assert.equal(p1(t).travel!.turnsLeft, 1);
+  assert.equal(p1(t).points, p1(s).points + 1);
+});
+
+test('step 2.7: a paid ship takes 1 travel turn (Nomad +1, no boss alert); a paid plane 0 turns (no +1)', () => {
+  let s = game(['eu-north', 'as-east'], ['nomad', 'luxury']);
+  s = go(s, { type: 'board', kind: 'port', to: 'na-one' });
+  assert.deepEqual(p1(s).travel, { kind: 'port', from: 'eu-north', to: 'na-one', turnsLeft: 1, paid: true });
+  assert.equal(p1(s).nomadShips, 0);
+  s = pass(s);
+  const before = p1(s).points;
+  const landed = go(s, { type: 'travel', challenge: true });
+  assert.equal(landed.challenge, null, 'no boss alert on a paid ship');
+  assert.equal(p1(landed).area, 'na-one');
+  assert.equal(p1(landed).points, before + 1 + 1 + 2); // Nomad +1, area +1, continent +2
+  let f = game(['eu-west', 'af-south'], ['nomad', 'luxury']);
+  const points = p1(f).points;
+  f = go(f, { type: 'board', kind: 'airport', to: 'as-east' });
+  assert.equal(p1(f).travel, null);
+  assert.equal(p1(f).area, 'as-east');
+  assert.equal(p1(f).points, points - 1 + 1 + 2); // ticket, area, continent: no Nomad +1
 });
 
 test('playing: the question comes now, the answer is the next move', () => {
   let s = backpackerAtSea();
   s = go(s, { type: 'travel', challenge: true });
   assert.ok(s.challenge);
-  assert.equal(p1(s).travel!.turnsLeft, 3, 'the trip goes on only after the answer');
+  assert.equal(p1(s).travel!.turnsLeft, 2, 'the trip goes on only after the answer');
   assert.deepEqual(legalActions(s, map), [{ type: 'challengeAnswer', choice: 0 }, { type: 'challengeAnswer', choice: 1 }]);
 });
 
@@ -96,12 +117,12 @@ test('right +1, wrong −1; the trip goes on either way', () => {
   const before = p1(s).points;
   const right = go(s, { type: 'challengeAnswer', choice: s.challenge!.correct });
   assert.equal(p1(right).points, before + 1);
-  assert.equal(p1(right).travel!.turnsLeft, 2);
+  assert.equal(p1(right).travel!.turnsLeft, 1);
   assert.deepEqual(right.challenged, { seat: p1(s).seat, challenge: s.challenge, choice: s.challenge!.correct, right: true, change: 1 });
   assert.equal(right.challenge, null);
   const wrong = go(s, { type: 'challengeAnswer', choice: s.challenge!.correct === 0 ? 1 : 0 });
   assert.equal(p1(wrong).points, before - 1);
-  assert.equal(p1(wrong).travel!.turnsLeft, 2);
+  assert.equal(p1(wrong).travel!.turnsLeft, 1);
   assert.equal(wrong.challenged!.right, false);
   assert.equal(wrong.challenged!.change, -1);
 });
@@ -138,19 +159,18 @@ test('the challenge is random but replays the same with the same seed', () => {
   assert.ok(geography > tries / 3 - 60 && geography < tries / 3 + 60, `geography challenges: ${geography} of ${tries}`);
 });
 
-// Step 2.5 (owner, replaces the secret ship surprise of 2026-10-11): on a ship trip to a new area, the 3rd
-// (last) travel turn brings the boss's alert, by turns: a challenge offer, then a +1 bonus. Only for new areas.
-test('the Nomad at sea: the boss on turns 1 and 2, a real challenge on the 3rd (1st ship trip to a new area)', () => {
+// Step 2.5 (owner, replaces the secret ship surprise of 2026-10-11): on a ship trip to a new area, the last
+// travel turn brings the boss's alert, by turns: a challenge offer, then a +1 bonus. Only for new areas.
+// Step 2.7: only on a free (quiz) ship trip, 2 turns: the alert comes on the 2nd.
+test('the Nomad at sea: the boss on turn 1, a real challenge on the 2nd (1st free ship trip to a new area)', () => {
   let s = atSea();
   assert.equal(p1(s).travel!.alert, 'challenge');
-  for (let i = 0; i < 2; i++) {
-    assert.equal(nomadAlert(p1(s)), null);
-    s = pass(go(s, { type: 'travel', challenge: true }));
-    assert.equal(s.challenge, null, 'the boss answers');
-  }
+  assert.equal(nomadAlert(p1(s)), null);
+  s = pass(go(s, { type: 'travel', challenge: true }));
+  assert.equal(s.challenge, null, 'the boss answers');
   assert.equal(nomadAlert(p1(s)), 'challenge');
   const t = go(s, { type: 'travel', challenge: true });
-  assert.ok(t.challenge, 'a real challenge on the 3rd turn');
+  assert.ok(t.challenge, 'a real challenge on the 2nd turn');
   const before = p1(t).points;
   const right = go(t, { type: 'challengeAnswer', choice: t.challenge!.correct });
   assert.equal(p1(right).area, 'na-one');
@@ -161,7 +181,6 @@ test('the next ship trip to a new area brings the boss bonus +1 instead; a ship 
   let s = atSea();
   p1(s).nomadShips = 1; // as if one ship trip to a new area came before
   p1(s).travel!.alert = 'bonus';
-  s = pass(go(s, { type: 'travel' }));
   s = pass(go(s, { type: 'travel' }));
   assert.equal(nomadAlert(p1(s)), 'bonus');
   const before = p1(s).points;
@@ -174,11 +193,11 @@ test('the next ship trip to a new area brings the boss bonus +1 instead; a ship 
   let v = game(['eu-north', 'as-east'], ['nomad', 'luxury']);
   p1(v).visitedAreas.push('na-one');
   p1(v).visitedContinents.push('North America');
-  v = go(v, { type: 'board', kind: 'port', to: 'na-one' });
+  v = quizShip(v);
   assert.equal(p1(v).travel!.alert, undefined);
   assert.equal(p1(v).nomadShips, 0);
   const start = p1(v).points;
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 2; i++) {
     v = pass(v);
     v = go(v, { type: 'travel', challenge: true });
     assert.equal(v.challenge, null);
@@ -187,16 +206,16 @@ test('the next ship trip to a new area brings the boss bonus +1 instead; a ship 
   assert.equal(p1(v).points, start);
 });
 
-test('the alerts alternate: challenge, bonus, challenge… counting only ship trips to new areas', () => {
+test('the alerts alternate: challenge, bonus, challenge… counting only free ship trips to new areas', () => {
   let s = game(['eu-north', 'as-east'], ['nomad', 'luxury']);
-  s = go(s, { type: 'board', kind: 'port', to: 'na-one' });
+  s = quizShip(s);
   assert.deepEqual([p1(s).travel!.alert, p1(s).nomadShips], ['challenge', 1]);
   s = game(['eu-north', 'as-east'], ['nomad', 'luxury']);
   p1(s).nomadShips = 1;
-  s = go(s, { type: 'board', kind: 'port', to: 'na-one' });
+  s = quizShip(s);
   assert.deepEqual([p1(s).travel!.alert, p1(s).nomadShips], ['bonus', 2]);
   s = game(['eu-north', 'as-east'], ['nomad', 'luxury']);
   p1(s).nomadShips = 2;
-  s = go(s, { type: 'board', kind: 'port', to: 'na-one' });
+  s = quizShip(s);
   assert.equal(p1(s).travel!.alert, 'challenge');
 });

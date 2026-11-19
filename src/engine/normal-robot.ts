@@ -2,7 +2,7 @@ import {
   bigCountryParts, blockedByMoney, continentReward, canPayAfterQuiz, currentPlayer, entryFees, feeTotal, legalActions,
   nomadAlert,
 } from './engine.ts';
-import { BUSINESS_PRICE, bigCountryPoints, SECOND_CITIZENSHIP_PRICE, CONTINENT_BONUS, QUIZ_TRIES, canRide, ticketPrice, TRAVEL_TURNS, WELCOME_BONUS, wholeCountryTrip } from './constants.ts';
+import { BUSINESS_PRICE, bigCountryPoints, SECOND_CITIZENSHIP_PRICE, CONTINENT_BONUS, QUIZ_TRIES, canRide, ticketPrice, travelTurns, WELCOME_BONUS, wholeCountryTrip } from './constants.ts';
 import { areaById } from './map.ts';
 import { nomadTripValue, planMove } from './planner.ts';
 import { nextRandom } from './rng.ts';
@@ -185,14 +185,15 @@ function chooseMove(state: GameState, map: GameMap, moves: Action[], me: Player,
     } else if (a.type === 'hitchhike') {
       // The Backpacker's hitchhike (task 19): robots don't know when a car stops, so they just try.
       const fees = feeTotal(entryFees(state, me, me.area, a.to));
-      options.push({ action: a, to: a.to, trip: true, turns: 1 + TRAVEL_TURNS[me.profile!].car, gain: busArrivalValue(map, me, a.to) - fees });
+      options.push({ action: a, to: a.to, trip: true, turns: 1 + travelTurns(me.profile!, 'car', false), gain: busArrivalValue(map, me, a.to) - fees });
     } else if (a.type === 'board' || a.type === 'quiz') {
       const key = `${a.kind}:${a.to}`;
       if (tripsSeen.has(key)) continue;
       tripsSeen.add(key);
       const fees = feeTotal(entryFees(state, me, me.area, a.to));
       const ticket = ticketPrice(me.profile!, a.kind);
-      // Try the free quiz first; after a wrong answer pay, if that keeps the reserve.
+      // Try the free quiz first; after a wrong answer pay, if that keeps the reserve. (The planning levels
+      // weigh paying, fast, against the quiz, slow: step 2.7, src/engine/planner.ts.)
       const quiz = plain.find((b) => b.type === 'quiz' && b.kind === a.kind && b.to === a.to);
       const board = plain.find((b) => b.type === 'board' && b.kind === a.kind && b.to === a.to);
       const pay = board && ticket !== null && (me.quizWrong > 0 || !quiz) && me.points - ticket - fees >= settings.reserve;
@@ -201,8 +202,8 @@ function chooseMove(state: GameState, map: GameMap, moves: Action[], me: Player,
       // A last try that sends it home if wrong: only when it can't walk (owner's rule, task 13).
       const lastTry = action === quiz && me.quizWrong >= QUIZ_TRIES - 1 && !canPayAfterQuiz(state, me, a.kind, a.to);
       if (lastTry && plain.some((b) => b.type === 'walk')) continue;
-      const travel = TRAVEL_TURNS[me.profile!][a.kind];
-      const nomad = me.profile === 'nomad' && travel > 0 ? nomadTripValue(me, a.kind, me.visitedAreas.includes(a.to), settings.accuracy) : 0;
+      const travel = travelTurns(me.profile!, a.kind, action === board);
+      const nomad = me.profile === 'nomad' ? nomadTripValue(me, a.kind, me.visitedAreas.includes(a.to), settings.accuracy, action === board) : 0;
       // The bus and the car give the whole country's points at once (owner's rule, M5, task 19).
       const value = wholeCountryTrip(a.kind) ? busArrivalValue(map, me, a.to) : arrivalValue(map, me, a.to);
       options.push({
@@ -216,7 +217,10 @@ function chooseMove(state: GameState, map: GameMap, moves: Action[], me: Player,
   // legal move, so a robot is never left without one (found in step 2.5, Mexico with 2 points).
   if (options.length === 0) return plain[0];
   let chosen: Move;
-  const nomadTarget = me.profile === 'nomad' && state.round >= robotRound(ROBOT_NOMAD_ROUND, state.totalRounds) && me.visitedContinents.length < CONTINENT_BONUS.nomad!.continents;
+  // Step 2.7: the Nomad's +5 for 3 continents is gone, so this rush happens only while a profile has
+  // such a bonus (today none for the Nomad).
+  const nomadBonus = CONTINENT_BONUS.nomad;
+  const nomadTarget = me.profile === 'nomad' && nomadBonus !== undefined && state.round >= robotRound(ROBOT_NOMAD_ROUND, state.totalRounds) && me.visitedContinents.length < nomadBonus.continents;
   if (nomadTarget) {
     // Nomad from round 18 with fewer than 3 continents: the quickest way to a new continent.
     const dist = distances(map, me, (id) => !me.visitedContinents.includes(areaById(map, id).continent));

@@ -2,9 +2,9 @@
 // landscape board (left: the current area drawn; right: the world map and the turn panel).
 // Robots play with simple rules, at the level chosen for each seat (task 13).
 
-import { BUSINESS_PRICE, cardEvery, CHALLENGE_POINTS, GAME_LENGTHS, CONTINENT_BONUS, VISA_TEST_FACTS, VISA_TEST_PASS, POINTS_NOMAD_BONUS, POINTS_NOMAD_SHIP, POINTS_NOMAD_TRIP, POINTS_NEW_AREA, POINTS_NEW_CONTINENT, POINTS_WONDER, GO_HOME_TURNS, QUIZ_TRIES, ROUTE_KINDS, bigCountryPoints, canRide, TICKET_BUSINESS, TICKET_PRICE, ticketPrice, TOUR_FEE, TRAVEL_TURNS, VISA_PRICE } from '../engine/constants.ts';
+import { BUSINESS_PRICE, cardEvery, CHALLENGE_POINTS, GAME_LENGTHS, CONTINENT_BONUS, VISA_TEST_FACTS, VISA_TEST_PASS, POINTS_NOMAD_BONUS, POINTS_NOMAD_TRIP, POINTS_NEW_AREA, POINTS_NEW_CONTINENT, POINTS_WONDER, GO_HOME_POINTS, GO_HOME_TURNS, MOST_BUSINESSES_BONUS, QUIZ_TRIES, ROUTE_KINDS, bigCountryPoints, canRide, TICKET_BUSINESS, TICKET_PRICE, ticketPrice, TOUR_FEE, travelTurns, VISA_PRICE } from '../engine/constants.ts';
 import {
-  apply, blockedByMoney, continentReward, citizenAreas, citizenshipOf, needsVisaTest, visaOwner, bookedBy, businessAt, canPayAfterQuiz, destinations, businessValue, createGame, currentPlayer, entryFees, feeTotal, finalScore, homeFor, landTurnsToCard, legalActions, nomadAlert,
+  apply, blockedByMoney, continentReward, citizenAreas, citizenshipOf, needsVisaTest, visaOwner, bookedBy, businessAt, canPayAfterQuiz, destinations, businessValue, businessCount, mostBusinessesBonus, createGame, currentPlayer, entryFees, feeTotal, finalScore, homeFor, landTurnsToCard, legalActions, nomadAlert,
 } from '../engine/engine.ts';
 import { robotAction } from '../engine/normal-robot.ts';
 import { loadGame, saveGame } from '../engine/save.ts';
@@ -166,6 +166,8 @@ const GUIDE_KEY = 'kaj-guide-off';
 let guideOff = (() => { try { return localStorage.getItem(GUIDE_KEY) === '1'; } catch { return false; } })();
 // A move into an area with fees (visa, tour fee), waiting for the player to confirm.
 let pendingFees: Action | null = null;
+// Step 2.7 (owner): before a quiz trip, Business, Luxury and the Nomad are told it is slower than paying.
+let pendingQuiz: Action | null = null;
 // The "sell a business" list is open on the move panel.
 let selling = false;
 // Choosing the home area: the continent zoomed into, and the area tapped (waiting for "Start here").
@@ -410,22 +412,24 @@ function guideBox(): HTMLElement {
 // choosing the home country (owner's request).
 function profileNote(p: Profile, who = ''): HTMLElement {
   const price = TICKET_PRICE[p];
-  const plane = TRAVEL_TURNS[p].airport;
-  const ship = TRAVEL_TURNS[p].port;
+  const plane = travelTurns(p, 'airport', true);
+  const ship = travelTurns(p, 'port', true);
   const trips = `planes ${plane ? plural(plane, 'travel turn') : 'arrive right away'}, ships ${plural(ship, 'travel turn')}`;
+  // Step 2.7 (owner): with the free quiz every profile travels like the Backpacker.
+  const quizTrips = `with the free quiz: planes ${plural(travelTurns(p, 'airport', false), 'travel turn')}, ships ${plural(travelTurns(p, 'port', false), 'travel turn')}`;
   const CITIZEN_LINE = `A citizen of its home country from the start: others pay it a ${VISA_PRICE}-point visa to enter.`;
   const CAR_LINE = `Can rent a car in Mexico (${plural(ticketPrice('nomad', 'car') ?? 0, 'point')}): all of the USA or all of Canada (+5) at once.`;
   const good: Record<Profile, string[]> = {
     backpacker: ['Never pays for a ticket: always the free quiz.', 'Can take the bus from Mongolia: all of Russia (+5) or all of China (+3) at once.', 'Can try to hitchhike from Mexico: all of the USA or all of Canada (+5) at once, if a car stops.', `+${CONTINENT_BONUS.backpacker!.points} for visiting ${CONTINENT_BONUS.backpacker!.continents} continents.`, CITIZEN_LINE],
-    business: [CITIZEN_LINE, 'Can take a 2nd citizenship for free, once, in an area it stands in.', 'Never pays a visa (but takes the visa test).', `Fast: ${trips}.`, CAR_LINE],
-    luxury: ['Can fly or sail to any airport or port.', CITIZEN_LINE, 'Never takes a visa test (it pays the visa).', `Fast: ${trips}.`, CAR_LINE],
-    nomad: [`Cheapest plane and ship ticket: ${plural(price ?? 0, 'point')}.`, `+${POINTS_NOMAD_TRIP} for every trip to a new area by plane, train, bus or car, +${POINTS_NOMAD_SHIP} by ship (it works on the way).`, 'Long ship trips to new areas: its boss sends a challenge or a +1 bonus, by turns.', `+${CONTINENT_BONUS.nomad!.points} for visiting ${CONTINENT_BONUS.nomad!.continents} continents.`, 'Can take the bus from Mongolia: all of Russia (+5) or all of China (+3) at once.', CAR_LINE],
+    business: [CITIZEN_LINE, 'Can take a 2nd citizenship for free, once, in an area it stands in.', 'Never pays a visa (but takes the visa test).', `Fast when it pays: ${trips}.`, CAR_LINE],
+    luxury: ['Can fly or sail to any airport or port.', CITIZEN_LINE, 'Never takes a visa test (it pays the visa).', `Fast when it pays: ${trips}.`, CAR_LINE],
+    nomad: [`The cheapest tickets: ${plural(price ?? 0, 'point')} for planes, ships and trains; fast when it pays: ${trips}.`, `+${POINTS_NOMAD_TRIP} for every trip to a new area that takes at least 1 travel turn (it works on the way).`, 'Free (quiz) ship trips to new areas: its boss sends a challenge or a +1 bonus, by turns.', 'Can take the bus from Mongolia: all of Russia (+5) or all of China (+3) at once.', CAR_LINE],
   };
   const bad: Record<Profile, string[]> = {
     backpacker: ['Travels by plane, ship, train or bus only with the quiz (one try per turn), and never rents a car.', `Slow: ${trips}.`],
-    business: [`Ticket ${plural(price ?? 0, 'point')}.`, 'Can\'t take the bus.'],
-    luxury: [`The highest ticket: ${plural(price ?? 0, 'point')}.`, 'Can\'t take the train or the bus.'],
-    nomad: [`Train ticket ${plural(ticketPrice('nomad', 'station') ?? 0, 'point')}.`, 'No citizenship: it pays visas but never receives any.', 'Works on trips: no travel challenges (except when its boss allows one).', `Slow: ${trips}.`],
+    business: [`Ticket ${plural(price ?? 0, 'point')}.`, `Slower ${quizTrips}.`, 'Can\'t take the bus.'],
+    luxury: [`The highest ticket: ${plural(price ?? 0, 'point')}.`, `Slower ${quizTrips}.`, 'Can\'t take the train or the bus.'],
+    nomad: ['No citizenship: it pays visas but never receives any.', 'Works on trips: no travel challenges (except when its boss allows one).', `No trip point for a paid plane, train or bus (0 travel turns). Slower ${quizTrips}.`],
   };
   return el('div', { className: 'note profile-note' },
     el('strong', {}, who ? '' : 'You chose ', iconEl(p), ` ${PROFILE_LABEL[p]}${who ? '' : '.'}`),
@@ -566,6 +570,7 @@ function act(action: Action): void {
   for (const r of state.rewards) {
     if (state.players[r.seat].kind === 'human') celebrations.push(r);
     else if (r.kind === 'continent') lines.push(`🌍 ${nameOf(r.seat)} visited every area of ${r.continent}: +${plural(r.points, 'point')}!`);
+    else if (r.kind === 'home') lines.push(`🏠 ${nameOf(r.seat)} went home: +${plural(r.points, 'point')} to start again.`);
   }
   if (mover.kind === 'human' && (income.length > 0 || celebrations.length > 0)) newsNow = true;
   // Event cards drawn by this move; a human's own start-of-turn card has its own box instead.
@@ -574,6 +579,7 @@ function act(action: Action): void {
   news.push(...lines);
   if (mover.kind === 'human' && lines.length > 0) newsNow = true;
   pendingFees = null;
+  pendingQuiz = null;
   selling = false;
   citizenPopup = false;
   zoom = null;
@@ -640,7 +646,7 @@ function phoneNews(c: DrawnCard, onRead: () => void): HTMLElement {
       el('div', { className: 'phone-read' }, read))));
 }
 
-// The Nomad's boss alert (step 2.5, owner): on a ship trip to a new area, at the start of the 3rd turn,
+// The Nomad's boss alert (step 2.5, owner): on a free (quiz) ship trip to a new area, at the start of its last (2nd) travel turn (step 2.7),
 // by turns a challenge offer or a +1 bonus. The same phone as the event news.
 const BOSS_ALERT: Record<NomadAlert, string> = {
   challenge: 'Your boss appreciates you working hard, so he has changed his mind! You can accept a challenge this turn if you want.',
@@ -689,6 +695,24 @@ function incomeLine(s: GameState, p: Payment): { seat: number; text: string } | 
   }
 }
 
+// Step 2.7 (owner): the final score's parts, and the order of a tie: points, then more businesses, then
+// more continents, then more areas (the engine's rank).
+function scoreDetail(s: GameState, seat: number): string {
+  const p = s.players[seat];
+  const bonus = mostBusinessesBonus(s.businesses, seat);
+  const owned = businessCount(s.businesses, seat);
+  return [`${p.points} travel`, `${businessValue(s, seat)} assets`, ...(bonus ? [`${bonus} for the most businesses`] : [])].join(' + ')
+    + `; ${owned === 1 ? '1 business' : `${owned} businesses`}`;
+}
+function rankKey(s: GameState, p: Player): number[] {
+  return [finalScore(s, p), businessCount(s.businesses, p.seat), p.visitedContinents.length, p.visitedAreas.length];
+}
+function placeOf(s: GameState, p: Player): number {
+  const better = (a: number[], b: number[]) => { for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return a[i] > b[i]; return false; };
+  return 1 + s.players.filter((o) => better(rankKey(s, o), rankKey(s, p))).length;
+}
+const TIE_RULE = `Equal points? The player with more businesses wins, then more continents, then more areas. Owning the most businesses also gives +${MOST_BUSINESSES_BONUS} at the end.`;
+
 // The end of the game: the winner popup. People are always cheered, robots never (owner's rule).
 function finishPopup(s: GameState, close: () => void): HTMLElement {
   const r = s.result!;
@@ -709,14 +733,15 @@ function finishPopup(s: GameState, close: () => void): HTMLElement {
     ...cheers.map((t) => el('p', { className: 'cheer', textContent: t })),
     el('ol', { className: 'ranking' }, ...r.ranking.map((seat) => {
       const p = s.players[seat];
-      const value = businessValue(s, seat);
-      const detail = [`${p.points} travel`, `${value} assets`].join(' + ');
-      // A medal for the first three places; equal points share a place (2026-10-10).
-      const place = 1 + s.players.filter((o) => finalScore(s, o) > finalScore(s, p)).length;
+      const detail = scoreDetail(s, seat);
+      // A medal for the first three places; a full tie shares a place (step 2.7: ties go to more
+      // businesses, then continents, then areas).
+      const place = placeOf(s, p);
       return el('li', { className: place === 1 ? 'first' : '' },
         el('span', { className: 'medal', textContent: ['🥇', '🥈', '🥉'][place - 1] ?? `${place}.` }),
         ' ', dot(seat), ` ${name(seat)}: `, el('b', { textContent: plural(finalScore(s, p), 'point') }), ` (${detail})`);
     })),
+    el('p', { className: 'small', textContent: TIE_RULE }),
     el('div', { className: 'row' }, again, button('See the map', close)));
 }
 
@@ -786,8 +811,17 @@ function paymentNote(p: Payment): string {
 }
 
 // Moves into an area with fees or a visa test ask first: "entering costs a 2-point visa / 1-point tour fee".
-function go(action: Action): void {
+// Step 2.7 (owner): a quiz trip of a player who could pay is announced first: the quiz is slower.
+function go(action: Action, quizSeen = false): void {
   const s = state!;
+  const me = currentPlayer(s);
+  if (action.type === 'quiz' && !quizSeen && me.profile && ticketPrice(me.profile, action.kind) !== null) {
+    pendingQuiz = action;
+    popup = null;
+    render();
+    return;
+  }
+  pendingQuiz = null;
   if ((action.type === 'walk' || action.type === 'board' || action.type === 'quiz' || action.type === 'hitchhike')
     && (entryFees(s, currentPlayer(s), currentPlayer(s).area, action.to).length > 0 || needsVisaTest(s, currentPlayer(s), action.to))) {
     pendingFees = action;
@@ -887,7 +921,7 @@ function renderChips(s: GameState): HTMLElement {
     const points = s.phase === 'finished' ? finalScore(s, p) : p.points;
     const chip = el('button', { className: 'chip' + (p === me && s.phase !== 'finished' ? ' active' : '') + (shownPlayer === seat ? ' open' : ''), title: 'Show details' },
       dot(seat), ` ${shortOf(seat)}${p.kind === 'robot' ? ' 🤖' : ''} `, el('b', { textContent: String(points) }),
-      businessValue(s, seat) && s.phase !== 'finished' ? ` +🏢${businessValue(s, seat)}` : '');
+      businessValue(s, seat) && s.phase !== 'finished' ? ` +🏢${businessValue(s, seat)}${mostBusinessesBonus(s.businesses, seat) ? ` ⭐+${mostBusinessesBonus(s.businesses, seat)}` : ''}` : '');
     chip.style.borderColor = colourOf(seat);
     chip.addEventListener('click', () => { shownPlayer = shownPlayer === seat ? null : seat; render(); });
     return chip;
@@ -955,11 +989,11 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
         : '🏁 The journey is over!' }),
       el('ol', {}, ...r.ranking.map((seat) => {
         const p = s.players[seat];
-        const value = businessValue(s, seat);
-        // One total in points: travel points + assets (businesses at their price).
-        const detail = [`${p.points} travel`, `${value} assets`].join(' + ');
+        // One total in points: travel points + assets (businesses at their price) + the most-businesses bonus.
+        const detail = scoreDetail(s, seat);
         return el('li', {}, dot(seat), ` ${nameOf(seat)}: ${plural(finalScore(s, p), 'point')} (${detail}), ${plural(p.visitedContinents.length, 'continent')}, ${plural(p.visitedAreas.length, 'area')}`);
       })),
+      el('p', { className: 'small', textContent: TIE_RULE }),
       button('Play again', renderSetup));
     return box;
   }
@@ -1014,7 +1048,7 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
     const bus = trip.kind === 'bus';
     const car = trip.kind === 'car';
     const hitch = car && me.profile === 'backpacker';
-    const total = me.profile ? TRAVEL_TURNS[me.profile][trip.kind] : trip.turnsLeft;
+    const total = me.profile ? travelTurns(me.profile, trip.kind, trip.paid) : trip.turnsLeft;
     const step = trip.turnsLeft > 0
       ? ` · ${plane ? 'flight' : train || bus || car ? 'journey' : 'day'} ${total - trip.turnsLeft + 1} of ${total}`
       : ` · waiting to land (${to} is taken)`;
@@ -1047,12 +1081,28 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
       el('p', { className: 'small', textContent: challenge
         ? `${offer} One question, ${CHALLENGE_SECONDS} seconds. You don't have to play.`
         : `A challenge needs at least ${plural(CHALLENGE_POINTS, 'point')}, so there is none this turn.` }),
-      me.profile === 'nomad' ? el('p', { className: 'small', textContent: nomadAlert(me) === 'bonus' ? `🎁 Your boss's bonus: +${plural(POINTS_NOMAD_BONUS, 'point')} on this trip.` : `💻 Digital Nomad: +${POINTS_NOMAD_TRIP} for every trip to a new area (+${POINTS_NOMAD_SHIP} by ship), paid on its first travel turn.` }) : '',
+      me.profile === 'nomad' ? el('p', { className: 'small', textContent: nomadAlert(me) === 'bonus' ? `🎁 Your boss's bonus: +${plural(POINTS_NOMAD_BONUS, 'point')} on this trip.` : `💻 Digital Nomad: +${POINTS_NOMAD_TRIP} for every trip to a new area with at least 1 travel turn, paid on its first travel turn.` }) : '',
       el('div', { className: 'row' }, ...(challenge
         ? [play, button(me.profile === 'nomad' && nomadAlert(me) !== 'challenge' ? '💻 Keep working' : plane || train || bus || car ? '😴 No thanks' : '🌅 No thanks', () => act({ type: 'travel' }))]
         : [button('Continue the trip', () => act({ type: 'travel' }))]))));
   } else {
     const here = areaById.get(me.area!)!;
+    if (pendingQuiz && pendingQuiz.type === 'quiz') {
+      const q = pendingQuiz;
+      const where = areaById.get(q.to)!.name;
+      const slow = travelTurns(me.profile!, q.kind, false);
+      const fast = travelTurns(me.profile!, q.kind, true);
+      const price = ticketPrice(me.profile!, q.kind)!;
+      const board = actions.find((a) => a.type === 'board' && a.kind === q.kind && a.to === q.to);
+      const turnsText = (n: number) => (n === 0 ? 'you arrive right away' : plural(n, 'travel turn'));
+      box.append(el('h2', {}, who, ': ⚠️ Attention! The quiz trip is slower'),
+        el('p', { className: 'note', textContent: `With the free quiz, your trip to ${where} takes ${turnsText(slow)}. If you pay the ${plural(price, 'point')} ticket, ${turnsText(fast)}. A wrong answer uses this turn, and you try again on a later turn.` }),
+        el('div', { className: 'row' },
+          button('Take the quiz', () => go(q, true)),
+          board ? button(`Pay ${price} instead`, () => go(board)) : '',
+          button('Cancel', () => { pendingQuiz = null; render(); })));
+      return box;
+    }
     if (pendingFees && (pendingFees.type === 'walk' || pendingFees.type === 'board' || pendingFees.type === 'quiz' || pendingFees.type === 'hitchhike')) {
       const a = pendingFees;
       const fees = entryFees(s, me, me.area, a.to);
@@ -1078,8 +1128,12 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
       const homeName = areaById.get(homeFor(s, gameMap, me))!.name;
       const left = GO_HOME_TURNS - 1 - me.broke;
       box.append(el('p', { className: 'note', textContent: left <= 0
-        ? `🏠 Your money has run out, and your trip ends here. You go home to ${homeName}, free of any fees.`
-        : `💸 Out of money! You can't pay to enter any area or to board. ${s.businesses.some((b) => b.owner === me.seat) ? 'Sell a business to another player (💰 below), or wait for luck.' : 'Wait for luck.'} ${left === 1 ? 'Next turn' : `In ${left} turns`}, if you still can't pay, your trip ends and you go home to ${homeName}.` }));
+        ? `🏠 Your money has run out, and your trip ends here. You go home to ${homeName}, free of any fees, and get +${GO_HOME_POINTS} to start again.`
+        : `💸 Out of money! You can't pay to enter any area or to board. ${s.businesses.some((b) => b.owner === me.seat) ? 'Sell a business to another player (💰 below), or wait for luck.' : 'Wait for luck.'} ${left === 1 ? 'Next turn' : `In ${left} turns`}, if you still can't pay, your trip ends and you go home to ${homeName} (+${GO_HOME_POINTS} to start again).` }));
+    } else if (me.points === 0 && actions.some((a) => a.type === 'sell')) {
+      // Step 2.7 (owner): with 0 points and a business to sell, a reminder that selling brings points.
+      const owned = s.businesses.filter((b) => b.owner === me.seat).length;
+      box.append(el('p', { className: 'note', textContent: `💰 You have 0 points, but you own ${owned === 1 ? '1 business' : `${owned} businesses`}. You can sell one to another player (💰 below) to get points back.` }));
     }
     const waiting = waitingNote(s);
     if (waiting) box.append(el('p', { className: 'small', textContent: waiting }));
@@ -1276,8 +1330,8 @@ function forcedPayNote(s: GameState, kind: RouteKind, dest: string): string {
   const price = ticketPrice(me.profile!, kind);
   const to = ticketTo(s, kind);
   return price === null
-    ? ` After ${QUIZ_TRIES} wrong answers here your trip ends and you go home.`
-    : ` After ${QUIZ_TRIES} wrong answers here you must pay the ${price}-point ticket and go${to ? ` (the ticket goes ${to.slice(2, -1)})` : ''}; if you can't pay, you go home.`;
+    ? ` After ${QUIZ_TRIES} wrong answers here your trip ends and you go home (+${GO_HOME_POINTS} to start again).`
+    : ` After ${QUIZ_TRIES} wrong answers here you must pay the ${price}-point ticket and go${to ? ` (the ticket goes ${to.slice(2, -1)})` : ''}; if you can't pay, you go home (+${GO_HOME_POINTS} to start again).`;
 }
 
 // Neighbours and destinations closed because someone is travelling there (owner's rule, task 13).
@@ -1300,12 +1354,17 @@ function lastTryText(s: GameState, kind: RouteKind, dest: string): string {
   const name = areaById.get(dest)!.name;
   return canPayAfterQuiz(s, me, kind, dest)
     ? `⚠️ Last try here for ${name}: Attention! If wrong, you pay the ${ticketPrice(me.profile!, kind)}-point ticket with your points and travel.`
-    : `⚠️ Last try here for ${name}: Attention! If wrong, you go home to ${areaById.get(homeFor(s, gameMap, me))!.name}.`;
+    : `⚠️ Last try here for ${name}: Attention! If wrong, you go home to ${areaById.get(homeFor(s, gameMap, me))!.name} (+${GO_HOME_POINTS} to start again).`;
 }
 
 function lastTryWarning(s: GameState, actions: Action[]): string {
   if (currentPlayer(s).quizWrong < QUIZ_TRIES - 1) return '';
   return actions.flatMap((a) => (a.type === 'quiz' ? [lastTryText(s, a.kind, a.to)] : [])).join(' ');
+}
+
+// Step 2.7 (owner): a paid ticket is fast, the free quiz is slow. "arrive right away" or "N travel turns".
+function turnsWord(n: number): string {
+  return n === 0 ? 'you arrive right away' : plural(n, 'travel turn');
 }
 
 function travelNote(me: Player): string {
@@ -1315,9 +1374,11 @@ function travelNote(me: Player): string {
     const vehicle = capital(TRAVEL_WORDS[kind].vehicle);
     if (!canRide(me.profile!, kind)) return `${VEHICLE[kind]} ${vehicle}: ${NO_RIDE[kind]}`;
     const ticketCost = ticketPrice(me.profile!, kind);
-    const turns = TRAVEL_TURNS[me.profile!][kind];
-    if (kind === 'car' && ticketCost === null) return `👍 Car: you may try to hitchhike (free, if a car stops), ${plural(turns, 'travel turn')}`;
-    return `${VEHICLE[kind]} ${vehicle}: ${ticketCost === null ? 'you travel only with the quiz' : kind === 'car' ? `rent ${ticketCost}, no quiz` : `ticket ${ticketCost}`}, ${plural(turns, 'travel turn')}`;
+    const fast = travelTurns(me.profile!, kind, true);
+    const slow = travelTurns(me.profile!, kind, false);
+    if (kind === 'car' && ticketCost === null) return `👍 Car: you may try to hitchhike (free, if a car stops), ${turnsWord(slow)}`;
+    if (kind === 'car') return `${VEHICLE[kind]} ${vehicle}: rent ${ticketCost}, no quiz, ${turnsWord(fast)}`;
+    return `${VEHICLE[kind]} ${vehicle}: ${ticketCost === null ? `only with the quiz, ${turnsWord(slow)}` : `ticket ${ticketCost}, ${turnsWord(fast)}; or the free quiz, ${turnsWord(slow)}`}`;
   });
   const quiz = price === null
     ? 'The quiz is free; a wrong answer uses the turn, and you may try again on later turns.'
@@ -1386,7 +1447,7 @@ function answerResult(before: GameState, after: GameState, action: Action): type
   if (action.type === 'answer' && before.quiz) {
     const { question, to, kind } = before.quiz;
     const ok = action.choice === question.correct;
-    const turns = me.profile ? TRAVEL_TURNS[me.profile][kind] : 0;
+    const turns = me.profile ? travelTurns(me.profile, kind, false) : 0;
     return {
       ok,
       title: ok ? '✅ Right!' : '❌ Wrong answer',
@@ -1528,7 +1589,8 @@ function renderGuide(s: GameState, actions: Action[]): HTMLElement | string {
     }
     const to = destinations(gameMap, here.id, kind, me.profile!).map((t) => areaById.get(t)!.name);
     const price = ticketPrice(me.profile!, kind);
-    const turns = TRAVEL_TURNS[me.profile!][kind];
+    const turns = travelTurns(me.profile!, kind, true);
+    const slow = travelTurns(me.profile!, kind, false);
     if (kind === 'car') {
       lines.push(price === null
         ? `👍 Cars drive from here to ${to.join(' or ')}. Want to try to hitchhike? If a car stops, you ride for free and get all of the USA's or Canada's points (+5) at once; its other parts still give +1 each. If none stops, walk on. Tap the hitchhiker.`
@@ -1536,7 +1598,7 @@ function renderGuide(s: GameState, actions: Action[]): HTMLElement | string {
       continue;
     }
     lines.push(`${VEHICLE[kind]} There is ${placeName} here: ${words.verb} to ${to.join(' or ')}. ${
-      price === null ? 'Backpacker: only with the free quiz.' : `Ticket ${plural(price, 'point')}, or try the free quiz.`} ${turns ? plural(turns, 'travel turn') : 'You arrive right away'}.${
+      price === null ? `Backpacker: only with the free quiz, ${turnsWord(slow)}.` : `Ticket ${plural(price, 'point')}: ${turnsWord(turns)}. Or the free quiz: slower, ${turnsWord(slow)}.`}${
       kind === 'bus' ? ' The bus gives the whole country\'s points at once: Russia +5 or China +3; its other parts still give +1 each when you visit them.' : ''} Tap the ${words.vehicle}.`);
   }
   if (actions.some((a) => a.type === 'buyCitizenship')) {
@@ -1586,7 +1648,7 @@ function renderModal(s: GameState, actions: Action[], isRobot: boolean): Modal |
     return { turn: false, node: wrap(el('div', { className: 'trip-turn' }, hitchScene(h.stopped), el('div', { className: 'trip-text' },
       el('h2', { textContent: h.stopped ? '👍 A car stops!' : '👍 No luck this time' }),
       el('p', { textContent: h.stopped
-        ? `You raise your thumb, and a car pulls over. The driver is going to ${where} and has a free seat: you ride for free, ${plural(TRAVEL_TURNS.backpacker.car, 'travel turn')}.`
+        ? `You raise your thumb, and a car pulls over. The driver is going to ${where} and has a free seat: you ride for free, ${plural(travelTurns('backpacker', 'car', false), 'travel turn')}.`
         : 'You raise your thumb… the cars rush past, and none stops. You can\'t stay in Mexico: walk on to another area this turn.' }),
       ok(() => { hitched = null; render(); }))), 'trip'), sound: h.stopped ? 'car' : 'wrong', soundKey: h };
   }
@@ -1616,12 +1678,13 @@ function renderModal(s: GameState, actions: Action[], isRobot: boolean): Modal |
     const r = celebrations[0];
     const who = nameOf(r.seat);
     const area = r.area ? areaById.get(r.area)! : null;
-    const title = r.kind === 'surprise' ? '🎁 SURPRISE!' : `🌍 All of ${r.continent}!`;
+    const title = r.kind === 'surprise' ? '🎁 SURPRISE!' : r.kind === 'home' ? '🏠 Home again!' : `🌍 All of ${r.continent}!`;
     const text = r.kind === 'surprise'
       ? `Thank you for visiting ${area!.name}, ${who}! ${area!.name} rewards you with +${plural(r.points, 'point')}. ${SURPRISE_FACT[r.area!] ?? ''}`
+      : r.kind === 'home' ? `${who}, you are back in ${area!.name}: +${plural(r.points, 'point')} to start your trip again.`
       : `${who}, you visited every area of ${r.continent}: +${plural(r.points, 'point')}!`;
     return { turn: false, node: wrap(el('div', { className: 'income' },
-      el('div', { className: 'coins', textContent: r.kind === 'surprise' ? '🎁' : '🌍' }),
+      el('div', { className: 'coins', textContent: r.kind === 'surprise' ? '🎁' : r.kind === 'home' ? '🏠' : '🌍' }),
       el('h2', { className: 'big-title', textContent: title }),
       el('p', { textContent: text }),
       ok(() => { celebrations.shift(); if (news.length === 0 && income.length === 0 && celebrations.length === 0) newsNow = false; render(); }, 'Wonderful!')), 'gold'), sound: 'milestone', soundKey: r };
@@ -1689,7 +1752,7 @@ function renderModal(s: GameState, actions: Action[], isRobot: boolean): Modal |
   const wonderKey = `wonder-${here}`;
   if (s.phase === 'play' && me.kind === 'human' && !isRobot && here && here !== me.home && !seenCards.has(wonderKey)
     && areaById.get(here)!.wonder && me.visitedAreas.includes(here)
-    && !s.quiz && !s.visa && !s.challenge && !s.offer && !me.loseTurn && !pendingFees) {
+    && !s.quiz && !s.visa && !s.challenge && !s.offer && !me.loseTurn && !pendingFees && !pendingQuiz) {
     return { turn: false, node: wrap(wonderPoster(s, me, actions, () => { seenCards.add(wonderKey); }), 'trip'), sound: 'milestone', soundKey: wonderKey };
   }
   // Halfway and the last five turns, on a person's turn.
@@ -1734,7 +1797,7 @@ function renderModal(s: GameState, actions: Action[], isRobot: boolean): Modal |
   // Every call to action is a popup (owner's request): quiz, test, challenge, fees, an offer,
   // the travel turn (play a challenge?), a lost turn, and being stuck or sent home.
   const main = !isRobot && s.phase === 'play'
-    && (s.offer || s.quiz || s.challenge || pendingFees || me.travel || me.loseTurn
+    && (s.offer || s.quiz || s.challenge || pendingFees || pendingQuiz || me.travel || me.loseTurn
       || actions.some((a) => a.type === 'blocked' || a.type === 'goHome')
       || s.visa);
   if (main) {
@@ -1930,7 +1993,7 @@ function attachZoom(root: SVGSVGElement, k: number, onZoom?: (unit: number) => v
 // Can the human act on the map now (walk, open the airport or port menu, buy)?
 function mapTurn(s: GameState, isRobot: boolean): boolean {
   const me = currentPlayer(s);
-  return !isRobot && s.phase === 'play' && me.area !== null && !s.quiz && !s.challenge && !pendingFees && !s.offer
+  return !isRobot && s.phase === 'play' && me.area !== null && !s.quiz && !s.challenge && !pendingFees && !pendingQuiz && !s.offer
     && !me.loseTurn && !s.visa;
 }
 
@@ -2164,12 +2227,13 @@ function renderPopup(s: GameState, p: { kind: PopupKind; area: string }, myTurn:
   const kind: RouteKind = p.kind;
   if (kind === 'car') return carPopup(s, p.area, actions, close, box, businessLine, buyButton);
   const price = me.profile ? ticketPrice(me.profile, kind) : null;
-  const turns = me.profile ? TRAVEL_TURNS[me.profile][kind] : 0;
+  const turns = me.profile ? travelTurns(me.profile, kind, true) : 0;
+  const slowTurns = me.profile ? travelTurns(me.profile, kind, false) : 0;
   const noRide = me.profile !== null && !canRide(me.profile, kind);
   const dests = me.profile && me.area === p.area ? destinations(gameMap, p.area, kind, me.profile) : routeEnds(p.area, kind);
   box.append(el('div', { className: 'row spread' }, el('h3', { textContent: `${VEHICLE[kind]} ${capital(TRAVEL_WORDS[kind].place)} of ${area.name}` }), close),
     el('p', { className: 'small', textContent: noRide ? `${NO_RIDE[kind]}; you may still buy the ticket booth.`
-      : `${price === null ? 'Backpacker: you travel only with the quiz.' : `Ticket ${plural(price, 'point')}${ticketTo(s, kind)}.`} ${plural(turns, 'travel turn')}. The quiz is free; a wrong answer uses the turn.` }),
+      : `${price === null ? `Backpacker: you travel only with the quiz, ${turnsWord(slowTurns)}.` : `Ticket ${plural(price, 'point')}${ticketTo(s, kind)}: ${turnsWord(turns)}. The free quiz is slower: ${turnsWord(slowTurns)}.`} A wrong quiz answer uses the turn.` }),
     businessLine(TICKET_BUSINESS[kind]),
     el('div', { className: 'row' }, buyButton(TICKET_BUSINESS[kind])));
   const warning = lastTryWarning(s, plainActions(actions));
@@ -2205,7 +2269,7 @@ function carPopup(
   const area = areaById.get(areaId)!;
   const hiker = me.profile === 'backpacker';
   const price = me.profile ? ticketPrice(me.profile, 'car') : null;
-  const turns = me.profile ? TRAVEL_TURNS[me.profile].car : 1;
+  const turns = me.profile ? travelTurns(me.profile, 'car', price !== null) : 1;
   const dests = me.profile && me.area === areaId ? destinations(gameMap, areaId, 'car', me.profile) : routeEnds(areaId, 'car');
   const tried = me.area === areaId && me.hitchFailedRound === s.round;
   box.append(el('div', { className: 'row spread' }, el('h3', { textContent: hiker ? `👍 Hitchhiking in ${area.name}` : `🚗 Car rental of ${area.name}` }), close),
@@ -2267,7 +2331,7 @@ function renderWorld(s: GameState): HTMLElement {
     if (!p.travel) continue;
     const [ax, ay] = centre(p.travel.from);
     const [bx, by] = centre(p.travel.to);
-    const total = p.profile ? TRAVEL_TURNS[p.profile][p.travel.kind] : 1;
+    const total = p.profile ? travelTurns(p.profile, p.travel.kind, p.travel.paid) : 1;
     const t = Math.min(1, Math.max(0, (total - p.travel.turnsLeft) / (total + 1)));
     const line = svg('line', { x1: ax, y1: ay, x2: bx, y2: by, class: 'trip' });
     line.style.stroke = colourOf(p.seat);

@@ -43,11 +43,17 @@ function pass(s: GameState): GameState {
   return go(s, actions.find((a) => a.type === 'walk') ?? actions.find((a) => a.type !== 'buy' && a.type !== 'buyCitizenship')!);
 }
 
-// Board (Nomad: pay 1) or win the quiz (Backpacker), then ride the 1 travel turn.
+// Step 2.7: the Nomad pays 1 and arrives at once (0 travel turns); the Backpacker wins the quiz and
+// rides 1 travel turn.
 function ride(s: GameState, to: string): GameState {
-  if (me(s).profile === 'nomad') s = go(s, { type: 'board', kind: 'bus', to });
-  else s = answer(go(s, { type: 'quiz', kind: 'bus', to }), true);
-  assert.deepEqual(me(s).travel, { kind: 'bus', from: 'mongolia', to, turnsLeft: 1 });
+  if (me(s).profile === 'nomad') {
+    s = go(s, { type: 'board', kind: 'bus', to });
+    assert.equal(me(s).travel, null);
+    assert.equal(me(s).area, to);
+    return s;
+  }
+  s = answer(go(s, { type: 'quiz', kind: 'bus', to }), true);
+  assert.deepEqual(me(s).travel, { kind: 'bus', from: 'mongolia', to, turnsLeft: 1, paid: false });
   s = pass(s);
   assert.deepEqual(legalActions(s, map30), [{ type: 'travel' }, { type: 'travel', challenge: true }]);
   return go(s, { type: 'travel' });
@@ -79,8 +85,8 @@ test('bus to Siberia: +5 for all of Russia at once, only Siberia marked visited;
   assert.deepEqual(RUSSIA.filter((id) => me(s).visitedAreas.includes(id)), ['russia-east']);
   assert.deepEqual(me(s).bigCountries, ['Russia']);
   assert.deepEqual(me(s).visitedContinents, ['Africa', 'Asia']);
-  // 10 − 1 ticket + 1 Nomad bus turn + 5 Russia + 2 Asia.
-  assert.equal(me(s).points, 17);
+  // 10 − 1 ticket + 5 Russia + 2 Asia (a paid bus takes 0 turns: no Nomad +1, step 2.7).
+  assert.equal(me(s).points, 16);
 });
 
 test('bus to China West: +3 for all of China at once', () => {
@@ -91,17 +97,17 @@ test('bus to China West: +3 for all of China at once', () => {
 });
 
 test('after the bus, each other part of the country still gives +1 (and its continent counts)', () => {
-  let s = ride(game('nomad'), 'russia-east'); // 17 points
+  let s = ride(game('nomad'), 'russia-east'); // 16 points
   s = pass(s);
   s = go(s, { type: 'walk', to: 'russia-far-east' });
-  assert.equal(me(s).points, 18);
+  assert.equal(me(s).points, 17);
   s = go(pass(s), { type: 'walk', to: 'russia-east' }); // back: visited, 0
-  assert.equal(me(s).points, 18);
+  assert.equal(me(s).points, 17);
   s = pass(s);
   s = go(s, { type: 'walk', to: 'russia-west' });
-  // +1 for the part, +2 for Europe, +5 Nomad bonus for its 3rd continent (owner, 2026-10-11);
-  // the country's +5 is never given again.
-  assert.equal(me(s).points, 26);
+  // +1 for the part, +2 for Europe (step 2.7: no Nomad bonus for a 3rd continent); the country's +5
+  // is never given again.
+  assert.equal(me(s).points, 20);
   assert.deepEqual(me(s).bigCountries, ['Russia']);
 });
 
@@ -128,11 +134,11 @@ test('parts visited before: the bus still gives the full +5 once; nothing if Rus
   assert.equal(me(s).points, 10);
 });
 
-test('booth: one bus ticket booth, in Mongolia, 2 points, anyone may buy; the ticket goes to its owner', () => {
+test('booth: one bus ticket booth, in Mongolia, 1 point (step 2.7), anyone may buy; the ticket goes to its owner', () => {
   assert.deepEqual(mapBusinesses(map30).filter((b) => b.kind === 'bus').map((b) => b.area), ['mongolia']);
   let s = game('luxury');
   s = go(s, { type: 'buy', business: 'bus' });
-  assert.equal(me(s).points, 8);
+  assert.equal(me(s).points, 9);
   s = game('nomad');
   businessAt(s, 'mongolia', 'bus')!.owner = other(s).seat;
   const before = other(s).points;
@@ -145,10 +151,11 @@ test('fees and booked areas as usual: the visa is paid on boarding; no bus to a 
   other(s).citizenship = [...RUSSIA];
   // Step 2.6: the visa test at boarding, then the ticket and the visa together.
   s = passVisaTest(go(s, { type: 'board', kind: 'bus', to: 'russia-east' }), map30);
-  assert.equal(me(s).points, 10 - 1 - 2);
+  // Ticket and visa together; the paid bus arrives at once (+5 Russia, +2 Asia).
+  assert.equal(me(s).points, 10 - 1 - 2 + 5 + 2);
   s = game('nomad');
   other(s).area = null;
-  other(s).travel = { kind: 'airport', from: 'japan', to: 'china-west', turnsLeft: 1 };
+  other(s).travel = { kind: 'airport', from: 'japan', to: 'china-west', turnsLeft: 1, paid: false };
   assert.deepEqual(buses(s), ['board russia-east', 'quiz russia-east']);
 });
 
@@ -156,12 +163,15 @@ test('3 wrong quiz answers: the Nomad pays the 1-point bus ticket; the Backpacke
   let s = game('nomad');
   me(s).quizWrong = 2;
   s = answer(go(s, { type: 'quiz', kind: 'bus', to: 'china-west' }), false);
-  assert.equal(me(s).travel?.kind, 'bus');
-  assert.equal(me(s).points, 9);
+  // Paid, so 0 travel turns: there at once (10 − 1 + 3 China + 2 Asia).
+  assert.equal(me(s).area, 'china-west');
+  assert.equal(me(s).points, 14);
   s = game('backpacker');
   me(s).quizWrong = 2;
   s = answer(go(s, { type: 'quiz', kind: 'bus', to: 'china-west' }), false);
   assert.equal(me(s).area, 'west-africa');
+  // Step 2.7: going home gives +2.
+  assert.equal(me(s).points, 12);
 });
 
 test('the stuck-state checker leaves the bus out', () => {

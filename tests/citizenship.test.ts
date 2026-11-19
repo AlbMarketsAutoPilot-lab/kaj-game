@@ -163,8 +163,9 @@ test('plane: the ticket first, then the test; passed: ticket and visa together; 
   let s = go(start(), { type: 'board', kind: 'airport', to: 'as-east' });
   assert.equal(me(s).points, 3, 'nothing paid before the test');
   s = pass(s);
-  assert.equal(me(s).travel?.to, 'as-east');
-  assert.equal(me(s).points, 3 - 1 - VISA_PRICE);
+  // A paid plane takes 0 turns (step 2.7): there at once (a part of Bigland 0, Asia +2).
+  assert.equal(me(s).area, 'as-east');
+  assert.equal(me(s).points, 3 - 1 - VISA_PRICE + 2);
 
   s = fail(go(start(), { type: 'board', kind: 'airport', to: 'as-east' }));
   assert.equal(me(s).travel, null);

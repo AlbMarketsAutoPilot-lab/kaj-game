@@ -22,7 +22,7 @@ test('Backpacker: +7 on the move that reaches a 3rd continent, once (owner, 2026
   assert.equal(seatOf(s, 0).points, 16 + 1 + 3);
 });
 
-test('Luxury: no continent bonus (owner, 2026-10-11: the +5 for 5 continents is removed)', () => {
+test('Luxury: no continent bonus (owner, 2026-10-11: the +5 for 5 continents is removed); no extra start points (step 2.7)', () => {
   let s = startedGame(['eu-west', 'af-south'], 1, undefined, ['luxury', 'backpacker']);
   const lux = seatOf(s, 0);
   assert.equal(lux.profile, 'luxury');
@@ -32,13 +32,13 @@ test('Luxury: no continent bonus (owner, 2026-10-11: the +5 for 5 continents is 
   assert.equal(seatOf(s, 0).points, 3 + 3);
 });
 
-test('Digital Nomad: +5 on the move that reaches a 3rd continent, once (owner, 2026-10-11)', () => {
+test('Digital Nomad: no bonus for a 3rd continent any more (step 2.7, owner)', () => {
   let s = startedGame(['eu-west', 'af-south'], 1, undefined, ['nomad', 'backpacker']);
   assert.equal(seatOf(s, 0).profile, 'nomad');
   s = walk(s, 'af-north'); // 2nd continent: +1 +2
   s = apply(s, testMap, { type: 'blocked' });
-  s = walk(s, 'as-west'); // 3rd continent: +1 +2 +5
-  assert.equal(seatOf(s, 0).points, 3 + 3 + 8);
+  s = walk(s, 'as-west'); // 3rd continent: +1 +2 only
+  assert.equal(seatOf(s, 0).points, 3 + 3 + 3);
 });
 
 test('Business: no continent bonus', () => {

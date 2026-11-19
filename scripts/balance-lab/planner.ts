@@ -6,16 +6,17 @@
 // bus's whole country, big countries, whole continents, profile bonuses) and picks the first move of
 // the best plan, by discounted points. Other players are not predicted (only the first move checks them).
 import { canPayAfterQuiz, continentReward, currentPlayer, destinations, entryFees, feeTotal, legalActions } from '../../src/engine/engine.ts';
-import { bigCountryPoints, CONTINENT_BONUS, POINTS_NEW_CONTINENT, QUIZ_TRIES, ROUTE_KINDS, ticketPrice, TRAVEL_TURNS } from '../../src/engine/constants.ts';
+import { bigCountryPoints, CONTINENT_BONUS, POINTS_NEW_CONTINENT, QUIZ_TRIES, ROUTE_KINDS, ticketPrice, travelTurns } from '../../src/engine/constants.ts';
 import { noWalkBack, ROBOT_LEVELS, robotAction } from '../../src/engine/normal-robot.ts';
-import { nomadTripValue } from '../../src/engine/planner.ts';
+import { nomadTripValue, TURN_VALUE } from '../../src/engine/planner.ts';
 import { areaById } from '../../src/engine/map.ts';
 import type { Action, GameMap, GameState, Player, RobotLevel, RouteKind } from '../../src/engine/types.ts';
 
 export interface PlanLevel { accuracy: RobotLevel; depth: number }
 
 interface Sim { area: string; visited: Set<string>; conts: Set<string>; bigs: Set<string>; full: Set<string>; points: number }
-interface Step { to: string; kind: RouteKind | 'walk'; gain: number; turns: number; sim: Sim }
+// paid: a paid ticket (fast) or the quiz (slow; step 2.7, as the game's planner).
+interface Step { to: string; kind: RouteKind | 'walk'; gain: number; turns: number; sim: Sim; paid: boolean }
 
 const partsCache = new WeakMap<GameMap, Map<string, string[]>>();
 function parts(map: GameMap, country: string): string[] {
@@ -58,7 +59,7 @@ function steps(state: GameState, map: GameMap, me: Player, s: Sim, reserve: numb
     if (f > s.points) continue;
     const [g, n] = arrive(map, me, s, to, false);
     n.points += g - f;
-    out.push({ to, kind: 'walk', gain: g - f, turns: 1, sim: n });
+    out.push({ to, kind: 'walk', gain: g - f, turns: 1, sim: n, paid: false });
   }
   for (const kind of ROUTE_KINDS) {
     let dests = destinations(map, s.area, kind, me.profile!);
@@ -68,18 +69,29 @@ function steps(state: GameState, map: GameMap, me: Player, s: Sim, reserve: numb
     for (const to of dests) {
       const f = fees(to);
       const ticket = ticketPrice(me.profile!, kind);
-      const pay = ticket !== null && s.points - ticket - f >= reserve;
-      if (!pay && f > s.points) continue;
-      // Quiz: each wrong try uses a turn; at most QUIZ_TRIES tries.
-      const wait = pay ? 0 : Math.min(QUIZ_TRIES - 1, (1 - p) / p);
-      const travel = TRAVEL_TURNS[me.profile!][kind];
-      const [g, n] = arrive(map, me, s, to, kind === 'bus');
-      // The Nomad: +1 per trip to a new area, and its boss's alerts on ships (the game's rule, step 2.5).
-      const nomad = me.profile === 'nomad' && travel > 0 ? nomadTripValue(me, kind, s.visited.has(to), p) : 0;
-      const gain = g + nomad - f - (pay ? ticket! : 0);
-      n.points += gain;
-      // Boarding uses a turn (the area was entered on an earlier turn, except on the first step).
-      out.push({ to, kind, gain, turns: 1 + travel + wait, sim: n });
+      // Step 2.7: paying (fast) and the quiz (slow) are two steps, with their own travel turns.
+      const ways: boolean[] = [];
+      if (ticket !== null && s.points - ticket - f >= reserve) ways.push(true);
+      if (f <= s.points) ways.push(false);
+      // Step 2.7 (owner-approved, measured): when both are possible, pay or take the quiz by value: each
+      // turn saved by paying (and the expected quiz wait) is worth TURN_VALUE points.
+      if (ways.length === 2) {
+        const nv = (pd: boolean) => (me.profile === 'nomad' ? nomadTripValue(me, kind, s.visited.has(to), p, pd) : 0);
+        const waitFree = kind === 'car' ? 0 : Math.min(QUIZ_TRIES - 1, (1 - p) / p);
+        const d = -ticket! + nv(true) - nv(false) + TURN_VALUE * (travelTurns(me.profile!, kind, false) + waitFree - travelTurns(me.profile!, kind, true));
+        ways.splice(0, 2, d >= 0);
+      }
+      for (const paid of ways) {
+        // Quiz: each wrong try uses a turn; at most QUIZ_TRIES tries.
+        const wait = paid ? 0 : Math.min(QUIZ_TRIES - 1, (1 - p) / p);
+        const [g, n] = arrive(map, me, s, to, kind === 'bus');
+        // The Nomad: +1 per trip to a new area, and its boss's alerts on ships (the game's rule).
+        const nomad = me.profile === 'nomad' ? nomadTripValue(me, kind, s.visited.has(to), p, paid) : 0;
+        const gain = g + nomad - f - (paid ? ticket! : 0);
+        n.points += gain;
+        // Boarding uses a turn (the area was entered on an earlier turn, except on the first step).
+        out.push({ to, kind, gain, turns: 1 + travelTurns(me.profile!, kind, paid) + wait, sim: n, paid });
+      }
     }
   }
   return out;
@@ -124,10 +136,8 @@ export function planAction(state: GameState, map: GameMap, seed: number, level: 
     else {
       const quiz = legal.find((a) => a.type === 'quiz' && a.kind === st.kind && a.to === st.to);
       const board = legal.find((a) => a.type === 'board' && a.kind === st.kind && a.to === st.to);
-      const ticket = ticketPrice(me.profile!, st.kind);
-      const fees = feeTotal(entryFees(state, me, me.area, st.to));
-      const pay = board && ticket !== null && (me.quizWrong > 0 || !quiz) && me.points - ticket - fees >= settings.reserve;
-      action = pay ? board : quiz;
+      // Step 2.7: the step says whether to pay (fast) or take the quiz (slow).
+      action = st.paid ? board : quiz;
       // A last quiz try that would send it home: only when it can't walk (as the robot).
       if (action === quiz && me.quizWrong >= QUIZ_TRIES - 1 && !canPayAfterQuiz(state, me, st.kind, st.to) && legal.some((a) => a.type === 'walk')) action = undefined;
     }

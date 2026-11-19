@@ -61,13 +61,13 @@ export const TICKET_PRICE: Readonly<Record<Profile, number | null>> = {
   nomad: 1,
 };
 
-// Train ticket (task 17, owner's rule): 2 for Business and Nomad; the Backpacker never pays
-// (quiz only); Luxury can't take the train.
+// Train ticket (task 17, owner's rule; step 2.7: the Nomad pays 1): Business 2, Nomad 1; the
+// Backpacker never pays (quiz only); Luxury can't take the train.
 export const TRAIN_TICKET_PRICE: Readonly<Record<Profile, number | null>> = {
   backpacker: null,
   business: 2,
   luxury: null,
-  nomad: 2,
+  nomad: 1,
 };
 
 // Bus ticket (task 18, owner's rule): 1 for the Nomad; the Backpacker never pays (quiz only);
@@ -79,12 +79,12 @@ export const BUS_TICKET_PRICE: Readonly<Record<Profile, number | null>> = {
   nomad: 1,
 };
 
-// Car rental (task 19, owner's rule): 1 for Nomad, Business and Luxury, never a quiz. The
-// Backpacker never pays: it hitchhikes (see `hitchhikeStops` in engine.ts).
+// Car rental (task 19, owner's rule; step 2.7: Business and Luxury pay 2): Nomad 1, Business 2,
+// Luxury 2, never a quiz. The Backpacker never pays: it hitchhikes (see `hitchhikeStops` in engine.ts).
 export const CAR_TICKET_PRICE: Readonly<Record<Profile, number | null>> = {
   backpacker: null,
-  business: 1,
-  luxury: 1,
+  business: 2,
+  luxury: 2,
   nomad: 1,
 };
 
@@ -103,27 +103,26 @@ export function ticketPrice(profile: Profile, kind: RouteKind): number | null {
   return kind === 'station' ? TRAIN_TICKET_PRICE[profile] : TICKET_PRICE[profile];
 }
 
-// Travel turns: plane 1, ship 3; Business and Luxury: plane 0, ship 1. Train, bus and car: 1 for
-// everyone (tasks 17, 18 and 19).
-export const TRAVEL_TURNS: Readonly<Record<Profile, Readonly<Record<RouteKind, number>>>> = {
-  backpacker: { airport: 1, port: 3, station: 1, bus: 1, car: 1 },
-  business: { airport: 0, port: 1, station: 1, bus: 1, car: 1 },
-  luxury: { airport: 0, port: 1, station: 1, bus: 1, car: 1 },
-  nomad: { airport: 1, port: 3, station: 1, bus: 1, car: 1 },
-};
+// Travel turns (step 2.7, owner): a paid ticket is fast, a free one (the airline quiz, hitchhiking)
+// is slow, for every profile. Paid: plane 0, ship 1, train 0, bus 0, car 1. Free: plane 1, ship 2,
+// train 1, bus 1, car (hitchhiking) 1. The Backpacker never pays, so it always travels the free way.
+export const PAID_TRAVEL_TURNS: Readonly<Record<RouteKind, number>> = { airport: 0, port: 1, station: 0, bus: 0, car: 1 };
+export const FREE_TRAVEL_TURNS: Readonly<Record<RouteKind, number>> = { airport: 1, port: 2, station: 1, bus: 1, car: 1 };
+export function travelTurns(profile: Profile, kind: RouteKind, paid: boolean): number {
+  return paid && ticketPrice(profile, kind) !== null ? PAID_TRAVEL_TURNS[kind] : FREE_TRAVEL_TURNS[kind];
+}
 
 // After this many wrong quiz answers in one area, a player who can pay must pay and board.
 export const QUIZ_TRIES = 3;
 
 // Digital Nomad: +1 for every trip by plane, ship, train, bus or car (balance, owner 2026-10-11: per trip,
-// no longer per travel turn, so a 3-turn ship trip gives +1 like a plane). Step 2.5 (owner): only on a
-// trip to an area the Nomad has not visited yet; a repeated trip gives 0.
+// no longer per travel turn). Step 2.5 (owner): only on a trip to an area the Nomad has not visited yet; a
+// repeated trip gives 0. Step 2.7 (owner): only on a trip with at least 1 travel turn (it works on the way),
+// so a paid plane, train or bus trip (0 turns) gives nothing; the ship's +2 of step 2.6 is gone.
 export const POINTS_NOMAD_TRIP = 1;
-// Step 2.5 (owner): the boss's bonus on every second ship trip to a new area (the other one brings a
+// Step 2.5 (owner): the boss's bonus on every second free ship trip to a new area (the other one brings a
 // challenge offer instead; see nomadAlert in engine.ts).
 export const POINTS_NOMAD_BONUS = 1;
-// Step 2.6 (owner, measured): a Nomad ship trip to a new area gives +2 (other trips to new areas +1).
-export const POINTS_NOMAD_SHIP = 2;
 
 // Visa: paid to the citizen each time another player enters their country from outside (rulebook
 // section 7; step 2.6: every entry). The Business never pays a visa; Luxury pays but takes no test.
@@ -139,14 +138,17 @@ export const VISA_TEST_QUESTIONS = 3;
 export const VISA_TEST_PASS = 2;
 
 // Businesses (rulebook section 6). At the end of the game each one counts for its price.
+// Step 2.7 (owner): airline and ferry agency 2; guided tours, train, bus and car booths 1.
 export const BUSINESS_PRICE: Readonly<Record<BusinessKind, number>> = {
-  tours: 2,
-  airline: 3,
+  tours: 1,
+  airline: 2,
   ferry: 2,
-  train: 2,
-  bus: 2,
-  car: 2,
+  train: 1,
+  bus: 1,
+  car: 1,
 };
+// Step 2.7 (owner): at the end, every player owning the most businesses (at least 1) gets +1.
+export const MOST_BUSINESSES_BONUS = 1;
 
 // The business that sells the tickets at each kind of departure point.
 export const TICKET_BUSINESS: Readonly<Record<RouteKind, BusinessKind>> = {
@@ -167,14 +169,18 @@ export const TOUR_FEE = 1;
 
 // Blocked by lack of money this many turns in a row: the player is sent home (task 9).
 export const GO_HOME_TURNS = 3;
+// Step 2.7 (owner): going home (after 3 turns blocked by money, or after the 3rd wrong quiz answer with
+// no money for the ticket) gives +2 every time, so the player can pay a visa and start again.
+export const GO_HOME_POINTS = 2;
+
 
 // Profile bonuses (rulebook section 12). The start continent counts. The bonus is given once,
 // on the move that reaches that many continents. Balance (owner, 2026-10-11, measured in
 // docs/balance-lab.md): Backpacker +7 (was +3); the Luxury +5 for 5 continents is removed; the
 // Nomad gets +5 for 3 continents (instead of −5 at the end with fewer than 3).
+// Step 2.7 (owner): the Nomad's +5 for 3 continents is removed.
 export const CONTINENT_BONUS: Readonly<Partial<Record<Profile, { continents: number; points: number }>>> = {
   backpacker: { continents: 3, points: 7 },
-  nomad: { continents: 3, points: 5 },
 };
 
 // Whole continent (owner, M5): every area of a continent visited gives, once, the number of its
@@ -196,19 +202,19 @@ export function cardEvery(totalRounds: number): number {
   return totalRounds >= 50 ? CARD_EVERY_50 : CARD_EVERY;
 }
 
-// Event-card mix by profile and number of players (step 2.6, owner-approved mix "G", measured in robot
-// games): the same cards for everyone; only how often good and bad ones come. A good card (points above
-// 0) counts `good` times, a bad one (points below 0, or losing a turn) `bad` times. 3 players use the
-// 4-player mix. Not listed: the normal deck (1 and 1). The Backpacker's helper cards b1–b8 are no longer
-// drawn (kept in cards.ts, owner: a possible lever for step 2.7).
+// Event-card mix by profile and number of players (step 2.6; step 2.7, owner's final mix "D1", measured in
+// robot games): the same cards for everyone; only how often good and bad ones come. A good card (points
+// above 0) counts `good` times, a bad one (points below 0, or losing a turn) `bad` times. 3 players use the
+// 4-player mix. Not listed: the normal deck (1 and 1). The Backpacker's helper cards b1–b8 are not drawn
+// (kept in cards.ts).
 export interface CardMix { good: number; bad: number }
 export const EVENT_MIX: Readonly<Record<'2' | '4', Partial<Record<Profile, CardMix>>>> = {
   2: { business: { good: 1.1, bad: 0.95 } },
   4: {
-    backpacker: { good: 1, bad: 1.2 },
-    business: { good: 1.1, bad: 0.95 },
-    luxury: { good: 1.15, bad: 0.9 },
-    nomad: { good: 1.25, bad: 0.85 },
+    backpacker: { good: 0.93, bad: 1.3 },
+    business: { good: 1.2, bad: 0.87 },
+    luxury: { good: 1.3, bad: 0.85 },
+    nomad: { good: 1.1, bad: 0.92 },
   },
 };
 export function cardMix(profile: Profile, players: number): CardMix {
