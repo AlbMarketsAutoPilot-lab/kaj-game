@@ -743,6 +743,49 @@ Luxury's instant citizenship and Business's +6.
   the test is offered only with the 2 points in hand ("no money, no entry"). **Luxury never takes the test**,
   only pays the visa.
 - Stuck-state checker with 3 citizenships from turn 1 (plus bought ones); robots; guide and help texts.
+- **Session 1 done (2026-11-19, owner's final decisions; nothing built yet, session 2 builds it).** Measured in
+  scratch copies (robot games, 1,600 per line, normal and planning robots, 2 and 4 players, both maps).
+  - **Rules:**
+    - Citizenship of the start country from turn 1 for all but the Nomad; one start per country
+      (Russia: only one player may start in it).
+    - No asking button, no citizenship test, no Business +6, no Luxury instant citizenship.
+      Backpacker and Luxury: one citizenship only.
+    - **Business:** may take one 2nd citizenship, **free**, in the area it stands in, if nobody holds
+      it and it is not the Nomad's start country. It doesn't end the turn, is not counted at the end
+      and can't be sold. The Business **never pays a visa but takes the test.**
+    - **Luxury** pays the visa but never takes the test.
+    - **Visa and test on every entry** from outside (2 points to the citizen); moving inside a big
+      country is free.
+    - **Visa test:** read 6 facts, 3 questions, 2 right to pass. Offered only with the money in hand.
+      Failed: nothing paid, no entry, the turn is used.
+    - **On a trip:** ticket first (pay or a right quiz), then the test, then everything is paid.
+      Failed: no trip, the free quiz ticket is lost, and it is not a quiz try. After the 3rd wrong
+      quiz answer the test comes too (failed: no trip, nothing paid, the count starts again).
+      Hitchhiking: the test only if a car stops. Going home is free.
+    - **Nomad:** a ship trip to a new area gives **+2** (other trips +1), plus the boss alerts as
+      in 2.5.
+    - **Event cards by profile and player count** (mix "G"; 3 players use the 4-player mix): the
+      Backpacker no longer draws its helper cards b1–b8. Owner: **keep them in `src/cards/cards.ts`,
+      unused**, as a possible lever for step 2.7. Each draw is weighted (good / bad):
+      - Business 1.1 / 0.95 (2 and 4 players);
+      - with 4 players: Backpacker 1 / 1.2, Luxury 1.15 / 0.9, Nomad 1.25 / 0.85;
+      - with 2 players: Backpacker, Luxury and Nomad use the normal deck.
+    - Save version 18.
+  - **Robots (owner-approved):** answer the visa test at their level's rate; the Business buys its 2nd
+    citizenship when it keeps its reserve, after businesses; the "ask" rule is removed; the planner's
+    Nomad trip value counts +2 for ships.
+  - **Fairness, 1,600 games per line:** 21 of 32 before the change → **29 of 32** after. Misses:
+    Nomad 19.6% and Backpacker 16% (30 turns, 4 players), Luxury 31% (50 turns, 4 players).
+    Boredom unchanged (26–34%), close finishes 39–40% in every 4-player line. Nobody went home,
+    longest blocked streak 2, 15–16% of visa tests failed.
+  - **Tried and dropped:**
+    - the bought citizenship at 5 points (Business 8–31%), then the corrected rule without
+      card changes (10 of 32);
+    - Backpacker +1 travel turn per trip (21 of 32);
+    - 10 other card mixes (8–28 of 32).
+  - **Map traps (known limit):** the 3 start citizenships cut off some area in 3.9% (30 turns) and 1.7%
+    (50 turns) of possible start sets; with a bought one, more. "Go home" remains the way out; it never
+    triggered in robot games.
 
 **2.7 (balance) Balance tuning (high, 1).** All lab packages on both maps, 2 and 4 players, normal and planning
 robots; tune the numbers; report fair/unfair, boredom and excitement. Watch: Backpacker (much slower trips),
