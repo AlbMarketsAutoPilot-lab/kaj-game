@@ -1,7 +1,7 @@
 # KAJ — all game rules as of 2026-11-20
 
 Checked against the code (`src/engine/`, `src/maps/`, `src/cards/`) and `docs/engine.md`.
-Rules marked **[2.6]** came with step 2.6 and **[2.7]** with step 2.7 (both 2026-11-19), **[2.8]** with step 2.8 (2026-11-20). Where a new rule replaced
+Rules marked **[2.6]** came with step 2.6 and **[2.7]** with step 2.7 (both 2026-11-19), **[2.8]** with step 2.8 and **[2.10]** with step 2.10 (both 2026-11-20). Where a new rule replaced
 an older one, the old one is shown ~~struck out~~.
 
 ## 1. Players and setup
@@ -210,3 +210,14 @@ test next turn (read 6 facts, 3 questions, 2 right to pass), Luxury granted at o
 
 - The game saves after every move; one save slot.
 - A save from another version can't be continued. The version is **[2.8] 20** (2.7: 19).
+
+## 11. Passport and records [2.10]
+
+- **End of the game:** the popup shows the ranking, a "Congratulations" for every winning person (robots and the
+  other places are not cheered), a "🛂 Passport" button for each person, "▶ Play again" and "🏆 Records". It stays
+  until "Play again" (the phone's back button still asks "Leave the game?").
+- **Passport:** a blue cover with the country of citizenship and its flag (the Digital Nomad: its start country, nationality
+  "none"); a data page with the profile icon and name, the journey and the final numbers; then a stamp for every area
+  visited, in the order visited, 6 a page.
+- **Records on this device:** the 10 best wins by a person, one list per game length, by points (then more areas).
+  Robots never enter. Nothing leaves the device.

@@ -747,3 +747,29 @@ chance (±1 point with 4 players, ±1.5 with 2). The two misses (Backpacker, 4 p
 30%, while the planning robots' Backpacker on the same maps is at 20–23%: a card mix can't move one without the other.
 Not measured (owner chose N1): a smaller weight for the 5 "lose a turn" cards, the only card lever for boredom.
 
+## Step 2.9 (2026-11-20): three new wonders — measured, not adopted
+
+Extended lab (`lab2.ts`, 1,600 games per line). Before: the game on main (`before29`). After (`wonders3`, scratch copy,
+only these 3 lines changed): Petra (Middle East) and Angkor Wat (Indochina) wonders on the 30-turn map, Victoria Falls
+(Zambezi) on the 50-turn map; their guided tours come with them.
+
+**Before: 30 of 32** (as in step 2.8). **After: 22 of 32**, 37 points outside the target (before 1). Robot check: robots
+pay for 39–59% → 39–58% of their trips. **Owner: no new wonders.**
+
+| Line | Backpacker | Business | Luxury | Nomad |
+|---|---|---|---|---|
+| 30 turns, 2 players, normal | 56% ✅ → 65% ❌ (54.3) | 48% ✅ → 31% ❌ (48.1) | 42% ✅ → 49% ✅ (50.4) | 54% ✅ → 55% ✅ (51.5) |
+| 30 turns, 2 players, planning | 57% ✅ → 65% ❌ (58.8) | 52% ✅ → 36% ❌ (51.4) | 45% ✅ → 48% ✅ (52.9) | 46% ✅ → 51% ✅ (54.4) |
+| 30 turns, 4 players, normal | 31% ❌ → 31% ❌ (53.2) | 21% ✅ → 17% ❌ (48.6) | 27% ✅ → 31% ❌ (51.8) | 21% ✅ → 21% ✅ (49.4) |
+| 30 turns, 4 players, planning | 20% ✅ → 29% ✅ (54.6) | 28% ✅ → 22% ✅ (53.0) | 25% ✅ → 25% ✅ (52.8) | 26% ✅ → 24% ✅ (52.4) |
+| 50 turns, 2 players, normal | 58% ✅ → 67% ❌ (75.8) | 43% ✅ → 42% ✅ (68.8) | 53% ✅ → 47% ✅ (70.7) | 45% ✅ → 43% ✅ (71.7) |
+| 50 turns, 2 players, planning | 54% ✅ → 52% ✅ (78.3) | 48% ✅ → 41% ✅ (75.2) | 50% ✅ → 60% ❌ (77.8) | 48% ✅ → 48% ✅ (77.4) |
+| 50 turns, 4 players, normal | 30% ❌ → 28% ✅ (73.8) | 23% ✅ → 23% ✅ (70.2) | 26% ✅ → 22% ✅ (71.1) | 21% ✅ → 28% ✅ (71.4) |
+| 50 turns, 4 players, planning | 23% ✅ → 25% ✅ (75.6) | 22% ✅ → 24% ✅ (75.0) | 25% ✅ → 20% ✅ (73.0) | 29% ✅ → 32% ❌ (76.6) |
+
+(After: average final score in brackets.) Boredom 23–28% before and after; lead changes 2.3–5.7 → 2.3–5.4; won by 3 or
+less 22–39% → 20–36%; draws 0–1 per line; go home 15–54 → 12–52 per line (after 3 turns without money 0); blocked turns
+0–48 → 0–59; longest blocked streak 2; failed visa tests 13.8–16.9% → 15.3–17.6%. The biggest shifts (Business −16,
+Backpacker +9 on the 30-turn map with 2 players; Luxury +10 with one wonder on the 50-turn map) are far beyond chance
+(±1.5 points with 2 players). The cause was not measured.
+

@@ -95,8 +95,8 @@ Every task also adds its part to the test board, so there is **always a playable
 | 2.6 | Citizenship from turn 1, Business buys 2nd/3rd, visa test | **high** | 2 | — | ✅ done (owner's final rules, 2026-11-19): start citizenship for all but the Nomad, the Business's one free 2nd citizenship (never pays visas), visa test on every entry (Luxury pays with no test), Nomad ship +2, event-card mix "G" (helpers b1–b8 kept, not drawn); fair 21 → 29 of 32 at 1,600 games per line; saves v18; `docs/rules-now.md` lists every rule |
 | 2.7 | Balance tuning of all 2.0 rule changes (4 profiles, boredom, excitement) | **high** | 1 | — | ✅ done (owner's final decision, 2026-11-19): paid trips fast, quiz trips slow (with a notice), train Nomad 1, car Business/Luxury 2, cheaper businesses, +1 for the most businesses and business tiebreak, go home +2, Nomad changes; the Luxury +5 measured and dropped; robots weigh paying (2.5 points per saved turn); card mix D1; fair 29 of 32 (as before); saves v19 |
 | 2.8 | Event cards as real geography news | medium | 1 | — | ✅ done (owner's decisions, 2026-11-20): the 45 cards are news about the country where the player stands (country, capital, currency filled in; no capital in big countries), the 12 own-area cards became general cards (same points), one card mix per map (N1); fair 29 → 30 of 32 at 1,600 games per line; boredom the same; saves v20; screens that show the rules (start-map bonuses, profile popup with "Choose another", bonus progress in "It's your turn", world-map dots of the current player only, free-or-paid, visa, business and go-home notices) |
-| 2.9 | More wonders, history and curiosity for each, new design | medium | 2 | — | |
-| 2.10 | Passport with stamps, records on the device | medium | 1–2 | — | |
+| 2.9 | More wonders, history and curiosity for each, new design | medium | 2 | — | ⛔ stopped (owner, 2026-11-20): no new wonders; Petra and Angkor Wat (30 turns) and Victoria Falls (50 turns) measured 30 → 22 of 32 at 1,600 games per line; history and curiosity of the 11 wonders kept for later |
+| 2.10 | Passport with stamps, records on the device | medium | 1–2 | — | ✅ done (owner-approved design, 2026-11-20): end popup in two columns (only winners cheered, new-record line, a passport button per person, Play again and Records, no Leave); passport cover with the citizenship and flag, data page, stamps 6 a page; records top 10 by points per game length; screens only, save stays 20 |
 | 2.11 | 100-turn map in this app (J1 plan high, J2 engine high, J3–J6 medium) | **high** / medium | ~10 | — | |
 | 2.12 | Full test games, release 2.0 (web on kaj.kritere.com and app) | medium | 1–2 | — | |
 
@@ -825,6 +825,13 @@ Tower (France), Hagia Sophia (Turkey), Petra (Middle East), Angkor Wat (Indochin
 Tower (France), Hagia Sophia (Turkey), Easter Island (Chile), Victoria Falls (Zambezi), Stonehenge
 (UK & Ireland). For every wonder, old and new: a short history and a short curiosity, shown with a proper
 design. Balance check (more wonder points and tours).
+
+- **Stopped (owner, 2026-11-20): no new wonders.** Measured first with only 3 (owner's choice): Petra (Middle East)
+  and Angkor Wat (Indochina) on the 30-turn map, Victoria Falls (Zambezi) on the 50-turn map, in a scratch copy.
+  Fairness at 1,600 games per line: **30 → 22 of 32** (1 → 37 points outside the target); biggest shifts on the
+  30-turn map with 2 players (Business 48% → 31%, Backpacker 56% → 65%). Table in `docs/balance-lab.md`, step 2.9.
+  Owner: no card-mix repair tried; nothing built, game unchanged (save stays 20). The history and curiosity texts
+  for the 11 wonders already in the game are **kept for later** (no rule or balance change).
 
 **2.10 (H) Passport and records (medium, 1–2).** Each human player's passport at the end of the game, a stamp
 for every area visited. Records on this device only: the top 10 counts of games won by a human ("Your win

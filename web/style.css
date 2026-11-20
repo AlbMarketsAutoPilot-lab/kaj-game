@@ -446,3 +446,64 @@ button.link { background: none; border: none; padding: 0; text-align: left; font
   .handover .big-title { margin: 2px 0; }
   .turn-chip, .turn-goals-title { font-size: calc(11.5px / var(--ui-zoom, 1)); padding-left: 4px; padding-right: 4px; }
 }
+
+/* Step 2.10: the end popup in two columns, the passport and the records (owner-approved mock-up). */
+.modal.fin-modal { width: min(760px, 100%); padding: 8px 12px; }
+.fin2 { display: grid; grid-template-columns: 38% 1fr; gap: 10px; align-items: center; }
+.fin2 .trophy { font-size: 2.4rem; }
+.fin2 .big-title { font-size: 1.15rem; margin: 2px 0; }
+.fin2 .cheer { font-size: 0.78rem; margin: 3px 0; }
+.fin2 .rec-line { font-size: 0.78rem; margin: 3px 0; color: var(--gold-bright); }
+.fin2 .ranking { display: block; margin: 0; padding: 0; list-style: none; font-size: 0.8rem; text-align: left; }
+.fin2 .ranking li { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 2px 10px 2px 6px; margin: 3px 0; }
+.fin2 .ranking b { white-space: nowrap; }
+.fin2 .ranking small { color: var(--muted); font-size: 0.7rem; display: block; padding-left: 2.2em; }
+.fin2 button { font-size: 0.8rem; padding: 5px 10px; }
+.fin2 .ppb { font-size: 0.7rem; padding: 3px 8px; white-space: nowrap; }
+.fin2 .row { margin-top: 4px; justify-content: center; }
+.pp-back { z-index: 20; background: rgba(2, 20, 24, 0.78); padding: 8px; }
+.pp-x { position: fixed; top: calc(6px + var(--safe-t)); right: calc(8px + var(--safe-r)); font-size: 1rem; padding: 4px 10px; }
+.pp-book { display: flex; flex-direction: column; align-items: center; }
+.pp-nav { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 6px; color: var(--cream); font-size: 0.8rem; }
+.pp-nav button { padding: 3px 12px; }
+.pp-cover { width: min(42vh, 230px); aspect-ratio: 125 / 176; border-radius: 6px 12px 12px 6px; box-sizing: border-box; padding: 7% 6%;
+  background: radial-gradient(circle at 40% 30%, #2a3f6e, #121c38 70%); box-shadow: inset 6px 0 10px rgba(0, 0, 0, 0.45), 0 10px 30px rgba(0, 0, 0, 0.6);
+  color: #e9c46a; font-family: "Cinzel", Georgia, serif; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: space-between; }
+.pp-cover .country { font-size: clamp(0.7rem, 3.6vh, 1.05rem); letter-spacing: 0.12em; font-weight: 700; text-shadow: 0 1px 0 #070c1c; }
+.pp-cover .emblem { width: 52%; aspect-ratio: 1; border-radius: 50%; border: 2px solid #e9c46a; display: grid; place-items: center; box-shadow: 0 0 0 4px rgba(233, 196, 106, 0.25); }
+.pp-cover .emblem img { width: 66%; border-radius: 3px; filter: sepia(0.25) saturate(0.9); box-shadow: 0 1px 3px #0008; }
+.pp-cover .word { font-size: clamp(0.8rem, 4.4vh, 1.3rem); letter-spacing: 0.25em; font-weight: 700; }
+.pp-cover .chip { width: 18%; aspect-ratio: 1.5; border: 2px solid #e9c46a; border-radius: 4px; position: relative; }
+.pp-cover .chip::after { content: ''; position: absolute; inset: 30% 38%; border: 2px solid #e9c46a; border-radius: 50%; }
+.pp-spread { display: flex; height: min(78vh, 300px); aspect-ratio: 250 / 176; max-width: 96vw; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6); border-radius: 6px; overflow: hidden; }
+.pp-page { flex: 1; position: relative; color: #2b3a4a; font-family: "Courier New", monospace; overflow: hidden;
+  background: repeating-radial-gradient(circle at 50% 50%, rgba(80, 140, 170, 0.07) 0 2px, transparent 2px 9px), linear-gradient(135deg, #e9f1ea, #f4ead8 60%, #e3eef0); }
+.pp-page + .pp-page { border-left: 1px solid #b9b3a3; box-shadow: inset 8px 0 10px -8px rgba(0, 0, 0, 0.35); }
+.pp-pno { position: absolute; bottom: 4px; width: 100%; text-align: center; font-size: 0.55rem; color: #8a8a7a; }
+.pp-page .guill { position: absolute; inset: 0; opacity: 0.18; background: repeating-linear-gradient(60deg, transparent 0 7px, #4a7e9a 7px 8px), repeating-linear-gradient(-60deg, transparent 0 7px, #9a4a6a 7px 8px); }
+.dp { container-type: inline-size; position: relative; padding: 5% 5% 0; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; }
+.dp h4 { margin: 0 0 3%; font-size: clamp(0.5rem, 2.6vh, 0.72rem); letter-spacing: 0.1em; text-align: center; font-family: "Cinzel", Georgia, serif; color: #5a1a22; }
+.dp .body { display: flex; gap: 5%; flex: 1; min-height: 0; }
+.dp .photo { width: 30%; aspect-ratio: 3 / 4; align-self: flex-start; background: linear-gradient(#dfe7ea, #c9d6db); border: 1px solid #9aa; display: grid; place-items: center; }
+.dp .photo svg { width: 92%; height: 92%; }
+.dp .fields { flex: 1; font-size: clamp(0.42rem, 2.2vh, 0.62rem); line-height: 1.15; text-align: left; }
+.dp .fields div { margin-bottom: 2.5%; }
+.dp .fields i { display: block; font-style: normal; font-size: 0.78em; color: #6c7a86; }
+.dp .fields b { font-size: 1.1em; color: #1d2733; }
+.dp .mrz { font-size: 3.3cqw; letter-spacing: 0; background: rgba(255, 255, 255, 0.55); padding: 2% 3%; margin: 0 -5% 7%; color: #111; white-space: pre; overflow: hidden; text-align: left; }
+.pp-stamps { position: absolute; inset: 6% 4% 9%; display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr); gap: 3%; }
+.pp-stamp { justify-self: center; align-self: center; width: 88%; aspect-ratio: 1.5; border: 2px solid currentColor; border-radius: 12px; box-sizing: border-box; padding: 2px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+  font-family: "Courier New", monospace; font-weight: 700; text-transform: uppercase; opacity: 0.85; mix-blend-mode: multiply; }
+.pp-stamp.round { border-radius: 50%; aspect-ratio: 1; width: 64%; }
+.pp-stamp .n { font-size: clamp(0.4rem, 2.2vh, 0.62rem); line-height: 1.05; }
+.pp-stamp .c { font-size: clamp(0.32rem, 1.6vh, 0.46rem); letter-spacing: 0.06em; }
+.pp-stamp img { width: 26%; margin: 2px 0; filter: saturate(0.7); opacity: 0.9; }
+.pp-stamp .no { font-size: clamp(0.3rem, 1.5vh, 0.42rem); }
+.pp-rec { width: min(560px, 96vw); max-height: 92vh; overflow-y: auto; text-align: center; }
+.pp-tabs { display: flex; gap: 6px; justify-content: center; margin: 4px 0 6px; }
+.pp-tabs button.on { background: var(--accent); color: var(--deep); }
+.pp-rec table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.pp-rec td, .pp-rec th { padding: 2px 6px; text-align: left; }
+.pp-rec th { color: var(--muted); font-weight: 400; font-size: 0.72rem; }
+.pp-rec tr.new td { background: rgba(243, 210, 122, 0.2); }
