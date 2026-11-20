@@ -94,7 +94,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | 2.5 | Travel by profile (turns, prices, quiz = Backpacker turns, quiz popup), bus and car whole country | **high** | 2 | — | ✅ done (owner's final decision, 2026-11-18): only the Nomad boss alerts (+1 per trip to new areas only; ship alerts: a challenge, then a +1 bonus, by turns; surprise removed) and the car to USA East or Canada West; the rest of 2.5 dropped; saves v17 |
 | 2.6 | Citizenship from turn 1, Business buys 2nd/3rd, visa test | **high** | 2 | — | ✅ done (owner's final rules, 2026-11-19): start citizenship for all but the Nomad, the Business's one free 2nd citizenship (never pays visas), visa test on every entry (Luxury pays with no test), Nomad ship +2, event-card mix "G" (helpers b1–b8 kept, not drawn); fair 21 → 29 of 32 at 1,600 games per line; saves v18; `docs/rules-now.md` lists every rule |
 | 2.7 | Balance tuning of all 2.0 rule changes (4 profiles, boredom, excitement) | **high** | 1 | — | ✅ done (owner's final decision, 2026-11-19): paid trips fast, quiz trips slow (with a notice), train Nomad 1, car Business/Luxury 2, cheaper businesses, +1 for the most businesses and business tiebreak, go home +2, Nomad changes; the Luxury +5 measured and dropped; robots weigh paying (2.5 points per saved turn); card mix D1; fair 29 of 32 (as before); saves v19 |
-| 2.8 | Event cards as real geography news | medium | 1 | — | |
+| 2.8 | Event cards as real geography news | medium | 1 | — | ✅ done (owner's decisions, 2026-11-20): the 45 cards are news about the country where the player stands (country, capital, currency filled in; no capital in big countries), the 12 own-area cards became general cards (same points), one card mix per map (N1); fair 29 → 30 of 32 at 1,600 games per line; boredom the same; saves v20; screens that show the rules (start-map bonuses, profile popup with "Choose another", bonus progress in "It's your turn", world-map dots of the current player only, free-or-paid, visa, business and go-home notices) |
 | 2.9 | More wonders, history and curiosity for each, new design | medium | 2 | — | |
 | 2.10 | Passport with stamps, records on the device | medium | 1–2 | — | |
 | 2.11 | 100-turn map in this app (J1 plan high, J2 engine high, J3–J6 medium) | **high** / medium | ~10 | — | |
@@ -809,6 +809,16 @@ that is true every year, about the area (about 60 cards, same mix of effects; ow
 "PERU — The Inca Trail closes every February for repairs. Walkers wait a day." (lose a turn);
 "INDIA — The monsoon arrives: four months of rain fill the rivers and flood the roads." (−1);
 "JAPAN — Cherry blossom season! Forecasters follow the 'sakura front' as it moves north." (+1).
+
+- **Done (2026-11-20, owner's decisions):** the samples above (news true every year about one country) would need about
+  300 cards to cover every area, so the owner chose news **about the country where the player stands**, made from real
+  data: the 33 cards for anywhere were rewritten as country news ({country}, {capital}, {currency} filled in; a part of a
+  big country never names the capital), all approved after one correction (c33). The 12 own-area cards had no note on
+  why those places; owner: they become general cards with new texts and the same points (option 1, no 88 new cards).
+  One card mix per map (N1, measured): **29 → 30 of 32** at 1,600 games per line; boredom 23–28% (the same). Details:
+  `docs/engine.md` and `docs/balance-lab.md`, step 2.8. Saves v20.
+  Also in this session (owner): screens that show the rules instead of learning them by heart (list in `docs/engine.md`,
+  step 2.8); screens only, no rule or balance change.
 
 **2.9 (G) Wonders (medium, 2).** Proposal (none in a big country): 30-turn map +5: Parthenon (Greece), Eiffel
 Tower (France), Hagia Sophia (Turkey), Petra (Middle East), Angkor Wat (Indochina). 50-turn map +5: Eiffel

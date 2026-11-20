@@ -2,7 +2,7 @@
 // landscape board (left: the current area drawn; right: the world map and the turn panel).
 // Robots play with simple rules, at the level chosen for each seat (task 13).
 
-import { BUSINESS_PRICE, cardEvery, CHALLENGE_POINTS, GAME_LENGTHS, CONTINENT_BONUS, VISA_TEST_FACTS, VISA_TEST_PASS, POINTS_NOMAD_BONUS, POINTS_NOMAD_TRIP, POINTS_NEW_AREA, POINTS_NEW_CONTINENT, POINTS_WONDER, GO_HOME_POINTS, GO_HOME_TURNS, MOST_BUSINESSES_BONUS, QUIZ_TRIES, ROUTE_KINDS, bigCountryPoints, canRide, TICKET_BUSINESS, TICKET_PRICE, ticketPrice, TOUR_FEE, travelTurns, VISA_PRICE } from '../engine/constants.ts';
+import { BUSINESS_PRICE, cardEvery, CHALLENGE_POINTS, GAME_LENGTHS, CONTINENT_BONUS, VISA_TEST_FACTS, VISA_TEST_PASS, POINTS_NOMAD_BONUS, POINTS_NOMAD_TRIP, POINTS_NEW_AREA, POINTS_NEW_CONTINENT, POINTS_WONDER, WELCOME_BONUS, GO_HOME_POINTS, GO_HOME_TURNS, MOST_BUSINESSES_BONUS, QUIZ_TRIES, ROUTE_KINDS, bigCountryPoints, canRide, TICKET_BUSINESS, TICKET_PRICE, ticketPrice, TOUR_FEE, travelTurns, VISA_PRICE } from '../engine/constants.ts';
 import {
   apply, blockedByMoney, continentReward, citizenAreas, citizenshipOf, needsVisaTest, visaOwner, bookedBy, businessAt, canPayAfterQuiz, destinations, businessValue, businessCount, mostBusinessesBonus, createGame, currentPlayer, entryFees, feeTotal, finalScore, homeFor, landTurnsToCard, legalActions, nomadAlert,
 } from '../engine/engine.ts';
@@ -166,7 +166,7 @@ const GUIDE_KEY = 'kaj-guide-off';
 let guideOff = (() => { try { return localStorage.getItem(GUIDE_KEY) === '1'; } catch { return false; } })();
 // A move into an area with fees (visa, tour fee), waiting for the player to confirm.
 let pendingFees: Action | null = null;
-// Step 2.7 (owner): before a quiz trip, Business, Luxury and the Nomad are told it is slower than paying.
+// Step 2.7 (owner): before a quiz trip, Business, Luxury and the Nomad see the quiz time and the paid time (step 2.8: before a paid trip too).
 let pendingQuiz: Action | null = null;
 // The "sell a business" list is open on the move panel.
 let selling = false;
@@ -399,6 +399,25 @@ function setNewsOff(off: boolean): void {
   try { localStorage.setItem(NEWS_KEY, off ? '1' : '0'); } catch { /* not kept */ }
 }
 
+// The free-or-paid trip notice (step 2.7; step 2.8: shown for a quiz and a paid trip): "Don't show this again" turns it
+// off on this device (owner, step 2.8).
+const QUIZ_NOTICE_KEY = 'kaj-quiz-notice-off';
+let quizNoticeOff = (() => { try { return localStorage.getItem(QUIZ_NOTICE_KEY) === '1'; } catch { return false; } })();
+function setQuizNoticeOff(off: boolean): void {
+  quizNoticeOff = off;
+  try { localStorage.setItem(QUIZ_NOTICE_KEY, off ? '1' : '0'); } catch { /* not kept */ }
+}
+
+// Rule notices (owner, step 2.8): visa, businesses, going home. Each has "Don't show this again", kept on this device.
+type InfoKind = 'visa' | 'business' | 'home';
+const INFO_KEY = (k: InfoKind) => `kaj-info-${k}-off`;
+const infoOff = (k: InfoKind) => { try { return localStorage.getItem(INFO_KEY(k)) === '1'; } catch { return false; } };
+function setInfoOff(k: InfoKind): void {
+  try { localStorage.setItem(INFO_KEY(k), '1'); } catch { /* not kept */ }
+}
+// A move into a visa country waits here until the visa notice is read.
+let visaInfo: Action | null = null;
+
 function guideBox(): HTMLElement {
   const tick = el('input', { type: 'checkbox', checked: !guideOff });
   tick.addEventListener('change', () => {
@@ -407,6 +426,13 @@ function guideBox(): HTMLElement {
   });
   return el('label', { className: 'small' }, tick, ' 🧭 Guided help for people (what you can do each turn)');
 }
+
+// Step 2.8 (owner): the profile's advantages alone, in the popup before a person confirms a profile.
+const GOOD_ONLY = '\u0000good';
+// The profile a person tapped, waiting for "Play as …" or "Choose another" (owner, step 2.8).
+let pendingProfile: Profile | null = null;
+// What the "It's your turn" chips showed last time, per seat: a chip whose number went up glows (owner, step 2.8).
+const lastChips = new Map<number, Map<string, number>>();
 
 // "You chose …": the profile's advantages and weaknesses (rulebook section 12), shown while
 // choosing the home country (owner's request).
@@ -423,14 +449,16 @@ function profileNote(p: Profile, who = ''): HTMLElement {
     backpacker: ['Never pays for a ticket: always the free quiz.', 'Can take the bus from Mongolia: all of Russia (+5) or all of China (+3) at once.', 'Can try to hitchhike from Mexico: all of the USA or all of Canada (+5) at once, if a car stops.', `+${CONTINENT_BONUS.backpacker!.points} for visiting ${CONTINENT_BONUS.backpacker!.continents} continents.`, CITIZEN_LINE],
     business: [CITIZEN_LINE, 'Can take a 2nd citizenship for free, once, in an area it stands in.', 'Never pays a visa (but takes the visa test).', `Fast when it pays: ${trips}.`, CAR_LINE],
     luxury: ['Can fly or sail to any airport or port.', CITIZEN_LINE, 'Never takes a visa test (it pays the visa).', `Fast when it pays: ${trips}.`, CAR_LINE],
-    nomad: [`The cheapest tickets: ${plural(price ?? 0, 'point')} for planes, ships and trains; fast when it pays: ${trips}.`, `+${POINTS_NOMAD_TRIP} for every trip to a new area that takes at least 1 travel turn (it works on the way).`, 'Free (quiz) ship trips to new areas: its boss sends a challenge or a +1 bonus, by turns.', 'Can take the bus from Mongolia: all of Russia (+5) or all of China (+3) at once.', CAR_LINE],
+    // Step 2.8 (owner): the boss alerts stay a surprise; the trip point in one short line.
+    nomad: [`The cheapest tickets: ${plural(price ?? 0, 'point')} for planes, ships and trains; fast when it pays: ${trips}.`, `Gets paid +${POINTS_NOMAD_TRIP} during trips to new areas.`, 'Can take the bus from Mongolia: all of Russia (+5) or all of China (+3) at once.', CAR_LINE],
   };
   const bad: Record<Profile, string[]> = {
     backpacker: ['Travels by plane, ship, train or bus only with the quiz (one try per turn), and never rents a car.', `Slow: ${trips}.`],
     business: [`Ticket ${plural(price ?? 0, 'point')}.`, `Slower ${quizTrips}.`, 'Can\'t take the bus.'],
     luxury: [`The highest ticket: ${plural(price ?? 0, 'point')}.`, `Slower ${quizTrips}.`, 'Can\'t take the train or the bus.'],
-    nomad: ['No citizenship: it pays visas but never receives any.', 'Works on trips: no travel challenges (except when its boss allows one).', `No trip point for a paid plane, train or bus (0 travel turns). Slower ${quizTrips}.`],
+    nomad: ['No citizenship: it pays visas but never receives any.', 'Works on trips: no travel challenges.', `No trip point for a paid plane, train or bus (0 travel turns). Slower ${quizTrips}.`],
   };
+  if (who === GOOD_ONLY) return el('ul', { className: 'profile-good' }, ...good[p].map((t) => el('li', { textContent: t })));
   return el('div', { className: 'note profile-note' },
     el('strong', {}, who ? '' : 'You chose ', iconEl(p), ` ${PROFILE_LABEL[p]}${who ? '' : '.'}`),
     el('p', { className: 'small', textContent: `👍 ${good[p].join(' ')}` }),
@@ -812,16 +840,28 @@ function paymentNote(p: Payment): string {
 
 // Moves into an area with fees or a visa test ask first: "entering costs a 2-point visa / 1-point tour fee".
 // Step 2.7 (owner): a quiz trip of a player who could pay is announced first: the quiz is slower.
-function go(action: Action, quizSeen = false): void {
+function go(action: Action, quizSeen = false, visaSeen = false): void {
   const s = state!;
   const me = currentPlayer(s);
-  if (action.type === 'quiz' && !quizSeen && me.profile && ticketPrice(me.profile, action.kind) !== null) {
+  // Step 2.8 (owner): the notice informs on a quiz and on a paid trip alike, when the player could do either.
+  const both = (action.type === 'quiz' || action.type === 'board') && legalActions(s, gameMap).some((x) =>
+    x.type === (action.type === 'quiz' ? 'board' : 'quiz') && x.kind === action.kind && x.to === action.to);
+  if (both && !quizSeen && !quizNoticeOff && me.profile && ticketPrice(me.profile, action.kind) !== null) {
     pendingQuiz = action;
     popup = null;
     render();
     return;
   }
   pendingQuiz = null;
+  // Step 2.8 (owner): entering another player's country, the visa rule first (until "Don't show this again").
+  if ((action.type === 'walk' || action.type === 'board' || action.type === 'quiz') && !visaSeen && !infoOff('visa')
+    && (needsVisaTest(s, me, action.to) || entryFees(s, me, me.area, action.to).some((f) => f.reason === 'visa'))) {
+    visaInfo = action;
+    popup = null;
+    render();
+    return;
+  }
+  visaInfo = null;
   if ((action.type === 'walk' || action.type === 'board' || action.type === 'quiz' || action.type === 'hitchhike')
     && (entryFees(s, currentPlayer(s), currentPlayer(s).area, action.to).length > 0 || needsVisaTest(s, currentPlayer(s), action.to))) {
     pendingFees = action;
@@ -869,7 +909,9 @@ function render(): void {
   if (s.phase === 'chooseProfile') {
     const people = s.players.filter((p) => p.kind === 'human' && p.profile);
     app.replaceChildren(el('section', { className: 'card setup' }, title(), renderTurn(s, actions, isRobot),
-      ...people.map((p) => profileNote(p.profile!, people.length > 1 ? nameOf(p.seat) : ''))));
+      ...people.map((p) => profileNote(p.profile!, people.length > 1 ? nameOf(p.seat) : ''))),
+      // Step 2.8 (owner): the tapped profile's advantages, before it is confirmed.
+      ...(pendingProfile && modal ? [modal.node] : []));
   } else {
     const header = el('header', {},
       title('strong'),
@@ -921,7 +963,7 @@ function renderChips(s: GameState): HTMLElement {
     const points = s.phase === 'finished' ? finalScore(s, p) : p.points;
     const chip = el('button', { className: 'chip' + (p === me && s.phase !== 'finished' ? ' active' : '') + (shownPlayer === seat ? ' open' : ''), title: 'Show details' },
       dot(seat), ` ${shortOf(seat)}${p.kind === 'robot' ? ' 🤖' : ''} `, el('b', { textContent: String(points) }),
-      businessValue(s, seat) && s.phase !== 'finished' ? ` +🏢${businessValue(s, seat)}${mostBusinessesBonus(s.businesses, seat) ? ` ⭐+${mostBusinessesBonus(s.businesses, seat)}` : ''}` : '');
+      businessValue(s, seat) && s.phase !== 'finished' ? ` +🏢${businessValue(s, seat)}${mostBusinessesBonus(s.businesses, seat) ? ` (+${mostBusinessesBonus(s.businesses, seat)})` : ''}` : '');
     chip.style.borderColor = colourOf(seat);
     chip.addEventListener('click', () => { shownPlayer = shownPlayer === seat ? null : seat; render(); });
     return chip;
@@ -1020,7 +1062,7 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
   if (s.phase === 'chooseProfile') {
     box.append(el('h2', {}, who, ', choose your traveller'),
       el('div', { className: 'row' }, ...actions.map((a) =>
-        a.type === 'chooseProfile' ? iconButton(a.profile, () => act(a)) : '')));
+        a.type === 'chooseProfile' ? iconButton(a.profile, () => { pendingProfile = a.profile; render(); }) : '')));
   } else if (s.phase === 'chooseStart') {
     box.append(el('h2', {}, who, ', choose your home country'),
       el('p', { className: 'small', textContent: zoom
@@ -1087,20 +1129,26 @@ function renderTurn(s: GameState, actions: Action[], isRobot: boolean): HTMLElem
         : [button('Continue the trip', () => act({ type: 'travel' }))]))));
   } else {
     const here = areaById.get(me.area!)!;
-    if (pendingQuiz && pendingQuiz.type === 'quiz') {
-      const q = pendingQuiz;
-      const where = areaById.get(q.to)!.name;
-      const slow = travelTurns(me.profile!, q.kind, false);
-      const fast = travelTurns(me.profile!, q.kind, true);
-      const price = ticketPrice(me.profile!, q.kind)!;
-      const board = actions.find((a) => a.type === 'board' && a.kind === q.kind && a.to === q.to);
-      const turnsText = (n: number) => (n === 0 ? 'you arrive right away' : plural(n, 'travel turn'));
-      box.append(el('h2', {}, who, ': ⚠️ Attention! The quiz trip is slower'),
-        el('p', { className: 'note', textContent: `With the free quiz, your trip to ${where} takes ${turnsText(slow)}. If you pay the ${plural(price, 'point')} ticket, ${turnsText(fast)}. A wrong answer uses this turn, and you try again on a later turn.` }),
+    if (pendingQuiz && (pendingQuiz.type === 'quiz' || pendingQuiz.type === 'board')) {
+      const p0 = pendingQuiz;
+      const slow = travelTurns(me.profile!, p0.kind, false);
+      const fast = travelTurns(me.profile!, p0.kind, true);
+      const price = ticketPrice(me.profile!, p0.kind)!;
+      const quiz = actions.find((a) => a.type === 'quiz' && a.kind === p0.kind && a.to === p0.to);
+      const board = actions.find((a) => a.type === 'board' && a.kind === p0.kind && a.to === p0.to);
+      const turns = (n: number) => (n === 0 ? '0 travel turns (you arrive right away)' : plural(n, 'travel turn'));
+      const hide = el('input', { type: 'checkbox' });
+      const keep = () => { if (hide.checked) setQuizNoticeOff(true); };
+      // Step 2.8 (owner): only information, no warning; no Cancel (the player picks one of the two).
+      box.append(el('h2', {}, who, ': free or paid trip'),
+        el('div', { className: 'note' },
+          el('div', { textContent: `Free quiz = ${turns(slow)}` }),
+          el('div', { textContent: `${price}-point ticket = ${turns(fast)}` }),
+          el('div', { textContent: 'Wrong quiz answer = miss a turn' })),
         el('div', { className: 'row' },
-          button('Take the quiz', () => go(q, true)),
-          board ? button(`Pay ${price} instead`, () => go(board)) : '',
-          button('Cancel', () => { pendingQuiz = null; render(); })));
+          quiz ? button('Take the quiz', () => { keep(); go(quiz, true); }) : '',
+          board ? button(`Pay ${price}`, () => { keep(); go(board, true); }) : ''),
+        el('label', { className: 'small' }, hide, ' Don\'t show this again'));
       return box;
     }
     if (pendingFees && (pendingFees.type === 'walk' || pendingFees.type === 'board' || pendingFees.type === 'quiz' || pendingFees.type === 'hitchhike')) {
@@ -1708,15 +1756,69 @@ function renderModal(s: GameState, actions: Action[], isRobot: boolean): Modal |
       el('label', { className: 'small' }, hide, ' Don\'t show "What happened" again'),
       ok(() => { if (hide.checked) setNewsOff(true); news = []; newsNow = false; render(); }))) };
   }
-  // A person's turn begins (owner's request, task 14i): who plays now.
+  // Step 2.8 (owner): a tapped profile shows its advantages first; the person plays it or chooses another.
+  if (s.phase === 'chooseProfile' && pendingProfile && !isRobot) {
+    const prof = pendingProfile;
+    const pick = actions.find((a) => a.type === 'chooseProfile' && a.profile === prof);
+    if (!pick) pendingProfile = null;
+    else {
+      const yes = button(`✔ Play as ${PROFILE_LABEL[prof]}`, () => { pendingProfile = null; act(pick); });
+      yes.className = 'primary';
+      return { turn: false, node: wrap(el('div', { className: 'handover' },
+        el('div', { className: 'handover-icon' }, iconEl(prof)),
+        el('h2', { className: 'big-title', textContent: PROFILE_LABEL[prof] }),
+        profileNote(prof, GOOD_ONLY),
+        el('div', { className: 'row' }, yes, button('↩ Choose another', () => { pendingProfile = null; render(); })))) };
+    }
+  }
+  // A person's turn begins (owner's request, task 14i): who plays now. Step 2.8 (owner): with the player's progress
+  // towards every bonus (continents, big countries, wonders; the Backpacker's continents, the Business's citizenships).
   const turnKey = `turn-${s.round}-${me.seat}`;
   if (s.phase === 'play' && me.kind === 'human' && !isRobot && !seenCards.has(turnKey)) {
     const where = me.area ? areaById.get(me.area)!.name : me.travel ? `on the way to ${areaById.get(me.travel.to)!.name}` : '';
+    const before = lastChips.get(me.seat);
+    const now = new Map<string, number>();
+    const chip = (key: string, text: string, n: number, total: number) => {
+      now.set(key, n);
+      const pct = Math.round((100 * n) / total);
+      const c = el('div', { className: `turn-chip${before && n > (before.get(key) ?? 0) ? ' glow' : ''}`, textContent: text });
+      c.style.background = `linear-gradient(90deg, var(--chip-fill) ${pct}%, var(--chip-empty) ${pct}%)`;
+      return c;
+    };
+    const visited = new Set(me.visitedAreas);
+    const count = (ids: Area[]) => ids.filter((a) => visited.has(a.id)).length;
+    const shortName = (c: string) => c.replace('North ', 'N. ').replace('South ', 'S. ');
+    const continentsList = continents.map((c) => {
+      const all = gameMap.areas.filter((a) => a.continent === c);
+      return chip(`c-${c}`, `${shortName(c)} ${count(all)}/${all.length} · all +${continentReward(gameMap, c)}`, count(all), all.length);
+    });
+    const ORDER = ['United States', 'Canada', 'Russia', 'China', 'Brazil', 'Australia'];
+    const bigNames = [...new Set(gameMap.areas.flatMap((a) => (a.bigCountry ? [a.bigCountry] : [])))]
+      .sort((x, y) => (ORDER.indexOf(x) + 99) % 99 - (ORDER.indexOf(y) + 99) % 99);
+    const bigList = bigNames.map((b) => {
+      const all = gameMap.areas.filter((a) => a.bigCountry === b);
+      return chip(`b-${b}`, `${b === 'United States' ? 'USA' : b} ${count(all)}/${all.length} · all +${bigCountryPoints(all.length)}`, count(all), all.length);
+    });
+    const wonders = gameMap.areas.filter((a) => a.wonder);
+    const last: HTMLElement[] = [chip('w', `🏛️ Wonders ${count(wonders)}/${wonders.length} · each +${POINTS_WONDER} more`, count(wonders), wonders.length)];
+    const bp = CONTINENT_BONUS.backpacker!;
+    if (me.profile === 'backpacker') {
+      const n = new Set(me.visitedAreas.map((id) => areaById.get(id)!.continent)).size;
+      last.push(chip('bp', `🎒 Bonus ${Math.min(n, bp.continents)}/${bp.continents} continents +${bp.points}`, Math.min(n, bp.continents), bp.continents));
+    }
+    if (me.profile === 'business') {
+      const n = (me.citizenship?.length ? 1 : 0) + (me.bought?.length ? 1 : 0);
+      last.push(chip('cz', `🛂 Citizenship ${n}/2`, n, 2));
+    }
+    const row = (title: string, items: HTMLElement[]) => el('div', { className: 'turn-goals' }, el('div', { className: 'turn-goals-title', textContent: title }), el('div', { className: 'turn-grid' }, ...items));
     return { turn: false, node: wrap(el('div', { className: 'handover' },
       el('div', { className: 'handover-icon' }, me.profile ? iconEl(me.profile) : dot(me.seat)),
       el('h2', { className: 'big-title', textContent: `${nameOf(me.seat)}, it's your turn!` }),
       el('p', { textContent: `Round ${s.round} of ${s.totalRounds}${where ? ` · 📍 ${where}` : ''} · ${plural(me.points, 'point')}` }),
-      ok(() => { seenCards.add(turnKey); render(); }, "▶ Let's go"))), sound: 'tap', soundKey: turnKey };
+      row('🌍 Whole continents', continentsList),
+      row('🧩 Big countries', bigList),
+      el('div', { className: 'turn-last' }, ...last),
+      ok(() => { seenCards.add(turnKey); lastChips.set(me.seat, now); render(); }, "▶ Let's go"))), sound: 'tap', soundKey: turnKey };
   }
   // A person's first turn on a continent (owner, M5): the whole-continent reward to aim for.
   const here2 = me.area ? areaById.get(me.area)! : null;
@@ -1729,6 +1831,41 @@ function renderModal(s: GameState, actions: Action[], isRobot: boolean): Modal |
       el('h2', { className: 'big-title', textContent: `🌍 Welcome to ${c}!` }),
       el('p', {}, 'Visit ', el('strong', { textContent: `all ${total} areas of ${c}` }), ' for a ', el('strong', { textContent: `+${continentReward(gameMap, c)} reward` }), `. You have visited ${seen} so far.`),
       ok(() => { seenCards.add(contKey); render(); }, "Let's go!")), 'gold'), sound: 'milestone', soundKey: contKey };
+  }
+  // Rule notices (owner, step 2.8): short, only information, "OK, I understand" and "Don't show this again".
+  const info = (kind: InfoKind, title: string, lines: string[], done: () => void) => {
+    const hide = el('input', { type: 'checkbox' });
+    return { turn: false, node: wrap(el('div', {},
+      el('h2', { textContent: title }),
+      el('div', { className: 'note' }, ...lines.map((t) => el('div', { textContent: t }))),
+      el('label', { className: 'small' }, hide, ' Don\'t show this again'),
+      ok(() => { if (hide.checked) setInfoOff(kind); done(); }, 'OK, I understand'))) };
+  };
+  if (visaInfo && me.kind === 'human' && !isRobot && (visaInfo.type === 'walk' || visaInfo.type === 'board' || visaInfo.type === 'quiz')) {
+    const a = visaInfo;
+    const visa = entryFees(s, me, me.area, a.to).find((f) => f.reason === 'visa');
+    const to = visa ? ` to ${nameOf(visa.to.seat)}` : '';
+    const lines = me.profile === 'luxury'
+      ? [`You will pay ${plural(VISA_PRICE, 'point')}${to}.`, 'Luxury travellers take no visa test.']
+      : me.profile === 'business'
+        ? ['Business travellers pay nothing, but take the visa test.', `Answer ${VISA_TEST_PASS} of 3 questions right and you get the visa; otherwise you miss a turn.`]
+        : [`You will pay ${plural(VISA_PRICE, 'point')}${to}, and take a visa test.`, `Answer ${VISA_TEST_PASS} of 3 questions right and you get the visa; otherwise you miss a turn (nothing paid).`];
+    return info('visa', '🛂 You need a visa!', lines, () => { visaInfo = null; go(a, true, true); });
+  }
+  const bizKey = `bizinfo-${me.seat}`;
+  if (s.phase === 'play' && me.kind === 'human' && !isRobot && !seenCards.has(bizKey) && !infoOff('business') && actions.some((a) => a.type === 'buy')) {
+    return info('business', '🏢 You can buy a business!', [
+      'Bus, car, train, ship, plane or wonder: others pay to use your business.',
+      'Buying loses no points: each business counts its price.',
+      `Buying a plane for ${BUSINESS_PRICE.airline} points? ${BUSINESS_PRICE.airline} points from traveling + ${BUSINESS_PRICE.airline} points from the plane = ${2 * BUSINESS_PRICE.airline} points.`,
+      'Owning the most businesses at the end gives you an extra point.',
+    ], () => { seenCards.add(bizKey); render(); });
+  }
+  const homeKey = `homeinfo-${s.round}-${me.seat}`;
+  if (s.phase === 'play' && me.kind === 'human' && !isRobot && !seenCards.has(homeKey) && !infoOff('home')
+    && me.broke === GO_HOME_TURNS - 2 && actions.some((a) => a.type === 'blocked') && blockedByMoney(s, gameMap, me)) {
+    return info('home', '🏠 Blocked again', [`Blocked ${GO_HOME_TURNS - 1} turns · ${GO_HOME_TURNS}rd blocked turn = go home +${GO_HOME_POINTS}.`],
+      () => { seenCards.add(homeKey); render(); });
   }
   const key = s.card ? `${s.card.round}-${s.card.seat}-${s.card.card.text}` : '';
   if (s.phase === 'play' && me.kind === 'human' && s.card?.seat === me.seat && !seenCards.has(key)) {
@@ -2314,8 +2451,14 @@ function renderWorld(s: GameState): HTMLElement {
   for (const [id, path] of d.paths) {
     const b = bookedBy(s, id);
     if (b) path.style.stroke = colourOf(b.seat);
-    const [cx, cy] = geo.get(id)!.centre;
-    visitedDots(d, s, id, cx, cy + d.fs * 0.55, d.fs * 0.2);
+    // Owner (2026-11-20): only the dots of the player whose turn it is (a robot's too), a bit bigger; in a small
+    // area (Korea) the dot stays small enough to leave the area visible.
+    if (me.visitedAreas.includes(id)) {
+      const g = geo.get(id)!;
+      const [cx, cy] = g.centre;
+      const r = Math.min(d.fs * 0.32, g.core.w * 0.22, g.core.h * 0.22);
+      d.labels.append(svg('circle', { cx, cy: cy + Math.min(d.fs * 0.55, g.core.h * 0.3), r, fill: colourOf(me.seat), class: 'visit' }));
+    }
   }
   const centre = (id: string) => geo.get(id)!.centre;
   for (const r of gameMap.routes ?? []) {
@@ -2415,13 +2558,12 @@ function renderStartMap(s: GameState, isRobot: boolean): HTMLElement {
       const x = ids.reduce((t, p) => t + p[0], 0) / ids.length;
       const y = ids.reduce((t, p) => t + p[1], 0) / ids.length;
       const taken = s.players.find((p) => p.startContinent === c);
-      label(d, x, y, taken ? `${c}: ${nameOf(taken.seat)}` : c, open(c) ? 'go' : 'near', 1,
+      // Owner (step 2.8): the welcome bonus next to each continent's name, so it is part of the choice; a taken
+      // continent shows only its name and the icon of the player who chose it (no profile name).
+      const text = taken ? c : `${c} +${WELCOME_BONUS[c]}`;
+      label(d, x, y, text, open(c) ? 'go' : 'near', 1,
         open(c) ? () => { zoom = c; render(); } : undefined);
-    }
-    for (const p of s.players) {
-      if (!p.area) continue;
-      const [cx, cy] = geo.get(p.area)!.centre;
-      d.labels.append(piece(p.seat, cx + (p.seat - 1.5) * d.fs * 1.2, cy, d.fs * 1.8));
+      if (taken) d.labels.append(piece(taken.seat, x - ([...text].length * d.fs * 0.31 + d.fs * 1.1), y, d.fs * 1.6));
     }
     wrap.append(el('div', { className: 'where' }, 'The world: tap a continent'), d.root);
     return wrap;

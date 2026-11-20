@@ -2,11 +2,13 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { CARDS } from '../src/cards/cards.ts';
 import { cardMix } from '../src/engine/constants.ts';
-import { apply, createGame, eligibleCards, landTurnsToCard, legalActions } from '../src/engine/engine.ts';
+import { apply, createGame, eligibleCards, landTurnsToCard, legalActions, newsCard } from '../src/engine/engine.ts';
+import { CARD_COUNTRIES } from '../src/cards/countries.ts';
 import { randomRobotAction } from '../src/engine/robot.ts';
 import { loadGame, saveGame } from '../src/engine/save.ts';
 import type { Action, DrawnCard, GameState, Profile } from '../src/engine/types.ts';
 import { map30 } from '../src/maps/map30.ts';
+import { map50 } from '../src/maps/map50.ts';
 import { travelMap as map } from './fixtures/test-map.ts';
 import { seatOf, seats, startedGame } from './helpers.ts';
 
@@ -62,12 +64,34 @@ test('the card file: 40–60 cards, allowed strengths, area cards on the real ma
   assert.ok(share((p) => Math.abs(p) === 5) <= 0.1);
 });
 
-test('which cards can be drawn: area cards only in their area', () => {
+// Step 2.8 (owner, option 1): no card is kept for one area; every country card can come everywhere.
+test('which cards can be drawn: every country card everywhere (step 2.8)', () => {
   const ids = (decks: Parameters<typeof eligibleCards>[0], area: string | null) => eligibleCards(decks, area).map((c) => c.id);
-  assert.ok(ids(['country'], 'egypt').includes('a1'));
-  assert.ok(!ids(['country'], 'egypt').includes('a4'));
-  assert.ok(!ids(['country'], 'iceland').includes('a1'));
+  const country = CARDS.filter((c) => c.deck === 'country').map((c) => c.id);
+  assert.equal(country.length, 45);
+  assert.ok(CARDS.every((c) => c.area === undefined));
+  for (const area of ['egypt', 'iceland', 'france']) assert.deepEqual(ids(['country'], area), country);
   assert.ok(ids(['country', 'backpacker'], 'france').some((id) => id.startsWith('b')));
+});
+
+// Step 2.8 (owner): the news names the country the player stands in, never a capital in a big country.
+test('news cards: every card filled in every area of both maps', () => {
+  for (const m of [map30, map50]) {
+    for (const a of m.areas) {
+      for (const c of CARDS.filter((x) => x.deck === 'country')) {
+        for (const k of [0, 1, 2]) {
+          const n = newsCard(c, a, k);
+          assert.ok(!/[{}]/.test(n.text) && n.big === undefined && /^[A-Z0-9]/.test(n.text), `${c.id} in ${a.id}: ${n.text}`);
+          assert.equal(n.points, c.points);
+          if (a.bigCountry && c.big) assert.equal(n.text.includes(CARD_COUNTRIES[a.bigCountry]?.capital ?? '#'), false, `${c.id} in ${a.id}`);
+        }
+      }
+    }
+  }
+  const at = (id: string, area: string) => newsCard(CARDS.find((c) => c.id === id)!, map30.areas.find((a) => a.id === area)!, 0).text;
+  assert.equal(at('c31', 'japan'), 'Strike in Tokyo: buses and trains stop for a day. Nobody leaves the city.');
+  assert.equal(at('c31', 'russia-far-east'), 'Strike across Russia: buses and trains stop for a day. Nobody travels.');
+  assert.equal(at('c40', 'usa-west').slice(0, 17), 'The United States');
 });
 
 test('the count: every 3rd land turn', () => {
@@ -186,17 +210,23 @@ test('the same seed draws the same cards; saves from versions 1 and 2 are not co
   }
 });
 
-// Step 2.6; step 2.7 (owner's final mix "D1"): the same cards for everyone, but how often good and bad ones
-// come depends on the profile and the number of players (3 players use the 4-player mix). The Backpacker's
-// helper cards b1–b8 are kept in cards.ts but never drawn.
-test('the card mix by profile and number of players; the Backpacker\'s helper cards are not drawn', () => {
-  assert.deepEqual(cardMix('business', 2), { good: 1.1, bad: 0.95 });
-  assert.deepEqual(cardMix('nomad', 2), { good: 1, bad: 1 });
+// Step 2.6; step 2.7 (mix "D1"); step 2.8 (owner's final mix "N1", one mix per map): the same cards for everyone,
+// but how often good and bad ones come depends on the map, the profile and the number of players (3 players use
+// the 4-player mix). The Backpacker's helper cards b1–b8 are kept in cards.ts but never drawn.
+test('the card mix by map, profile and number of players; the Backpacker\'s helper cards are not drawn', () => {
+  assert.deepEqual(cardMix('business', 2), { good: 1.1, bad: 1.3 });
+  assert.deepEqual(cardMix('nomad', 2), { good: 1, bad: 1.37 });
   assert.deepEqual(cardMix('nomad', 3), cardMix('nomad', 4));
-  assert.deepEqual(cardMix('backpacker', 4), { good: 0.93, bad: 1.3 });
-  assert.deepEqual(cardMix('business', 4), { good: 1.2, bad: 0.87 });
-  assert.deepEqual(cardMix('luxury', 4), { good: 1.3, bad: 0.85 });
-  assert.deepEqual(cardMix('nomad', 4), { good: 1.1, bad: 0.92 });
+  assert.deepEqual(cardMix('backpacker', 4), { good: 0.93, bad: 1.6 });
+  assert.deepEqual(cardMix('business', 4), { good: 1.2, bad: 1.3 });
+  assert.deepEqual(cardMix('luxury', 4), { good: 1.3, bad: 1.17 });
+  assert.deepEqual(cardMix('nomad', 4), { good: 1.1, bad: 1.26 });
+  // The 50-turn map has its own mix.
+  assert.deepEqual(cardMix('backpacker', 2, 50), { good: 1, bad: 1.5 });
+  assert.deepEqual(cardMix('nomad', 2, 50), { good: 1, bad: 1.25 });
+  assert.deepEqual(cardMix('backpacker', 4, 50), { good: 0.93, bad: 1.9 });
+  assert.deepEqual(cardMix('business', 4, 50), { good: 1.2, bad: 1.19 });
+  assert.deepEqual(cardMix('nomad', 4, 50), { good: 1.1, bad: 1.15 });
   assert.ok(CARDS.filter((c) => c.deck === 'backpacker').length === 8, 'b1–b8 kept');
   const bad = (c: DrawnCard) => c.card.loseTurn === true || c.card.points < 0;
   const drawn: Record<string, { all: number; bad: number }> = {};
@@ -217,6 +247,6 @@ test('the card mix by profile and number of players; the Backpacker\'s helper ca
     }
   }
   const share = (p: Profile) => drawn[p].bad / drawn[p].all;
-  // 4 players: Backpacker 63% bad, Nomad 50%, Business 47%, Luxury 44% (in theory, the 33 cards for anywhere).
+  // 30 turns, 4 players: Backpacker 60% bad, Nomad 50%, Business 49%, Luxury 44% (in theory, the 45 news cards).
   assert.ok(share('backpacker') > share('business') && share('backpacker') > share('nomad') && share('nomad') > share('luxury'), JSON.stringify(drawn));
 });

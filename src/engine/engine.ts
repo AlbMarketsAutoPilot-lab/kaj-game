@@ -38,6 +38,7 @@ import {
   WELCOME_BONUS,
 } from './constants.ts';
 import { CARDS } from '../cards/cards.ts';
+import { CARD_COUNTRIES } from '../cards/countries.ts';
 import { CHALLENGES } from '../challenges/challenges.ts';
 import { areaById, validateMap } from './map.ts';
 import { drawFresh, makeExam, makeQuestion } from './quiz.ts';
@@ -866,8 +867,8 @@ function scheduledCard(state: GameState, map: GameMap, me: Player): void {
   // Step 2.6: everyone draws the country cards (the Backpacker's helper cards are no longer drawn),
   // with the profile's card mix (EVENT_MIX). An area may take the place cards of another id
   // (Area.cardsFrom, task M2).
-  const card = pickCard(state, ['country'], areaById(map, me.area!).cardsFrom ?? me.area, cardMix(me.profile!, state.players.length));
-  state.card = applyCard(state, me, card);
+  const card = pickCard(state, ['country'], areaById(map, me.area!).cardsFrom ?? me.area, cardMix(me.profile!, state.players.length, state.totalRounds));
+  state.card = applyCard(state, me, newsCard(card, areaById(map, me.area!), state.drawn.length));
   if (card.loseTurn) me.loseTurn = true;
 }
 
@@ -893,6 +894,26 @@ function pickCard(state: GameState, decks: Deck[], area: string | null, mix: Car
   return cards[cards.length - 1];
 }
 const CARD_DRAW_STEPS = 1000000;
+
+// Step 2.8 (owner): the news names the country the player stands in. In an area with several countries, the
+// countries take turns (by the number of cards drawn so far, not with the dice), leaving out very small ones (under
+// a tenth of the area's biggest country). In a part of a big country the `big` text is used (no capital).
+export function newsCard(card: EventCard, area: Area, drawnBefore: number): EventCard {
+  const { big, ...rest } = card;
+  const template = area.bigCountry && big ? big : card.text;
+  if (!template.includes('{')) return rest;
+  const all = (area.countries ?? []).map((n) => CARD_COUNTRIES[n]).filter((c) => c !== undefined);
+  const biggest = Math.max(...all.map((c) => c.size));
+  const names = all.filter((c) => c.size >= biggest / 10);
+  // Every area of the real maps has country data; the small test maps have none.
+  const c = names[drawnBefore % names.length] ?? { name: area.name, capital: 'the capital', currency: 'local money', size: 0 };
+  const text = template
+    .replaceAll('{country}', c.name)
+    .replaceAll('{capital}', c.capital)
+    .replaceAll('{currency}', c.currency)
+    .replace(/(^|[.!?] )([a-z])/g, (_, a: string, b: string) => a + b.toUpperCase());
+  return { ...rest, text };
+}
 
 function applyCard(state: GameState, me: Player, card: EventCard): DrawnCard {
   const before = me.points;

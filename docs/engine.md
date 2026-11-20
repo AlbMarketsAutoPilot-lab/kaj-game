@@ -914,6 +914,57 @@ The owner's new rules, then the balance tuning. Rules in full: `docs/rules-now.m
 - **Measured and not adopted:** card mixes inside 45–59% bad cards (best 27 of 32); keeping the +5 with stronger cards
   (best 28 of 32, Luxury 78% bad cards); 8 rule simplifications together (26 of 32); one mission per player (26 of 32).
 
+## News cards about the country and one card mix per map (version 2.0, step 2.8, owner-approved 2026-11-20)
+
+Rules in full: `docs/rules-now.md` ([2.8]). Card texts: `docs/cards.md`.
+
+- **News about the country (owner):** the 45 country cards are short news items about the country where the player
+  stands, no longer personal events. A card's text holds {country}, {capital} and {currency}; `newsCard` in
+  `src/engine/engine.ts` fills them in when the card is drawn, from `src/cards/countries.ts` (made by
+  `node scripts/card-countries.ts` from `data/countries.json`: name, with "the" where English needs it, capital,
+  currency, size). Several currencies in the data: the first, except Cuba (Cuban peso) and Zimbabwe (US dollar).
+- **Areas with several countries:** they take turns by the number of cards drawn in the game so far (no dice, so the
+  robot games are not changed by the texts); countries under a tenth of the area's biggest are left out (no Andorra in
+  "News from Iberia"). Test maps without real countries use the area's name.
+- **Big countries (owner):** a card that names the capital has a second text (`big`) used in a part of a big country,
+  so "News from USA West" never says Washington. The drawn card keeps only the filled-in text.
+- **No own-area cards (owner, option 1):** a1–a12 became general cards c34–c45 with the same points and new texts;
+  all 45 come everywhere. Counts: +1 ×17, −1 ×11, +2 ×5, −2 ×3, lose a turn ×5, +5 ×2, −5 ×2 (47% bad, was 55% of
+  the 33 cards for anywhere). `Area.cardsFrom` and the `area` field stay in the code, unused by the cards.
+- **One card mix per map** (`EVENT_MIX['30' | '50']`, `cardMix(profile, players, totalRounds)`), mix "N1": D1 adjusted
+  to the 45 cards (the same bad shares), then per map: 30 turns, 4 players, Backpacker fewer bad cards (1.6) and
+  Business more (1.3); 50 turns, 2 players, Backpacker 1.5 and Nomad 1.25; 4 players, Backpacker 1.9 and Nomad 1.15.
+  Table in `docs/rules-now.md` §8.
+- **Texts:** three approved texts were shortened a little to keep the 110-character test limit (c11, c14, c33).
+- **Save version 20:** a game in progress from version 19 or older can't be continued.
+- **Tests:** the two tests of own-area cards now check that every card comes everywhere (also in Peru and Bolivia on
+  the 50-turn map, naming that country); new test: all 45 cards filled in every area of both maps, never a capital in
+  a big country; the card-mix test checks N1 on both maps. No test limit changed. 226 tests pass.
+- **Balance (1,600 games per line, details in `docs/balance-lab.md`, step 2.8):** before **29 of 32**, after
+  **30 of 32**. Misses: the Backpacker with 4 players and normal robots, 31% (30 turns) and 30% (50 turns), within
+  chance; the planning robots' Backpacker on the same maps is at 20% and 23%, so cards can't move both. Boredom
+  23–28% (the same), lead changes 2.3–5.7, won by 3 or less 22–39%.
+- **Screens that show the rules (owner, same session; screens only, no rule or balance change):**
+  - Start map: each continent shows its welcome bonus ("Africa +3"); a chosen continent shows the player's icon and its
+    name only (no profile name, no piece in the area).
+  - Choosing a profile: a popup lists the profile's advantages (`profileNote(p, GOOD_ONLY)`), with "✔ Play as …" and
+    "↩ Choose another" (nothing is chosen until "Play as"). Nomad texts: "Gets paid +1 during trips to new areas"; the
+    boss alerts are no longer mentioned (a surprise).
+  - "It's your turn" popup: progress towards every bonus: the 6 continents ("Europe 1/12 · all +4"; N./S. America), the
+    big countries ("USA 0/3 · all +5"), the wonders ("Wonders 0/7 · each +1 more"), the Backpacker's "Bonus 1/3
+    continents +7", the Business's "Citizenship 1/2"; a chip whose number went up since the player's last turn glows
+    (`lastChips`). About 12.5 px on screen (11.5 on short screens, with a smaller profile icon).
+  - World map: only the visited dots of the player whose turn it is (a robot's too), a bit bigger, kept small in small
+    areas (Korea).
+  - Name box: "+🏢2 (+1)" for the most businesses (was "⭐+1").
+  - Free or paid trip (was "⚠️ Attention! The quiz trip is slower"): "[Profile]: free or paid trip", "Free quiz = 1
+    travel turn / 3-point ticket = 0 travel turns (you arrive right away) / Wrong quiz answer = miss a turn"; shown when
+    the player taps the quiz or the ticket and both are possible; "Take the quiz" and "Pay N" (no Cancel).
+  - Rule notices, each with "OK, I understand" and "Don't show this again" (kept on the device, `kaj-info-*-off`,
+    `kaj-quiz-notice-off`): 🛂 visa before entering another player's country (texts by profile: the Business pays
+    nothing, Luxury takes no test); 🏢 the first time a player can buy a business (once per game); 🏠 on the 2nd turn in
+    a row blocked by money ("Blocked 2 turns · 3rd blocked turn = go home +2").
+
 ## Project setup
 
 - TypeScript, run directly by Node 22.18 or newer (no build step for tests).
