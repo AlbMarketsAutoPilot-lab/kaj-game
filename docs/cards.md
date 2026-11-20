@@ -12,7 +12,7 @@ In an area with several countries they take turns (very small ones left out). In
 Russia, China, Brazil, Australia) a card that names the capital uses its big-country text instead. The 12 old
 own-area cards (a1–a12) are general cards now (c34–c45, same points).
 
-**Card mix by map, profile and number of players** (`EVENT_MIX` in `src/engine/constants.ts`; 3 players use the
+**Card mix "N1" by map, profile and number of players** (step 2.8; `EVENT_MIX` in `src/engine/constants.ts`; 3 players use the
 4-player mix): a good card counts "good" times, a bad one (points below 0, or a lost turn) "bad" times.
 
 | Map | Profile | 2 players | 3 or 4 players |
