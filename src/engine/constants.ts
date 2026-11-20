@@ -202,23 +202,26 @@ export function cardEvery(totalRounds: number): number {
   return totalRounds >= 50 ? CARD_EVERY_50 : CARD_EVERY;
 }
 
-// Event-card mix by profile and number of players (step 2.6; step 2.7, owner's final mix "D1", measured in
-// robot games): the same cards for everyone; only how often good and bad ones come. A good card (points
+// Event-card mix by map, profile and number of players (step 2.6; step 2.7 mix "D1"; step 2.8, owner's final
+// mix "N1", measured in robot games, 1,600 per line: D1 adjusted to the 45 news cards, one mix per map): the same
+// cards for everyone; only how often good and bad ones come. A good card (points
 // above 0) counts `good` times, a bad one (points below 0, or losing a turn) `bad` times. 3 players use the
 // 4-player mix. Not listed: the normal deck (1 and 1). The Backpacker's helper cards b1–b8 are not drawn
 // (kept in cards.ts).
 export interface CardMix { good: number; bad: number }
-export const EVENT_MIX: Readonly<Record<'2' | '4', Partial<Record<Profile, CardMix>>>> = {
-  2: { business: { good: 1.1, bad: 0.95 } },
-  4: {
-    backpacker: { good: 0.93, bad: 1.3 },
-    business: { good: 1.2, bad: 0.87 },
-    luxury: { good: 1.3, bad: 0.85 },
-    nomad: { good: 1.1, bad: 0.92 },
+type MixTable = Readonly<Record<'2' | '4', Partial<Record<Profile, CardMix>>>>;
+export const EVENT_MIX: Readonly<Record<'30' | '50', MixTable>> = {
+  30: {
+    2: { backpacker: { good: 1, bad: 1.37 }, business: { good: 1.1, bad: 1.3 }, luxury: { good: 1, bad: 1.37 }, nomad: { good: 1, bad: 1.37 } },
+    4: { backpacker: { good: 0.93, bad: 1.6 }, business: { good: 1.2, bad: 1.3 }, luxury: { good: 1.3, bad: 1.17 }, nomad: { good: 1.1, bad: 1.26 } },
+  },
+  50: {
+    2: { backpacker: { good: 1, bad: 1.5 }, business: { good: 1.1, bad: 1.3 }, luxury: { good: 1, bad: 1.37 }, nomad: { good: 1, bad: 1.25 } },
+    4: { backpacker: { good: 0.93, bad: 1.9 }, business: { good: 1.2, bad: 1.19 }, luxury: { good: 1.3, bad: 1.17 }, nomad: { good: 1.1, bad: 1.15 } },
   },
 };
-export function cardMix(profile: Profile, players: number): CardMix {
-  return EVENT_MIX[players <= 2 ? '2' : '4'][profile] ?? { good: 1, bad: 1 };
+export function cardMix(profile: Profile, players: number, totalRounds = 30): CardMix {
+  return EVENT_MIX[totalRounds >= 50 ? '50' : '30'][players <= 2 ? '2' : '4'][profile] ?? { good: 1, bad: 1 };
 }
 
 // Travel-turn challenges (task 12): right +1, wrong −1; not offered with 0 points.

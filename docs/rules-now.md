@@ -1,7 +1,7 @@
-# KAJ — all game rules as of 2026-11-19
+# KAJ — all game rules as of 2026-11-20
 
 Checked against the code (`src/engine/`, `src/maps/`, `src/cards/`) and `docs/engine.md`.
-Rules marked **[2.6]** came with step 2.6 and **[2.7]** with step 2.7 (both 2026-11-19). Where a new rule replaced
+Rules marked **[2.6]** came with step 2.6 and **[2.7]** with step 2.7 (both 2026-11-19), **[2.8]** with step 2.8 (2026-11-20). Where a new rule replaced
 an older one, the old one is shown ~~struck out~~.
 
 ## 1. Players and setup
@@ -65,7 +65,8 @@ an older one, the old one is shown ~~struck out~~.
   ship Backpacker and Nomad 3, Business and Luxury 1; train, bus and car 1.~~ A paid trip after the 3rd
   wrong quiz answer is a paid trip (fast).
 - **[2.7]** Before a quiz trip, a player who could pay (Nomad, Business, Luxury) sees a notice: the quiz
-  trip takes longer than the paid one.
+  trip takes longer than the paid one. **[2.8]** The notice only informs (quiz time, paid time, a wrong answer misses
+  a turn), comes for a paid trip too, has no Cancel, and can be turned off ("Don't show this again").
 
 - **Routes:** fixed routes, 1 or 2 destinations each; all plane and ship routes are two-way.
   - 30 turns: 13 airports, 11 ports.
@@ -176,19 +177,28 @@ test next turn (read 6 facts, 3 questions, 2 right to pass), Luxury granted at o
 
 - **When:** on every 3rd turn a player begins in an area (30 turns) or every 5th (50 turns). Trip
   turns don't count, and there are none in the last round.
-- **Cards:** 45 news cards for everyone (33 for anywhere, 12 only in their own area). Effects: ±1, ±2,
-  ±5, or lose a turn.
+- **Cards:** 45 news cards for everyone. ~~33 for anywhere, 12 only in their own area.~~ **[2.8]** All 45 can come
+  everywhere: +1 ×17, −1 ×11, +2 ×5, −2 ×3, lose a turn ×5, +5 ×2, −5 ×2 (the 12 old own-area cards became general
+  cards with the same points).
+- **[2.8] News about the country where the player stands:** each card names that country, its capital or its
+  currency (real data). In an area with several countries they take turns (very small ones are left out). In a part
+  of a big country (USA, Canada, Russia, China, Brazil, Australia) a card never names the capital. ~~Personal events
+  ("your phone battery dies").~~
 - The Backpacker's 8 helper cards (b1–b8, all +1 or +2) stay in the files, but **[2.6]** nobody draws
-  them. They are kept as a possible balance lever for step 2.7.
-- **Card mix by profile** (**[2.7]** mix "D1", replaces 2.6's mix "G"). The same cards; only how often good
-  and bad ones come (bad shares counted on the 33 cards for anywhere):
+  them. They are kept as a possible balance lever.
+- **Card mix by map and profile** (~~**[2.7]** mix "D1", one for both maps~~ **[2.8]** mix "N1", **one for each
+  map**). The same cards; only how often good and bad ones come (good × / bad ×; bad share of the 45 cards):
 
-  | Profile | 2 players | 3 or 4 players |
-  |---|---|---|
-  | Backpacker | normal deck: 55% bad | good 0.93×, bad 1.3×: 63% bad (was 59%) |
-  | Business | good 1.1×, bad 0.95×: 51% bad | good 1.2×, bad 0.87×: 47% bad (was 51%) |
-  | Luxury | normal deck: 55% bad | good 1.3×, bad 0.85×: 44% bad (was 48%) |
-  | Nomad | normal deck: 55% bad | good 1.1×, bad 0.92×: 50% bad (was 45%) |
+  | Map | Profile | 2 players | 3 or 4 players |
+  |---|---|---|---|
+  | 30 turns | Backpacker | 1 / 1.37: 55% bad | 0.93 / 1.6: 60% bad |
+  | 30 turns | Business | 1.1 / 1.3: 51% bad | 1.2 / 1.3: 49% bad |
+  | 30 turns | Luxury | 1 / 1.37: 55% bad | 1.3 / 1.17: 44% bad |
+  | 30 turns | Nomad | 1 / 1.37: 55% bad | 1.1 / 1.26: 50% bad |
+  | 50 turns | Backpacker | 1 / 1.5: 57% bad | 0.93 / 1.9: 64% bad |
+  | 50 turns | Business | 1.1 / 1.3: 51% bad | 1.2 / 1.19: 46% bad |
+  | 50 turns | Luxury | 1 / 1.37: 55% bad | 1.3 / 1.17: 44% bad |
+  | 50 turns | Nomad | 1 / 1.25: 52% bad | 1.1 / 1.15: 48% bad |
 
 ## 9. Questions
 
@@ -199,4 +209,4 @@ test next turn (read 6 facts, 3 questions, 2 right to pass), Luxury granted at o
 ## 10. Saves
 
 - The game saves after every move; one save slot.
-- A save from another version can't be continued. The version is **[2.7] 19** (2.6: 18).
+- A save from another version can't be continued. The version is **[2.8] 20** (2.7: 19).

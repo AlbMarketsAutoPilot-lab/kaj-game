@@ -719,3 +719,31 @@ longest blocked streak 2; failed visa tests 15–18%; draws 0–1 per 1,600 game
 - **Also measured, not adopted:** 8 rule simplifications together 26 of 32; one mission per player 26 of 32.
 - **Misses no card mix can fix:** in 30 turns, 4 players, planning, the Backpacker is weak and Business strong; in 50
   turns, 4 players, normal, the reverse. The card mix is the same on both maps.
+
+## Step 2.8 (2026-11-20): news cards everywhere, one card mix per map — before and after
+
+Extended lab (`lab2.ts`, 1,600 games per line, the same seeds). Before: the game on main (`before28`); after: the 45
+news cards drawn everywhere with mix N1 (`N1`, scratch copy; the game in `src/` is the same, checked file by
+file).
+
+**Before: 29 of 32**, 5 points outside the target (the same as step 2.7, line for line). **After: 30 of 32**, 1 point
+outside. Robot check: robots pay for 39–59% of their trips, before and after.
+
+| Line | Backpacker | Business | Luxury | Nomad |
+|---|---|---|---|---|
+| 30 turns, 2 players, normal | 55% ✅ → 56% ✅ (51.3) | 44% ✅ → 48% ✅ (48.3) | 45% ✅ → 42% ✅ (48.5) | 56% ✅ → 54% ✅ (50.0) |
+| 30 turns, 2 players, planning | 57% ✅ → 57% ✅ (56.7) | 51% ✅ → 52% ✅ (52.2) | 43% ✅ → 45% ✅ (52.0) | 49% ✅ → 46% ✅ (52.6) |
+| 30 turns, 4 players, normal | 28% ✅ → 31% ❌ (51.1) | 25% ✅ → 21% ✅ (48.3) | 25% ✅ → 27% ✅ (49.1) | 22% ✅ → 21% ✅ (48.1) |
+| 30 turns, 4 players, planning | 18% ❌ → 20% ✅ (51.8) | 32% ❌ → 28% ✅ (53.1) | 24% ✅ → 25% ✅ (51.5) | 26% ✅ → 26% ✅ (51.9) |
+| 50 turns, 2 players, normal | 60% ✅ → 58% ✅ (73.7) | 43% ✅ → 43% ✅ (68.8) | 53% ✅ → 53% ✅ (71.1) | 44% ✅ → 45% ✅ (71.0) |
+| 50 turns, 2 players, planning | 60% ✅ → 54% ✅ (77.6) | 48% ✅ → 48% ✅ (76.4) | 48% ✅ → 50% ✅ (75.2) | 44% ✅ → 48% ✅ (76.4) |
+| 50 turns, 4 players, normal | 31% ❌ → 30% ❌ (73.1) | 23% ✅ → 23% ✅ (69.6) | 25% ✅ → 26% ✅ (71.0) | 20% ✅ → 21% ✅ (69.9) |
+| 50 turns, 4 players, planning | 25% ✅ → 23% ✅ (74.9) | 24% ✅ → 22% ✅ (74.3) | 25% ✅ → 25% ✅ (73.9) | 26% ✅ → 29% ✅ (75.0) |
+
+(After: average final score in brackets.) Boredom 23–28% before and after; lead changes 2.2–5.7 → 2.3–5.7; won by 3
+or less 20–39% → 22–39%; draws 0–1 per line; go home 15–58 → 15–54 per line (after 3 turns without money 0); blocked
+turns 0–56 → 0–48; longest blocked streak 2; failed visa tests 15–18% → 14–17%. Most single changes are within
+chance (±1 point with 4 players, ±1.5 with 2). The two misses (Backpacker, 4 players, normal robots) are just over
+30%, while the planning robots' Backpacker on the same maps is at 20–23%: a card mix can't move one without the other.
+Not measured (owner chose N1): a smaller weight for the 5 "lose a turn" cards, the only card lever for boredom.
+

@@ -190,11 +190,13 @@ test('robots of every level finish 50-round games', () => {
   }
 });
 
-test('"Thin mountain air" (Peru & Bolivia on the 30-turn map) comes in Peru only (owner)', () => {
+// Step 2.8 (owner, option 1): no card is kept for one area any more. The old Peru & Bolivia card (a6, now c39)
+// comes in Peru and in Bolivia, and the news names the country the player stands in.
+test('step 2.8: every country card comes in Peru and Bolivia too, with that country in the news', () => {
   const peru = areas.find((a) => a.id === 'peru')!;
   assert.equal(peru.cardsFrom, 'peru-bolivia');
-  assert.ok(eligibleCards(['country'], peru.cardsFrom!).some((c) => c.id === 'a6'));
-  assert.ok(!eligibleCards(['country'], 'bolivia').some((c) => c.id === 'a6'));
+  assert.ok(eligibleCards(['country'], peru.cardsFrom!).some((c) => c.id === 'c39'));
+  assert.ok(eligibleCards(['country'], 'bolivia').some((c) => c.id === 'c39'));
   // In a game: the second player's 5th land turn starts in Peru (or Bolivia), many seeds.
   const seen = { peru: 0, bolivia: 0 };
   for (const where of ['peru', 'bolivia'] as const) {
@@ -203,11 +205,16 @@ test('"Thin mountain air" (Peru & Bolivia on the 30-turn map) comes in Peru only
       seatOf(s, 1).area = where;
       seatOf(s, 1).landTurns = 4;
       s = apply(s, map50, legalActions(s, map50).find((a) => a.type === 'walk')!);
-      if (s.card?.seat === seatOf(s, 1).seat && s.card.card.id === 'a6') seen[where]++;
+      if (s.card?.seat !== seatOf(s, 1).seat) continue;
+      assert.ok(!/[{}]/.test(s.card.card.text), s.card.card.text);
+      if (s.card.card.id === 'c39') {
+        seen[where]++;
+        assert.ok(s.card.card.text.includes(where === 'peru' ? 'Peru' : 'Bolivia'), s.card.card.text);
+      }
     }
   }
   assert.ok(seen.peru > 0);
-  assert.equal(seen.bolivia, 0);
+  assert.ok(seen.bolivia > 0);
 });
 
 test('saves version 12 (owner, M5): games resume; older saves (10, 11) are not continued', () => {

@@ -424,3 +424,25 @@ button.link { background: none; border: none; padding: 0; text-align: left; font
 .event-meaning { margin: 6px 0; }
 .event-meaning .event-badge { font-size: 1.15rem; padding: 4px 14px; margin: 0 0 0 6px; }
 @media (prefers-reduced-motion: reduce) { .phone { animation: none; } }
+
+/* Step 2.8 (owner): progress towards every bonus in the "It's your turn" popup, about 12 px on any screen;
+   a chip whose number went up since the player's last turn glows. */
+:root { --chip-fill: #c9a227; --chip-empty: #0f3b33; }
+.turn-goals { text-align: left; margin: 4px 0 2px; }
+.turn-goals-title { font-weight: 700; color: var(--gold, #e9c46a); font-size: calc(12.5px / var(--ui-zoom, 1)); margin-bottom: 3px; }
+.turn-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3px; }
+.turn-last { display: flex; justify-content: center; gap: 3px; margin-top: 6px; }
+.turn-last .turn-chip { flex: 0 1 50%; }
+.turn-chip { border: 1px solid #e9c46a; border-radius: 8px; color: #fff; font-weight: 600; text-align: center;
+  font-size: calc(12.5px / var(--ui-zoom, 1)); padding: 2px 6px; white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis; text-shadow: 0 1px 2px #000; }
+.turn-chip.glow { box-shadow: 0 0 10px 3px #ffd54a; border-color: #fff3b0; }
+/* The profile's advantages before a person confirms it. */
+.profile-good { text-align: left; margin: 6px 0 10px; padding-left: 1.2em; }
+.profile-good li { margin: 2px 0; }
+/* Short screens: a smaller icon, so the goals keep their size. */
+@media (max-height: 400px) {
+  .handover-icon .picon { width: 40px; height: 40px; }
+  .handover .big-title { margin: 2px 0; }
+  .turn-chip, .turn-goals-title { font-size: calc(11.5px / var(--ui-zoom, 1)); padding-left: 4px; padding-right: 4px; }
+}

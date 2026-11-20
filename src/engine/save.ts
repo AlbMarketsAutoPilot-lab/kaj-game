@@ -10,8 +10,9 @@ import type { GameState } from './types.ts';
 // Version 17 (2.0, step 2.5): Nomad boss alerts, the car to Canada West. Version 18 (2.0, step 2.6):
 // citizenship from turn 1, the visa test, the Business's 2nd citizenship, the event-card mix; no older
 // save is continued. Version 19 (2.0, step 2.7): paid trips fast, free trips slow, new prices, go home +2,
-// Luxury +5 at the start, the most-businesses bonus; no older save is continued.
-export const SAVE_VERSION = 19;
+// Luxury +5 at the start, the most-businesses bonus; no older save is continued. Version 20 (2.0, step 2.8):
+// news cards about the country, all 45 drawn everywhere, one card mix per map; no older save is continued.
+export const SAVE_VERSION = 20;
 
 export function saveGame(state: GameState): string {
   return JSON.stringify({ version: SAVE_VERSION, state });

@@ -322,6 +322,8 @@ export interface EventCard {
   loseTurn?: true;
   // A country card drawn only in this area.
   area?: string;
+  // Step 2.8: the text in a part of a big country (no capital). Drawn cards keep only the filled-in text.
+  big?: string;
 }
 
 export interface DrawnCard {
