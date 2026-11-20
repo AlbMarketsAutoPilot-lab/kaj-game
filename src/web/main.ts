@@ -18,6 +18,9 @@ import { shapes30 } from '../maps/shapes30.ts';
 import { shapes50 } from '../maps/shapes50.ts';
 import { centres } from '../maps/centres.ts';
 import { countryCapital, countryFlag, SURPRISE_FACT, WONDER_NAME, WONDER_PLACE } from './countries.ts';
+import { passportBook, recordLine, recordsBox, type PassportData } from './passport.ts';
+import { COUNTRY_CODE3 } from './passport-codes.ts';
+import { addWin, loadRecords, saveRecords, type WinRecord } from './records.ts';
 import { buildGeo, colourAreas, continentBox, glowFor, pad, propSpots, squeeze, svg, unionBox, type Box, type PropKind } from './maps.ts';
 import { airport, busStop, carRental, citizenFlag, monument, pawn, place, port, station } from './props.ts';
 import { iconEl, iconUse, installIcons, PROFILE_COLOUR } from './icons.ts';
@@ -741,36 +744,117 @@ function placeOf(s: GameState, p: Player): number {
 }
 const TIE_RULE = `Equal points? The player with more businesses wins, then more continents, then more areas. Owning the most businesses also gives +${MOST_BUSINESSES_BONUS} at the end.`;
 
-// The end of the game: the winner popup. People are always cheered, robots never (owner's rule).
-function finishPopup(s: GameState, close: () => void): HTMLElement {
+// The end of the game: the winner popup (step 2.10 design, owner). Left: the trophy, the title, a cheer for
+// every winning person (robots never; other places are not mentioned) with their new record, if any. Right:
+// the ranking, a passport button on each person's row, then "Play again" and "Records". The passport and
+// the records open over this popup, which stays until "Play again" (or the back button).
+function finishPopup(s: GameState): HTMLElement {
   const r = s.result!;
-  const name = (seat: number) => `${nameOf(seat)}${s.players[seat].kind === 'robot' ? ' 🤖' : ''}`;
-  const people = s.players.filter((p) => p.kind === 'human');
+  const { places, date } = recordWins(s);
   const humanWinners = r.winners.filter((w) => s.players[w].kind === 'human');
   const title = humanWinners.length > 0
     ? `🎉 ${humanWinners.map((w) => nameOf(w)).join(' and ')} ${humanWinners.length > 1 || r.winners.length > 1 ? 'share the cup' : 'wins'}!`
     : '🏁 The journey is over!';
-  const cheers = people.map((p) => (r.winners.includes(p.seat)
-    ? `🏆 Congratulations, ${nameOf(p.seat)}! What a journey: ${plural(finalScore(s, p), 'point')}, ${plural(p.visitedAreas.length, 'area')} and ${plural(p.visitedContinents.length, 'continent')}!`
-    : `🌟 ${nameOf(p.seat)}, you did a great job: ${plural(p.visitedAreas.length, 'area')} and ${plural(p.visitedContinents.length, 'continent')} explored! You'll do even better next time.`));
-  const again = button('▶ Play again', renderSetup);
-  again.className = 'primary big';
-  return el('div', { className: 'finish' },
-    el('div', { className: 'trophy', textContent: humanWinners.length > 0 ? '🏆' : '🧭' }),
-    el('h2', { className: 'big-title', textContent: title }),
-    ...cheers.map((t) => el('p', { className: 'cheer', textContent: t })),
-    el('ol', { className: 'ranking' }, ...r.ranking.map((seat) => {
-      const p = s.players[seat];
-      const detail = scoreDetail(s, seat);
-      // A medal for the first three places; a full tie shares a place (step 2.7: ties go to more
-      // businesses, then continents, then areas).
-      const place = placeOf(s, p);
-      return el('li', { className: place === 1 ? 'first' : '' },
-        el('span', { className: 'medal', textContent: ['🥇', '🥈', '🥉'][place - 1] ?? `${place}.` }),
-        ' ', dot(seat), ` ${name(seat)}: `, el('b', { textContent: plural(finalScore(s, p), 'point') }), ` (${detail})`);
-    })),
-    el('p', { className: 'small', textContent: TIE_RULE }),
-    el('div', { className: 'row' }, again, button('See the map', close)));
+  const short = humanWinners.length > 1;
+  const cheers = humanWinners.flatMap((w) => {
+    const p = s.players[w];
+    const place = places.get(w);
+    return [el('p', { className: 'cheer', textContent: short
+      ? `🏆 Congratulations, ${nameOf(w)}! ${plural(finalScore(s, p), 'point')}, ${plural(p.visitedAreas.length, 'area')}!`
+      : `🏆 Congratulations, ${nameOf(w)}! ${plural(finalScore(s, p), 'point')}, ${plural(p.visitedAreas.length, 'area')}, ${plural(p.visitedContinents.length, 'continent')}!` }),
+      ...(place ? [el('p', { className: 'rec-line', textContent: recordLine(place, s.totalRounds, short) })] : [])];
+  });
+  const again = button('▶ Play again', () => { closeOverlay(); renderSetup(); });
+  again.className = 'primary';
+  const records = button('🏆 Records', () => openOverlay(recordsBox(loadRecords(), s.totalRounds, { turns: s.totalRounds, places: [...places.values()] }, closeOverlay)));
+  return el('div', { className: 'finish fin2' },
+    el('div', {},
+      el('div', { className: 'trophy', textContent: humanWinners.length > 0 ? '🏆' : '🧭' }),
+      el('h2', { className: 'big-title', textContent: title }),
+      ...cheers),
+    el('div', {},
+      el('ol', { className: 'ranking' }, ...r.ranking.map((seat) => {
+        const p = s.players[seat];
+        // A medal for the first three places; a full tie shares a place (step 2.7: ties go to more
+        // businesses, then continents, then areas).
+        const place = placeOf(s, p);
+        const passport = p.kind === 'human'
+          ? [button('🛂 Passport', () => openOverlay(passportBook(passportData(s, p, date), closeOverlay)))]
+          : [];
+        if (passport[0]) passport[0].className = 'ppb';
+        return el('li', { className: place === 1 ? 'first' : '' },
+          el('div', {},
+            el('span', { className: 'medal', textContent: ['🥇', '🥈', '🥉'][place - 1] ?? `${place}.` }),
+            ' ', dot(seat), ` ${nameOf(seat)}${p.kind === 'robot' ? ' 🤖' : ''}: `, el('b', { textContent: plural(finalScore(s, p), 'point') }),
+            el('small', { textContent: scoreDetail(s, seat).replace('; ', ' · ') })),
+          ...passport);
+      })),
+      el('div', { className: 'row' }, again, records)));
+}
+
+// Step 2.10: each person's win goes into the records on this device once per game (robots never).
+const recordedGames = new WeakMap<GameState, { places: Map<number, number>; date: Date }>();
+function recordWins(s: GameState): { places: Map<number, number>; date: Date } {
+  const done = recordedGames.get(s);
+  if (done) return done;
+  const date = new Date();
+  const iso = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  const places = new Map<number, number>();
+  let records = loadRecords();
+  const wins = s.result!.winners.map((w) => s.players[w]).filter((p) => p.kind === 'human' && p.profile);
+  const added: { seat: number; win: WinRecord }[] = [];
+  for (const p of wins) {
+    const win: WinRecord = { points: finalScore(s, p), areas: p.visitedAreas.length, continents: p.visitedContinents.length, profile: p.profile!, players: s.players.length, date: iso };
+    records = addWin(records, s.totalRounds, win).records;
+    added.push({ seat: p.seat, win });
+  }
+  // Places once all of this game's wins are in (a shared win: both rows).
+  for (const { seat, win } of added) {
+    const i = (records[String(s.totalRounds)] ?? []).indexOf(win);
+    if (i >= 0) places.set(seat, i + 1);
+  }
+  if (wins.length) saveRecords(records);
+  const out = { places, date };
+  recordedGames.set(s, out);
+  return out;
+}
+
+// The passport of a person (step 2.10): the cover country is the citizenship (the Nomad: its start
+// country, with nationality "none"); an area with several countries shows the area's name and the flag of
+// its first country.
+function passportData(s: GameState, p: Player, date: Date): PassportData {
+  const home = areaById.get(p.home!)!;
+  const country = p.citizenship ? citizenshipName(p.citizenship) : home.bigCountry ?? home.name;
+  const first = areaById.get((p.citizenship ?? [home.id])[0])!.countries?.[0] ?? '';
+  const flagOf = (c: string) => { const code = countryFlag(c); return code && FLAGS[code] ? FLAGS[code] : ''; };
+  return {
+    profile: p.profile!,
+    name: PROFILE_LABEL[p.profile!],
+    country,
+    nationality: p.citizenship ? country : null,
+    code: COUNTRY_CODE3[first] ?? 'KAJ',
+    flag: flagOf(first),
+    number: `KAJ${s.totalRounds}-${String(p.seat + 1)}${String(s.rng % 1000).padStart(3, '0')}`,
+    turns: s.totalRounds,
+    players: s.players.length,
+    date,
+    areas: p.visitedAreas.length,
+    continents: p.visitedContinents.length,
+    points: finalScore(s, p),
+    stamps: p.visitedAreas.map((id) => { const a = areaById.get(id)!; return { name: a.name, continent: a.continent, flag: flagOf(a.countries?.[0] ?? '') }; }),
+  };
+}
+
+// The passport and the records open over the end popup (step 2.10); closing them leaves it as it was.
+let overlay: HTMLElement | null = null;
+function closeOverlay(): void {
+  overlay?.remove();
+  overlay = null;
+}
+function openOverlay(node: HTMLElement): void {
+  closeOverlay();
+  overlay = node;
+  document.body.append(node);
 }
 
 // The wonder poster (task M6): the drawing, the name in the poster's lettering, the wonder point
@@ -1906,7 +1990,7 @@ function renderModal(s: GameState, actions: Action[], isRobot: boolean): Modal |
   }
   // The end of the game: the winner popup.
   if (s.phase === 'finished' && !seenCards.has('finished')) {
-    return { turn: false, node: wrap(finishPopup(s, () => { seenCards.add('finished'); render(); }), 'gold'), sound: 'win', soundKey: 'finished' };
+    return { turn: false, node: wrap(finishPopup(s), 'gold fin-modal'), sound: 'win', soundKey: 'finished' };
   }
   // Choosing the home country: stressed before it is confirmed (owner's request, task 14 A2).
   if (s.phase === 'chooseStart' && !isRobot && pickedStart) {
@@ -2613,6 +2697,7 @@ function closeLeave(): void {
 }
 (window as Window & { kajBack?: () => void }).kajBack = () => {
   if (leaveBox) return closeLeave();
+  if (overlay) return closeOverlay(); // step 2.10: a passport or the records close first
   if (legalOpen) return renderStart();
   const stay = button('Stay', closeLeave);
   stay.className = 'primary';

@@ -965,6 +965,34 @@ Rules in full: `docs/rules-now.md` ([2.8]). Card texts: `docs/cards.md`.
     nothing, Luxury takes no test); 🏢 the first time a player can buy a business (once per game); 🏠 on the 2nd turn in
     a row blocked by money ("Blocked 2 turns · 3rd blocked turn = go home +2").
 
+## Passport and records at the end of the game (version 2.0, step 2.10, owner-approved 2026-11-20)
+
+Screens only: no rule, robot, balance or save change (the save stays version 20). Rules in `docs/rules-now.md` §11.
+
+- **End popup (owner's design):** two columns. Left: the trophy, the title, a cheer for every winning person (robots
+  never; the other places are not mentioned) and, under it, "🏆 New record: Nth best win on this device (30 turns)" ("the best win" for 1st)
+  when the win entered the top 10 (shorter in a shared win). Right: the ranking (detail on a small second line), a
+  "🛂 Passport" button on each person's row (none for robots), then "▶ Play again" and "🏆 Records". "See the map" is
+  gone; there is no Leave button (owner): the phone's back button already asks "Leave the game?". The tie-break line
+  is no longer in the popup (it stays in the board's end panel).
+- **Passport and records open over the popup** (`openOverlay` in `src/web/main.ts`), with "✕ Close"; closing them
+  leaves the popup as it was. The back button closes them first.
+- **Passport (`src/web/passport.ts`):** a navy blue cover (owner: blue for everyone) with the country of citizenship and its flag; page 1 a data
+  page (the profile icon as the photo; type P, 3-letter code, passport number; name = the profile name; nationality;
+  journey turns and players; date of issue; areas · continents · points; two 44-character machine-readable lines);
+  then stamp pages, 6 a page, two pages at a time with ‹ ›: one ink stamp per area visited (the start area too), in
+  the order visited, in its continent's colour, with the continent, the flag, the area name and "ARRIVED · n" (no
+  dates: the game keeps none). Owner: no wonder or home marks. The cover country is the start citizenship (a big
+  country: its name); the **Digital Nomad** shows its start country with "Nationality: none". An area with several
+  countries shows the area's name and the flag of its first country (also on stamps). 3-letter codes:
+  `src/web/passport-codes.ts`, made by `node scripts/passport-codes.ts` from `data/countries.json`.
+- **Records (`src/web/records.ts`, `tests/records.test.ts`):** each person's win is kept on the device
+  (`kaj-records`), once per game, robots never: points, areas, continents, profile, players, date. One top-10 list
+  per game length, **by points** (owner's choice after measuring 400 robot winners per map: areas tie too often,
+  8 of the top 10 on 30 turns), then more areas; on a full tie the older win stays ahead. The records screen has a
+  tab per length and marks today's new wins. A browser that blocks storage keeps no records.
+- **Tests:** 4 new (ranking, top 10, unreadable storage, ordinals); 230 pass.
+
 ## Project setup
 
 - TypeScript, run directly by Node 22.18 or newer (no build step for tests).
