@@ -5,7 +5,7 @@
 // failed ones, draws, and how often robots take the quiz or pay (the robot check).
 // Games `start` … `start + games − 1` use the same seeds as measure.ts (game g: seed g × 7919 + 3), so a line
 // split into chunks gives the same games as one run.
-import { apply, createGame, currentPlayer, finalScore } from '../../src/engine/engine.ts';
+import { apply, createGame, currentPlayer, finalScore, legalActions } from '../../src/engine/engine.ts';
 import { robotAction } from '../../src/engine/normal-robot.ts';
 import { mapFor } from '../../src/maps/index.ts';
 import type { Action, GameState, RobotLevel } from '../../src/engine/types.ts';
@@ -60,7 +60,12 @@ function play(drivers: string[], seed: number): GameState {
     const lvl = DRIVERS[drivers[seat]];
     let a: Action;
     // Sale answers: the buyer's robot; every other choice: the seat's driver.
-    [a, rs] = s.offer ? robotAction(s, map, rs, lvl.accuracy) : planAction(s, map, rs, lvl);
+    // Step 2.11 (owner): seat 0 stands for the person, who chooses a profile freely (here: at random among the
+    // free ones); the robots take Kris Ann first (normal-robot.ts), so she is in every robot game.
+    if (s.phase === 'chooseProfile' && seat === 0) {
+      const options = legalActions(s, map);
+      a = options[Math.floor((((seed * 2654435761) >>> 0) / 2 ** 32) * options.length)];
+    } else [a, rs] = s.offer ? robotAction(s, map, rs, lvl.accuracy) : planAction(s, map, rs, lvl);
     if (a.type === 'blocked' || a.type === 'lostTurn') turnDull = true;
     if (a.type === 'blocked') { extra.blocked++; streak[seat]++; extra.maxStreak = Math.max(extra.maxStreak, streak[seat]); }
     else if (a.type === 'walk' || a.type === 'board' || a.type === 'quiz' || a.type === 'goHome') streak[seat] = 0;

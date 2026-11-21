@@ -11,7 +11,8 @@ export const MIN_SEATS = 2;
 export const MAX_SEATS = 4;
 export const MAX_ROBOTS = 3;
 
-export const PROFILES: readonly Profile[] = ['backpacker', 'business', 'luxury', 'nomad'];
+// Step 2.11 (owner): the 5th profile, Kris Ann (the game's heroine, travelling with her Dad).
+export const PROFILES: readonly Profile[] = ['backpacker', 'business', 'luxury', 'nomad', 'krisann'];
 
 // Six starting continents in v1; Antarctica is never a start.
 export const START_CONTINENTS: readonly Continent[] = [
@@ -47,6 +48,17 @@ export function bigCountryPoints(parts: number): number {
   return parts >= 3 ? POINTS_BIG_COUNTRY_3_PARTS : POINTS_BIG_COUNTRY_AREA + parts;
 }
 
+// Step 2.11 (owner): Kris Ann gets +3 extra for every big country she finishes (also all at once by
+// bus or car): USA, Canada, Russia +8; China, Brazil, Australia +6.
+export const KRISANN_BIG_COUNTRY_EXTRA = 3;
+export function bigCountryReward(profile: Profile | null, parts: number): number {
+  return bigCountryPoints(parts) + (profile === 'krisann' ? KRISANN_BIG_COUNTRY_EXTRA : 0);
+}
+// Step 2.11 (owner): Kris Ann never owns a business (can't buy one, can't be offered one).
+export function ownsNoBusiness(profile: Profile | null): boolean {
+  return profile === 'krisann';
+}
+
 // The ways to travel beyond walking: plane, ship, train (task 17), bus (task 18) and car (task 19).
 export const ROUTE_KINDS: readonly RouteKind[] = ['airport', 'port', 'station', 'bus', 'car'];
 
@@ -59,7 +71,10 @@ export const TICKET_PRICE: Readonly<Record<Profile, number | null>> = {
   business: 2,
   luxury: 3,
   nomad: 1,
+  krisann: 2,
 };
+// Step 2.11 (owner): Kris Ann's plane ticket is 4 (her ship ticket 2, in TICKET_PRICE).
+export const KRISANN_PLANE_PRICE = 4;
 
 // Train ticket (task 17, owner's rule; step 2.7: the Nomad pays 1): Business 2, Nomad 1; the
 // Backpacker never pays (quiz only); Luxury can't take the train.
@@ -68,6 +83,7 @@ export const TRAIN_TICKET_PRICE: Readonly<Record<Profile, number | null>> = {
   business: 2,
   luxury: null,
   nomad: 1,
+  krisann: 2,
 };
 
 // Bus ticket (task 18, owner's rule): 1 for the Nomad; the Backpacker never pays (quiz only);
@@ -77,6 +93,7 @@ export const BUS_TICKET_PRICE: Readonly<Record<Profile, number | null>> = {
   business: null,
   luxury: null,
   nomad: 1,
+  krisann: 2,
 };
 
 // Car rental (task 19, owner's rule; step 2.7: Business and Luxury pay 2): Nomad 1, Business 2,
@@ -86,13 +103,14 @@ export const CAR_TICKET_PRICE: Readonly<Record<Profile, number | null>> = {
   business: 2,
   luxury: 2,
   nomad: 1,
+  krisann: 2,
 };
 
 // Who may take each kind of trip: everyone, except Luxury on the train (task 17), and only the
-// Nomad and the Backpacker on the bus (task 18). Everyone takes the car (task 19).
+// Nomad, the Backpacker and (step 2.11) Kris Ann on the bus (task 18). Everyone takes the car (task 19).
 export function canRide(profile: Profile, kind: RouteKind): boolean {
   if (kind === 'station') return profile !== 'luxury';
-  if (kind === 'bus') return profile === 'nomad' || profile === 'backpacker';
+  if (kind === 'bus') return profile === 'nomad' || profile === 'backpacker' || profile === 'krisann';
   return true;
 }
 
@@ -100,6 +118,7 @@ export function canRide(profile: Profile, kind: RouteKind): boolean {
 export function ticketPrice(profile: Profile, kind: RouteKind): number | null {
   if (kind === 'bus') return BUS_TICKET_PRICE[profile];
   if (kind === 'car') return CAR_TICKET_PRICE[profile];
+  if (kind === 'airport' && profile === 'krisann') return KRISANN_PLANE_PRICE;
   return kind === 'station' ? TRAIN_TICKET_PRICE[profile] : TICKET_PRICE[profile];
 }
 
@@ -206,20 +225,25 @@ export function cardEvery(totalRounds: number): number {
 // mix "N1", measured in robot games, 1,600 per line: D1 adjusted to the 45 news cards, one mix per map): the same
 // cards for everyone; only how often good and bad ones come. A good card (points
 // above 0) counts `good` times, a bad one (points below 0, or losing a turn) `bad` times. 3 players use the
-// 4-player mix. Not listed: the normal deck (1 and 1). The Backpacker's helper cards b1–b8 are not drawn
-// (kept in cards.ts).
+// 4-player mix. Not listed: the normal deck (1 and 1). Step 2.11 (owner, measured: 34 of 40 fair at 1,600 games
+// per line, version "TG"): a new mix for the 5 profiles, "lose a turn" cards half as often (LOSE_TURN_WEIGHT) and
+// Kris Ann's own 8 cards (KRISANN_CARD_WEIGHT; they replaced the Backpacker's unused helper cards b1–b8).
 export interface CardMix { good: number; bad: number }
 type MixTable = Readonly<Record<'2' | '4', Partial<Record<Profile, CardMix>>>>;
 export const EVENT_MIX: Readonly<Record<'30' | '50', MixTable>> = {
   30: {
-    2: { backpacker: { good: 1, bad: 1.37 }, business: { good: 1.1, bad: 1.3 }, luxury: { good: 1, bad: 1.37 }, nomad: { good: 1, bad: 1.37 } },
-    4: { backpacker: { good: 0.93, bad: 1.6 }, business: { good: 1.2, bad: 1.3 }, luxury: { good: 1.3, bad: 1.17 }, nomad: { good: 1.1, bad: 1.26 } },
+    2: { backpacker: { good: 1, bad: 0.91 }, business: { good: 1.1, bad: 0.79 }, luxury: { good: 1, bad: 1.12 }, nomad: { good: 1.1, bad: 0.66 }, krisann: { good: 1, bad: 1.48 } },
+    4: { backpacker: { good: 0.93, bad: 1.81 }, business: { good: 1.2, bad: 1.44 }, luxury: { good: 1.3, bad: 1.23 }, nomad: { good: 1.1, bad: 0.81 }, krisann: { good: 1, bad: 1.03 } },
   },
   50: {
-    2: { backpacker: { good: 1, bad: 1.5 }, business: { good: 1.1, bad: 1.3 }, luxury: { good: 1, bad: 1.37 }, nomad: { good: 1, bad: 1.25 } },
-    4: { backpacker: { good: 0.93, bad: 1.9 }, business: { good: 1.2, bad: 1.19 }, luxury: { good: 1.3, bad: 1.17 }, nomad: { good: 1.1, bad: 1.15 } },
+    2: { backpacker: { good: 1, bad: 1.29 }, business: { good: 1.1, bad: 1.13 }, luxury: { good: 1, bad: 1.24 }, nomad: { good: 1, bad: 0.72 }, krisann: { good: 1, bad: 1.25 } },
+    4: { backpacker: { good: 0.93, bad: 2.25 }, business: { good: 1.2, bad: 1.19 }, luxury: { good: 1.3, bad: 1.21 }, nomad: { good: 1.1, bad: 0.81 }, krisann: { good: 1, bad: 0.97 } },
   },
 };
+// Step 2.11 (owner): the 5 "lose a turn" cards come half as often as the other bad cards, for everyone.
+export const LOSE_TURN_WEIGHT = 0.5;
+// Step 2.11 (owner): each of Kris Ann's own cards comes as often as one news card (good or bad).
+export const KRISANN_CARD_WEIGHT = 1;
 export function cardMix(profile: Profile, players: number, totalRounds = 30): CardMix {
   return EVENT_MIX[totalRounds >= 50 ? '50' : '30'][players <= 2 ? '2' : '4'][profile] ?? { good: 1, bad: 1 };
 }

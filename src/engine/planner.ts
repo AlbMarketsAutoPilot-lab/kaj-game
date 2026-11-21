@@ -6,7 +6,7 @@
 // GAMMA^k. Other players are not predicted (only the first move checks them). The same algorithm as the
 // balance lab's test robot (scripts/balance-lab/planner.ts).
 import { canPayAfterQuiz, continentReward, destinations, entryFees, feeTotal } from './engine.ts';
-import { bigCountryPoints, CONTINENT_BONUS, POINTS_NEW_CONTINENT, POINTS_NOMAD_BONUS, POINTS_NOMAD_TRIP, QUIZ_TRIES, ROUTE_KINDS, ticketPrice, travelTurns, wholeCountryTrip } from './constants.ts';
+import { bigCountryReward, CONTINENT_BONUS, POINTS_NEW_CONTINENT, POINTS_NOMAD_BONUS, POINTS_NOMAD_TRIP, QUIZ_TRIES, ROUTE_KINDS, ticketPrice, travelTurns, wholeCountryTrip } from './constants.ts';
 import { areaById } from './map.ts';
 import type { Action, GameMap, GameState, Player, RouteKind } from './types.ts';
 
@@ -41,7 +41,7 @@ function arrive(map: GameMap, me: Player, s: Sim, to: string, byBus: boolean): [
     const c = area.bigCountry;
     if (c) {
       if (n.bigs.has(c)) gain += 1;
-      else if (byBus || parts(map, c).every((id) => n.visited.has(id))) { gain += bigCountryPoints(parts(map, c).length); n.bigs.add(c); }
+      else if (byBus || parts(map, c).every((id) => n.visited.has(id))) { gain += bigCountryReward(me.profile, parts(map, c).length); n.bigs.add(c); }
     } else gain += area.wonder ? 2 : 1;
     if (!n.full.has(area.continent) && map.areas.every((a) => a.continent !== area.continent || n.visited.has(a.id))) {
       gain += continentReward(map, area.continent); n.full.add(area.continent);

@@ -1,7 +1,7 @@
-# KAJ — all game rules as of 2026-11-20
+# KAJ — all game rules as of 2026-11-21
 
 Checked against the code (`src/engine/`, `src/maps/`, `src/cards/`) and `docs/engine.md`.
-Rules marked **[2.6]** came with step 2.6 and **[2.7]** with step 2.7 (both 2026-11-19), **[2.8]** with step 2.8 and **[2.10]** with step 2.10 (both 2026-11-20). Where a new rule replaced
+Rules marked **[2.6]** came with step 2.6 and **[2.7]** with step 2.7 (both 2026-11-19), **[2.8]** with step 2.8 and **[2.10]** with step 2.10 (both 2026-11-20), **[2.11]** with step 2.11 (2026-11-21). Where a new rule replaced
 an older one, the old one is shown ~~struck out~~.
 
 ## 1. Players and setup
@@ -9,8 +9,11 @@ an older one, the old one is shown ~~struck out~~.
 - 2–4 players on one device, each a person or a robot (at least 1 person, at most 3 robots).
   Robots: easy, normal or hard.
 - A random first player, then always the same order.
-- 4 profiles: Backpacker, Business, Luxury, Digital Nomad. Each profile only once. They are chosen in
-  turn order, and the last player gets the one left.
+- ~~4 profiles: Backpacker, Business, Luxury, Digital Nomad. Each profile only once. They are chosen in
+  turn order, and the last player gets the one left.~~ **[2.11]** 5 profiles: Backpacker, Business, Luxury, Digital
+  Nomad, **Kris Ann**. Each profile only once, chosen in turn order; everyone chooses (no "last one left").
+- **[2.11]** A robot takes Kris Ann if she is still free; otherwise a random free profile. So Kris Ann is in every
+  game with a robot.
 - Start area: every player starts on a different continent (Europe, Asia, Africa, North America,
   South America, Oceania; never Antarctica).
 - **[2.6]** Only one player may start in a country. This matters only for Russia, whose parts lie on
@@ -54,11 +57,11 @@ an older one, the old one is shown ~~struck out~~.
 
 | Kind | Who | Ticket | **[2.7]** Travel turns: paid / free (quiz or hitchhiking) |
 |---|---|---|---|
-| Plane | everyone | Nomad 1, Business 2, Luxury 3, Backpacker quiz only | 0 / 1 |
-| Ship | everyone | the same | 1 / 2 |
-| Train (France ↔ Russia West or Turkey) | not Luxury | Business 2, Nomad ~~2~~ **[2.7] 1**, Backpacker quiz only | 0 / 1 |
-| Bus (Mongolia → Siberia or China West, one way) | Nomad and Backpacker only | Nomad 1, Backpacker quiz only | 0 / 1 |
-| Car (Mexico → USA East or Canada West, one way) | everyone | Nomad 1, Business and Luxury ~~1~~ **[2.7] 2** (no quiz); the Backpacker hitchhikes | 1 / 1 |
+| Plane | everyone | Nomad 1, Business 2, Luxury 3, **[2.11]** Kris Ann 4, Backpacker quiz only | 0 / 1 |
+| Ship | everyone | the same (**[2.11]** Kris Ann 2) | 1 / 2 |
+| Train (France ↔ Russia West or Turkey) | not Luxury | Business 2, Nomad ~~2~~ **[2.7] 1**, **[2.11]** Kris Ann 2, Backpacker quiz only | 0 / 1 |
+| Bus (Mongolia → Siberia or China West, one way) | Nomad, Backpacker and **[2.11]** Kris Ann | Nomad 1, **[2.11]** Kris Ann 2, Backpacker quiz only | 0 / 1 |
+| Car (Mexico → USA East or Canada West, one way) | everyone | Nomad 1, Business and Luxury ~~1~~ **[2.7] 2**, **[2.11]** Kris Ann 2 (no quiz); the Backpacker hitchhikes | 1 / 1 |
 
 - **[2.7] Paid is fast, free is slow, for every profile.** The Backpacker never pays, so its trips always
   take the free time. ~~Old travel turns by profile: plane Backpacker and Nomad 1, Business and Luxury 0;
@@ -93,8 +96,8 @@ an older one, the old one is shown ~~struck out~~.
 
 - **Backpacker:** never pays a ticket (quiz, or hitchhiking). +7 on reaching a 3rd continent (the
   start continent counts).
-  - **[2.6]** No longer draws its 8 helper event cards (b1–b8). They stay in the game's files, unused,
-    in case step 2.7 needs them for balance.
+  - **[2.6]** No longer draws its 8 helper event cards (b1–b8). ~~They stay in the game's files, unused,
+    in case step 2.7 needs them for balance.~~ **[2.11]** They were replaced by Kris Ann's 8 cards.
 - **Business:** cheaper and faster trips (table above).
   - ~~+6 when granted citizenship~~ **[2.6]** removed.
   - **[2.6]** May take one 2nd citizenship, free (section 6).
@@ -111,6 +114,14 @@ an older one, the old one is shown ~~struck out~~.
     ship brings no alert.
   - ~~+5 on reaching a 3rd continent.~~ **[2.7]** removed.
   - Never holds a citizenship.
+- **[2.11] Kris Ann** (the game's heroine, travelling with her Dad):
+  - **+3 extra for every big country she finishes:** USA, Canada, Russia +8; China, Brazil, Australia +6. Also when
+    the bus or the car gives the whole country at once.
+  - May take the bus (Mongolia → Russia +8 or China +6).
+  - **Never owns a business:** can't buy one and is never offered one.
+  - Tickets: plane 4; ship, train, bus and car 2. Normal travel times (paid fast, quiz slow), the free quiz as everyone.
+  - Only the start citizenship.
+  - Her own 8 cards (section 8).
 
 ## 6. Citizenship and visas
 
@@ -162,7 +173,7 @@ test next turn (read 6 facts, 3 questions, 2 right to pass), Luxury granted at o
 | Bus booth | Mongolia | 1 (2) | paid bus tickets |
 | Car rental | Mexico | 1 (2) | paid car rentals |
 
-- **Buying:** the player standing in the area may buy, if nobody owns it and they can pay. It does
+- **Buying:** the player standing in the area may buy, if nobody owns it and they can pay. **[2.11]** Never Kris Ann. It does
   not end the turn, and there is no limit per player.
 - **Selling:** on their own turn, before moving, a player may offer one business to another player
   who can pay its price; the buyer answers yes or no. One offer per turn, never to a player who is
@@ -184,21 +195,35 @@ test next turn (read 6 facts, 3 questions, 2 right to pass), Luxury granted at o
   currency (real data). In an area with several countries they take turns (very small ones are left out). In a part
   of a big country (USA, Canada, Russia, China, Brazil, Australia) a card never names the capital. ~~Personal events
   ("your phone battery dies").~~
-- The Backpacker's 8 helper cards (b1–b8, all +1 or +2) stay in the files, but **[2.6]** nobody draws
-  them. They are kept as a possible balance lever.
-- **Card mix by map and profile** (~~**[2.7]** mix "D1", one for both maps~~ **[2.8]** mix "N1", **one for each
-  map**). The same cards; only how often good and bad ones come (good × / bad ×; bad share of the 45 cards):
+- ~~The Backpacker's 8 helper cards (b1–b8, all +1 or +2) stay in the files, but **[2.6]** nobody draws
+  them.~~ **[2.11]** They are replaced by **Kris Ann's 8 cards** (below).
+- **[2.11] "Lose a turn" cards come half as often** as the other bad cards, for everyone.
+- **Card mix by map and profile** (~~**[2.7]** mix "D1"~~, ~~**[2.8]** mix "N1"~~, **[2.11]** mix "TG", **one for
+  each map**). The same cards; only how often good and bad ones come (good × / bad ×; bad share of the 45 cards, with
+  "lose a turn" half as often). TG was tuned before the 44–64% limit of step 2.11's later tests; some shares are lower.
 
   | Map | Profile | 2 players | 3 or 4 players |
   |---|---|---|---|
-  | 30 turns | Backpacker | 1 / 1.37: 55% bad | 0.93 / 1.6: 60% bad |
-  | 30 turns | Business | 1.1 / 1.3: 51% bad | 1.2 / 1.3: 49% bad |
-  | 30 turns | Luxury | 1 / 1.37: 55% bad | 1.3 / 1.17: 44% bad |
-  | 30 turns | Nomad | 1 / 1.37: 55% bad | 1.1 / 1.26: 50% bad |
-  | 50 turns | Backpacker | 1 / 1.5: 57% bad | 0.93 / 1.9: 64% bad |
-  | 50 turns | Business | 1.1 / 1.3: 51% bad | 1.2 / 1.19: 46% bad |
-  | 50 turns | Luxury | 1 / 1.37: 55% bad | 1.3 / 1.17: 44% bad |
-  | 50 turns | Nomad | 1 / 1.25: 52% bad | 1.1 / 1.15: 48% bad |
+  | 30 turns | Backpacker | 1 / 0.91: 41% bad | 0.93 / 1.81: 60% bad |
+  | 30 turns | Business | 1.1 / 0.79: 36% bad | 1.2 / 1.44: 48% bad |
+  | 30 turns | Luxury | 1 / 1.12: 46% bad | 1.3 / 1.23: 42% bad |
+  | 30 turns | Nomad | 1.1 / 0.66: 32% bad | 1.1 / 0.81: 36% bad |
+  | 30 turns | Kris Ann | 1 / 1.48: 53% bad | 1 / 1.03: 44% bad |
+  | 50 turns | Backpacker | 1 / 1.29: 50% bad | 0.93 / 2.25: 65% bad |
+  | 50 turns | Business | 1.1 / 1.13: 44% bad | 1.2 / 1.19: 43% bad |
+  | 50 turns | Luxury | 1 / 1.24: 49% bad | 1.3 / 1.21: 42% bad |
+  | 50 turns | Nomad | 1 / 0.72: 36% bad | 1.1 / 0.81: 36% bad |
+  | 50 turns | Kris Ann | 1 / 1.25: 49% bad | 1 / 0.97: 43% bad |
+
+  ~~N1 (step 2.8): 30 turns Backpacker 1 / 1.37 and 0.93 / 1.6, Business 1.1 / 1.3 and 1.2 / 1.3, Luxury 1 / 1.37 and
+  1.3 / 1.17, Nomad 1 / 1.37 and 1.1 / 1.26; 50 turns Backpacker 1 / 1.5 and 0.93 / 1.9, Business 1.1 / 1.3 and
+  1.2 / 1.19, Luxury 1 / 1.37 and 1.3 / 1.17, Nomad 1 / 1.25 and 1.1 / 1.15.~~
+- **[2.11] Kris Ann's own cards:** 8 cards about Kris Ann and her Dad, each reminding of one rule. Only Kris Ann draws
+  them, together with the news cards (each as often as one news card), and **none comes twice in a game** (about 1 or
+  2 a game). Everyone sees them as a picture popup, also when Kris Ann is a robot (the only robot popup people see);
+  never as phone news. Points (30 turns / 50 turns): 1 Good at quizzes +2 / +2; 2 A wonder! +1 / +1; 3 One more area
+  to go +1 / +1; 4 Exploring is good 0 / +1; 5 Visa required 0 / 0; 6 Not for sale −1 / −1; 7 Too fast! −1 / −1;
+  8 The missed plane −2 / −1. Texts: `src/cards/cards.ts` and `docs/cards.md`.
 
 ## 9. Questions
 
@@ -209,7 +234,7 @@ test next turn (read 6 facts, 3 questions, 2 right to pass), Luxury granted at o
 ## 10. Saves
 
 - The game saves after every move; one save slot.
-- A save from another version can't be continued. The version is **[2.8] 20** (2.7: 19).
+- A save from another version can't be continued. The version is **[2.11] 21** (2.8: 20).
 
 ## 11. Passport and records [2.10]
 

@@ -773,3 +773,53 @@ less 22–39% → 20–36%; draws 0–1 per line; go home 15–54 → 12–52 pe
 Backpacker +9 on the 30-turn map with 2 players; Luxury +10 with one wonder on the 50-turn map) are far beyond chance
 (±1.5 points with 2 players). The cause was not measured.
 
+## Step 2.11 (2026-11-21): Kris Ann, the 5th profile — before and after
+
+Extended lab (`lab2.ts`, 1,600 games per line). Lab changes (owner-approved): seat 0 stands for the person and chooses
+a profile at random among the free ones; the robots take Kris Ann first, so she is in every robot game; the report
+counts the old 4 profiles of 32 and Kris Ann apart (of 8). With 2 players each old profile plays only about 400 games
+per line: about ±2.5 points by chance (4 players ±1.2). Before: the game on main (`before211`); after: the built game
+(`build211`), identical to the scratch version KA5 in all 40 results.
+
+**Before: 30 of 32** (as in step 2.8). **After: old profiles 26 of 32, Kris Ann 8 of 8, 34 of 40.** Robot check: robots
+pay for 39–59% → 42–56% of their trips.
+
+| Line | Backpacker | Business | Luxury | Nomad | Kris Ann |
+|---|---|---|---|---|---|
+| 30 turns, 2 players, normal | 56% ✅ → 42% ✅ (57.9) | 48% ✅ → 56% ✅ (53.7) | 42% ✅ → 48% ✅ (52.5) | 54% ✅ → 57% ✅ (56.4) | 49% ✅ (55.1) |
+| 30 turns, 2 players, planning | 57% ✅ → 54% ✅ (61.1) | 52% ✅ → 45% ✅ (58.1) | 45% ✅ → 45% ✅ (57.4) | 46% ✅ → 44% ✅ (57.9) | 53% ✅ (59.9) |
+| 30 turns, 4 players, normal | 31% ❌ → 29% ✅ (52.4) | 21% ✅ → 26% ✅ (50.5) | 27% ✅ → 26% ✅ (50.9) | 21% ✅ → 24% ✅ (51.8) | 21% ✅ (51.3) |
+| 30 turns, 4 players, planning | 20% ✅ → 24% ✅ (54.8) | 28% ✅ → 27% ✅ (54.9) | 25% ✅ → 22% ✅ (54.1) | 26% ✅ → 23% ✅ (55.2) | 28% ✅ (56.4) |
+| 50 turns, 2 players, normal | 58% ✅ → 56% ✅ (77.9) | 43% ✅ → 35% ❌ (74.0) | 53% ✅ → 41% ✅ (74.7) | 45% ✅ → 57% ✅ (81.5) | 53% ✅ (78.2) |
+| 50 turns, 2 players, planning | 54% ✅ → 43% ✅ (84.7) | 48% ✅ → 68% ❌ (85.5) | 50% ✅ → 56% ✅ (84.3) | 48% ✅ → 41% ✅ (84.2) | 48% ✅ (85.0) |
+| 50 turns, 4 players, normal | 30% ❌ → 36% ❌ (75.8) | 23% ✅ → 19% ❌ (70.8) | 26% ✅ → 26% ✅ (73.3) | 21% ✅ → 24% ✅ (73.4) | 20% ✅ (74.1) |
+| 50 turns, 4 players, planning | 23% ✅ → 16% ❌ (76.0) | 22% ✅ → 30% ❌ (79.5) | 25% ✅ → 24% ✅ (77.5) | 29% ✅ → 30% ✅ (80.3) | 25% ✅ (79.6) |
+
+(After: average final score in brackets.) Boredom 23–28% → 22–32% (average 25.3% → 26.2%); lead changes 2.3–5.7 →
+3.0–6.6 (average 3.84 → 4.60); won by 3 or less 22–39% → 25–38% (29.5% → 31.8%); draws 0–1 → 0 per line; go home
+15–54 → 4–48 per line (after 3 turns without money 0); blocked turns 0–48 → 0–50; longest blocked streak 2; failed
+visa tests 13.8–16.9% → 14.4–16.4%. The 6 misses (all on the 50-turn map) are profiles doing well with one robot type
+and badly with the other (Business 35% / 68%, Backpacker 36% / 16%, Business 19% / 30%); a card mix moves both
+together, so it can't fix them. Checked with a point breakdown (300–800 games): in 2-player games Kris Ann's opponent
+owns every business and earns her paid tickets; the Backpacker is the only profile that gains nothing from planning.
+
+**Every version measured** (1,600 games per line; old profiles of 32 / Kris Ann of 8 / points outside the target /
+average boredom / lead changes / won by 3 or less; "mix" = card mix tuned per map, profile and player count):
+
+| Version | Kris Ann's rules and cards | Old | KA | Outside | Boredom | Lead | Close |
+|---|---|---|---|---|---|---|---|
+| F1–F5 | the starting design + one lever each (no business; plane 4; helper cards; bus; +1 per part) | 5–18 | 0–6 | 152–530 | 22.3–27.7% | 3.9–4.6 | 25–31% |
+| TA | no business, plane 4 + mix | 25 | 7 | 32 | 27.7% | 4.63 | 32.1% |
+| TB | + 1 point per big-country part + mix | 16 | 2 | 98 | 23.8% | 4.64 | 30.3% |
+| TC / TD | TA + helper cards / + bus, mix | 21 / 24 | 8 / 8 | 43 / 21 | 27.6 / 27.0% | 4.6 | 32% |
+| TE / TF | TA / TC + "lose a turn" half as often, mix | 23 / 19 | 7 / 8 | 35 / 29 | 26.9 / 26.8% | 4.6 | 31–32% |
+| **TG** | **TD + "lose a turn" half as often, mix** | **26** | **8** | **22** | **26.2%** | **4.56** | **31.3%** |
+| TH | TD + helper cards (old points), mix | 26 | 8 | 21 | 27.0% | 4.55 | 32.3% |
+| GF2 / MF2 | tickets 1 above the dearest, quiz trips as fast as paid, her cards tuned; from TG / from N1 | 17 / 22 | 7 / 8 | 49 / 37 | 25.7 / 26.5% | 3.8 | 31% |
+| GS2 / MS2 | the same with normal quiz times | 20 / 22 | 5 / 5 | 58 / 56 | 26.5 / 27.3% | 4.2 | 31% |
+| FT / FR | TG with tickets 1 above the dearest, her cards; FR with robots counting each big-country part | 22 / 23 | 5 / 7 | 53 / 34 | 27.4 / 28.6% | 4.2 / 4.5 | 31 / 33% |
+| TX2 | TG + her cards, normal "lose a turn" cards | 24 | 8 | 39 | 27.0% | 4.57 | 31.6% |
+| KA1 / KA2 | TG + her cards, points adding up to 0 | 25 / 25 | 7 / 7 | 25 / 23 | 26.2% | 4.6 | 31.8% |
+| KA3 | TG + her cards, 50-turn points a little kinder | 26 | 8 | 24 | 26.2% | 4.60 | 31.9% |
+| KA4 | KA1 with her cards half as often on the 50-turn map | 24 | 8 | 22 | 26.2% | 4.59 | 31.5% |
+| **KA5 (built)** | **KA3, none of her cards twice in a game** | **26** | **8** | **24** | **26.2%** | **4.60** | **31.8%** |

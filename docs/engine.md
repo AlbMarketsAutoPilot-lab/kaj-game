@@ -993,6 +993,57 @@ Screens only: no rule, robot, balance or save change (the save stays version 20)
   tab per length and marks today's new wins. A browser that blocks storage keeps no records.
 - **Tests:** 4 new (ranking, top 10, unreadable storage, ordinals); 230 pass.
 
+## Kris Ann, the 5th profile (version 2.0, step 2.11, owner-approved 2026-11-21)
+
+Rules in full: `docs/rules-now.md` ([2.11]). Chosen from `docs/profiles8.md` (the Explorer), then named Kris Ann, the
+game's heroine, by the owner. Measured in scratch copies first (`docs/balance-lab.md`, step 2.11); the built game
+measures exactly the same (all 40 results identical to the scratch version "KA5").
+
+- **Profile `krisann`** (`Profile`, `PROFILES`, last in the list): "Kris Ann" on every screen, a 3D compass icon
+  (`src/web/icons.ts`, colour `#1f9c8a`).
+- **Choosing:** with 5 profiles and at most 4 players everyone chooses; "the last player gets the one left" is removed.
+  **A robot takes Kris Ann if she is free** (`normal-robot.ts`), otherwise a random free profile.
+- **+3 extra for every big country she finishes** (`KRISANN_BIG_COUNTRY_EXTRA`, `bigCountryReward(profile, parts)`),
+  also all at once by bus or car: USA, Canada, Russia +8; China, Brazil, Australia +6. Robots and both planners use
+  `bigCountryReward`.
+- **Never owns a business** (`ownsNoBusiness`): no `buy` action, never offered a sale.
+- **Tickets:** plane 4 (`KRISANN_PLANE_PRICE`), ship, train, bus and car 2; she may take the bus (`canRide`). Normal
+  travel times (paid fast, quiz slow) and the free quiz, so the stuck-state checker is unchanged. Only the start
+  citizenship.
+- **Card mix "TG"** (`EVENT_MIX`, all 5 profiles, one per map) and **"lose a turn" cards half as often** for everyone
+  (`LOSE_TURN_WEIGHT` = 0.5). TG was tuned before the owner's 44–64% bad-card limit of the later tests: some shares are
+  lower (Nomad 32–36%).
+- **Kris Ann's own 8 cards** (`src/cards/cards.ts`, deck `krisann`, ids k1–k8, replacing the Backpacker's unused helper
+  cards b1–b8): drawn only by her, together with the news cards (`KRISANN_CARD_WEIGHT` = 1: each as often as one news
+  card), **none twice in a game** (`Player.ownCards`); `points` in the 30-turn game, `points50` in the 50-turn game
+  (30 / 50: +2/+2, +1/+1, +1/+1, 0/+1, 0/0, −1/−1, −1/−1, −2/−1). About 1.2 a game; none in about 1 game in 4.
+- **Screens:** her card is a picture popup like the wonder posters (the owner's 8 pictures, `assets/krisann/k1–k8.webp`,
+  960 px, about 26 KB each, inlined by `scripts/build-web.ts` as `KAJ_KRISANN`), with "🧭 Kris Ann & Dad", the title,
+  the text, the points and OK; shown to **every player, also when Kris Ann is a robot** (the robot waits for OK; the
+  only robot popup people see); never the phone news. Profile popup and side note (her advantages and limits), the
+  guide's profiles slide (a 5th line), the big-country chips and the bus/car line show her +8 / +6.
+- **Guide (owner-approved, 12 slides):** the profiles slide is gone (players see each profile when they choose it);
+  "Travel faster" is 3 slides (the 5 ways to travel; the free quiz, with the 3-wrong-answers rule; a paid / free quiz
+  table of travel turns, the car and challenges); the citizenship slide has a clearer text ("another player's
+  citizenship country") and a real visa test for France (6 facts from the game, "I'm ready", 3 timed questions), then
+  "Welcome to France!" or "No entry into France"; "area" instead of "country" where points are counted.
+- **Audit fixes (screens):** the car and bus texts show the player's own big-country points (Kris Ann +8 / +6); the bus
+  is "Nomad, Backpacker and Kris Ann"; businesses and guided tours say "Kris Ann never owns a business" to her; the
+  profile popups and area details show each profile's own car price (before, always the Nomad's 1 point).
+- **Lab (owner-approved):** `measure2.ts`: seat 0 stands for the person and chooses a profile at random among the free
+  ones; the robots take Kris Ann first, so she is in every robot game. `report2.ts`: a Kris Ann column; the old 4
+  profiles counted as before (of 32), Kris Ann apart (of 8).
+- **Save version 21:** a game in progress from version 20 or older can't be continued.
+- **Tests:** `tests/krisann.test.ts` (tickets and the bus, +3 by car, no business, the robot's choice, her cards: only
+  hers, none twice, 50-turn points); setup (5 profiles, no "last one left"), car prices, card mix TG, save 21. The news
+  cards keep their 110-character limit and their allowed strengths; Kris Ann's cards (longer, some 0 points,
+  owner-approved) are checked by their own lines and on the 568×320 screen. 235 tests pass.
+- **Balance (1,600 games per line, details in `docs/balance-lab.md`, step 2.11):** before (the game of step 2.10)
+  **30 of 32**; after **old profiles 26 of 32, Kris Ann 8 of 8 (34 of 40)**. Misses, all on the 50-turn map: Business
+  35% / 68% (2 players, normal / planning robots) and 19% / 30% (4 players), Backpacker 36% / 16% (4 players): each
+  the same profile doing well with one robot type and badly with the other, which no card mix can fix. Boredom 25.3% →
+  26.2%, lead changes 3.84 → 4.60, won by 3 or less 29.5% → 31.8% (averages of the 8 lines).
+
 ## Project setup
 
 - TypeScript, run directly by Node 22.18 or newer (no build step for tests).

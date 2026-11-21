@@ -62,13 +62,15 @@ export const CARDS: readonly EventCard[] = [
   { id: 'c44', title: '🏛️ A new World Heritage site', deck: 'country', points: 2, text: 'UNESCO adds a site in {country} to the World Heritage List. Free tours celebrate the news.' },
   { id: 'c45', title: '🎆 The city’s birthday', deck: 'country', points: 1, text: '{capital} celebrates its birthday with free fireworks over the old town.', big: 'A city in {country} celebrates its birthday with free fireworks over the old town.' },
 
-  // ---------- Backpacker cards (helpers; not drawn since step 2.6, kept by the owner as a lever for step 2.7) ----------
-  { id: 'b1', title: '🚚 A free ride', deck: 'backpacker', points: 2, text: 'A truck driver takes you further down the road for free.' },
-  { id: 'b2', title: '🎟️ A friend pays the bus', deck: 'backpacker', points: 2, text: 'A friend you met on the road pays your next bus ticket.' },
-  { id: 'b3', title: '🌾 A week on a farm', deck: 'backpacker', points: 2, text: 'You work a week on a farm and get free food and a bed.' },
-  { id: 'b4', title: '🛏️ A free night', deck: 'backpacker', points: 1, text: 'A hostel gives you a free night for fixing their sign.' },
-  { id: 'b5', title: '🍝 Shared dinner', deck: 'backpacker', points: 1, text: 'Other backpackers share their dinner with you.' },
-  { id: 'b6', title: '🗺️ Free walking tour', deck: 'backpacker', points: 1, text: 'You find a free walking tour of the old town.' },
-  { id: 'b7', title: '📘 Guidebook sold', deck: 'backpacker', points: 1, text: 'You sell your old guidebook to another traveller.' },
-  { id: 'b8', title: '🚲 A borrowed bike', deck: 'backpacker', points: 1, text: 'A local lends you a bike for the day.' },
+  // ---------- Kris Ann's cards (step 2.11, owner-approved texts and pictures) ----------
+  // Drawn only by Kris Ann, instead of a news card, none twice in a game; shown to every player as a picture popup,
+  // also when Kris Ann is a robot. Each reminds of one rule. points: 30-turn game; points50: the 50-turn game.
+  { id: 'k1', title: '🧠 Good at quizzes', deck: 'krisann', points: 2, text: '“Travelling for free with a quiz?” asks Dad. “Then answer correctly, or you lose the turn! After 3 wrong answers in the same place, you must pay anyway, or go home.” Kris Ann is good at quizzes!' },
+  { id: 'k2', title: '📸 A wonder!', deck: 'krisann', points: 1, text: '“Our first visit to a wonder gives 1 point more,” says Dad. “But if someone owns its guided tours, we pay them 1 point to go in. Lucky us, nobody does!” Kris Ann takes plenty of pictures of the wonder.' },
+  { id: 'k3', title: '🌍 One more area to go', deck: 'krisann', points: 1, text: 'Dad counts on his fingers: “Visit every area of a continent and it gives you a bonus, once.” Kris Ann marks the missing areas on her map.' },
+  { id: 'k4', title: '🌠 Exploring is good', deck: 'krisann', points: 0, points50: 1, text: '“Why explore?” asks Kris Ann. “Because every new area gives 1 point,” says Dad, “and the first step on a new continent gives 2 more. Places we have already visited give 0.” Exploring is not bad after all!' },
+  { id: 'k5', title: '🛂 Visa required', deck: 'krisann', points: 0, text: '“Stop!” says Dad. “This country needs a visa! Answer correctly 2 of 3 questions about the country, pay the 2-point visa, and you can enter.” Kris Ann thinks a bit, then changes direction!' },
+  { id: 'k6', title: '🏢 Not for sale', deck: 'krisann', points: -1, text: 'Dad explains to Kris Ann: “A business 🏢 earns points when others use it. At the end, it still counts what you paid for it: 2 points + 0 business or 0 points + 2 business = 2 points. Whoever owns the most businesses gets +1 more.” Kris Ann can’t own one, and she sulks.' },
+  { id: 'k7', title: '🎲 Too fast!', deck: 'krisann', points: -1, text: 'On a long trip Kris Ann accepts a challenge! Dad explains: “A right answer gives 1 point, a wrong one takes 1 away.” Kris Ann answers before he finishes, and gets it wrong.' },
+  { id: 'k8', title: '⏰ The missed plane', deck: 'krisann', points: -2, points50: -1, text: 'Dad explains to Kris Ann: “The free quiz trip is slower. Paying costs more, but we get there faster.” Kris Ann can’t decide, and the plane leaves without them.' },
 ];
