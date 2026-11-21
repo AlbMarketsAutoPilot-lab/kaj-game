@@ -57,6 +57,8 @@ const html = read('web/index.html')
   .replace('/*WONDERS*/', () => JSON.stringify(wonders).replace(/<\/script/gi, '<\\/script'))
   .replace('/*LEGAL*/', () => JSON.stringify(legal).replace(/<\/script/gi, '<\\/script'))
   .replace('/*POSTER*/', () => dataUri('assets/art/poster.webp'))
+  // Step 2.11: Kris Ann's 8 card pictures (owner's art), keyed by card id.
+  .replace('/*KRISANN*/', () => JSON.stringify(Object.fromEntries(readdirSync(new URL('assets/krisann/', root)).filter((f) => f.endsWith('.webp')).map((f) => [f.slice(0, -5), dataUri(`assets/krisann/${f}`)]))))
   .replace('/*SCRIPT*/', () => js);
 
 mkdirSync(new URL('dist/', root), { recursive: true });

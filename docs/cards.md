@@ -17,14 +17,16 @@ own-area cards (a1–a12) are general cards now (c34–c45, same points).
 
 | Map | Profile | 2 players | 3 or 4 players |
 |---|---|---|---|
-| 30 turns | Backpacker | good 1×, bad 1.37× | good 0.93×, bad 1.6× |
-| 30 turns | Business | good 1.1×, bad 1.3× | good 1.2×, bad 1.3× |
-| 30 turns | Luxury | good 1×, bad 1.37× | good 1.3×, bad 1.17× |
-| 30 turns | Nomad | good 1×, bad 1.37× | good 1.1×, bad 1.26× |
-| 50 turns | Backpacker | good 1×, bad 1.5× | good 0.93×, bad 1.9× |
-| 50 turns | Business | good 1.1×, bad 1.3× | good 1.2×, bad 1.19× |
-| 50 turns | Luxury | good 1×, bad 1.37× | good 1.3×, bad 1.17× |
-| 50 turns | Nomad | good 1×, bad 1.25× | good 1.1×, bad 1.15× |
+| 30 turns | Backpacker | good 1×, bad 0.91× | good 0.93×, bad 1.81× |
+| 30 turns | Business | good 1.1×, bad 0.79× | good 1.2×, bad 1.44× |
+| 30 turns | Luxury | good 1×, bad 1.12× | good 1.3×, bad 1.23× |
+| 30 turns | Nomad | good 1.1×, bad 0.66× | good 1.1×, bad 0.81× |
+| 30 turns | Krisann | good 1×, bad 1.48× | good 1×, bad 1.03× |
+| 50 turns | Backpacker | good 1×, bad 1.29× | good 0.93×, bad 2.25× |
+| 50 turns | Business | good 1.1×, bad 1.13× | good 1.2×, bad 1.19× |
+| 50 turns | Luxury | good 1×, bad 1.24× | good 1.3×, bad 1.21× |
+| 50 turns | Nomad | good 1×, bad 0.72× | good 1.1×, bad 0.81× |
+| 50 turns | Krisann | good 1×, bad 1.25× | good 1×, bad 0.97× |
 
 To report a problem, give the id (for example "c7: …").
 
@@ -78,15 +80,15 @@ To report a problem, give the id (for example "c7: …").
 | c44 | +2 | 🏛️ A new World Heritage site | UNESCO adds a site in {country} to the World Heritage List. Free tours celebrate the news. | same | News from New Zealand: “UNESCO adds a site in New Zealand to the World Heritage List. Free tours celebrate the news.” |
 | c45 | +1 | 🎆 The city’s birthday | {capital} celebrates its birthday with free fireworks over the old town. | A city in {country} celebrates its birthday with free fireworks over the old town. | News from Greece: “Athens celebrates its birthday with free fireworks over the old town.”<br>News from Canada East: “A city in Canada celebrates its birthday with free fireworks over the old town.” |
 
-## Backpacker cards (kept, not drawn since step 2.6)
+## Kris Ann's cards (step 2.11; drawn only by Kris Ann, shown to everyone; points: 30 turns, 50 turns in brackets)
 
 | Id | Headline | Card | Effect |
 |---|---|---|---|
-| b1 | 🚚 A free ride | A truck driver takes you further down the road for free. | +2 |
-| b2 | 🎟️ A friend pays the bus | A friend you met on the road pays your next bus ticket. | +2 |
-| b3 | 🌾 A week on a farm | You work a week on a farm and get free food and a bed. | +2 |
-| b4 | 🛏️ A free night | A hostel gives you a free night for fixing their sign. | +1 |
-| b5 | 🍝 Shared dinner | Other backpackers share their dinner with you. | +1 |
-| b6 | 🗺️ Free walking tour | You find a free walking tour of the old town. | +1 |
-| b7 | 📘 Guidebook sold | You sell your old guidebook to another traveller. | +1 |
-| b8 | 🚲 A borrowed bike | A local lends you a bike for the day. | +1 |
+| k1 | 🧠 Good at quizzes | “Travelling for free with a quiz?” asks Dad. “Then answer correctly, or you lose the turn! After 3 wrong answers in the same place, you must pay anyway, or go home.” Kris Ann is good at quizzes! | +2 |
+| k2 | 📸 A wonder! | “Our first visit to a wonder gives 1 point more,” says Dad. “But if someone owns its guided tours, we pay them 1 point to go in. Lucky us, nobody does!” Kris Ann takes plenty of pictures of the wonder. | +1 |
+| k3 | 🌍 One more area to go | Dad counts on his fingers: “Visit every area of a continent and it gives you a bonus, once.” Kris Ann marks the missing areas on her map. | +1 |
+| k4 | 🌠 Exploring is good | “Why explore?” asks Kris Ann. “Because every new area gives 1 point,” says Dad, “and the first step on a new continent gives 2 more. Places we have already visited give 0.” Exploring is not bad after all! | 0 (+1) |
+| k5 | 🛂 Visa required | “Stop!” says Dad. “This country needs a visa! Answer correctly 2 of 3 questions about the country, pay the 2-point visa, and you can enter.” Kris Ann thinks a bit, then changes direction! | 0 |
+| k6 | 🏢 Not for sale | Dad explains to Kris Ann: “A business 🏢 earns points when others use it. At the end, it still counts what you paid for it: 2 points + 0 business or 0 points + 2 business = 2 points. Whoever owns the most businesses gets +1 more.” Kris Ann can’t own one, and she sulks. | -1 |
+| k7 | 🎲 Too fast! | On a long trip Kris Ann accepts a challenge! Dad explains: “A right answer gives 1 point, a wrong one takes 1 away.” Kris Ann answers before he finishes, and gets it wrong. | -1 |
+| k8 | ⏰ The missed plane | Dad explains to Kris Ann: “The free quiz trip is slower. Paying costs more, but we get there faster.” Kris Ann can’t decide, and the plane leaves without them. | -2 (-1) |

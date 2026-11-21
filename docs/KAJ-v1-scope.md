@@ -27,6 +27,7 @@ Target: a complete, playable v1 within about 15 days of work.
 - The 4 profiles of the rulebook: Backpacker, Business Traveler, Luxury Traveler, Digital Nomad.
 - **Each profile can be taken by only one player.** Profiles are chosen in turn order; the last player gets the one left.
 - Board icons: 🎒 backpack (Backpacker), 💼 business suitcase (Business), 💎 diamond (Luxury), 💻 laptop (Nomad), plus each player's colour.
+- **Version 2.0, step 2.11 (owner, 2026-11-21):** a 5th profile, **Kris Ann** 🧭 (compass), and everyone chooses (no "the last player gets the one left"). See `docs/rules-now.md` and `docs/engine.md`, step 2.11.
 
 ## 4. Map
 

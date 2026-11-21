@@ -33,23 +33,27 @@ test('the same seed gives the same game', () => {
   assert.deepEqual(a, b);
 });
 
-test('each profile can be taken by only one player; the last player gets the one left', () => {
+// Step 2.11 (owner): 5 profiles, each taken once; with at most 4 players everyone chooses (no "last one left").
+test('each profile can be taken by only one player; the last player chooses from the 2 left (step 2.11)', () => {
   let s = createGame({ seats: seats(4), seed: 7 }, testMap);
-  assert.equal(legalActions(s, testMap).length, 4);
+  assert.equal(legalActions(s, testMap).length, 5);
   s = apply(s, testMap, { type: 'chooseProfile', profile: 'luxury' });
-  assert.equal(legalActions(s, testMap).length, 3);
+  assert.equal(legalActions(s, testMap).length, 4);
   assert.throws(() => apply(s, testMap, { type: 'chooseProfile', profile: 'luxury' }));
   s = apply(s, testMap, { type: 'chooseProfile', profile: 'nomad' });
   s = apply(s, testMap, { type: 'chooseProfile', profile: 'backpacker' });
+  assert.equal(s.phase, 'chooseProfile');
+  assert.deepEqual(legalActions(s, testMap).map((a) => (a.type === 'chooseProfile' ? a.profile : '')), ['business', 'krisann']);
+  s = apply(s, testMap, { type: 'chooseProfile', profile: 'krisann' });
   assert.equal(s.phase, 'chooseStart');
-  assert.equal(seatOf(s, 3).profile, 'business');
+  assert.equal(seatOf(s, 3).profile, 'krisann');
 });
 
-test('with 2 players the second still chooses from the 3 left', () => {
+test('with 2 players the second still chooses from the 4 left', () => {
   let s = createGame({ seats: seats(2), seed: 7 }, testMap);
   s = apply(s, testMap, { type: 'chooseProfile', profile: 'nomad' });
   assert.equal(s.phase, 'chooseProfile');
-  assert.equal(legalActions(s, testMap).length, 3);
+  assert.equal(legalActions(s, testMap).length, 4);
 });
 
 test('starting continents must all be different', () => {

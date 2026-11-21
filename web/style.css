@@ -344,6 +344,23 @@ button.link { background: none; border: none; padding: 0; text-align: left; font
 .guide-badge img { height: 1em; vertical-align: -2px; }
 .guide-zero { fill: var(--glow); font-weight: 700; paint-order: stroke; stroke: var(--deep); stroke-width: 0.15px; }
 .guide-quiz { text-align: center; }
+/* Step 2.11: the guide's travel pictures and the visa test's facts. */
+.guide-ways { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin: 8px 0; }
+.guide-way { display: grid; gap: 2px; justify-items: center; padding: 6px 4px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255, 255, 255, 0.05); }
+.guide-way-icon { font-size: 1.7rem; line-height: 1.1; }
+.guide-way .small { line-height: 1.2; }
+.guide-table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 0.92rem; }
+.guide-table th, .guide-table td { border: 1px solid var(--line); padding: 5px 6px; }
+.guide-table th { color: var(--gold-bright); }
+.guide-table td:first-child { text-align: left; }
+.guide-facts { text-align: left; margin: 6px 0; padding-left: 20px; font-size: 0.9rem; }
+.guide-facts li { margin: 3px 0; }
+@media (max-height: 340px) {
+  .guide-way { padding: 4px 2px; } .guide-way-icon { font-size: 1.35rem; } .guide-ways { margin: 4px 0; }
+  .guide-table { font-size: 0.82rem; margin: 4px 0; } .guide-table th, .guide-table td { padding: 3px 5px; }
+  .guide-facts { font-size: 0.8rem; column-count: 2; column-gap: 18px; } .guide-facts li { margin: 1px 0; break-inside: avoid; }
+  .guide-table { font-size: 0.8rem; }
+}
 .guide-inline { position: static; margin: 8px auto 0; }
 /* Audit U5: the guide fits on every screen without scrolling inside the card: the drawing gets the
    height the text and buttons (about 335 px) leave free. */
@@ -386,6 +403,16 @@ button.link { background: none; border: none; padding: 0; text-align: left; font
 .wonder-name { font-size: 2rem; margin: 0; line-height: 1.1; }
 .wonder-where { color: var(--muted); margin: 0 0 8px; font-family: "Cinzel", Georgia, serif; }
 .wonder-points { color: var(--gold-bright); font-weight: 700; }
+/* Step 2.11: Kris Ann's cards (owner-approved design): the owner's picture in a cream frame, like the wonder posters. */
+.ka-art { width: 100%; display: block; border-radius: 10px; border: 3px solid #efe3c2; }
+.ka-kicker { margin: 0; color: var(--muted); font-family: "Cinzel", Georgia, serif; font-size: 0.85rem; letter-spacing: 0.04em; }
+.ka-title { font-size: 1.4rem; margin: 0 0 4px; line-height: 1.15; color: var(--gold-bright); }
+.ka-card .trip-text p { margin: 6px 0; font-size: 0.95rem; }
+/* Picture and text side by side on every phone (also below 600 px, unlike the trip scenes). */
+.trip-turn.ka-card { grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 14px; }
+@media (max-height: 340px) { .ka-title { font-size: 1.2rem; } .ka-card .trip-text p { font-size: 0.85rem; margin: 4px 0; } }
+.ka-points { color: var(--gold-bright); font-weight: 700; }
+.ka-points.bad { color: var(--danger); }
 /* The loading screen (index.html), until the start screen shows. */
 .loading { min-height: calc(100 * var(--vh) - 32px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: var(--muted); }
 .loading .title { font-size: 2rem; margin: 0; }

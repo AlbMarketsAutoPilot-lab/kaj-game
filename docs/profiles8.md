@@ -1,5 +1,12 @@
 # 8 profiles — 4 new profiles and their balance on paper (planning, no code)
 
+**Update (version 2.0, step 2.11, 2026-11-21):** the **Explorer** was built as the 5th profile and named **Kris Ann**
+by the owner, with new rules for the 2.0 game (`docs/rules-now.md` [2.11], `docs/engine.md` step 2.11): +3 extra for
+every big country finished (as planned here, also by bus or car), the bus, never owns a business, plane ticket 4 and
+other tickets 2, normal travel times (the "slow planes" below no longer fit the 2.0 rule "paid fast, quiz slow"), and
+her own 8 cards. The other 3 profiles below (Photographer, Student, Merchant) are not used; their notes predate the
+2.0 rules (citizenship from turn 1, the visa test, paid trips fast and free trips slow, new prices).
+
 Status: **plan for the future standalone paid app** (owner, 2026-10-11: the 100-turn game with 8 profiles,
 built later as a separate app; not in this app's version 1.0). Written 2026-10-10, before the profile
 balance of 2026-10-11 (`docs/engine.md`, `docs/balance-lab.md`): the numbers in sections 1 and 3 are

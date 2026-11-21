@@ -140,14 +140,14 @@ test('challenges and the quiz share one rotation per player, carried into the ne
   }
 });
 
-test('save version 20 (step 2.8): the seen questions are saved; a version-19 save is not continued', () => {
-  assert.equal(SAVE_VERSION, 20);
+test('save version 21 (step 2.11): the seen questions are saved; a version-20 save is not continued', () => {
+  assert.equal(SAVE_VERSION, 21);
   let s = createGame({ seats: seats(2), seed: 3 }, map30);
   s = apply(s, map30, { type: 'chooseProfile', profile: 'backpacker' });
   s.players[0].seen = ['flag-esp'];
   const back = loadGame(saveGame(s));
   assert.ok('state' in back);
   assert.deepEqual(back.state.players[0].seen, ['flag-esp']);
-  const old = loadGame(JSON.stringify({ version: 19, state: s }));
+  const old = loadGame(JSON.stringify({ version: 20, state: s }));
   assert.ok('error' in old);
 });

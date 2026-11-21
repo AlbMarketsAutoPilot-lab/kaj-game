@@ -2,7 +2,7 @@ import {
   bigCountryParts, blockedByMoney, continentReward, canPayAfterQuiz, currentPlayer, entryFees, feeTotal, legalActions,
   nomadAlert,
 } from './engine.ts';
-import { BUSINESS_PRICE, bigCountryPoints, SECOND_CITIZENSHIP_PRICE, CONTINENT_BONUS, QUIZ_TRIES, canRide, ticketPrice, travelTurns, WELCOME_BONUS, wholeCountryTrip } from './constants.ts';
+import { BUSINESS_PRICE, bigCountryReward, SECOND_CITIZENSHIP_PRICE, CONTINENT_BONUS, QUIZ_TRIES, canRide, ticketPrice, travelTurns, WELCOME_BONUS, wholeCountryTrip } from './constants.ts';
 import { areaById } from './map.ts';
 import { nomadTripValue, planMove } from './planner.ts';
 import { nextRandom } from './rng.ts';
@@ -126,7 +126,8 @@ function choose(state: GameState, map: GameMap, actions: Action[], me: Player, s
     const play = me.points >= settings.challengeFrom && (me.profile !== 'nomad' || nomadAlert(me) === 'challenge');
     return actions.find((a) => a.type === 'travel' && (a.challenge === true) === play) ?? first;
   }
-  if (first.type === 'chooseProfile') return actions[Math.floor(rnd.next() * actions.length)];
+  // Step 2.11 (owner): the first robot to choose takes Kris Ann; the others choose at random.
+  if (first.type === 'chooseProfile') return actions.find((a) => a.type === 'chooseProfile' && a.profile === 'krisann') ?? actions[Math.floor(rnd.next() * actions.length)];
   if (first.type === 'chooseStart') return chooseStart(map, actions, me, rnd);
 
   // Buy a business when it keeps the reserve: tours, then airline, then ferry agency.
@@ -251,7 +252,7 @@ export function arrivalValue(map: GameMap, me: Player, to: string): number {
       value += 1; // after the bus (owner, M5): each part not visited yet gives +1
     } else if (area.bigCountry) {
       const parts = bigCountryParts(map, area.bigCountry);
-      value += parts.every((id) => id === to || me.visitedAreas.includes(id)) ? bigCountryPoints(parts.length) : PART_PROGRESS;
+      value += parts.every((id) => id === to || me.visitedAreas.includes(id)) ? bigCountryReward(me.profile, parts.length) : PART_PROGRESS;
     } else {
       value += area.wonder ? 2 : 1;
     }
@@ -283,7 +284,7 @@ function busArrivalValue(map: GameMap, me: Player, to: string): number {
   // With the area counted as visited, arrivalValue gives only the continent's points.
   const continent = arrivalValue(map, { ...me, visitedAreas: [...me.visitedAreas, to] }, to);
   const full = me.visitedAreas.includes(to) ? 0 : wholeContinentValue(map, me, to);
-  return (had ? 0 : bigCountryPoints(parts.length)) + continent + full;
+  return (had ? 0 : bigCountryReward(me.profile, parts.length)) + continent + full;
 }
 
 function unvisitedNext(map: GameMap, me: Player, to: string): number {

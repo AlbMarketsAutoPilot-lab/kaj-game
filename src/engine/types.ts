@@ -12,7 +12,7 @@ export type Continent =
   | 'Oceania'
   | 'Antarctica';
 
-export type Profile = 'backpacker' | 'business' | 'luxury' | 'nomad';
+export type Profile = 'backpacker' | 'business' | 'luxury' | 'nomad' | 'krisann';
 
 export type SeatKind = 'human' | 'robot';
 
@@ -132,6 +132,8 @@ export interface Player {
   // The area the player walked from on their last move; null after a trip, going home or the start
   // (step 2.4). Only the robots use it: they don't walk straight back for nothing.
   cameFrom?: string | null;
+  // Step 2.11: Kris Ann's own cards drawn in this game (none comes twice).
+  ownCards: string[];
 }
 
 // A special reward given by the last move (owner, M5), so the screens can show it.
@@ -281,7 +283,7 @@ export interface GameState {
 }
 
 // Event cards (rulebook section 10, docs/engine.md task 11). The cards: src/cards/cards.ts.
-export type Deck = 'country' | 'backpacker';
+export type Deck = 'country' | 'krisann';
 
 // ---------- travel-turn challenges (task 12) ----------
 
@@ -324,6 +326,8 @@ export interface EventCard {
   area?: string;
   // Step 2.8: the text in a part of a big country (no capital). Drawn cards keep only the filled-in text.
   big?: string;
+  // Step 2.11: Kris Ann's cards may have other points in the 50-turn game.
+  points50?: number;
 }
 
 export interface DrawnCard {

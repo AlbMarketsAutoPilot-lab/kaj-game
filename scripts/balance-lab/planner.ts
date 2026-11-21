@@ -6,7 +6,7 @@
 // bus's whole country, big countries, whole continents, profile bonuses) and picks the first move of
 // the best plan, by discounted points. Other players are not predicted (only the first move checks them).
 import { canPayAfterQuiz, continentReward, currentPlayer, destinations, entryFees, feeTotal, legalActions } from '../../src/engine/engine.ts';
-import { bigCountryPoints, CONTINENT_BONUS, POINTS_NEW_CONTINENT, QUIZ_TRIES, ROUTE_KINDS, ticketPrice, travelTurns } from '../../src/engine/constants.ts';
+import { bigCountryReward, CONTINENT_BONUS, POINTS_NEW_CONTINENT, QUIZ_TRIES, ROUTE_KINDS, ticketPrice, travelTurns } from '../../src/engine/constants.ts';
 import { noWalkBack, ROBOT_LEVELS, robotAction } from '../../src/engine/normal-robot.ts';
 import { nomadTripValue, TURN_VALUE } from '../../src/engine/planner.ts';
 import { areaById } from '../../src/engine/map.ts';
@@ -36,7 +36,7 @@ function arrive(map: GameMap, me: Player, s: Sim, to: string, byBus: boolean): [
     const c = area.bigCountry;
     if (c) {
       if (n.bigs.has(c)) gain += 1;
-      else if (byBus || parts(map, c).every((id) => n.visited.has(id))) { gain += bigCountryPoints(parts(map, c).length); n.bigs.add(c); }
+      else if (byBus || parts(map, c).every((id) => n.visited.has(id))) { gain += bigCountryReward(me.profile, parts(map, c).length); n.bigs.add(c); }
     } else gain += area.wonder ? 2 : 1;
     if (!n.full.has(area.continent) && map.areas.every((a) => a.continent !== area.continent || n.visited.has(a.id))) {
       gain += continentReward(map, area.continent); n.full.add(area.continent);

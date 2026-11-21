@@ -97,8 +97,9 @@ Every task also adds its part to the test board, so there is **always a playable
 | 2.8 | Event cards as real geography news | medium | 1 | — | ✅ done (owner's decisions, 2026-11-20): the 45 cards are news about the country where the player stands (country, capital, currency filled in; no capital in big countries), the 12 own-area cards became general cards (same points), one card mix per map (N1); fair 29 → 30 of 32 at 1,600 games per line; boredom the same; saves v20; screens that show the rules (start-map bonuses, profile popup with "Choose another", bonus progress in "It's your turn", world-map dots of the current player only, free-or-paid, visa, business and go-home notices) |
 | 2.9 | More wonders, history and curiosity for each, new design | medium | 2 | — | ⛔ stopped (owner, 2026-11-20): no new wonders; Petra and Angkor Wat (30 turns) and Victoria Falls (50 turns) measured 30 → 22 of 32 at 1,600 games per line; history and curiosity of the 11 wonders kept for later |
 | 2.10 | Passport with stamps, records on the device | medium | 1–2 | — | ✅ done (owner-approved design, 2026-11-20): end popup in two columns (only winners cheered, new-record line, a passport button per person, Play again and Records, no Leave); passport cover with the citizenship and flag, data page, stamps 6 a page; records top 10 by points per game length; screens only, save stays 20 |
-| 2.11 | 100-turn map in this app (J1 plan high, J2 engine high, J3–J6 medium) | **high** / medium | ~10 | — | |
-| 2.12 | Full test games, release 2.0 (web on kaj.kritere.com and app) | medium | 1–2 | — | |
+| 2.11 | Kris Ann, a 5th profile (the Explorer of `docs/profiles8.md`), her 8 cards with the owner's pictures | **high** | 1 | — | ✅ done (owner's final decisions, 2026-11-21): +3 per big country, bus, no business, plane 4, card mix TG with "lose a turn" half as often, her 8 cards (none twice a game, shown to everyone), robots take her first; 34 of 40 fair (old 26 of 32, Kris Ann 8 of 8) at 1,600 games per line (before 30 of 32); saves v21 |
+| 2.12 | 100-turn map in this app (J1 plan high, J2 engine high, J3–J6 medium) | **high** / medium | ~10 | — | |
+| 2.13 | Full test games, release 2.0 (web on kaj.kritere.com and app) | medium | 1–2 | — | |
 
 ## The tasks
 
@@ -599,7 +600,7 @@ task 15 (the Play release) and task 16 (full-game tests) to the last days with n
 
 ## Version 2.0 (owner-approved plan, 2026-11-16)
 
-Owner (2026-11-16): this work is **version 2.0**; every step adds one: 2.1, 2.2 … 2.12 (the status rows),
+Owner (2026-11-16): this work is **version 2.0**; every step adds one: 2.1, 2.2 … 2.13 (the status rows; renumbered by the owner on 2026-11-20),
 so each change can be tracked.
 
 Game design changes before web play on https://kaj.kritere.com. One task per session, in the order of the
@@ -608,8 +609,9 @@ status rows (2.1 first). Each task: tests pass, web build works, docs updated, p
 ### Decisions taken (owner)
 
 - The **30- and 50-turn games are unfrozen** (2026-11-16).
-- The **100-turn game is part of 2.0**, with the same **4 profiles** (replaces "separate paid app" in
-  `KAJ-v1-scope.md` §10; `docs/profiles8.md` is not used).
+- ~~The **100-turn game is part of 2.0**, with the same **4 profiles** (replaces "separate paid app" in
+  `KAJ-v1-scope.md` §10; `docs/profiles8.md` is not used).~~ **Owner, 2026-11-20:** one 5th profile first (step 2.11,
+  chosen from `docs/profiles8.md`), then the 100-turn game (step 2.12) with the 5 profiles, then the release (2.13).
 - The **passport screen** comes in 2.0 (was "Not in v1", scope §9).
 - **Balance rule:** no change goes in without an analysis of how it affects each profile (Backpacker,
   Business, Luxury, Nomad), boredom and excitement, measured with the balance lab and planning robots
@@ -837,11 +839,27 @@ design. Balance check (more wonder points and tours).
 for every area visited. Records on this device only: the top 10 counts of games won by a human ("Your win
 country count ranks 3rd"). Proposal: count areas, one list per game length.
 
-**2.11 (J) 100-turn map (about 10 sessions + about 5 days of fact checking).** J1 (high): rework
-`docs/map100.md` to about 100–125 areas, 4 profiles, the new route style; ask its 8 open questions. J2
+**2.11 (K) Kris Ann, a 5th profile (high, 1).** Owner (2026-11-20): one new profile from `docs/profiles8.md` before the
+100-turn game. The Explorer was chosen, then named **Kris Ann** (the game's heroine) by the owner.
+
+- **Done (2026-11-21, owner's final decisions after measuring):** rules in `docs/rules-now.md` ([2.11]) and
+  `docs/engine.md` (step 2.11). Kris Ann: +3 extra for every big country she finishes (also by bus or car); may take the
+  bus; never owns a business; plane ticket 4, ship, train, bus and car 2; normal travel times; only the start
+  citizenship. Robots take her first. Card mix "TG" for all 5 profiles with "lose a turn" cards half as often (for
+  everyone). Her own 8 cards (the owner's pictures and texts, each reminding of a rule; points 30 / 50 turns +2/+2,
+  +1/+1, +1/+1, 0/+1, 0/0, −1/−1, −1/−1, −2/−1), drawn only by her, none twice in a game, shown to every player as a
+  picture popup, also when she is a robot. 1,600 games per line: before 30 of 32; after old profiles 26 of 32 and Kris
+  Ann 8 of 8 (34 of 40); the 6 misses are on the 50-turn map, profiles doing well with one robot type and badly with
+  the other, which no card mix can fix. Every version measured (about 30, from 0 to 34 of 40): `docs/balance-lab.md`,
+  step 2.11. Not adopted after measuring: quiz trips as fast as paid ones, tickets 1 above the dearest profile on every
+  route, 1 point per big-country part, a robot that counts big-country parts (better for Kris Ann, more boredom). Found
+  and not fixed (owner's choice): the Backpacker gains nothing from planning robots. Saves v21.
+
+**2.12 (J) 100-turn map (about 10 sessions + about 5 days of fact checking).** J1 (high): rework
+`docs/map100.md` to about 100–125 areas, 5 profiles, the new route style; ask its 8 open questions. J2
 engine (high, 2), J3 shapes, J4 facts (2), J5 screens (2), J6 test games (2), medium.
 
-**2.12 (release) Release (medium, 1–2).** Full test games (2–4 players, all lengths), web at kaj.kritere.com and app.
+**2.13 (release) Release (medium, 1–2).** Full test games (2–4 players, all lengths), web at kaj.kritere.com and app.
 
 **How the Play Store app gets the 2.0 changes (checked 2026-11-16 in the 1.0.2 release chat):**
 - Every step is merged into `main` when it is done; GitHub Pages (`.github/workflows/pages.yml`) then

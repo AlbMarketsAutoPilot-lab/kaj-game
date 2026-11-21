@@ -132,7 +132,7 @@ export function passportBook(p: PassportData, close: () => void): HTMLElement {
   return back;
 }
 
-const PROFILE_NAME: Record<Profile, string> = { backpacker: 'Backpacker', business: 'Business Traveler', luxury: 'Luxury Traveler', nomad: 'Digital Nomad' };
+const PROFILE_NAME: Record<Profile, string> = { backpacker: 'Backpacker', business: 'Business Traveler', luxury: 'Luxury Traveler', nomad: 'Digital Nomad', krisann: 'Kris Ann' };
 
 // The records on this device: a tab per game length, the top 10 by points; `fresh` marks today's new wins.
 export function recordsBox(records: Records, turns: number, fresh: { turns: number; places: number[] }, close: () => void): HTMLElement {

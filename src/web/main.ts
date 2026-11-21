@@ -2,7 +2,7 @@
 // landscape board (left: the current area drawn; right: the world map and the turn panel).
 // Robots play with simple rules, at the level chosen for each seat (task 13).
 
-import { BUSINESS_PRICE, cardEvery, CHALLENGE_POINTS, GAME_LENGTHS, CONTINENT_BONUS, VISA_TEST_FACTS, VISA_TEST_PASS, POINTS_NOMAD_BONUS, POINTS_NOMAD_TRIP, POINTS_NEW_AREA, POINTS_NEW_CONTINENT, POINTS_WONDER, WELCOME_BONUS, GO_HOME_POINTS, GO_HOME_TURNS, MOST_BUSINESSES_BONUS, QUIZ_TRIES, ROUTE_KINDS, bigCountryPoints, canRide, TICKET_BUSINESS, TICKET_PRICE, ticketPrice, TOUR_FEE, travelTurns, VISA_PRICE } from '../engine/constants.ts';
+import { BUSINESS_PRICE, cardEvery, CHALLENGE_POINTS, GAME_LENGTHS, CONTINENT_BONUS, VISA_TEST_FACTS, VISA_TEST_PASS, POINTS_NOMAD_BONUS, POINTS_NOMAD_TRIP, POINTS_NEW_AREA, POINTS_NEW_CONTINENT, POINTS_WONDER, WELCOME_BONUS, GO_HOME_POINTS, GO_HOME_TURNS, MOST_BUSINESSES_BONUS, QUIZ_TRIES, ROUTE_KINDS, bigCountryReward, ownsNoBusiness, KRISANN_BIG_COUNTRY_EXTRA, KRISANN_PLANE_PRICE, canRide, TICKET_BUSINESS, TICKET_PRICE, ticketPrice, TOUR_FEE, travelTurns, VISA_PRICE } from '../engine/constants.ts';
 import {
   apply, blockedByMoney, continentReward, citizenAreas, citizenshipOf, needsVisaTest, visaOwner, bookedBy, businessAt, canPayAfterQuiz, destinations, businessValue, businessCount, mostBusinessesBonus, createGame, currentPlayer, entryFees, feeTotal, finalScore, homeFor, landTurnsToCard, legalActions, nomadAlert,
 } from '../engine/engine.ts';
@@ -35,9 +35,10 @@ const PROFILE_LABEL: Record<Profile, string> = {
   business: 'Business Traveler',
   luxury: 'Luxury Traveler',
   nomad: 'Digital Nomad',
+  krisann: 'Kris Ann',
 };
 // The short names, where the long ones don't fit (the top bar, map pieces).
-const PROFILE_SHORT: Record<Profile, string> = { backpacker: 'Backpacker', business: 'Business', luxury: 'Luxury', nomad: 'Nomad' };
+const PROFILE_SHORT: Record<Profile, string> = { backpacker: 'Backpacker', business: 'Business', luxury: 'Luxury', nomad: 'Nomad', krisann: 'Kris Ann' };
 const profileOf = (seat: number): Profile | null => state?.players[seat]?.profile ?? null;
 const nameOf = (seat: number): string => { const p = profileOf(seat); return p ? PROFILE_LABEL[p] : `Player ${seat + 1}`; };
 const shortOf = (seat: number): string => { const p = profileOf(seat); return p ? PROFILE_SHORT[p] : `Player ${seat + 1}`; };
@@ -83,7 +84,7 @@ const TRAVEL_WORDS: Readonly<Record<RouteKind, { verb: string; vehicle: string; 
 // Who can't take a trip of this kind (see canRide), as told on the screens.
 const NO_RIDE: Partial<Record<RouteKind, string>> = {
   station: 'Luxury can\'t take the train',
-  bus: 'Only the Nomad and the Backpacker take the bus',
+  bus: 'Only the Nomad, the Backpacker and Kris Ann take the bus',
 };
 const BUSINESS_ICON: Record<BusinessKind, string> = { tours: '🏛️', airline: '✈️', ferry: '⚓', train: '🚆', bus: '🚌', car: '🚗' };
 const BUSINESS_NAME: Record<BusinessKind, string> = { tours: 'guided tours', airline: 'airline', ferry: 'ferry agency', train: 'train ticket booth', bus: 'bus ticket booth', car: 'car rental' };
@@ -447,19 +448,22 @@ function profileNote(p: Profile, who = ''): HTMLElement {
   // Step 2.7 (owner): with the free quiz every profile travels like the Backpacker.
   const quizTrips = `with the free quiz: planes ${plural(travelTurns(p, 'airport', false), 'travel turn')}, ships ${plural(travelTurns(p, 'port', false), 'travel turn')}`;
   const CITIZEN_LINE = `A citizen of its home country from the start: others pay it a ${VISA_PRICE}-point visa to enter.`;
-  const CAR_LINE = `Can rent a car in Mexico (${plural(ticketPrice('nomad', 'car') ?? 0, 'point')}): all of the USA or all of Canada (+5) at once.`;
+  const CAR_LINE = `Can rent a car in Mexico (${plural(ticketPrice(p, 'car') ?? 0, 'point')}): all of the USA or all of Canada (+${bigCountryReward(p, 3)}) at once.`;
   const good: Record<Profile, string[]> = {
     backpacker: ['Never pays for a ticket: always the free quiz.', 'Can take the bus from Mongolia: all of Russia (+5) or all of China (+3) at once.', 'Can try to hitchhike from Mexico: all of the USA or all of Canada (+5) at once, if a car stops.', `+${CONTINENT_BONUS.backpacker!.points} for visiting ${CONTINENT_BONUS.backpacker!.continents} continents.`, CITIZEN_LINE],
     business: [CITIZEN_LINE, 'Can take a 2nd citizenship for free, once, in an area it stands in.', 'Never pays a visa (but takes the visa test).', `Fast when it pays: ${trips}.`, CAR_LINE],
     luxury: ['Can fly or sail to any airport or port.', CITIZEN_LINE, 'Never takes a visa test (it pays the visa).', `Fast when it pays: ${trips}.`, CAR_LINE],
     // Step 2.8 (owner): the boss alerts stay a surprise; the trip point in one short line.
     nomad: [`The cheapest tickets: ${plural(price ?? 0, 'point')} for planes, ships and trains; fast when it pays: ${trips}.`, `Gets paid +${POINTS_NOMAD_TRIP} during trips to new areas.`, 'Can take the bus from Mongolia: all of Russia (+5) or all of China (+3) at once.', CAR_LINE],
+    // Step 2.11 (owner): Kris Ann, the game's heroine, travels with her Dad.
+    krisann: [`+${KRISANN_BIG_COUNTRY_EXTRA} extra for every big country she finishes: USA, Canada, Russia +${bigCountryReward('krisann', 3)}; China, Brazil, Australia +${bigCountryReward('krisann', 2)}.`, `Can take the bus from Mongolia: all of Russia (+${bigCountryReward('krisann', 3)}) or all of China (+${bigCountryReward('krisann', 2)}) at once.`, `Can rent a car in Mexico (${plural(ticketPrice('krisann', 'car') ?? 0, 'point')}): all of the USA or all of Canada (+${bigCountryReward('krisann', 3)}) at once.`, `A citizen of her home country from the start: others pay her a ${VISA_PRICE}-point visa to enter.`, 'Travels with Dad.'],
   };
   const bad: Record<Profile, string[]> = {
     backpacker: ['Travels by plane, ship, train or bus only with the quiz (one try per turn), and never rents a car.', `Slow: ${trips}.`],
     business: [`Ticket ${plural(price ?? 0, 'point')}.`, `Slower ${quizTrips}.`, 'Can\'t take the bus.'],
     luxury: [`The highest ticket: ${plural(price ?? 0, 'point')}.`, `Slower ${quizTrips}.`, 'Can\'t take the train or the bus.'],
     nomad: ['No citizenship: it pays visas but never receives any.', 'Works on trips: no travel challenges.', `No trip point for a paid plane, train or bus (0 travel turns). Slower ${quizTrips}.`],
+    krisann: ['Never owns a business.', `Plane ticket ${plural(KRISANN_PLANE_PRICE, 'point')}; ship, train, bus and car ${plural(price ?? 0, 'point')}.`, `Slower ${quizTrips}.`],
   };
   if (who === GOOD_ONLY) return el('ul', { className: 'profile-good' }, ...good[p].map((t) => el('li', { textContent: t })));
   return el('div', { className: 'note profile-note' },
@@ -629,12 +633,13 @@ function moveSound(action: Action, bought: boolean): void {
 
 // ---------- event cards (task 11) ----------
 
-const DECK_ICON: Record<Deck, string> = { country: '🗺️', backpacker: '🎒' };
+const DECK_ICON: Record<Deck, string> = { country: '🗺️', krisann: '🧭' };
 
 // What the card did: the points really won or lost, or the lost turn.
 function cardEffect(c: DrawnCard): string {
   const { points, loseTurn } = c.card;
   if (loseTurn) return '⏸️ This turn is lost.';
+  if (points === 0) return '0 points.';
   if (points > 0) return `+${plural(points, 'point')}.`;
   if (c.change === 0) return `−${plural(-points, 'point')}, but there were no points to lose.`;
   if (c.change !== points) return `−${plural(-points, 'point')}: only ${-c.change} to lose, so ${-c.change} lost.`;
@@ -656,8 +661,25 @@ function renderCard(c: DrawnCard): HTMLElement {
 // Where the news comes from: the area the player is in (Backpacker tips come from the road).
 function newsFrom(c: DrawnCard): string {
   const area = state?.players[c.seat].area;
-  if (c.card.deck === 'backpacker') return 'Backpacker news';
+  if (c.card.deck === 'krisann') return 'Kris Ann & Dad';
   return area ? `News from ${areaById.get(area)!.name}` : 'News';
+}
+
+// Step 2.11 (owner): Kris Ann's own card, a picture popup like the wonder posters (the owner's art), shown to every
+// player, also when Kris Ann is a robot: the only robot popup people see. Never the phone news.
+const KRISANN_ART: Record<string, string> = (window as unknown as { KAJ_KRISANN?: Record<string, string> }).KAJ_KRISANN ?? {};
+function krisAnnCard(c: DrawnCard, close: () => void): HTMLElement {
+  const okButton = button('OK', close);
+  okButton.className = 'primary';
+  const art = KRISANN_ART[c.card.id];
+  return el('div', { className: 'trip-turn ka-card' },
+    art ? el('img', { className: 'ka-art', src: art, alt: '' }) : el('div', {}),
+    el('div', { className: 'trip-text' },
+      el('p', { className: 'ka-kicker', textContent: '🧭 Kris Ann & Dad' }),
+      el('h2', { className: 'ka-title', textContent: c.card.title }),
+      el('p', { textContent: c.card.text }),
+      el('p', { className: `ka-points${c.card.points < 0 ? ' bad' : ''}`, textContent: cardEffect(c) }),
+      el('div', { className: 'row' }, okButton)));
 }
 
 // The phone that buzzes before an event card (owner's request, task 14k): only "Read".
@@ -876,6 +898,7 @@ function wonderPoster(s: GameState, me: Player, actions: Action[], seen: () => v
   } else {
     offer = tours && tours.owner !== null
       ? `Its Guided Tours belong to ${nameOf(tours.owner)}.`
+      : ownsNoBusiness(me.profile) ? 'Nobody runs its Guided Tours yet. Kris Ann never owns a business.'
       : `Nobody runs its Guided Tours yet. They cost ${price}, and you have ${plural(me.points, 'point')}.`;
     const ok = button('OK', close);
     ok.className = 'primary';
@@ -1645,7 +1668,7 @@ function arrivalLines(before: Player, after: Player): { area: string; lines: str
   if (country && !before.bigCountries.includes(country) && after.bigCountries.includes(country)) {
     const parts = gameMap.areas.filter((x) => x.bigCountry === country);
     const how = by === 'bus' ? '🚌 The bus' : before.profile === 'backpacker' ? '👍 Hitchhiking' : '🚗 The car';
-    lines[0] = `${how} gives all of ${country}'s points at once: +${bigCountryPoints(parts.length)}! Its other parts still give +${POINTS_NEW_AREA} each when you visit them.`;
+    lines[0] = `${how} gives all of ${country}'s points at once: +${bigCountryReward(before.profile, parts.length)}! Its other parts still give +${POINTS_NEW_AREA} each when you visit them.`;
   }
   // A whole continent (owner, M5); the surprise has its own popup.
   for (const c of after.fullContinents.filter((x) => !before.fullContinents.includes(x))) {
@@ -1725,13 +1748,13 @@ function renderGuide(s: GameState, actions: Action[]): HTMLElement | string {
     const slow = travelTurns(me.profile!, kind, false);
     if (kind === 'car') {
       lines.push(price === null
-        ? `👍 Cars drive from here to ${to.join(' or ')}. Want to try to hitchhike? If a car stops, you ride for free and get all of the USA's or Canada's points (+5) at once; its other parts still give +1 each. If none stops, walk on. Tap the hitchhiker.`
-        : `🚗 There is a car rental here: rent a car to ${to.join(' or ')} for ${plural(price, 'point')} (no quiz) and get all of the USA's or Canada's points (+5) at once; its other parts still give +1 each. ${plural(turns, 'travel turn')}. Tap the car.`);
+        ? `👍 Cars drive from here to ${to.join(' or ')}. Want to try to hitchhike? If a car stops, you ride for free and get all of the USA's or Canada's points (+${bigCountryReward(me.profile, 3)}) at once; its other parts still give +1 each. If none stops, walk on. Tap the hitchhiker.`
+        : `🚗 There is a car rental here: rent a car to ${to.join(' or ')} for ${plural(price, 'point')} (no quiz) and get all of the USA's or Canada's points (+${bigCountryReward(me.profile, 3)}) at once; its other parts still give +1 each. ${plural(turns, 'travel turn')}. Tap the car.`);
       continue;
     }
     lines.push(`${VEHICLE[kind]} There is ${placeName} here: ${words.verb} to ${to.join(' or ')}. ${
       price === null ? `Backpacker: only with the free quiz, ${turnsWord(slow)}.` : `Ticket ${plural(price, 'point')}: ${turnsWord(turns)}. Or the free quiz: slower, ${turnsWord(slow)}.`}${
-      kind === 'bus' ? ' The bus gives the whole country\'s points at once: Russia +5 or China +3; its other parts still give +1 each when you visit them.' : ''} Tap the ${words.vehicle}.`);
+      kind === 'bus' ? ` The bus gives the whole country's points at once: Russia +${bigCountryReward(me.profile, 3)} or China +${bigCountryReward(me.profile, 2)}; its other parts still give +1 each when you visit them.` : ''} Tap the ${words.vehicle}.`);
   }
   if (actions.some((a) => a.type === 'buyCitizenship')) {
     lines.push(`🛂 Business Traveler: you can take a 2nd citizenship here, for free and only once (the button above). Then the other players take a visa test and pay you ${plural(VISA_PRICE, 'point')} each time they enter (Luxury pays without a test).`);
@@ -1881,7 +1904,7 @@ function renderModal(s: GameState, actions: Action[], isRobot: boolean): Modal |
       .sort((x, y) => (ORDER.indexOf(x) + 99) % 99 - (ORDER.indexOf(y) + 99) % 99);
     const bigList = bigNames.map((b) => {
       const all = gameMap.areas.filter((a) => a.bigCountry === b);
-      return chip(`b-${b}`, `${b === 'United States' ? 'USA' : b} ${count(all)}/${all.length} · all +${bigCountryPoints(all.length)}`, count(all), all.length);
+      return chip(`b-${b}`, `${b === 'United States' ? 'USA' : b} ${count(all)}/${all.length} · all +${bigCountryReward(me.profile, all.length)}`, count(all), all.length);
     });
     const wonders = gameMap.areas.filter((a) => a.wonder);
     const last: HTMLElement[] = [chip('w', `🏛️ Wonders ${count(wonders)}/${wonders.length} · each +${POINTS_WONDER} more`, count(wonders), wonders.length)];
@@ -1952,6 +1975,12 @@ function renderModal(s: GameState, actions: Action[], isRobot: boolean): Modal |
       () => { seenCards.add(homeKey); render(); });
   }
   const key = s.card ? `${s.card.round}-${s.card.seat}-${s.card.card.text}` : '';
+  // Step 2.11 (owner): Kris Ann's card shows to everyone, also on a robot's turn (the robot waits for OK).
+  if (s.phase === 'play' && s.card?.card.deck === 'krisann' && s.card.seat === me.seat && !seenCards.has(key)) {
+    const c = s.card;
+    return { turn: false, node: wrap(krisAnnCard(c, () => { seenCards.add(key); pauseNext(); render(); }), 'trip'),
+      sound: c.card.points < 0 ? 'card-bad' : c.card.points > 0 ? 'card-good' : 'tap', soundKey: key };
+  }
   if (s.phase === 'play' && me.kind === 'human' && s.card?.seat === me.seat && !seenCards.has(key)) {
     const bad = s.card.card.loseTurn || s.card.card.points < 0;
     // Two steps (task 14k): the phone buzzes, then the news and what it means.
@@ -2423,7 +2452,7 @@ function renderPopup(s: GameState, p: { kind: PopupKind; area: string }, myTurn:
     const b = businessAt(s, p.area, kind);
     if (!b) return '';
     return el('p', { className: 'small', textContent: `${BUSINESS_ICON[kind]} ${capital(BUSINESS_NAME[kind])}: ${b.owner === null
-      ? `for sale, ${plural(BUSINESS_PRICE[kind], 'point')}; then ${BUSINESS_EARNS[kind]}.`
+      ? `for sale, ${plural(BUSINESS_PRICE[kind], 'point')}; then ${BUSINESS_EARNS[kind]}.${ownsNoBusiness(me.profile) ? ' Kris Ann never owns a business.' : ''}`
       : b.owner === me.seat ? 'yours.' : `owned by ${nameOf(b.owner)}.`}` });
   };
 
@@ -2604,12 +2633,12 @@ function renderAreaDetails(s: GameState, id: string): HTMLElement {
     routes('airport').length ? `✈️ Airport: flights to ${routes('airport').join(', ')}` : '',
     routes('port').length ? `⚓ Port: ships to ${routes('port').join(', ')}` : '',
     routes('station').length ? `🚆 Station: trains to ${routes('station').join(', ')} (not for Luxury)` : '',
-    routes('bus').length ? `🚌 Bus stop: buses to ${routes('bus').join(' or ')}, one way (Nomad and Backpacker only): the whole country\'s points at once` : '',
+    routes('bus').length ? `🚌 Bus stop: buses to ${routes('bus').join(' or ')}, one way (Nomad, Backpacker and Kris Ann only): the whole country\'s points at once` : '',
     routes('car').length ? (me.profile === 'backpacker'
       ? `👍 Hitchhiking to ${routes('car').join(' or ')}, one way, free if a car stops: all of the USA\'s or Canada\'s points at once`
-      : `🚗 Car rental: cars to ${routes('car').join(' or ')}, one way, ${plural(ticketPrice('nomad', 'car') ?? 0, 'point')} (no quiz): all of the USA\'s or Canada\'s points at once`) : '',
+      : `🚗 Car rental: cars to ${routes('car').join(' or ')}, one way, ${plural(ticketPrice(me.profile ?? 'nomad', 'car') ?? 0, 'point')} (no quiz): all of the USA\'s or Canada\'s points at once`) : '',
     `🚶 Walk to: ${a.neighbours.map((n) => areaById.get(n)!.name).join(', ') || 'nowhere (plane or ship only)'}`,
-    ...s.businesses.filter((b) => b.area === id).map((b) => `${BUSINESS_ICON[b.kind]} ${capital(BUSINESS_NAME[b.kind])}: ${b.owner === null ? `for sale, ${plural(BUSINESS_PRICE[b.kind], 'point')}` : `owned by ${nameOf(b.owner)}`}`),
+    ...s.businesses.filter((b) => b.area === id).map((b) => `${BUSINESS_ICON[b.kind]} ${capital(BUSINESS_NAME[b.kind])}: ${b.owner === null ? `for sale, ${plural(BUSINESS_PRICE[b.kind], 'point')}${ownsNoBusiness(me.profile) ? ' (Kris Ann never owns a business)' : ''}` : `owned by ${nameOf(b.owner)}`}`),
     ...s.players.filter((p) => citizenAreas(p).includes(id)).map((p) => `🛂 ${nameOf(p.seat)} is a citizen here: others take a visa test and pay a ${VISA_PRICE}-point visa`),
     ...s.players.filter((p) => p.area === id).map((p) => `📍 ${nameOf(p.seat)} is here`),
     ...s.players.filter((p) => p.home === id).map((p) => `🏠 ${nameOf(p.seat)}'s home country`),

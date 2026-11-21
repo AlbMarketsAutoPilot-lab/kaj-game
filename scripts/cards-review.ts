@@ -9,7 +9,7 @@ import { map30 } from '../src/maps/map30.ts';
 
 const effect = (points: number, loseTurn?: true) => (loseTurn ? 'lose a turn' : points > 0 ? `+${points}` : `${points}`);
 const country = CARDS.filter((c) => c.deck === 'country');
-const backpacker = CARDS.filter((c) => c.deck === 'backpacker');
+const krisann = CARDS.filter((c) => c.deck === 'krisann');
 const count = (cards: EventCard[], f: (c: EventCard) => boolean) => cards.filter(f).length;
 // Examples: a normal area (taking turns) and a part of a big country.
 const EXAMPLES = ['chile', 'japan', 'egypt', 'iberia', 'india', 'mexico', 'turkey-caucasus', 'northern-andes', 'scandinavia', 'west-africa', 'korea', 'italy', 'uk-ireland', 'new-zealand', 'greece'];
@@ -19,7 +19,7 @@ const cell = (s: string) => s.replaceAll('|', '\\|');
 
 const mixRows: string[] = [];
 for (const turns of ['30', '50'] as const) {
-  for (const p of ['backpacker', 'business', 'luxury', 'nomad'] as const) {
+  for (const p of ['backpacker', 'business', 'luxury', 'nomad', 'krisann'] as const) {
     const m = (players: '2' | '4') => {
       const x = EVENT_MIX[turns][players][p];
       return x ? `good ${x.good}×, bad ${x.bad}×` : 'normal deck';
@@ -70,7 +70,7 @@ for (const c of country) {
   }
   lines.push(`| ${c.id} | ${effect(c.points, c.loseTurn)} | ${cell(c.title)} | ${cell(c.text)} | ${c.big ? cell(c.big) : 'same'} | ${cell(example)} |`);
 }
-lines.push('', '## Backpacker cards (kept, not drawn since step 2.6)', '', '| Id | Headline | Card | Effect |', '|---|---|---|---|');
-for (const c of backpacker) lines.push(`| ${c.id} | ${c.title} | ${c.text} | ${effect(c.points, c.loseTurn)} |`);
+lines.push('', "## Kris Ann's cards (step 2.11; drawn only by Kris Ann, shown to everyone; points: 30 turns, 50 turns in brackets)", '', '| Id | Headline | Card | Effect |', '|---|---|---|---|');
+for (const c of krisann) lines.push(`| ${c.id} | ${c.title} | ${c.text} | ${effect(c.points, c.loseTurn)}${c.points50 !== undefined ? ` (${effect(c.points50)})` : ''} |`);
 writeFileSync('docs/cards.md', lines.join('\n') + '\n');
 console.log(`docs/cards.md: ${CARDS.length} cards`);

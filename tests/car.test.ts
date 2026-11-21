@@ -47,9 +47,9 @@ test('routes: from Mexico only, one way to USA East or Canada West, on both maps
   }
 });
 
-test('the Nomad rents the car for 1 point, Business and Luxury for 2 (step 2.7), never by quiz; 1 travel turn', () => {
-  assert.deepEqual(CAR_TICKET_PRICE, { backpacker: null, business: 2, luxury: 2, nomad: 1 });
-  for (const profile of ['nomad', 'business', 'luxury'] as const) {
+test('the Nomad rents the car for 1 point, Business, Luxury and Kris Ann for 2 (steps 2.7, 2.11), never by quiz; 1 travel turn', () => {
+  assert.deepEqual(CAR_TICKET_PRICE, { backpacker: null, business: 2, luxury: 2, nomad: 1, krisann: 2 });
+  for (const profile of ['nomad', 'business', 'luxury', 'krisann'] as const) {
     const rent: number = CAR_TICKET_PRICE[profile]!;
     assert.deepEqual(cars(game(profile)), ['board canada-west', 'board usa-east'], profile);
     assert.deepEqual(cars(game(profile, 'mexico', rent - 1)), [], `${profile} with ${rent - 1} points`);

@@ -12,6 +12,10 @@ import {
   MAX_SEATS,
   MIN_SEATS,
   bigCountryPoints,
+  bigCountryReward,
+  ownsNoBusiness,
+  LOSE_TURN_WEIGHT,
+  KRISANN_CARD_WEIGHT,
   POINTS_NEW_AREA,
   POINTS_NEW_CONTINENT,
   POINTS_NOMAD_BONUS,
@@ -116,6 +120,7 @@ export function createGame(config: GameConfig, map: GameMap): GameState {
     hitchFailedRound: null,
     nomadShips: 0,
     cameFrom: null,
+    ownCards: [],
   }));
 
   return {
@@ -237,13 +242,8 @@ export function apply(state: GameState, map: GameMap, action: Action): GameState
   switch (action.type) {
     case 'chooseProfile': {
       me.profile = action.profile;
+      // Step 2.11: with 5 profiles and at most 4 players, everyone chooses (no "last one left").
       advanceSetup(next, map);
-      // The last player to choose gets the one profile left.
-      const left = PROFILES.filter((p) => !next.players.some((q) => q.profile === p));
-      if (next.phase === 'chooseProfile' && next.current === next.players.length - 1 && left.length === 1) {
-        currentPlayer(next).profile = left[0];
-        advanceSetup(next, map);
-      }
       return next;
     }
     case 'chooseStart': {
@@ -616,6 +616,7 @@ export function mostBusinessesBonus(businesses: Business[], seat: number): numbe
 // Two players are never in one area, so the first to arrive has the first chance (⭐ right to
 // buy at a wonder); if they leave without buying, whoever arrives next may buy.
 function buyActions(state: GameState, me: Player): Action[] {
+  if (ownsNoBusiness(me.profile)) return [];
   return state.businesses
     .filter((b) => b.area === me.area && b.owner === null && me.points >= BUSINESS_PRICE[b.kind])
     .map((b) => ({ type: 'buy', business: b.kind }));
@@ -629,7 +630,7 @@ function sellActions(state: GameState, me: Player): Action[] {
   return state.businesses
     .filter((b) => b.owner === me.seat)
     .flatMap((b) => state.players
-      .filter((p) => p.seat !== me.seat && p.travel === null && p.points >= BUSINESS_PRICE[b.kind])
+      .filter((p) => p.seat !== me.seat && p.travel === null && !ownsNoBusiness(p.profile) && p.points >= BUSINESS_PRICE[b.kind])
       .map((p): Action => ({ type: 'sell', business: b.kind, area: b.area, to: p.seat })));
 }
 
@@ -750,7 +751,7 @@ function arrive(state: GameState, map: GameMap, me: Player, area: Area, byBus = 
   const country = area.bigCountry;
   const countryDone = country !== undefined && me.bigCountries.includes(country);
   const giveCountry = (c: string) => {
-    me.points = addPoints(me.points, bigCountryPoints(bigCountryParts(map, c).length));
+    me.points = addPoints(me.points, bigCountryReward(me.profile, bigCountryParts(map, c).length));
     me.bigCountries.push(c);
   };
   if (!me.visitedAreas.includes(area.id)) {
@@ -864,10 +865,16 @@ function countLandTurn(state: GameState, map: GameMap, me: Player): void {
 
 function scheduledCard(state: GameState, map: GameMap, me: Player): void {
   if (!state.eventCards) return;
-  // Step 2.6: everyone draws the country cards (the Backpacker's helper cards are no longer drawn),
-  // with the profile's card mix (EVENT_MIX). An area may take the place cards of another id
-  // (Area.cardsFrom, task M2).
-  const card = pickCard(state, ['country'], areaById(map, me.area!).cardsFrom ?? me.area, cardMix(me.profile!, state.players.length, state.totalRounds));
+  // Step 2.6: everyone draws the country cards, with the profile's card mix (EVENT_MIX). An area may take the
+  // place cards of another id (Area.cardsFrom, task M2). Step 2.11 (owner): Kris Ann also draws her own 8 cards,
+  // none twice in a game, with their own points in the 50-turn game.
+  const own = me.profile === 'krisann';
+  let card = pickCard(state, own ? ['country', 'krisann'] : ['country'], areaById(map, me.area!).cardsFrom ?? me.area,
+    cardMix(me.profile!, state.players.length, state.totalRounds), me.ownCards ?? []);
+  if (card.deck === 'krisann') {
+    (me.ownCards ??= []).push(card.id);
+    if (state.totalRounds >= 50 && card.points50 !== undefined) card = { ...card, points: card.points50 };
+  }
   state.card = applyCard(state, me, newsCard(card, areaById(map, me.area!), state.drawn.length));
   if (card.loseTurn) me.loseTurn = true;
 }
@@ -880,9 +887,10 @@ export function eligibleCards(decks: Deck[], area: string | null): EventCard[] {
 // A random card (the same card can come again), with the game's dice.
 // Step 2.6: a good card (points above 0) counts `mix.good` times, a bad one (points below 0, or a lost
 // turn) `mix.bad` times, any other card once.
-function pickCard(state: GameState, decks: Deck[], area: string | null, mix: CardMix): EventCard {
-  const cards = eligibleCards(decks, area);
-  const weight = (c: EventCard) => (c.loseTurn || c.points < 0 ? mix.bad : c.points > 0 ? mix.good : 1);
+function pickCard(state: GameState, decks: Deck[], area: string | null, mix: CardMix, exclude: string[] = []): EventCard {
+  const cards = eligibleCards(decks, area).filter((c) => !exclude.includes(c.id));
+  // Step 2.11: a "lose a turn" card counts half a bad card; each of Kris Ann's cards as one news card.
+  const weight = (c: EventCard) => (c.deck === 'krisann' ? KRISANN_CARD_WEIGHT : c.loseTurn ? mix.bad * LOSE_TURN_WEIGHT : c.points < 0 ? mix.bad : c.points > 0 ? mix.good : 1);
   const total = cards.reduce((sum, c) => sum + weight(c), 0);
   const [i, rng] = randomInt(state.rng, CARD_DRAW_STEPS);
   state.rng = rng;

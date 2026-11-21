@@ -1,4 +1,4 @@
-// The 4 profile icons (owner-approved preview, after task 14g): shaded SVG drawings that look 3D,
+// The 5 profile icons (Kris Ann's compass since step 2.11) (owner-approved preview, after task 14g): shaded SVG drawings that look 3D,
 // one colour per profile, with a white border (owner's request) and a soft shadow. The drawings sit once in the page; every icon is a <use> of them.
 
 import type { Profile } from '../engine/types.ts';
@@ -77,6 +77,25 @@ const DEFS = `<filter id="kaj-shadow" x="-30%" y="-30%" width="160%" height="170
 <rect x="54" y="52" width="20" height="13" rx="3" fill="url(#kaj-gold)" stroke="#7a5310" stroke-width="1.5"/>
 <rect x="20" y="40" width="40" height="30" rx="10" fill="url(#kaj-shine)"/>
 </g>
+</symbol>
+<!-- Step 2.11 (owner-approved): Kris Ann's compass, in the same shaded 3D style. -->
+<linearGradient id="kaj-cRim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7fe0cf"/><stop offset=".5" stop-color="#1f9c8a"/><stop offset="1" stop-color="#0b5a50"/></linearGradient>
+<radialGradient id="kaj-cFace" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="#fffbe8"/><stop offset=".7" stop-color="#f3e2b0"/><stop offset="1" stop-color="#c9ad6a"/></radialGradient>
+<linearGradient id="kaj-cRed" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ff7a6b"/><stop offset=".5" stop-color="#e0352b"/><stop offset="1" stop-color="#8e1710"/></linearGradient>
+<linearGradient id="kaj-cWhite" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffffff"/><stop offset=".5" stop-color="#dfe6ea"/><stop offset="1" stop-color="#8d989f"/></linearGradient>
+<symbol id="kaj-krisann" viewBox="0 0 128 128">
+<g filter="url(#kaj-shadow)">
+<rect x="56" y="6" width="16" height="14" rx="5" fill="url(#kaj-gold)" stroke="#7a5310" stroke-width="1.5"/>
+<circle cx="64" cy="68" r="52" fill="url(#kaj-cRim)" stroke="#06433b" stroke-width="2"/>
+<circle cx="64" cy="68" r="43" fill="url(#kaj-cFace)" stroke="#8a6a24" stroke-width="2"/>
+<g stroke="#6b5420" stroke-width="2.2" stroke-linecap="round">
+<path d="M64 29v7M64 100v7M25 68h7M96 68h7"/><path d="M36.4 40.4l4 4M87.6 91.6l4 4M91.6 40.4l-4 4M40.4 91.6l-4 4" stroke-width="1.6"/></g>
+<text x="64" y="47" font-family="Georgia,serif" font-weight="700" font-size="13" text-anchor="middle" fill="#8e1710">N</text>
+<polygon points="64,30 74,68 64,64 54,68" fill="url(#kaj-cRed)" stroke="#6a120c" stroke-width="1.2" stroke-linejoin="round"/>
+<polygon points="64,106 54,68 64,72 74,68" fill="url(#kaj-cWhite)" stroke="#5c666c" stroke-width="1.2" stroke-linejoin="round"/>
+<circle cx="64" cy="68" r="6" fill="url(#kaj-gold)" stroke="#7a5310" stroke-width="1.5"/>
+<ellipse cx="48" cy="44" rx="26" ry="16" fill="url(#kaj-shine)" transform="rotate(-30 48 44)"/>
+</g>
 </symbol>`;
 
 export const PROFILE_COLOUR: Record<Profile, string> = {
@@ -84,6 +103,7 @@ export const PROFILE_COLOUR: Record<Profile, string> = {
   backpacker: '#e0352b',
   business: '#b0703a',
   luxury: '#2f8fe0',
+  krisann: '#1f9c8a',
 };
 
 // Puts the drawings in the page (once).

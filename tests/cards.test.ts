@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { CARDS } from '../src/cards/cards.ts';
-import { cardMix } from '../src/engine/constants.ts';
+import { cardMix, LOSE_TURN_WEIGHT } from '../src/engine/constants.ts';
 import { apply, createGame, eligibleCards, landTurnsToCard, legalActions, newsCard } from '../src/engine/engine.ts';
 import { CARD_COUNTRIES } from '../src/cards/countries.ts';
 import { randomRobotAction } from '../src/engine/robot.ts';
@@ -46,16 +46,19 @@ test('the card file: 40–60 cards, allowed strengths, area cards on the real ma
   assert.equal(new Set(CARDS.map((c) => c.id)).size, CARDS.length, 'ids are unique');
   const areas = new Set(map30.areas.map((a) => a.id));
   for (const c of CARDS) {
-    assert.ok([-5, -2, -1, 1, 2, 5].includes(c.points) || (c.points === 0 && c.loseTurn), c.id);
+    // The news cards' allowed strengths; Kris Ann's cards (step 2.11, owner-approved, some 0) are checked below.
+    if (c.deck === 'country') assert.ok([-5, -2, -1, 1, 2, 5].includes(c.points) || (c.points === 0 && c.loseTurn), c.id);
     if (c.loseTurn) assert.equal(c.points, 0, c.id);
     if (c.area) {
       assert.equal(c.deck, 'country', c.id);
       assert.ok(areas.has(c.area), `${c.id}: unknown area ${c.area}`);
     }
-    if (c.deck === 'backpacker') assert.ok(c.points > 0 && !c.loseTurn, `${c.id}: Backpacker cards help`);
-    assert.ok(c.text.length > 0 && c.text.length <= 110, `${c.id}: text length`);
+    // The news cards (the phone) keep their 110-character limit; Kris Ann's cards (step 2.11) are picture popups
+    // with longer, owner-approved texts, checked on the small phone screens (568×320) instead.
+    if (c.deck === 'country') assert.ok(c.text.length > 0 && c.text.length <= 110, `${c.id}: text length`);
+    if (c.deck === 'krisann') assert.ok(c.points >= -2 && c.points <= 2 && !c.loseTurn && c.text.includes('Kris Ann'), `${c.id}: Kris Ann card`);
   }
-  for (const deck of ['country', 'backpacker'] as const) {
+  for (const deck of ['country', 'krisann'] as const) {
     assert.ok(CARDS.filter((c) => c.deck === deck).length >= 8, deck);
   }
   // Mostly ±1, some ±2 or "lose a turn", rare ±5.
@@ -71,7 +74,7 @@ test('which cards can be drawn: every country card everywhere (step 2.8)', () =>
   assert.equal(country.length, 45);
   assert.ok(CARDS.every((c) => c.area === undefined));
   for (const area of ['egypt', 'iceland', 'france']) assert.deepEqual(ids(['country'], area), country);
-  assert.ok(ids(['country', 'backpacker'], 'france').some((id) => id.startsWith('b')));
+  assert.ok(ids(['country', 'krisann'], 'france').some((id) => id.startsWith('k')));
 });
 
 // Step 2.8 (owner): the news names the country the player stands in, never a capital in a big country.
@@ -210,24 +213,29 @@ test('the same seed draws the same cards; saves from versions 1 and 2 are not co
   }
 });
 
-// Step 2.6; step 2.7 (mix "D1"); step 2.8 (owner's final mix "N1", one mix per map): the same cards for everyone,
-// but how often good and bad ones come depends on the map, the profile and the number of players (3 players use
-// the 4-player mix). The Backpacker's helper cards b1–b8 are kept in cards.ts but never drawn.
-test('the card mix by map, profile and number of players; the Backpacker\'s helper cards are not drawn', () => {
-  assert.deepEqual(cardMix('business', 2), { good: 1.1, bad: 1.3 });
-  assert.deepEqual(cardMix('nomad', 2), { good: 1, bad: 1.37 });
+// Step 2.6; step 2.7 (mix "D1"); step 2.8 ("N1"); step 2.11 (owner's final mix "TG", one mix per map, measured 34 of 40):
+// the same news cards for everyone, but how often good and bad ones come depends on the map, the profile and the number
+// of players (3 players use the 4-player mix). Only Kris Ann draws her own 8 cards.
+test('the card mix by map, profile and number of players; only Kris Ann draws her own cards (step 2.11)', () => {
+  assert.deepEqual(cardMix('business', 2), { good: 1.1, bad: 0.79 });
+  assert.deepEqual(cardMix('nomad', 2), { good: 1.1, bad: 0.66 });
   assert.deepEqual(cardMix('nomad', 3), cardMix('nomad', 4));
-  assert.deepEqual(cardMix('backpacker', 4), { good: 0.93, bad: 1.6 });
-  assert.deepEqual(cardMix('business', 4), { good: 1.2, bad: 1.3 });
-  assert.deepEqual(cardMix('luxury', 4), { good: 1.3, bad: 1.17 });
-  assert.deepEqual(cardMix('nomad', 4), { good: 1.1, bad: 1.26 });
+  assert.deepEqual(cardMix('backpacker', 4), { good: 0.93, bad: 1.81 });
+  assert.deepEqual(cardMix('business', 4), { good: 1.2, bad: 1.44 });
+  assert.deepEqual(cardMix('luxury', 4), { good: 1.3, bad: 1.23 });
+  assert.deepEqual(cardMix('nomad', 4), { good: 1.1, bad: 0.81 });
+  assert.deepEqual(cardMix('krisann', 4), { good: 1, bad: 1.03 });
   // The 50-turn map has its own mix.
-  assert.deepEqual(cardMix('backpacker', 2, 50), { good: 1, bad: 1.5 });
-  assert.deepEqual(cardMix('nomad', 2, 50), { good: 1, bad: 1.25 });
-  assert.deepEqual(cardMix('backpacker', 4, 50), { good: 0.93, bad: 1.9 });
+  assert.deepEqual(cardMix('backpacker', 2, 50), { good: 1, bad: 1.29 });
+  assert.deepEqual(cardMix('nomad', 2, 50), { good: 1, bad: 0.72 });
+  assert.deepEqual(cardMix('backpacker', 4, 50), { good: 0.93, bad: 2.25 });
   assert.deepEqual(cardMix('business', 4, 50), { good: 1.2, bad: 1.19 });
-  assert.deepEqual(cardMix('nomad', 4, 50), { good: 1.1, bad: 1.15 });
-  assert.ok(CARDS.filter((c) => c.deck === 'backpacker').length === 8, 'b1–b8 kept');
+  assert.deepEqual(cardMix('krisann', 2, 50), { good: 1, bad: 1.25 });
+  assert.equal(LOSE_TURN_WEIGHT, 0.5);
+  // Kris Ann's 8 cards, as measured: points 30 turns +2 +1 +1 0 0 −1 −1 −2; 50 turns +2 +1 +1 +1 0 −1 −1 −1.
+  const own = CARDS.filter((c) => c.deck === 'krisann');
+  assert.deepEqual(own.map((c) => c.points), [2, 1, 1, 0, 0, -1, -1, -2]);
+  assert.deepEqual(own.map((c) => c.points50 ?? c.points), [2, 1, 1, 1, 0, -1, -1, -1]);
   const bad = (c: DrawnCard) => c.card.loseTurn === true || c.card.points < 0;
   const drawn: Record<string, { all: number; bad: number }> = {};
   for (let g = 0; g < 150; g++) {
@@ -239,7 +247,7 @@ test('the card mix by map, profile and number of players; the Backpacker\'s help
       s = apply(s, map30, a);
       for (const c of s.drawn) {
         const p = s.players[c.seat].profile!;
-        assert.notEqual(c.card.deck, 'backpacker', `helper card drawn: ${c.card.id}`);
+        if (c.card.deck === 'krisann') assert.equal(p, 'krisann', `${c.card.id} drawn by ${p}`);
         drawn[p] ??= { all: 0, bad: 0 };
         drawn[p].all++;
         if (bad(c)) drawn[p].bad++;
@@ -247,6 +255,7 @@ test('the card mix by map, profile and number of players; the Backpacker\'s help
     }
   }
   const share = (p: Profile) => drawn[p].bad / drawn[p].all;
-  // 30 turns, 4 players: Backpacker 60% bad, Nomad 50%, Business 49%, Luxury 44% (in theory, the 45 news cards).
-  assert.ok(share('backpacker') > share('business') && share('backpacker') > share('nomad') && share('nomad') > share('luxury'), JSON.stringify(drawn));
+  // 30 turns, 4 players, the 45 news cards with "lose a turn" half as often (in theory): Backpacker 60% bad, Business
+  // 48%, Luxury 42%, Nomad 36%.
+  assert.ok(share('backpacker') > share('business') && share('business') > share('luxury') && share('luxury') > share('nomad'), JSON.stringify(drawn));
 });
