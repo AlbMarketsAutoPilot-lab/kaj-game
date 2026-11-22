@@ -98,7 +98,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | 2.9 | More wonders, history and curiosity for each, new design | medium | 2 | — | ⛔ stopped (owner, 2026-11-20): no new wonders; Petra and Angkor Wat (30 turns) and Victoria Falls (50 turns) measured 30 → 22 of 32 at 1,600 games per line; history and curiosity of the 11 wonders kept for later |
 | 2.10 | Passport with stamps, records on the device | medium | 1–2 | — | ✅ done (owner-approved design, 2026-11-20): end popup in two columns (only winners cheered, new-record line, a passport button per person, Play again and Records, no Leave); passport cover with the citizenship and flag, data page, stamps 6 a page; records top 10 by points per game length; screens only, save stays 20 |
 | 2.11 | Kris Ann, a 5th profile (the Explorer of `docs/profiles8.md`), her 8 cards with the owner's pictures | **high** | 1 | — | ✅ done (owner's final decisions, 2026-11-21): +3 per big country, bus, no business, plane 4, card mix TG with "lose a turn" half as often, her 8 cards (none twice a game, shown to everyone), robots take her first; 34 of 40 fair (old 26 of 32, Kris Ann 8 of 8) at 1,600 games per line (before 30 of 32); saves v21 |
-| 2.12 | 100-turn map in this app (J1 plan high, J2 engine high, J3–J6 medium) | **high** / medium | ~10 | — | J1 ✅ done (owner's final decisions, 2026-11-22): 126 areas (`docs/map100.md`), big countries and the 11 wonders as on the 50-turn map, 25 routes in the 2.4 style; 100 turns: cards every 5, own mix, catch-up ×3 (F3-2, 16 of 20 at 3,200 games per line); 30 and 50 turns adopt catch-up ×1 (K1-3, 32 of 40 on new games, as today, more exciting); saves v22 in J2. Next: J2 engine (high) |
+| 2.12 | 100-turn map in this app (J1 plan high, J2 engine high, J3–J6 medium) | **high** / medium | ~10 | — | J1 ✅ done (owner's final decisions, 2026-11-22): 126 areas (`docs/map100.md`), big countries and the 11 wonders as on the 50-turn map, 25 routes in the 2.4 style; 100 turns: cards every 5, own mix, catch-up ×3 (F3-2, 16 of 20 at 3,200 games per line); 30 and 50 turns adopt catch-up ×1 (K1-3, 32 of 40 on new games, as today, more exciting); saves v22 in J2. J2 ✅ done (2026-11-22): map100 in the engine (hidden in the setup until J5), the three card mixes, catch-up on every map, lab options, saves v22; the built game measures exactly as J1 (33 of 40, 16 of 20). Next: J3 shapes (medium) |
 | 2.13 | Full test games, release 2.0 (web on kaj.kritere.com and app) | medium | 1–2 | — | |
 
 ## The tasks
@@ -883,6 +883,17 @@ engine (high, 2), J3 shapes, J4 facts (2), J5 screens (2), J6 test games (2), me
     v22 (no older save continues); `docs/rules-now.md` updated when the rules are in the code. Proof: the built game must
     measure exactly as the scratch versions (K1-3 and F3-2, same seeds, line by line). Until J4, the 100-turn areas
     borrow the facts of their 50-turn areas (test only; not released).
+  - **J2 done (2026-11-22, one session):** built as decided (`docs/engine.md`, step 2.12 part J2; rules in
+    `docs/rules-now.md`, [2.12]). `src/maps/map100.ts` is made by `node scripts/map100-review.ts` from the plan's lines
+    (same area, neighbour and route order); game length 100 (`GAME_LENGTHS`; the setup screen shows only 30 and 50 until
+    J5); card mixes K1-3 and F3-2 and catch-up exactly as in `docs/card-mix-2.12.json`; lab `--lines=100` and `--first=`;
+    saves v22. Proof (games 1–3,200 per line, 1 run each): 30 and 50 turns 33 of 40 (25 of 32, Kris Ann 8 of 8), boredom
+    26.2%, lead changes 5.40, won by 3 or less 42.9%; 100 turns 16 of 20, boredom 25.1%, lead changes 10.52, won by 3 or
+    less 50.2%; every line as in J1 (`docs/balance-lab.md`). Tests: new `tests/map100.test.ts` and `tests/catchup.test.ts`;
+    the card-mix, game-length and save-version tests take the new values. One existing check failed with catch-up (step
+    2.11: Luxury draws more bad cards than the Nomad, 30 turns, 4 random robots: 38.9% against 41.4%); owner's choice A:
+    that test turns catch-up off with a test-only switch (`GameConfig.catchUp`), so it measures the card mix alone; no
+    limit changed. 249 tests pass; the web build works.
 
 **2.13 (release) Release (medium, 1–2).** Full test games (2–4 players, all lengths), web at kaj.kritere.com and app.
 

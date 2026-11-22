@@ -1,7 +1,8 @@
-# KAJ — all game rules as of 2026-11-21
+# KAJ — all game rules as of 2026-11-22
 
 Checked against the code (`src/engine/`, `src/maps/`, `src/cards/`) and `docs/engine.md`.
-Rules marked **[2.6]** came with step 2.6 and **[2.7]** with step 2.7 (both 2026-11-19), **[2.8]** with step 2.8 and **[2.10]** with step 2.10 (both 2026-11-20), **[2.11]** with step 2.11 (2026-11-21). Where a new rule replaced
+Rules marked **[2.6]** came with step 2.6 and **[2.7]** with step 2.7 (both 2026-11-19), **[2.8]** with step 2.8 and **[2.10]** with step 2.10 (both 2026-11-20), **[2.11]** with step 2.11 (2026-11-21), **[2.12]** with step 2.12 part J2 (2026-11-22). Rules marked
+**[2.12, not yet playable]** are in the engine but the 100-turn game is not in the setup screen until step 2.12 part J5. Where a new rule replaced
 an older one, the old one is shown ~~struck out~~.
 
 ## 1. Players and setup
@@ -21,6 +22,8 @@ an older one, the old one is shown ~~struck out~~.
 - Welcome bonus: Europe, Asia, Africa +3; North and South America +4; Oceania +5.
 - Game length: 30 rounds (53 areas, 7 wonders) or 50 rounds (84 areas, 11 wonders). Every player gets
   every round.
+- **[2.12, not yet playable]** 100 rounds: 126 areas, 11 wonders (those of the 50-turn map), big countries in the same
+  parts as on the 50-turn map; the plan is `docs/map100.md`.
 
 ## 2. Moving
 
@@ -45,8 +48,9 @@ an older one, the old one is shown ~~struck out~~.
   (USA with Alaska, Canada, Russia) gives +5.
 - **Whole continent:** every area of a continent visited gives, once:
   - 30 turns: Europe 4, Asia 5, Africa 3, North America 3, South America 2, Oceania 2;
-  - 50 turns: Europe 6, Asia 8, Africa 6, North America 3, South America 3, Oceania 2.
-- **Madagascar** (50 turns): a secret SURPRISE +3 on the first arrival. It is never announced.
+  - 50 turns: Europe 6, Asia 8, Africa 6, North America 3, South America 3, Oceania 2;
+  - **[2.12, not yet playable]** 100 turns: Europe 11, Asia 12, Africa 11, North America 4, South America 4, Oceania 2.
+- **Madagascar** (50 turns; **[2.12, not yet playable]** and 100 turns): a secret SURPRISE +3 on the first arrival. It is never announced.
 - Points never go below 0.
 - **End of the game:** points plus the price of every business owned.
   - **[2.7]** Every player owning the most businesses (at least 1) gets **+1**.
@@ -74,6 +78,7 @@ an older one, the old one is shown ~~struck out~~.
 - **Routes:** fixed routes, 1 or 2 destinations each; all plane and ship routes are two-way.
   - 30 turns: 13 airports, 11 ports.
   - 50 turns: 15 airports, 13 ports.
+  - **[2.12, not yet playable]** 100 turns: 17 airports, 23 ports (25 routes); train, bus and car as on the 50-turn map.
   - Luxury may fly to any airport and sail to any port.
 - **Airline quiz** (free ticket): one a/b question about the destination (9 in 10 from its facts,
   1 in 10 a challenge question), 15 seconds.
@@ -186,8 +191,8 @@ test next turn (read 6 facts, 3 questions, 2 right to pass), Luxury granted at o
 
 ## 8. Event cards
 
-- **When:** on every 3rd turn a player begins in an area (30 turns) or every 5th (50 turns). Trip
-  turns don't count, and there are none in the last round.
+- **When:** on every 3rd turn a player begins in an area (30 turns) or every 5th (50 turns; **[2.12, not yet
+  playable]** and 100 turns). Trip turns don't count, and there are none in the last round.
 - **Cards:** 45 news cards for everyone. ~~33 for anywhere, 12 only in their own area.~~ **[2.8]** All 45 can come
   everywhere: +1 ×17, −1 ×11, +2 ×5, −2 ×3, lose a turn ×5, +5 ×2, −5 ×2 (the 12 old own-area cards became general
   cards with the same points).
@@ -198,30 +203,45 @@ test next turn (read 6 facts, 3 questions, 2 right to pass), Luxury granted at o
 - ~~The Backpacker's 8 helper cards (b1–b8, all +1 or +2) stay in the files, but **[2.6]** nobody draws
   them.~~ **[2.11]** They are replaced by **Kris Ann's 8 cards** (below).
 - **[2.11] "Lose a turn" cards come half as often** as the other bad cards, for everyone.
-- **Card mix by map and profile** (~~**[2.7]** mix "D1"~~, ~~**[2.8]** mix "N1"~~, **[2.11]** mix "TG", **one for
-  each map**). The same cards; only how often good and bad ones come (good × / bad ×; bad share of the 45 cards, with
-  "lose a turn" half as often). TG was tuned before the 44–64% limit of step 2.11's later tests; some shares are lower.
+- **Card mix by map and profile** (~~**[2.7]** mix "D1"~~, ~~**[2.8]** mix "N1"~~, ~~**[2.11]** mix "TG"~~, **[2.12]** mix
+  "K1-3" for 30 and 50 turns, "F3-2" for 100 turns, exact values in `docs/card-mix-2.12.json`). The same cards; only how
+  often good and bad ones come (good × / bad ×, rounded; bad share of the 45 cards, with "lose a turn" half as often).
+  Owner (J1): bad shares outside 44–64% are accepted.
 
   | Map | Profile | 2 players | 3 or 4 players |
   |---|---|---|---|
-  | 30 turns | Backpacker | 1 / 0.91: 41% bad | 0.93 / 1.81: 60% bad |
-  | 30 turns | Business | 1.1 / 0.79: 36% bad | 1.2 / 1.44: 48% bad |
-  | 30 turns | Luxury | 1 / 1.12: 46% bad | 1.3 / 1.23: 42% bad |
-  | 30 turns | Nomad | 1.1 / 0.66: 32% bad | 1.1 / 0.81: 36% bad |
-  | 30 turns | Kris Ann | 1 / 1.48: 53% bad | 1 / 1.03: 44% bad |
-  | 50 turns | Backpacker | 1 / 1.29: 50% bad | 0.93 / 2.25: 65% bad |
-  | 50 turns | Business | 1.1 / 1.13: 44% bad | 1.2 / 1.19: 43% bad |
-  | 50 turns | Luxury | 1 / 1.24: 49% bad | 1.3 / 1.21: 42% bad |
-  | 50 turns | Nomad | 1 / 0.72: 36% bad | 1.1 / 0.81: 36% bad |
-  | 50 turns | Kris Ann | 1 / 1.25: 49% bad | 1 / 0.97: 43% bad |
+  | 30 turns | Backpacker | 1 / 0.84: 39% bad | 0.93 / 1.95: 62% bad |
+  | 30 turns | Business | 1.1 / 1.06: 43% bad | 1.2 / 1.8: 54% bad |
+  | 30 turns | Luxury | 1 / 1.22: 48% bad | 1.3 / 1.25: 42% bad |
+  | 30 turns | Nomad | 1.1 / 0.54: 28% bad | 1.1 / 0.82: 37% bad |
+  | 30 turns | Kris Ann | 1 / 1.44: 53% bad | 1 / 0.81: 38% bad |
+  | 50 turns | Backpacker | 1 / 1.44: 53% bad | 0.93 / 2.3: 66% bad |
+  | 50 turns | Business | 1.1 / 1.5: 51% bad | 1.2 / 1.36: 47% bad |
+  | 50 turns | Luxury | 1 / 1.47: 53% bad | 1.3 / 1.27: 43% bad |
+  | 50 turns | Nomad | 1 / 0.8: 38% bad | 1.1 / 0.91: 39% bad |
+  | 50 turns | Kris Ann | 1 / 1.06: 45% bad | 1 / 0.76: 37% bad |
+  | 100 turns **[not yet playable]** | Backpacker | 1 / 1.69: 57% bad | 1 / 1.48: 53% bad |
+  | 100 turns **[not yet playable]** | Business | 1 / 1.85: 59% bad | 1 / 1.53: 54% bad |
+  | 100 turns **[not yet playable]** | Luxury | 1 / 1.85: 59% bad | 1 / 1.06: 45% bad |
+  | 100 turns **[not yet playable]** | Nomad | 1 / 2.55: 66% bad | 1 / 0.89: 41% bad |
+  | 100 turns **[not yet playable]** | Kris Ann | 1 / 0.51: 28% bad | 1 / 0.57: 31% bad |
 
+  ~~TG (step 2.11): 30 turns Backpacker 1 / 0.91 and 0.93 / 1.81, Business 1.1 / 0.79 and 1.2 / 1.44, Luxury 1 / 1.12 and
+  1.3 / 1.23, Nomad 1.1 / 0.66 and 1.1 / 0.81, Kris Ann 1 / 1.48 and 1 / 1.03; 50 turns Backpacker 1 / 1.29 and
+  0.93 / 2.25, Business 1.1 / 1.13 and 1.2 / 1.19, Luxury 1 / 1.24 and 1.3 / 1.21, Nomad 1 / 0.72 and 1.1 / 0.81, Kris Ann
+  1 / 1.25 and 1 / 0.97.~~
   ~~N1 (step 2.8): 30 turns Backpacker 1 / 1.37 and 0.93 / 1.6, Business 1.1 / 1.3 and 1.2 / 1.3, Luxury 1 / 1.37 and
   1.3 / 1.17, Nomad 1 / 1.37 and 1.1 / 1.26; 50 turns Backpacker 1 / 1.5 and 0.93 / 1.9, Business 1.1 / 1.3 and
   1.2 / 1.19, Luxury 1 / 1.37 and 1.3 / 1.17, Nomad 1 / 1.25 and 1.1 / 1.15.~~
+- **[2.12] Catch-up** (secret, never shown, like hitchhiking): at a card draw, the player with the single highest score
+  (points plus businesses, as at the end) draws bad cards (1 + catch-up) times as often; the player with the single
+  lowest score draws good cards (1 + catch-up) times as often; nobody else changes, and nothing changes when the top or
+  the bottom score is shared. Catch-up: 30 and 50 turns **1** (twice as often); **[2.12, not yet playable]** 100 turns
+  **3** (4 times as often).
 - **[2.11] Kris Ann's own cards:** 8 cards about Kris Ann and her Dad, each reminding of one rule. Only Kris Ann draws
   them, together with the news cards (each as often as one news card), and **none comes twice in a game** (about 1 or
   2 a game). Everyone sees them as a picture popup, also when Kris Ann is a robot (the only robot popup people see);
-  never as phone news. Points (30 turns / 50 turns): 1 Good at quizzes +2 / +2; 2 A wonder! +1 / +1; 3 One more area
+  never as phone news. Points (30 turns / 50 turns; **[2.12, not yet playable]** 100 turns: the 50-turn points): 1 Good at quizzes +2 / +2; 2 A wonder! +1 / +1; 3 One more area
   to go +1 / +1; 4 Exploring is good 0 / +1; 5 Visa required 0 / 0; 6 Not for sale −1 / −1; 7 Too fast! −1 / −1;
   8 The missed plane −2 / −1. Texts: `src/cards/cards.ts` and `docs/cards.md`.
 
@@ -234,7 +254,7 @@ test next turn (read 6 facts, 3 questions, 2 right to pass), Luxury granted at o
 ## 10. Saves
 
 - The game saves after every move; one save slot.
-- A save from another version can't be continued. The version is **[2.11] 21** (2.8: 20).
+- A save from another version can't be continued. The version is **[2.12] 22** (2.11: 21).
 
 ## 11. Passport and records [2.10]
 

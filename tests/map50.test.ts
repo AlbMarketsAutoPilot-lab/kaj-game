@@ -19,8 +19,8 @@ const areas = map50.areas;
 const routes = map50.routes ?? [];
 const sites = (kind: string) => new Set(routes.filter((r) => r.kind === kind).flatMap((r) => [r.a, r.b]));
 
-test('map choice: 30 turns by default, or 50', () => {
-  assert.deepEqual([...GAME_LENGTHS], [30, 50]);
+test('map choice: 30 turns by default, or 50 (step 2.12: or 100, tests/map100.test.ts)', () => {
+  assert.deepEqual([...GAME_LENGTHS], [30, 50, 100]);
   assert.equal(mapFor(), map30);
   assert.equal(mapFor(30), map30);
   assert.equal(mapFor(50), map50);

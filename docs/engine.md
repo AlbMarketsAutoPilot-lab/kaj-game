@@ -1044,6 +1044,40 @@ measures exactly the same (all 40 results identical to the scratch version "KA5"
   the same profile doing well with one robot type and badly with the other, which no card mix can fix. Boredom 25.3% →
   26.2%, lead changes 3.84 → 4.60, won by 3 or less 29.5% → 31.8% (averages of the 8 lines).
 
+## The 100-turn map, catch-up and the new card mixes (version 2.0, step 2.12 part J2, owner-approved 2026-11-22)
+
+Rules in full: `docs/rules-now.md` ([2.12]). Decided and measured in J1 (`docs/map100.md`, `docs/card-mix-2.12.json`,
+`docs/balance-lab.md` step 2.12); built in J2 exactly as measured. The 100-turn game is in the engine but **not in the
+setup screen** until part J5 (`SETUP_LENGTHS` = 30, 50).
+
+- **Map `map100`** (`src/maps/map100.ts`, made by `node scripts/map100-review.ts` from the same lines as the plan): 126
+  areas, 238 walking links, 25 plane and ship routes plus the train, bus and car of the 50-turn map. Area order,
+  neighbour order and route order are the plan's (they change the robot games). `GAME_LENGTHS` = 30, 50, 100; `mapFor(100)`,
+  `mapById('map100')`; `rounds: 100`.
+- **Facts until part J4 (test only, never released):** each area borrows the facts and the test-only geography facts of
+  its 50-turn area(s) (`inside`), joined in that order (Uganda, Rwanda & Burundi: Kenya & Uganda, then Tanzania).
+- **Cards:** every 5th land turn on 100 turns (`cardEvery`, as on 50 turns); Kris Ann's cards use `points50` on 100
+  turns (as on 50 turns). Card mixes (`EVENT_MIX`, exact values of `docs/card-mix-2.12.json`): 30 and 50 turns "K1-3",
+  100 turns "F3-2" (`cardMix`: 100 turns or more use '100').
+- **Catch-up on every map** (`CATCH_UP` 30: 1, 50: 1, 100: 3; `catchUpFor`, `withCatchUp` in `engine.ts`): at a card
+  draw, the single highest `finalScore` multiplies the bad weight by (1 + catch-up), the single lowest the good weight;
+  nobody else changes, a shared top or bottom changes nothing. Applied to the profile's mix before the card is picked. A
+  secret rule: no text on any screen. A test-only switch (`GameConfig.catchUp`, on by default, owner's choice A) turns
+  it off: only the step 2.11 card-mix test uses it, so that test still measures the card mix alone (with catch-up on,
+  random-robot Nomads often lead and draw more bad cards than Luxury: 41.4% against 38.9%).
+- **Lab (owner-approved in J1):** `lab2.ts … --lines=100` plays the 4 lines of the 100-turn game (default: the 8 lines
+  of 30 and 50 turns); `--first=<game>` starts at that game number (default 1; `--first=3201` plays new games).
+  `report2.ts` counts fair results of the lines given (4 lines of 20, 8 lines of 40).
+- **Save version 22:** a game in progress from version 21 or older can't be continued.
+- **Tests:** `tests/map100.test.ts` (map check, stuck-state checker, trap counts 41 of 6,786 pairs and 1,084 of 109,567
+  start sets, big countries, borrowed facts, businesses, random-robot 100-round games with cards every 5th land turn and a
+  save), `tests/catchup.test.ts` (leader, last, ties, businesses counted, ×1 and ×3, the switch); card mixes of all 3 maps against
+  the JSON (`tests/cards.test.ts`), game lengths (`tests/map50.test.ts`), save 22 (`tests/rotation.test.ts`).
+- **Proof (lab, games 1–3,200 per line, 1 run each):** the built game measures exactly as the J1 scratch versions. 30
+  and 50 turns: 33 of 40 (old profiles 25 of 32, Kris Ann 8 of 8), boredom 26.2%, lead changes 5.40, won by 3 or less
+  42.9% (K1-3). 100 turns: 16 of 20, boredom 25.1%, lead changes 10.52, won by 3 or less 50.2% (F3-2), every win share
+  and average score as in `docs/balance-lab.md`, step 2.12. 249 tests pass; the web build works (setup: 30 and 50 turns).
+
 ## Project setup
 
 - TypeScript, run directly by Node 22.18 or newer (no build step for tests).

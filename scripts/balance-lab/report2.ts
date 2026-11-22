@@ -13,6 +13,7 @@ import { tmpdir } from 'node:os';
 
 const RESULTS = join(tmpdir(), 'kaj-lab2');
 // Step 2.11: Kris Ann reported in her own column and counted apart (her 8 results), the old 4 as before (32).
+// Step 2.12: counted of the lines in the result: 8 lines (30 and 50 turns) of 40, 4 lines (100 turns) of 20.
 const OLD = ['backpacker', 'business', 'luxury', 'nomad'];
 const PROFILES = [...OLD, 'krisann'];
 const load = (label: string) => JSON.parse(readFileSync(join(RESULTS, `${label}.json`), 'utf8'));
@@ -37,7 +38,7 @@ function summary(label: string, r: any): string {
   const range = (f: (k: string) => number, d = 0) => { const v = keys.map(f); return `${Math.min(...v).toFixed(d)}–${Math.max(...v).toFixed(d)}`; };
   const e = (k: string) => r[k].extra;
   return [
-    `**${label}: old profiles ${fair} of 32 fair**, ${outside.toFixed(0)} points outside the target` + (hasKa ? `; **Kris Ann ${ka} of 8**, ${kaOut.toFixed(0)} outside; total ${fair + ka} of 40.` : '.'),
+    `**${label}: old profiles ${fair} of ${4 * keys.length} fair**, ${outside.toFixed(0)} points outside the target` + (hasKa ? `; **Kris Ann ${ka} of ${keys.length}**, ${kaOut.toFixed(0)} outside; total ${fair + ka} of ${5 * keys.length}.` : '.'),
     `Robot check: robots pay for ${range((k) => pct(e(k).paid, e(k).paid + e(k).quiz))}% of their trips.`,
     `Boredom ${range((k) => pct(r[k].feelSum.boredom, r[k].games))}%; lead changes ${range((k) => r[k].feelSum.leadChanges / r[k].games, 1)}; won by 3 or less ${range((k) => pct(r[k].feelSum.close, r[k].games))}%; draws ${range((k) => e(k).draws)} per line.`,
     `Go home ${range((k) => e(k).goHome)} per line (after 3 turns without money: ${range((k) => e(k).homeBlocked)}); blocked turns ${range((k) => e(k).blocked)}; longest blocked streak ${Math.max(...keys.map((k) => e(k).maxStreak))}; failed visa tests ${range((k) => pct(e(k).visaFailed, e(k).visaTests), 1)}%.`,
