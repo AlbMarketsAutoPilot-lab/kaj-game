@@ -12,6 +12,9 @@ With 400 games per line a win share is accurate to about ±2–4 points.
 this project; give a scratch copy with a changed rule to measure that rule) and also counts go home, blocked turns,
 the longest blocked streak, failed visa tests, draws and how often robots pay (the robot check). About 7–20 minutes.
 `node scripts/balance-lab/report2.ts <label>` prints the full report; `report2.ts <before> <after>` compares two.
+**Step 2.12 (J2, owner-approved in J1):** `lab2.ts … --lines=100` plays the 4 lines of the 100-turn game instead (2 and 4
+players, normal and planning robots); `--first=<game>` starts at that game number (default 1; `--first=3201` plays new
+games). `report2.ts` counts fair results of the lines given (of 40 for 30 and 50 turns, of 20 for 100 turns).
 Results are kept in the system's temporary folder (`kaj-lab2/`), not in the project.
 
 ## Robots: head to head (2 players, today's rules)
@@ -879,3 +882,39 @@ normal Backpacker 35.0%, Business 19.2%; 4 players planning Backpacker 17.4%, Bu
 
 **Owner's final decision (2026-11-22):** the 30- and 50-turn games adopt catch-up ×1 (K1-3); the 100-turn game F3-2.
 Fairness about 80% at 3,200 games per line is accepted (the 34 of 40 at 1,600 stays the aim).
+
+## Step 2.12, part J2 (2026-11-22): the built game measures as J1
+
+The game with the 100-turn map, the three card mixes and catch-up built in (`src/`), measured once per map with the
+lab options of J2 (`lab2.ts <label> 3200` and `lab2.ts <label> 3200 --lines=100`, games 1–3,200 per line, the same
+seeds as J1). Both match the J1 scratch versions exactly.
+
+**30 and 50 turns (K1-3): old profiles 25 of 32, Kris Ann 8 of 8, 33 of 40.** Robot check: robots pay for 42–56% of
+their trips. Averages: boredom 26.2%, lead changes 5.40, won by 3 or less 42.9%.
+
+| Line | Backpacker | Business | Luxury | Nomad | Kris Ann | Boredom | Excitement |
+|---|---|---|---|---|---|---|---|
+| 30 turns, 2 players, normal | 47% ✅ (59.0) | 59% ✅ (52.9) | 49% ✅ (53.0) | 52% ✅ (56.3) | 48% ✅ (55.5) | 29% | 4.0 lead changes, 41% won by ≤3 |
+| 30 turns, 2 players, planning | 48% ✅ (61.4) | 46% ✅ (57.5) | 53% ✅ (58.8) | 44% ✅ (59.2) | 52% ✅ (60.0) | 32% | 4.6 lead changes, 38% won by ≤3 |
+| 30 turns, 4 players, normal | 30% ✅ (52.1) | 23% ✅ (50.3) | 25% ✅ (51.2) | 26% ✅ (51.8) | 22% ✅ (51.5) | 27% | 4.9 lead changes, 48% won by ≤3 |
+| 30 turns, 4 players, planning | 22% ✅ (54.3) | 27% ✅ (54.9) | 24% ✅ (54.7) | 25% ✅ (55.5) | 27% ✅ (56.6) | 27% | 5.4 lead changes, 48% won by ≤3 |
+| 50 turns, 2 players, normal | 49% ✅ (77.4) | 39% ❌ (74.4) | 42% ✅ (75.8) | 59% ✅ (81.8) | 52% ✅ (78.7) | 23% | 4.9 lead changes, 41% won by ≤3 |
+| 50 turns, 2 players, planning | 52% ✅ (86.0) | 66% ❌ (84.7) | 60% ✅ (84.5) | 40% ❌ (84.2) | 46% ✅ (85.2) | 26% | 5.4 lead changes, 37% won by ≤3 |
+| 50 turns, 4 players, normal | 34% ❌ (75.2) | 19% ❌ (71.7) | 26% ✅ (73.6) | 22% ✅ (73.3) | 25% ✅ (74.8) | 22% | 6.6 lead changes, 45% won by ≤3 |
+| 50 turns, 4 players, planning | 17% ❌ (76.4) | 31% ❌ (79.6) | 23% ✅ (78.1) | 28% ✅ (79.9) | 25% ✅ (79.8) | 24% | 7.4 lead changes, 46% won by ≤3 |
+
+Go home 12–94 per line (after 3 turns without money 0); blocked turns 0–105; longest blocked streak 2; failed visa tests
+15.1–16.1%; draws 0–1 per line.
+
+**100 turns (F3-2): old profiles 12 of 16, Kris Ann 4 of 4, 16 of 20.** Robot check: robots pay for 38–58% of their
+trips. Averages: boredom 25.1%, lead changes 10.52, won by 3 or less 50.2%.
+
+| Line | Backpacker | Business | Luxury | Nomad | Kris Ann | Boredom | Excitement |
+|---|---|---|---|---|---|---|---|
+| 100 turns, 2 players, normal | 51% ✅ (128.9) | 42% ✅ (119.2) | 54% ✅ (121.9) | 43% ✅ (123.7) | 53% ✅ (125.4) | 26% | 8.6 lead changes, 44% won by ≤3 |
+| 100 turns, 2 players, planning | 49% ✅ (131.7) | 60% ✅ (131.6) | 46% ✅ (134.6) | 57% ✅ (133.5) | 47% ✅ (133.4) | 24% | 10.0 lead changes, 55% won by ≤3 |
+| 100 turns, 4 players, normal | 30% ✅ (122.3) | 17% ❌ (116.8) | 26% ✅ (120.5) | 21% ✅ (119.9) | 29% ✅ (121.4) | 26% | 11.0 lead changes, 50% won by ≤3 |
+| 100 turns, 4 players, planning | 20% ❌ (126.6) | 32% ❌ (128.7) | 22% ✅ (127.6) | 31% ❌ (129.0) | 21% ✅ (128.2) | 24% | 12.4 lead changes, 52% won by ≤3 |
+
+Go home 40–138 per line (after 3 turns without money 0); blocked turns 0–75; longest blocked streak 2; failed visa tests
+15.4–16.0%; draws 0. Time on this machine (4 cores): 11 minutes (30 and 50 turns), 26 minutes (100 turns).

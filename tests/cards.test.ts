@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { CARDS } from '../src/cards/cards.ts';
-import { cardMix, LOSE_TURN_WEIGHT } from '../src/engine/constants.ts';
+import { readFileSync } from 'node:fs';
+import { cardMix, LOSE_TURN_WEIGHT, PROFILES } from '../src/engine/constants.ts';
 import { apply, createGame, eligibleCards, landTurnsToCard, legalActions, newsCard } from '../src/engine/engine.ts';
 import { CARD_COUNTRIES } from '../src/cards/countries.ts';
 import { randomRobotAction } from '../src/engine/robot.ts';
@@ -213,24 +214,22 @@ test('the same seed draws the same cards; saves from versions 1 and 2 are not co
   }
 });
 
-// Step 2.6; step 2.7 (mix "D1"); step 2.8 ("N1"); step 2.11 (owner's final mix "TG", one mix per map, measured 34 of 40):
-// the same news cards for everyone, but how often good and bad ones come depends on the map, the profile and the number
-// of players (3 players use the 4-player mix). Only Kris Ann draws her own 8 cards.
-test('the card mix by map, profile and number of players; only Kris Ann draws her own cards (step 2.11)', () => {
-  assert.deepEqual(cardMix('business', 2), { good: 1.1, bad: 0.79 });
-  assert.deepEqual(cardMix('nomad', 2), { good: 1.1, bad: 0.66 });
+// Step 2.6; step 2.7 (mix "D1"); step 2.8 ("N1"); step 2.11 ("TG"); step 2.12 (owner's final mixes, measured in J1:
+// "K1-3" for 30 and 50 turns, "F3-2" for 100 turns, exact values of docs/card-mix-2.12.json): the same news cards for
+// everyone, but how often good and bad ones come depends on the map, the profile and the number of players (3 players
+// use the 4-player mix). Only Kris Ann draws her own 8 cards.
+test('the card mix by map, profile and number of players; only Kris Ann draws her own cards (step 2.12)', () => {
+  const json = JSON.parse(readFileSync(new URL('../docs/card-mix-2.12.json', import.meta.url), 'utf8'));
+  for (const turns of [30, 50, 100]) for (const players of [2, 3, 4]) for (const p of PROFILES) {
+    assert.deepEqual(cardMix(p, players, turns), json[turns].mix[players <= 2 ? '2' : '4'][p], `${turns} ${players} ${p}`);
+  }
   assert.deepEqual(cardMix('nomad', 3), cardMix('nomad', 4));
-  assert.deepEqual(cardMix('backpacker', 4), { good: 0.93, bad: 1.81 });
-  assert.deepEqual(cardMix('business', 4), { good: 1.2, bad: 1.44 });
-  assert.deepEqual(cardMix('luxury', 4), { good: 1.3, bad: 1.23 });
-  assert.deepEqual(cardMix('nomad', 4), { good: 1.1, bad: 0.81 });
-  assert.deepEqual(cardMix('krisann', 4), { good: 1, bad: 1.03 });
-  // The 50-turn map has its own mix.
-  assert.deepEqual(cardMix('backpacker', 2, 50), { good: 1, bad: 1.29 });
-  assert.deepEqual(cardMix('nomad', 2, 50), { good: 1, bad: 0.72 });
-  assert.deepEqual(cardMix('backpacker', 4, 50), { good: 0.93, bad: 2.25 });
-  assert.deepEqual(cardMix('business', 4, 50), { good: 1.2, bad: 1.19 });
-  assert.deepEqual(cardMix('krisann', 2, 50), { good: 1, bad: 1.25 });
+  assert.deepEqual(cardMix('business', 2), { good: 1.1, bad: 1.058216939059088 });
+  assert.deepEqual(cardMix('backpacker', 4, 50), { good: 0.93, bad: 2.2977081548575096 });
+  assert.deepEqual(cardMix('krisann', 2, 100), { good: 1, bad: 0.5089655227454075 });
+  assert.equal(json['30'].version, 'K1-3');
+  assert.equal(json['50'].version, 'K1-3');
+  assert.equal(json['100'].version, 'F3-2');
   assert.equal(LOSE_TURN_WEIGHT, 0.5);
   // Kris Ann's 8 cards, as measured: points 30 turns +2 +1 +1 0 0 −1 −1 −2; 50 turns +2 +1 +1 +1 0 −1 −1 −1.
   const own = CARDS.filter((c) => c.deck === 'krisann');
@@ -239,7 +238,8 @@ test('the card mix by map, profile and number of players; only Kris Ann draws he
   const bad = (c: DrawnCard) => c.card.loseTurn === true || c.card.points < 0;
   const drawn: Record<string, { all: number; bad: number }> = {};
   for (let g = 0; g < 150; g++) {
-    let s = createGame({ seats: seats(4, 3), seed: g * 31 + 7 }, map30);
+    // Step 2.12 (owner's choice A): catch-up off, so this measures the card mix alone (catch-up: tests/catchup.test.ts).
+    let s = createGame({ seats: seats(4, 3), seed: g * 31 + 7, catchUp: false }, map30);
     let r = g + 5;
     while (s.phase !== 'finished') {
       let a: Action;

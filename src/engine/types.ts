@@ -37,6 +37,8 @@ export interface GameConfig {
   // Whole-continent rewards on (default). Off only in rule tests on the tiny test map, whose
   // one-area continents would be complete at once.
   continentRewards?: boolean;
+  // Catch-up cards on (default, step 2.12). Off only in the test that measures the card mix alone.
+  catchUp?: boolean;
 }
 
 export interface Area {
@@ -265,6 +267,8 @@ export interface GameState {
   // Event cards on (see GameConfig).
   eventCards: boolean;
   continentRewards: boolean;
+  // Catch-up cards on (see GameConfig, step 2.12).
+  catchUp: boolean;
   // The card drawn at the start of the current player's turn, on show for the whole turn.
   card: DrawnCard | null;
   // The cards drawn by the last move (a travel card, and the next player's start-of-turn card),

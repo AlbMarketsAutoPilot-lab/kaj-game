@@ -3,9 +3,11 @@ import type { BusinessKind, Continent, Profile, RouteKind } from './types.ts';
 // The 30-turn game is the default; a map may set its own length (the 50-turn map, task M2).
 export const TOTAL_ROUNDS = 30;
 
-// The game lengths to choose from in the setup (task M2), the first one by default.
-export const GAME_LENGTHS = [30, 50] as const;
+// The game lengths (task M2), the first one by default. Step 2.12 (part J2): 100 turns, on its own map (map100).
+// The setup screen shows only SETUP_LENGTHS until step 2.12 part J5 (the 100-turn screens).
+export const GAME_LENGTHS = [30, 50, 100] as const;
 export type GameLength = (typeof GAME_LENGTHS)[number];
+export const SETUP_LENGTHS: readonly GameLength[] = [30, 50];
 
 export const MIN_SEATS = 2;
 export const MAX_SEATS = 4;
@@ -215,7 +217,7 @@ export function continentRewardFor(areas: number): number {
 // Event cards (task 11, count changed in task 12): at the start of each player's 3rd, 6th, 9th …
 // turn that begins in an area (trip turns don't count); none in the last round.
 export const CARD_EVERY = 3;
-// The 50-turn game (owner, task M2, as in the rulebook): every 5th land turn.
+// The 50-turn game (owner, task M2, as in the rulebook): every 5th land turn. Step 2.12: also the 100-turn game.
 export const CARD_EVERY_50 = 5;
 export function cardEvery(totalRounds: number): number {
   return totalRounds >= 50 ? CARD_EVERY_50 : CARD_EVERY;
@@ -230,22 +232,36 @@ export function cardEvery(totalRounds: number): number {
 // Kris Ann's own 8 cards (KRISANN_CARD_WEIGHT; they replaced the Backpacker's unused helper cards b1–b8).
 export interface CardMix { good: number; bad: number }
 type MixTable = Readonly<Record<'2' | '4', Partial<Record<Profile, CardMix>>>>;
-export const EVENT_MIX: Readonly<Record<'30' | '50', MixTable>> = {
+// Step 2.12 (owner, measured in J1 at 3,200 games per line, exact values of docs/card-mix-2.12.json): 30 and 50 turns
+// mix "K1-3", 100 turns mix "F3-2" (100 turns or more use it).
+export const EVENT_MIX: Readonly<Record<'30' | '50' | '100', MixTable>> = {
   30: {
-    2: { backpacker: { good: 1, bad: 0.91 }, business: { good: 1.1, bad: 0.79 }, luxury: { good: 1, bad: 1.12 }, nomad: { good: 1.1, bad: 0.66 }, krisann: { good: 1, bad: 1.48 } },
-    4: { backpacker: { good: 0.93, bad: 1.81 }, business: { good: 1.2, bad: 1.44 }, luxury: { good: 1.3, bad: 1.23 }, nomad: { good: 1.1, bad: 0.81 }, krisann: { good: 1, bad: 1.03 } },
+    2: { backpacker: { good: 1, bad: 0.8433406592546896 }, business: { good: 1.1, bad: 1.058216939059088 }, luxury: { good: 1, bad: 1.2211522139647586 }, nomad: { good: 1.1, bad: 0.5446647360749842 }, krisann: { good: 1, bad: 1.4434586698019325 } },
+    4: { backpacker: { good: 0.93, bad: 1.9536534101807108 }, business: { good: 1.2, bad: 1.8028893787315767 }, luxury: { good: 1.3, bad: 1.2454133333893371 }, nomad: { good: 1.1, bad: 0.8214035396682249 }, krisann: { good: 1, bad: 0.8061856743891243 } },
   },
   50: {
-    2: { backpacker: { good: 1, bad: 1.29 }, business: { good: 1.1, bad: 1.13 }, luxury: { good: 1, bad: 1.24 }, nomad: { good: 1, bad: 0.72 }, krisann: { good: 1, bad: 1.25 } },
-    4: { backpacker: { good: 0.93, bad: 2.25 }, business: { good: 1.2, bad: 1.19 }, luxury: { good: 1.3, bad: 1.21 }, nomad: { good: 1.1, bad: 0.81 }, krisann: { good: 1, bad: 0.97 } },
+    2: { backpacker: { good: 1, bad: 1.4423859614550982 }, business: { good: 1.1, bad: 1.503980212143605 }, luxury: { good: 1, bad: 1.4704043702713927 }, nomad: { good: 1, bad: 0.8029537058840832 }, krisann: { good: 1, bad: 1.0565602150742184 } },
+    4: { backpacker: { good: 0.93, bad: 2.2977081548575096 }, business: { good: 1.2, bad: 1.3581292336214332 }, luxury: { good: 1.3, bad: 1.2675839411802088 }, nomad: { good: 1.1, bad: 0.9118315784773889 }, krisann: { good: 1, bad: 0.7635060674354874 } },
+  },
+  100: {
+    2: { backpacker: { good: 1, bad: 1.6900594330122833 }, business: { good: 1, bad: 1.8480404733181934 }, luxury: { good: 1, bad: 1.8505028728017714 }, nomad: { good: 1, bad: 2.553892465368005 }, krisann: { good: 1, bad: 0.5089655227454075 } },
+    4: { backpacker: { good: 1, bad: 1.4816599011527394 }, business: { good: 1, bad: 1.5305484332137378 }, luxury: { good: 1, bad: 1.0632027648191955 }, nomad: { good: 1, bad: 0.8872376633933493 }, krisann: { good: 1, bad: 0.5693556478237388 } },
   },
 };
 // Step 2.11 (owner): the 5 "lose a turn" cards come half as often as the other bad cards, for everyone.
 export const LOSE_TURN_WEIGHT = 0.5;
 // Step 2.11 (owner): each of Kris Ann's own cards comes as often as one news card (good or bad).
 export const KRISANN_CARD_WEIGHT = 1;
+// Step 2.12 (owner, secret rule like hitchhiking, never shown): catch-up at a card draw. The player with the single
+// highest score (finalScore: points plus businesses, as at the end) multiplies the bad weight by (1 + CATCH_UP); the
+// player with the single lowest score multiplies the good weight by (1 + CATCH_UP); nobody else changes, and nothing
+// changes when the top or bottom score is shared. 30 and 50 turns 1, 100 turns 3.
+export const CATCH_UP: Readonly<Record<'30' | '50' | '100', number>> = { 30: 1, 50: 1, 100: 3 };
+export function catchUpFor(totalRounds: number): number {
+  return CATCH_UP[totalRounds >= 100 ? '100' : totalRounds >= 50 ? '50' : '30'];
+}
 export function cardMix(profile: Profile, players: number, totalRounds = 30): CardMix {
-  return EVENT_MIX[totalRounds >= 50 ? '50' : '30'][players <= 2 ? '2' : '4'][profile] ?? { good: 1, bad: 1 };
+  return EVENT_MIX[totalRounds >= 100 ? '100' : totalRounds >= 50 ? '50' : '30'][players <= 2 ? '2' : '4'][profile] ?? { good: 1, bad: 1 };
 }
 
 // Travel-turn challenges (task 12): right +1, wrong −1; not offered with 0 points.

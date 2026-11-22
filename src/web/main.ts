@@ -2,7 +2,7 @@
 // landscape board (left: the current area drawn; right: the world map and the turn panel).
 // Robots play with simple rules, at the level chosen for each seat (task 13).
 
-import { BUSINESS_PRICE, cardEvery, CHALLENGE_POINTS, GAME_LENGTHS, CONTINENT_BONUS, VISA_TEST_FACTS, VISA_TEST_PASS, POINTS_NOMAD_BONUS, POINTS_NOMAD_TRIP, POINTS_NEW_AREA, POINTS_NEW_CONTINENT, POINTS_WONDER, WELCOME_BONUS, GO_HOME_POINTS, GO_HOME_TURNS, MOST_BUSINESSES_BONUS, QUIZ_TRIES, ROUTE_KINDS, bigCountryReward, ownsNoBusiness, KRISANN_BIG_COUNTRY_EXTRA, KRISANN_PLANE_PRICE, canRide, TICKET_BUSINESS, TICKET_PRICE, ticketPrice, TOUR_FEE, travelTurns, VISA_PRICE } from '../engine/constants.ts';
+import { BUSINESS_PRICE, cardEvery, CHALLENGE_POINTS, SETUP_LENGTHS, CONTINENT_BONUS, VISA_TEST_FACTS, VISA_TEST_PASS, POINTS_NOMAD_BONUS, POINTS_NOMAD_TRIP, POINTS_NEW_AREA, POINTS_NEW_CONTINENT, POINTS_WONDER, WELCOME_BONUS, GO_HOME_POINTS, GO_HOME_TURNS, MOST_BUSINESSES_BONUS, QUIZ_TRIES, ROUTE_KINDS, bigCountryReward, ownsNoBusiness, KRISANN_BIG_COUNTRY_EXTRA, KRISANN_PLANE_PRICE, canRide, TICKET_BUSINESS, TICKET_PRICE, ticketPrice, TOUR_FEE, travelTurns, VISA_PRICE } from '../engine/constants.ts';
 import {
   apply, blockedByMoney, continentReward, citizenAreas, citizenshipOf, needsVisaTest, visaOwner, bookedBy, businessAt, canPayAfterQuiz, destinations, businessValue, businessCount, mostBusinessesBonus, createGame, currentPlayer, entryFees, feeTotal, finalScore, homeFor, landTurnsToCard, legalActions, nomadAlert,
 } from '../engine/engine.ts';
@@ -314,8 +314,8 @@ function renderSetup(): void {
   const kinds: SeatKind[] = ['human', 'robot', 'robot', 'robot'];
   const levels: RobotLevel[] = ['normal', 'normal', 'normal', 'normal'];
   let count = 2;
-  // The journey's length (task M4): 30 turns (default) or 50 turns.
-  let turns: GameLength = GAME_LENGTHS[0];
+  // The journey's length (task M4): 30 turns (default) or 50 turns. Step 2.12: 100 turns stays hidden until part J5.
+  let turns: GameLength = SETUP_LENGTHS[0];
 
   const rows = el('div', { className: 'seats' });
   const counts = el('div', { className: 'row' });
@@ -323,12 +323,12 @@ function renderSetup(): void {
   const about = el('p');
   const error = el('p', { className: 'error' });
   const draw = () => {
-    lengths.replaceChildren('Journey: ', ...GAME_LENGTHS.map((n) => {
+    lengths.replaceChildren('Journey: ', ...SETUP_LENGTHS.map((n) => {
       const b = button(`${n} turns`, () => { turns = n; draw(); });
       if (n === turns) b.className = 'chosen';
       return b;
     }));
-    about.textContent = turns === GAME_LENGTHS[0]
+    about.textContent = turns === SETUP_LENGTHS[0]
       ? `${turns} rounds around the world.`
       : `${turns} rounds around a bigger world.`;
     counts.replaceChildren('Players: ', ...[2, 3, 4].map((n) => {

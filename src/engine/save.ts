@@ -13,7 +13,8 @@ import type { GameState } from './types.ts';
 // Luxury +5 at the start, the most-businesses bonus; no older save is continued. Version 20 (2.0, step 2.8):
 // news cards about the country, all 45 drawn everywhere, one card mix per map; no older save is continued.
 // Version 21 (2.0, step 2.11): the 5th profile, Kris Ann, her own cards, the new card mix; no older save is continued.
-export const SAVE_VERSION = 21;
+// Version 22 (2.0, step 2.12): the 100-turn map, catch-up cards and new card mixes on every map; no older save is continued.
+export const SAVE_VERSION = 22;
 
 export function saveGame(state: GameState): string {
   return JSON.stringify({ version: SAVE_VERSION, state });

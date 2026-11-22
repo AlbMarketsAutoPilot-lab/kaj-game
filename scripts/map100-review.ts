@@ -1,6 +1,7 @@
-// Makes docs/map100.md, the 100-turn map plan of version 2.0, step 2.12 (part J1, owner-approved 2026-11-22).
+// Makes docs/map100.md, the 100-turn map plan of version 2.0, step 2.12 (part J1, owner-approved 2026-11-22), and
+// (part J2) the game's map src/maps/map100.ts from the same lines, in the same order.
 // Run: node scripts/map100-review.ts
-// Planning only: no engine or screen code uses this yet (the engine comes in J2). 126 areas; big countries and wonders
+// 126 areas; big countries and wonders
 // as on the 50-turn map; routes in the style of step 2.4. It checks that every country of the 50-turn map is used once,
 // builds the walking links from the open country data (data/countries.json) and the 50-turn links of the big-country
 // parts, checks that no 50-turn link is lost, and runs the stuck-state checker and the visa-trap counts on the plan.
@@ -201,7 +202,8 @@ const nf = 12 * (areas.length - same.length) - 12 * (map50.areas.length - same.l
 const icon = (k: string) => ({ airport: '✈️', port: '⛴️', station: '🚆', bus: '🚌', car: '🚗' })[k];
 let md = `# 100-turn map — plan for version 2.0, step 2.12
 
-Made by \`node scripts/map100-review.ts\` (planning: no engine or screen code uses it yet; the engine comes in J2).
+Made by \`node scripts/map100-review.ts\`, which also makes the game's map \`src/maps/map100.ts\` (step 2.12, part J2; not in the
+setup screen until part J5).
 Status: **owner-approved (2026-11-22), J1 done.** The 100-turn game is part of this app (version 2.0), with the 5 profiles
 and all 2.0 rules. It replaces the proposal of 2026-10-10 (138 areas, 8 profiles, a separate paid app, save version 12).
 
@@ -278,4 +280,46 @@ Measured with the extended lab at 3,200 games per line, then checked on 3,200 an
 - Exact card mixes: \`docs/card-mix-2.12.json\`. Kris Ann's cards use their 50-turn points.
 `;
 writeFileSync(new URL('../docs/map100.md', import.meta.url), md);
+
+// ---------- the game's map (step 2.12, part J2): src/maps/map100.ts ----------
+// The same areas, neighbours and routes in the same order as above (the order changes the robot games).
+const q = (x: unknown) => JSON.stringify(x);
+const areaLine = (a: Area, i: number) => {
+  const { id, name, continent, neighbours, countries, bigCountry, wonder, cardsFrom, surprise } = a as Area;
+  return `  { id: ${q(id)}, name: ${q(name)}, continent: ${q(continent)}, inside: ${q(S[i][0])}, neighbours: ${q(neighbours)}, countries: ${q(countries)}`
+    + `${bigCountry ? `, bigCountry: ${q(bigCountry)}` : ''}${wonder ? ', wonder: true' : ''}${cardsFrom ? `, cardsFrom: ${q(cardsFrom)}` : ''}${surprise ? `, surprise: ${surprise}` : ''} },`;
+};
+const routeLine = (r: Route) => `  { kind: ${q(r.kind)}, a: ${q(r.a)}, b: ${q(r.b)}${r.oneWay ? ', oneWay: true' : ''} },`;
+const ts = `// Made by \`node scripts/map100-review.ts\` from the owner-approved plan (docs/map100.md, step 2.12). Do not edit by hand.
+// The 100-turn map (step 2.12, part J2): ${areas.length} areas, ${areas.filter((a) => a.wonder).length} wonders, ${ap.size} airports, ${pt.size} ports, ${ROUTES.length} connections, the train, bus and car.
+// Area order, neighbour order and route order are the plan's: they change the robot games, so keep them.
+// \`inside\`: the 50-turn area(s) the area lies inside. Until step 2.12 part J4 (the facts), each area borrows the facts
+// and the test-only geography facts of its 50-turn area(s), joined in that order (for tests and the lab only; the
+// 100-turn game is not shown in the setup screen until part J5).
+import type { Area, GameMap, Route } from '../engine/types.ts';
+import type { Fact } from '../facts/types.ts';
+import { map50 } from './map50.ts';
+
+interface AreaInfo extends Area { inside: string[] }
+
+const AREAS: AreaInfo[] = [
+${areas.map(areaLine).join('\n')}
+];
+
+const ROUTES: Route[] = [
+${map.routes!.map(routeLine).join('\n')}
+];
+
+function borrow(from: Record<string, Fact[]> | undefined): Record<string, Fact[]> {
+  return Object.fromEntries(AREAS.map((a) => [a.id, a.inside.flatMap((p) => from?.[p] ?? [])]));
+}
+
+function build(): GameMap {
+  const list: Area[] = AREAS.map(({ inside, ...a }) => a);
+  return { id: 'map100', rounds: 100, areas: list, routes: ROUTES, facts: borrow(map50.facts), examFacts: borrow(map50.examFacts) };
+}
+
+export const map100: GameMap = build();
+`;
+writeFileSync(new URL('../src/maps/map100.ts', import.meta.url), ts);
 console.log(`${areas.length} areas, ${areas.filter((a) => a.wonder).length} wonders, ${ap.size} airports, ${pt.size} ports, ${ROUTES.length} connections, ${links.size} walking links, stuck problems: ${problems.length}, pair traps ${pairTraps}/${pairs}, start-set traps ${tripleTraps}/${triples}, new facts about ${Math.round((nf * 0.9) / 10) * 10}`);

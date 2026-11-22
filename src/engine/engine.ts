@@ -38,6 +38,7 @@ import {
   VISA_TEST_QUESTIONS,
   SECOND_CITIZENSHIP_PRICE,
   cardMix,
+  catchUpFor,
   type CardMix,
   WELCOME_BONUS,
 } from './constants.ts';
@@ -141,6 +142,7 @@ export function createGame(config: GameConfig, map: GameMap): GameState {
     offeredThisTurn: false,
     eventCards: config.eventCards !== false,
     continentRewards: config.continentRewards !== false,
+    catchUp: config.catchUp !== false,
     card: null,
     drawn: [],
     rewards: [],
@@ -870,13 +872,30 @@ function scheduledCard(state: GameState, map: GameMap, me: Player): void {
   // none twice in a game, with their own points in the 50-turn game.
   const own = me.profile === 'krisann';
   let card = pickCard(state, own ? ['country', 'krisann'] : ['country'], areaById(map, me.area!).cardsFrom ?? me.area,
-    cardMix(me.profile!, state.players.length, state.totalRounds), me.ownCards ?? []);
+    withCatchUp(state, me, cardMix(me.profile!, state.players.length, state.totalRounds)), me.ownCards ?? []);
   if (card.deck === 'krisann') {
     (me.ownCards ??= []).push(card.id);
     if (state.totalRounds >= 50 && card.points50 !== undefined) card = { ...card, points: card.points50 };
   }
   state.card = applyCard(state, me, newsCard(card, areaById(map, me.area!), state.drawn.length));
   if (card.loseTurn) me.loseTurn = true;
+}
+
+// Step 2.12 (owner, secret rule): catch-up. The single leader (finalScore, as at the end) draws bad cards
+// (1 + catch-up) times as often, the single last player good cards (1 + catch-up) times as often; a shared top or
+// bottom score changes nothing. Applied to the profile's mix before the card is picked.
+export function withCatchUp(state: GameState, me: Player, mix: CardMix): CardMix {
+  if (!state.catchUp) return mix;
+  const up = catchUpFor(state.totalRounds);
+  const scores = state.players.map((p) => finalScore(state, p));
+  const mine = finalScore(state, me);
+  const best = Math.max(...scores);
+  const worst = Math.min(...scores);
+  const only = (x: number) => scores.filter((v) => v === x).length === 1;
+  return {
+    good: mine === worst && only(worst) ? mix.good * (1 + up) : mix.good,
+    bad: mine === best && only(best) ? mix.bad * (1 + up) : mix.bad,
+  };
 }
 
 // The cards that can be drawn: the decks' cards, with area cards only in their own area.
