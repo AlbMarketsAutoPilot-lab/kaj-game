@@ -124,6 +124,9 @@ paid app, built later. Version 1.0 of this app mentions neither. Version 1.1 of 
 new app once it exists. Plans already written: `docs/map100.md` (the 100-turn map) and `docs/profiles8.md`
 (the 4 new profiles).
 
+**Version 2.0 (owner, 2026-11-20 and 2026-11-22):** the 100-turn game comes into this app (step 2.12) with the 5 profiles
+and all 2.0 rules; `docs/profiles8.md` is not used. Plan: `docs/map100.md` (126 areas).
+
 ## 11. If time runs short: cut order
 
 1. 2 challenge types instead of 6

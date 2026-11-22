@@ -1,0 +1,156 @@
+{
+ "30": {
+  "every": 3,
+  "catchUp": 1,
+  "version": "K1-3",
+  "mix": {
+   "2": {
+    "backpacker": {
+     "good": 1,
+     "bad": 0.8433406592546896
+    },
+    "business": {
+     "good": 1.1,
+     "bad": 1.058216939059088
+    },
+    "luxury": {
+     "good": 1,
+     "bad": 1.2211522139647586
+    },
+    "nomad": {
+     "good": 1.1,
+     "bad": 0.5446647360749842
+    },
+    "krisann": {
+     "good": 1,
+     "bad": 1.4434586698019325
+    }
+   },
+   "4": {
+    "backpacker": {
+     "good": 0.93,
+     "bad": 1.9536534101807108
+    },
+    "business": {
+     "good": 1.2,
+     "bad": 1.8028893787315767
+    },
+    "luxury": {
+     "good": 1.3,
+     "bad": 1.2454133333893371
+    },
+    "nomad": {
+     "good": 1.1,
+     "bad": 0.8214035396682249
+    },
+    "krisann": {
+     "good": 1,
+     "bad": 0.8061856743891243
+    }
+   }
+  }
+ },
+ "50": {
+  "every": 5,
+  "catchUp": 1,
+  "version": "K1-3",
+  "mix": {
+   "2": {
+    "backpacker": {
+     "good": 1,
+     "bad": 1.4423859614550982
+    },
+    "business": {
+     "good": 1.1,
+     "bad": 1.503980212143605
+    },
+    "luxury": {
+     "good": 1,
+     "bad": 1.4704043702713927
+    },
+    "nomad": {
+     "good": 1,
+     "bad": 0.8029537058840832
+    },
+    "krisann": {
+     "good": 1,
+     "bad": 1.0565602150742184
+    }
+   },
+   "4": {
+    "backpacker": {
+     "good": 0.93,
+     "bad": 2.2977081548575096
+    },
+    "business": {
+     "good": 1.2,
+     "bad": 1.3581292336214332
+    },
+    "luxury": {
+     "good": 1.3,
+     "bad": 1.2675839411802088
+    },
+    "nomad": {
+     "good": 1.1,
+     "bad": 0.9118315784773889
+    },
+    "krisann": {
+     "good": 1,
+     "bad": 0.7635060674354874
+    }
+   }
+  }
+ },
+ "100": {
+  "every": 5,
+  "catchUp": 3,
+  "version": "F3-2",
+  "mix": {
+   "2": {
+    "backpacker": {
+     "good": 1,
+     "bad": 1.6900594330122833
+    },
+    "business": {
+     "good": 1,
+     "bad": 1.8480404733181934
+    },
+    "luxury": {
+     "good": 1,
+     "bad": 1.8505028728017714
+    },
+    "nomad": {
+     "good": 1,
+     "bad": 2.553892465368005
+    },
+    "krisann": {
+     "good": 1,
+     "bad": 0.5089655227454075
+    }
+   },
+   "4": {
+    "backpacker": {
+     "good": 1,
+     "bad": 1.4816599011527394
+    },
+    "business": {
+     "good": 1,
+     "bad": 1.5305484332137378
+    },
+    "luxury": {
+     "good": 1,
+     "bad": 1.0632027648191955
+    },
+    "nomad": {
+     "good": 1,
+     "bad": 0.8872376633933493
+    },
+    "krisann": {
+     "good": 1,
+     "bad": 0.5693556478237388
+    }
+   }
+  }
+ },
+ "note": "Step 2.12 (owner-approved 2026-11-22): the exact card mixes measured in the balance lab (docs/balance-lab.md, step 2.12). good/bad = how often a good card (points above 0) and a bad card (points below 0, or lose a turn at half weight) come. catchUp: at a card draw, the player with the single highest score (points plus businesses, as at the end) multiplies bad by (1 + catchUp); the player with the single lowest multiplies good by (1 + catchUp); nobody else changes, and nothing changes when all are level. 3 players use the 4-player mix."
+}

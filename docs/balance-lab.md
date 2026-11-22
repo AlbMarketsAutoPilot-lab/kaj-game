@@ -823,3 +823,59 @@ average boredom / lead changes / won by 3 or less; "mix" = card mix tuned per ma
 | KA3 | TG + her cards, 50-turn points a little kinder | 26 | 8 | 24 | 26.2% | 4.60 | 31.9% |
 | KA4 | KA1 with her cards half as often on the 50-turn map | 24 | 8 | 22 | 26.2% | 4.59 | 31.5% |
 | **KA5 (built)** | **KA3, none of her cards twice in a game** | **26** | **8** | **24** | **26.2%** | **4.60** | **31.8%** |
+
+## Step 2.12, part J1 (2026-11-21/22): the 100-turn game and catch-up cards — measured, owner's final decision
+
+Extended lab (`lab2.ts`), every run in scratch copies outside the project; nothing in `src/` changed. Test-only changes
+in the scratch copies: a draft 126-area map (`scripts/map100-review.ts`, facts borrowed from the 50-turn areas), a lab
+option for the 100-turn lines and for the first game number (to play new games), and the catch-up rule. Exact card
+mixes: `docs/card-mix-2.12.json`. They come into the game in J2 (owner-approved).
+
+**Today's game at more games (main, unchanged):** 34 of 40 at 1,600 games per line (step 2.11), **32 of 40 at 3,200**,
+32 of 40 on 3,200 and on 6,400 new games (games 3,201–9,600). The 34 had two borderline results inside by luck (Business
+20%, Luxury 39%, 50 turns); it was also the best of about 30 versions measured on the same 1,600 games, so a little
+flattering. Averages: boredom 26.2–26.3%, lead changes 4.57–4.59, won by 3 or less 31.9%.
+
+**100 turns** (lines 100 turns × 2 and 4 players × normal and planning robots; fair of 20):
+
+| Version | Games per line | Fair | Boredom | Lead changes | Won by ≤3 |
+|---|---|---|---|---|---|
+| First run: cards every 10, the 50-turn card mix | 3,200 | 7 | 24–26% | 4.2–8.6 | 16–30% |
+| Cards every 5, card mix tuned (6 tries) | 800 | best 13 | 25.1% | 6.6 | 22% |
+| + catch-up ×1 / ×2 / ×3 / ×5 (4–6 tries each) | 800 | best 12 / 14 / 15 / 14 | 25.1% | 8.6 / 9.7 / 10.5 / 11.4 | 37 / 46 / 48 / 55% |
+| **F3-2 (frozen): every 5, its mix, catch-up ×3** | **3,200** | **16** | **25.1%** | **10.5** | **50.2%** |
+| F3-2, first half of the same games | 1,600 | 15 | 25.1% | 10.5 | 50% |
+| F3-2, new games 3,201–6,400 / 3,201–9,600 | 3,200 / 6,400 | 16 / 15 | 25.1% | 10.5 | 50% |
+| Business extra catch-up, 4 players (3 tries) | 800 | 13–15 | 25.1% | 10.6–10.8 | 48–50% |
+
+F3-2 at 3,200 (average score in brackets): 2 players normal: Backpacker 51% (128.9), Business 42% (119.2), Luxury 54%
+(121.9), Nomad 43% (123.7), Kris Ann 53% (125.4); 2 players planning: 49%, 60%, 46%, 57%, 47%; 4 players normal: 30%,
+**17%** ❌, 26%, 21%, 29%; 4 players planning: **20%** ❌ (just under), **32%** ❌, 22%, **31%** ❌, 21%. Robot check: robots pay
+for 38–58% of their trips. Go home after 3 turns without money 0; longest blocked streak 2 (3 on 6,400 new games); failed
+visa tests 15–16%. Bad-card shares of the 100-turn mix: Kris Ann 28–31%, the others 41–66%. On 6,400 new games the misses
+are Business 4 players 17% / 33%, Business 2 players planning 63%, Backpacker 4 players normal 31%, Kris Ann 4 players
+planning 19.5%.
+
+Why the first run was unfair (point split, scratch script, 60–300 games): in 2-player games Kris Ann's opponent owns every
+business, so her tickets, visas and tour fees (about 10 points a game) go to the opponent; her +3 per big country does not
+grow with the game. The misses left after tuning are a profile doing well with one robot type and badly with the other:
+the planning Business uses its cheap fast trips better (about 83 areas a game against 75). Card rules can't separate them.
+
+**30 and 50 turns with catch-up** (fair of 40, 3,200 games per line):
+
+| Version | Fair | Boredom | Lead changes | Won by ≤3 |
+|---|---|---|---|---|
+| Today (TG) | 32 | 26.2% | 4.59 | 31.9% |
+| Catch-up ×1 / ×2 / ×3, today's mix | 26 / 23 / 22 | 26.1–26.2% | 5.43 / 5.91 / 6.19 | 42.4 / 47.8 / 50.0% |
+| **K1-3: catch-up ×1, card mix tuned (tries 3–6 the same)** | **33** | **26.2%** | **5.40** | **42.9%** |
+| K1-3, first half of the same games (1,600) | 31 | 26.2% | 5.40 | 42.9% |
+| K1-3, new games 3,201–6,400 / 3,201–9,600 | 32 / 32 | 26.2–26.3% | 5.38–5.39 | 42.4–42.6% |
+
+Try 1 of the tuning repeated the earlier catch-up ×1 run exactly (0 differences in 8 lines). On new games today's game
+and K1-3 are equally fair (32 of 40); K1-3 is clearly more exciting. K1-3 misses (6,400 new games): 30 turns 2 players
+normal Business 60.3%; 50 turns 2 players normal Nomad 61.4%; 2 players planning Business 64.2%, Luxury 61.1%; 4 players
+normal Backpacker 35.0%, Business 19.2%; 4 players planning Backpacker 17.4%, Business 31.3%. Bad-card shares of K1-3:
+30 turns 28–62%, 50 turns 37–66%.
+
+**Owner's final decision (2026-11-22):** the 30- and 50-turn games adopt catch-up ×1 (K1-3); the 100-turn game F3-2.
+Fairness about 80% at 3,200 games per line is accepted (the 34 of 40 at 1,600 stays the aim).
