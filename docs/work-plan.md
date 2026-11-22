@@ -98,7 +98,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | 2.9 | More wonders, history and curiosity for each, new design | medium | 2 | — | ⛔ stopped (owner, 2026-11-20): no new wonders; Petra and Angkor Wat (30 turns) and Victoria Falls (50 turns) measured 30 → 22 of 32 at 1,600 games per line; history and curiosity of the 11 wonders kept for later |
 | 2.10 | Passport with stamps, records on the device | medium | 1–2 | — | ✅ done (owner-approved design, 2026-11-20): end popup in two columns (only winners cheered, new-record line, a passport button per person, Play again and Records, no Leave); passport cover with the citizenship and flag, data page, stamps 6 a page; records top 10 by points per game length; screens only, save stays 20 |
 | 2.11 | Kris Ann, a 5th profile (the Explorer of `docs/profiles8.md`), her 8 cards with the owner's pictures | **high** | 1 | — | ✅ done (owner's final decisions, 2026-11-21): +3 per big country, bus, no business, plane 4, card mix TG with "lose a turn" half as often, her 8 cards (none twice a game, shown to everyone), robots take her first; 34 of 40 fair (old 26 of 32, Kris Ann 8 of 8) at 1,600 games per line (before 30 of 32); saves v21 |
-| 2.12 | 100-turn map in this app (J1 plan high, J2 engine high, J3–J6 medium) | **high** / medium | ~10 | — | |
+| 2.12 | 100-turn map in this app (J1 plan high, J2 engine high, J3–J6 medium) | **high** / medium | ~10 | — | J1 ✅ done (owner's final decisions, 2026-11-22): 126 areas (`docs/map100.md`), big countries and the 11 wonders as on the 50-turn map, 25 routes in the 2.4 style; 100 turns: cards every 5, own mix, catch-up ×3 (F3-2, 16 of 20 at 3,200 games per line); 30 and 50 turns adopt catch-up ×1 (K1-3, 32 of 40 on new games, as today, more exciting); saves v22 in J2. Next: J2 engine (high) |
 | 2.13 | Full test games, release 2.0 (web on kaj.kritere.com and app) | medium | 1–2 | — | |
 
 ## The tasks
@@ -858,6 +858,31 @@ country count ranks 3rd"). Proposal: count areas, one list per game length.
 **2.12 (J) 100-turn map (about 10 sessions + about 5 days of fact checking).** J1 (high): rework
 `docs/map100.md` to about 100–125 areas, 5 profiles, the new route style; ask its 8 open questions. J2
 engine (high, 2), J3 shapes, J4 facts (2), J5 screens (2), J6 test games (2), medium.
+
+- **J1 done (2026-11-21/22, owner's final decisions):** plan in `docs/map100.md` (made by `node scripts/map100-review.ts`),
+  results in `docs/balance-lab.md` (step 2.12), exact card mixes in `docs/card-mix-2.12.json`.
+  - **Map:** 126 areas (Europe 32, Asia 35, Africa 33, North America 12, South America 11, Oceania 3), 178 real countries;
+    the owner's 6 African merges; big countries as on the 50-turn map (no 4 or 5 parts, points as today); the 11 wonders
+    of the 50-turn map (no new art); sensitive regions grouped; Sri Lanka by ship, one Caribbean area, Madagascar's two
+    planes and secret +3, the Øresund Bridge; 25 routes (17 airports, 23 ports, at most 2 destinations, all two-way), train,
+    bus (Siberia: all of Russia) and car as on the 50-turn map. Stuck-state checker passes; traps: 41 of 6,786 citizenship
+    pairs, 1,084 of 109,567 start sets. About 450 new facts for the owner (about 4 days).
+  - **100 turns (F3-2):** an event card every 5th land turn; its own card mix; catch-up ×3 (the leader draws bad cards 4
+    times as often, the last player good cards 4 times as often); Kris Ann's cards with their 50-turn points. Fair 16 of
+    20 at 3,200 games per line (15–16 on new games); boredom 25.1%, lead changes 10.5, won by 3 or less 50%.
+  - **30 and 50 turns (K1-3, owner: adopted):** catch-up ×1 (twice as often) and a new card mix. Fair 32 of 40 on new
+    games, the same as today's game measured the same way (today: 34 at 1,600, 32 at 3,200); lead changes 4.6 → 5.4, won by
+    3 or less 32% → 42%, boredom the same. This changes the 30- and 50-turn games (owner's decision, 2026-11-22).
+  - **Accepted:** fairness about 80% at 3,200 games per line; card-mix bad shares outside 44–64% (28–66%); catch-up is a
+    secret rule (like hitchhiking). The misses left are robot-type gaps (Business, Backpacker), which card rules can't fix.
+  - **Measured and not adopted:** cards every 10 (7 of 20); catch-up ×1, ×2, ×5 on 100 turns; extra catch-up for the
+    Business; catch-up ×2 and ×3 on 30 and 50 turns.
+  - **J2 (engine, high, 2 sessions):** `src/maps/map100.ts` from the plan; game length 100; cards every 5 on 100 turns;
+    the three card mixes and catch-up exactly as in `docs/card-mix-2.12.json`; the lab gets the 100-turn lines (owner-
+    approved) and a first-game option; tests (map check, stuck-state checker, trap counts, catch-up, card mixes); saves
+    v22 (no older save continues); `docs/rules-now.md` updated when the rules are in the code. Proof: the built game must
+    measure exactly as the scratch versions (K1-3 and F3-2, same seeds, line by line). Until J4, the 100-turn areas
+    borrow the facts of their 50-turn areas (test only; not released).
 
 **2.13 (release) Release (medium, 1–2).** Full test games (2–4 players, all lengths), web at kaj.kritere.com and app.
 
