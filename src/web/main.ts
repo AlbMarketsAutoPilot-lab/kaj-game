@@ -18,11 +18,12 @@ import { shapes30 } from '../maps/shapes30.ts';
 import { shapes50 } from '../maps/shapes50.ts';
 import { shapes100 } from '../maps/shapes100.ts';
 import { centres } from '../maps/centres.ts';
+import { colours } from '../maps/colours.ts';
 import { countryCapital, countryFlag, SURPRISE_FACT, WONDER_NAME, WONDER_PLACE } from './countries.ts';
 import { passportBook, recordLine, recordsBox, type PassportData } from './passport.ts';
 import { COUNTRY_CODE3 } from './passport-codes.ts';
 import { addWin, loadRecords, saveRecords, type WinRecord } from './records.ts';
-import { buildGeo, colourAreas, continentBox, glowFor, MAP_NAME, nameLayouts, pad, propSpots, squeeze, svg, unionBox, type Box, type PropKind } from './maps.ts';
+import { buildGeo, colourAreas, continentBox, glowFor, innerBorders, MAP_NAME, nameLayouts, pad, propSpots, squeeze, svg, unionBox, type Box, type PropKind } from './maps.ts';
 import { airport, busStop, carRental, citizenFlag, monument, pawn, place, port, station } from './props.ts';
 import { iconEl, iconUse, installIcons, PROFILE_COLOUR } from './icons.ts';
 import { hitchScene, tripScene, wonderScene } from './scenes.ts';
@@ -113,7 +114,7 @@ let areaColour = new Map<string, string>();
 function useMap(m: GameMap): void {
   if (!drawn.has(m.id)) {
     const g = buildGeo(m, SHAPES[m.id], centres[m.id]);
-    drawn.set(m.id, { geo: g, colour: colourAreas(m, g) });
+    drawn.set(m.id, { geo: g, colour: colours[m.id] ? new Map(Object.entries(colours[m.id])) : colourAreas(m, g) });
   }
   gameMap = m;
   areaById = new Map(m.areas.map((a) => [a.id, a]));
@@ -2090,6 +2091,8 @@ function drawMap(view: Box, k: number, cls: (id: string) => string, onTap: (id: 
     paths.set(a.id, path);
     shapes.append(path);
   }
+  // Owner (step 2.12b): the border between two parts of a big country is thin and dashed.
+  shapes.append(innerBorders(geo, paths.keys(), (id) => areaColour.get(id)!, cls));
   const names = svg('g', { class: 'names' });
   const labels = svg('g');
   root.append(shapes, glowFor(shapes), names, labels);
@@ -2734,6 +2737,7 @@ function renderStartMap(s: GameState, isRobot: boolean): HTMLElement {
       },
       (id) => (open(areaById.get(id)!.continent) ? () => { zoom = areaById.get(id)!.continent; render(); } : null));
     for (const path of d.paths.values()) path.style.fill = '';
+    d.root.querySelector('g.inner')?.remove(); // continents only: no country borders to show
     for (const c of continents) {
       const ids = gameMap.areas.filter((a) => a.continent === c).map((a) => geo.get(a.id)!.centre);
       const x = ids.reduce((t, p) => t + p[0], 0) / ids.length;

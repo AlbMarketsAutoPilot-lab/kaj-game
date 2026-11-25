@@ -7,7 +7,7 @@
 import { bigCountryPoints, BUSINESS_PRICE, FREE_TRAVEL_TURNS, MOST_BUSINESSES_BONUS, PAID_TRAVEL_TURNS, QUIZ_TRIES, VISA_TEST_FACTS, VISA_TEST_PASS, POINTS_BIG_COUNTRY_3_PARTS, POINTS_NEW_CONTINENT, POINTS_WONDER, VISA_PRICE } from '../engine/constants.ts';
 import { batch1 } from '../facts/batch1.ts';
 import type { AreaGeo } from './maps.ts';
-import { glowFor, pad, squeeze, svg, unionBox } from './maps.ts';
+import { glowFor, innerBorders, pad, squeeze, svg, unionBox } from './maps.ts';
 import { airport, pawn, place } from './props.ts';
 import { play, stopTimer } from './sound.ts';
 
@@ -73,6 +73,8 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
       if (tap) { path.classList.add('tap', 'guide-glow'); path.addEventListener('click', tap); }
       g.append(path);
     }
+    // Step 2.12b: the parts of a big country (Canada) with dashed borders between them, as on the game's maps.
+    g.append(innerBorders(geo, ids, (id) => areaColour.get(id)!, cls));
     root.append(g, glowFor(g));
     const at = (id: string): [number, number] => { const [x, y] = geo.get(id)!.centre; return [x * k, y]; };
     if (props) root.append(...props(at, Math.min(box.w * k, box.h) * 0.3));
