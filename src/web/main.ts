@@ -133,7 +133,7 @@ let robotTimer = 0;
 // The end of a turn (owner's request, task 14i): the map stays on the player who just moved
 // while their piece walks there; a person then sees what the turn gave and taps "End turn"
 // (a robot's ends by itself).
-let hold: { seat: number; from: string | null; to: string | null; lines: string[]; ready: boolean; animated: boolean } | null = null;
+let hold: { seat: number; from: string | null; to: string | null; lines: string[]; area: string | null; ready: boolean; animated: boolean } | null = null;
 let holdTimer = 0;
 let quizTimer = 0;
 // The Nomad pressed "Play the challenge": it works on trips (owner, 2026-10-11), so a joke instead.
@@ -547,7 +547,8 @@ function act(action: Action): void {
   // visit points: no hold for choosing it).
   if (state.phase === 'play' && action.type !== 'chooseStart' && (currentPlayer(state).seat !== mover.seat || state.round !== before.round)) {
     const walked = action.type === 'walk' || action.type === 'goHome';
-    hold = { seat: mover.seat, from: walked ? mover.area : null, to: walked ? after.area : null, lines: arrivalLines(mover, after)?.lines ?? [], ready: false, animated: false };
+    const arrival = arrivalLines(mover, after);
+    hold = { seat: mover.seat, from: walked ? mover.area : null, to: walked ? after.area : null, lines: arrival?.lines ?? [], area: arrival?.area ?? null, ready: false, animated: false };
     const h = hold;
     clearTimeout(holdTimer);
     holdTimer = window.setTimeout(() => {
@@ -1825,6 +1826,8 @@ function renderModal(s: GameState, actions: Action[], isRobot: boolean): Modal |
     const arrived = h.lines.length > 0 ? h.lines[0].replace('📍 You arrived in ', '').replace(/\.$/, '') : '';
     return { turn: false, node: wrap(el('div', {},
       el('h2', {}, dot(h.seat), arrived ? ` You arrived in ${arrived}!` : ` ${nameOf(h.seat)}, your turn is over`),
+      // Owner (2026-11-25): the countries of the area, with a flag and a capital only when the data has them.
+      ...(arrived && h.area ? countryRows(areaById.get(h.area)!) : []),
       ...h.lines.slice(1).map((t) => el('p', { textContent: t })),
       news.length ? el('ul', {}, ...news.map((t) => el('li', { textContent: t }))) : '',
       h.lines.length ? '' : el('p', { className: 'small', textContent: `You have ${plural(p.points, 'point')}.` }),
@@ -2615,17 +2618,23 @@ function citizenshipAreasOf(id: string): string[] {
 
 // The details of a tapped area (for planning; nobody moves): name, flags, capitals, wonder,
 // businesses, routes, citizenship, visits.
-function renderAreaDetails(s: GameState, id: string): HTMLElement {
-  const a = areaById.get(id)!;
-  const me = currentPlayer(s);
-  const routes = (kind: RouteKind) => routeEnds(id, kind).map((t) => areaById.get(t)!.name);
-  const countries = (a.countries ?? []).map((c) => {
+// The countries of an area: a flag and a capital only when the data has them (the area details
+// and the end-of-turn popup).
+function countryRows(a: Area): HTMLElement[] {
+  return (a.countries ?? []).map((c) => {
     const code = countryFlag(c);
     const cap = countryCapital(c);
     return el('div', { className: 'country' },
       code && FLAGS[code] ? el('img', { className: 'mini-flag', src: FLAGS[code], alt: '' }) : '',
       el('span', { textContent: `${c}${cap ? ` · capital ${cap}` : ''}` }));
   });
+}
+
+function renderAreaDetails(s: GameState, id: string): HTMLElement {
+  const a = areaById.get(id)!;
+  const me = currentPlayer(s);
+  const routes = (kind: RouteKind) => routeEnds(id, kind).map((t) => areaById.get(t)!.name);
+  const countries = countryRows(a);
   const parts = a.bigCountry ? gameMap.areas.filter((x) => x.bigCountry === a.bigCountry) : [];
   const total = gameMap.areas.filter((x) => x.continent === a.continent).length;
   const lines = [
