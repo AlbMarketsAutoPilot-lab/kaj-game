@@ -1,6 +1,8 @@
 // Draws the 53 areas of the 30-turn map from real borders (task 14): node scripts/map-shapes.ts
 // With --map 50: the 84 areas of the 50-turn map (task M3), same data and the same big-country
 // splits; writes src/maps/shapes50.ts and docs/map-shapes50.md.
+// With --map 100: the 126 areas of the 100-turn map (step 2.12, part J3), same data and the same
+// big-country splits (the same part ids); writes src/maps/shapes100.ts and docs/map-shapes100.md.
 //
 // Merged areas (Scandinavia, Balkans, ...) are joined from their countries; the 6 big countries
 // are split along their states or provinces (the lists below, checked by the owner).
@@ -8,7 +10,7 @@
 //
 // Data: Natural Earth 1:10m admin-1 states and provinces (public domain), kept outside the repo:
 //   curl -o <file> https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_admin_1_states_provinces.geojson
-//   node scripts/map-shapes.ts --from <file> [--map 50]
+//   node scripts/map-shapes.ts --from <file> [--map 50 | --map 100]
 import { readFileSync, writeFileSync } from 'node:fs';
 // @ts-ignore: no types
 import { topology } from 'topojson-server';
@@ -18,13 +20,14 @@ import { mergeArcs, neighbors } from 'topojson-client';
 import { filter, filterWeight, presimplify, quantile, simplify, sphericalRingArea, sphericalTriangleArea } from 'topojson-simplify';
 import { map30 } from '../src/maps/map30.ts';
 import { map50 } from '../src/maps/map50.ts';
+import { map100 } from '../src/maps/map100.ts';
 
 const fromIndex = process.argv.indexOf('--from');
 if (fromIndex < 0) throw new Error('Usage: node scripts/map-shapes.ts --from <ne_10m_admin_1_states_provinces.geojson>');
 const source = JSON.parse(readFileSync(process.argv[fromIndex + 1], 'utf8'));
 const turns = process.argv.includes('--map') ? Number(process.argv[process.argv.indexOf('--map') + 1]) : 30;
-if (turns !== 30 && turns !== 50) throw new Error('--map 30 or 50');
-const map = turns === 50 ? map50 : map30;
+if (turns !== 30 && turns !== 50 && turns !== 100) throw new Error('--map 30, 50 or 100');
+const map = turns === 100 ? map100 : turns === 50 ? map50 : map30;
 
 // Big countries: which states or provinces make each part (owner-approved).
 // The last part of each country (REST) gets every state or province not listed.
@@ -79,9 +82,18 @@ const BY_CODE: Record<string, string | null> = {
 const AREA_50: Record<string, string> = {
   Aland: 'finland', 'Baykonur Cosmodrome': 'kazakhstan', Gibraltar: 'spain', 'FR-GF': 'venezuela-guianas',
 };
-if (turns === 50) {
-  for (const place of Object.keys(EXTRA)) if (AREA_50[place]) EXTRA[place] = AREA_50[place];
-  BY_CODE['FR-GF'] = AREA_50['FR-GF'];
+// 100-turn map (J3): every place above goes to the 100-turn area it lies in.
+const AREA_100: Record<string, string> = {
+  Somaliland: 'somalia', Aland: 'finland', 'Faroe Islands': 'denmark',
+  'Hong Kong S.A.R.': 'china-east', 'Macau S.A.R': 'china-east', 'Siachen Glacier': 'india',
+  'Baykonur Cosmodrome': 'kazakhstan', 'US Naval Base Guantanamo Bay': 'caribbean',
+  'Puerto Rico': 'caribbean', 'Trinidad and Tobago': 'caribbean',
+  Gibraltar: 'spain', 'Isle of Man': 'uk', Jersey: 'uk', Guernsey: 'uk', 'FR-GF': 'venezuela-guianas',
+};
+const placeArea = turns === 100 ? AREA_100 : turns === 50 ? AREA_50 : null;
+if (placeArea) {
+  for (const place of Object.keys(EXTRA)) if (placeArea[place]) EXTRA[place] = placeArea[place];
+  BY_CODE['FR-GF'] = placeArea['FR-GF'];
 }
 
 const areaOfCountry = new Map<string, string>();
@@ -122,6 +134,9 @@ for (const f of source.features) {
 }
 const missing = map.areas.filter((a) => !byArea.has(a.id)).map((a) => a.id);
 if (missing.length) throw new Error(`Areas with no land: ${missing.join(', ')}`);
+// Every country of the map (big countries by their parts) must be in the data.
+const inData = new Set(source.features.map((f: any) => ALIASES[f.properties.admin] ?? f.properties.admin));
+const notInData = [...areaOfCountry.keys()].filter((c) => !inData.has(c)).sort();
 
 // One topology for all the land, so neighbouring areas share exactly the same border lines.
 const units: any[] = [];
@@ -182,8 +197,9 @@ const drawn = new Set<string>();
 nb.forEach((list, i) => list.forEach((j) => drawn.add([ids[i], ids[j]].sort().join(' – '))));
 const data = new Set<string>();
 for (const a of map.areas) for (const n of a.neighbours) data.add([a.id, n].sort().join(' – '));
-// The Channel Tunnel; on the 50-turn map also the sea crossing Madagascar ↔ Zambezi (owner, M2).
-const FIXED_LINKS = new Set(['france – uk-ireland', 'madagascar – zambezi']);
+// The Channel Tunnel; on the 50-turn map also the sea crossing Madagascar ↔ Zambezi (owner, M2);
+// on the 100-turn map the Channel Tunnel and the Øresund Bridge (docs/map100.md).
+const FIXED_LINKS = new Set(['france – uk-ireland', 'madagascar – zambezi', 'france – uk', 'denmark – sweden']);
 const onlyDrawn = [...drawn].filter((p) => !data.has(p)).sort();
 const onlyData = [...data].filter((p) => !drawn.has(p) && !FIXED_LINKS.has(p)).sort();
 
@@ -205,7 +221,7 @@ const nameOf = (id: string) => map.areas.find((a) => a.id === id)!.name;
 const lines = [
   `# Map shapes (${turns}-turn map)`,
   '',
-  `Made by \`node scripts/map-shapes.ts --from <file>${turns === 50 ? ' --map 50' : ''}\` from Natural Earth 1:10m states and provinces`,
+  `Made by \`node scripts/map-shapes.ts --from <file>${turns === 30 ? '' : ` --map ${turns}`}\` from Natural Earth 1:10m states and provinces`,
   '(public domain). Do not edit by hand: change the lists in the script and run it again.',
   '',
   '## Big countries: which states or provinces make each part',
@@ -232,10 +248,14 @@ const lines = [
   '## Check: drawn borders vs. walking links',
   '',
   `- Touching on the map but no walking link: ${onlyDrawn.length ? onlyDrawn.join('; ') : 'none'}`,
-  `- Walking link but not touching on the map: ${onlyData.length ? onlyData.join('; ') : 'none'} (the Channel Tunnel${turns === 50 ? ' and Madagascar ↔ Zambezi are' : ' is a'} fixed link${turns === 50 ? 's' : ''})`,
+  turns === 100
+    ? `- Walking link but not touching on the map: ${onlyData.length ? onlyData.join('; ') : 'none'} (the Channel Tunnel and the Øresund Bridge are fixed links)`
+    : `- Walking link but not touching on the map: ${onlyData.length ? onlyData.join('; ') : 'none'} (the Channel Tunnel${turns === 50 ? ' and Madagascar ↔ Zambezi are' : ' is a'} fixed link${turns === 50 ? 's' : ''})`,
+  ...(turns === 100 ? [`- Countries of the map not found in the data: ${notInData.length ? notInData.join(', ') : 'none'}`] : []),
   '',
 ];
-writeFileSync(new URL(`../docs/map-shapes${turns === 50 ? '50' : ''}.md`, import.meta.url), lines.join('\n'));
+writeFileSync(new URL(`../docs/map-shapes${turns === 30 ? '' : turns}.md`, import.meta.url), lines.join('\n'));
 console.log(`shapes${turns}.ts: ${Math.round(json.length / 1024)} KB, ${arcs.length} arcs, ${encoded.reduce((n, a) => n + a.length, 0)} points`);
 console.log('only drawn:', onlyDrawn.join('; ') || 'none');
 console.log('only data:', onlyData.join('; ') || 'none');
+console.log('countries not in the data:', notInData.join(', ') || 'none');

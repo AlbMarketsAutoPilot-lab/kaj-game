@@ -98,7 +98,8 @@ Every task also adds its part to the test board, so there is **always a playable
 | 2.9 | More wonders, history and curiosity for each, new design | medium | 2 | — | ⛔ stopped (owner, 2026-11-20): no new wonders; Petra and Angkor Wat (30 turns) and Victoria Falls (50 turns) measured 30 → 22 of 32 at 1,600 games per line; history and curiosity of the 11 wonders kept for later |
 | 2.10 | Passport with stamps, records on the device | medium | 1–2 | — | ✅ done (owner-approved design, 2026-11-20): end popup in two columns (only winners cheered, new-record line, a passport button per person, Play again and Records, no Leave); passport cover with the citizenship and flag, data page, stamps 6 a page; records top 10 by points per game length; screens only, save stays 20 |
 | 2.11 | Kris Ann, a 5th profile (the Explorer of `docs/profiles8.md`), her 8 cards with the owner's pictures | **high** | 1 | — | ✅ done (owner's final decisions, 2026-11-21): +3 per big country, bus, no business, plane 4, card mix TG with "lose a turn" half as often, her 8 cards (none twice a game, shown to everyone), robots take her first; 34 of 40 fair (old 26 of 32, Kris Ann 8 of 8) at 1,600 games per line (before 30 of 32); saves v21 |
-| 2.12 | 100-turn map in this app (J1 plan high, J2 engine high, J3–J6 medium) | **high** / medium | ~10 | — | J1 ✅ done (owner's final decisions, 2026-11-22): 126 areas (`docs/map100.md`), big countries and the 11 wonders as on the 50-turn map, 25 routes in the 2.4 style; 100 turns: cards every 5, own mix, catch-up ×3 (F3-2, 16 of 20 at 3,200 games per line); 30 and 50 turns adopt catch-up ×1 (K1-3, 32 of 40 on new games, as today, more exciting); saves v22 in J2. J2 ✅ done (2026-11-22): map100 in the engine (hidden in the setup until J5), the three card mixes, catch-up on every map, lab options, saves v22; the built game measures exactly as J1 (33 of 40, 16 of 20). Next: J3 shapes (medium) |
+| 2.12 | 100-turn map in this app (J1 plan high, J2 engine high, J3–J6 medium) | **high** / medium | ~10 | — | J1 ✅ done (owner's final decisions, 2026-11-22): 126 areas (`docs/map100.md`), big countries and the 11 wonders as on the 50-turn map, 25 routes in the 2.4 style; 100 turns: cards every 5, own mix, catch-up ×3 (F3-2, 16 of 20 at 3,200 games per line); 30 and 50 turns adopt catch-up ×1 (K1-3, 32 of 40 on new games, as today, more exciting); saves v22 in J2. J2 ✅ done (2026-11-22): map100 in the engine (hidden in the setup until J5), the three card mixes, catch-up on every map, lab options, saves v22; the built game measures exactly as J1 (33 of 40, 16 of 20). J3 ✅ done (2026-11-25): shapes of the 126 areas (`src/maps/shapes100.ts`), every country found, all areas drawn, pawn spots, `SHAPES` in the screens (still hidden in the setup). Next: the owner's map change of 2026-11-25 (Balkans, Horn of Africa; **high**), then J4 facts (medium) |
+| 2.12b | Big countries look like one country on the 30-, 50- and 100-turn maps (owner, 2026-11-25): one colour for all parts, never the colour of a neighbour (also across the sea, e.g. Madagascar), thin dashed borders between the parts | medium | 1 | — | |
 | 2.13 | Full test games, release 2.0 (web on kaj.kritere.com and app) | medium | 1–2 | — | |
 
 ## The tasks
@@ -894,6 +895,27 @@ engine (high, 2), J3 shapes, J4 facts (2), J5 screens (2), J6 test games (2), me
     2.11: Luxury draws more bad cards than the Nomad, 30 turns, 4 random robots: 38.9% against 41.4%); owner's choice A:
     that test turns catch-up off with a test-only switch (`GameConfig.catchUp`), so it measures the card mix alone; no
     limit changed. 249 tests pass; the web build works.
+  - **J3 done (2026-11-25, owner-approved plan):** `node scripts/map-shapes.ts --from <file> --map 100` makes
+    `src/maps/shapes100.ts` and `docs/map-shapes100.md` (same Natural Earth data and big-country splits as M3); the 30- and
+    50-turn shapes stay byte-identical. All 178 countries found in the data; every area drawn, and each of the 20 small countries checked on the drawing. Drawn
+    borders match the walking links except the Channel Tunnel and the Øresund Bridge; China West touches Myanmar (as on the
+    other maps). Pawn spots for map100 in `src/maps/centres.ts` (map30, map50 unchanged); `SHAPES` in `src/web/main.ts`
+    (the setup still shows 30 and 50 only); the game file grows 4,820 → 5,020 KB. New `tests/map-shapes100.test.ts`;
+    `tests/centres.test.ts` covers the 3 maps; the props test for map100 waits for J5. Found: `docs/map-shapes.md` (30-turn
+    review page) has old area names (renamed after task 14); not changed. 252 tests pass; the web build works.
+  - **Owner's decisions after J3 (2026-11-25), checked against the map data (where each disputed place is drawn on the 3
+    maps):**
+    - **Map change (a high-effort session, before J4):** one area **"Balkans"** = Serbia, Kosovo, North Macedonia,
+      Montenegro, Bosnia and Herzegovina (Slovenia & Croatia and Albania stay separate); the area "Somalia" (Somalia with
+      Somaliland) is renamed **"Horn of Africa"** (Ethiopia and Eritrea & Djibouti stay separate). Then run again: the
+      stuck-state checker and trap counts (their test values change, owner-approved), the 100-turn balance, the J3 shapes
+      and the pawn spots.
+    - **Kept as they are:** Taiwan left out (not drawn, as on the 30- and 50-turn maps); Crimea drawn with Russia West (as
+      on every map since task 14); Ethiopia and Eritrea, Sudan and South Sudan stay separate areas (independent UN
+      members). No other merges: Kashmir (India, Pakistan, China West), Arunachal (India), the Halaib triangle (Egypt), the
+      Ilemi triangle (Kenya), the Kuril Islands (Russia Far East), Golan (Levant), Abkhazia (Caucasus), Transnistria
+      (Moldova), Palestine (Levant) and Western Sahara (with Morocco) are drawn the same way on the 50- and 100-turn maps.
+    - **New task 2.12b** (status table): the look of big countries on all 3 maps.
 
 **2.13 (release) Release (medium, 1–2).** Full test games (2–4 players, all lengths), web at kaj.kritere.com and app.
 

@@ -16,6 +16,7 @@ import { map30 } from '../maps/map30.ts';
 import type { Shapes } from '../maps/shapes.ts';
 import { shapes30 } from '../maps/shapes30.ts';
 import { shapes50 } from '../maps/shapes50.ts';
+import { shapes100 } from '../maps/shapes100.ts';
 import { centres } from '../maps/centres.ts';
 import { countryCapital, countryFlag, SURPRISE_FACT, WONDER_NAME, WONDER_PLACE } from './countries.ts';
 import { passportBook, recordLine, recordsBox, type PassportData } from './passport.ts';
@@ -100,7 +101,8 @@ const BUSINESS_EARNS: Record<BusinessKind, string> = {
 const app = document.getElementById('app')!;
 // The map of the game on screen (task M4): the 30-turn map (default) or the 50-turn map, set by
 // useMap() when a game starts or a saved game continues. The drawings of each map are made once.
-const SHAPES: Record<string, Shapes> = { map30: shapes30, map50: shapes50 };
+// The 100-turn map's shapes (step 2.12, J3) are here, but its game is not in the setup screen until J5.
+const SHAPES: Record<string, Shapes> = { map30: shapes30, map50: shapes50, map100: shapes100 };
 const drawn = new Map<string, { geo: ReturnType<typeof buildGeo>; colour: Map<string, string> }>();
 let gameMap: GameMap = map30;
 let areaById = new Map<string, Area>();
