@@ -1103,6 +1103,16 @@ No rule, balance, save or screen change; the 100-turn game stays out of the setu
   and China West – Myanmar; the 7 islands with no walk touch no area); `tests/centres.test.ts` checks the 3 maps. The
   "no drawn prop over another area" check for the 100-turn map waits for part J5 (owner).
 
+## Area names on the maps (owner, 2026-11-25; screens only)
+
+On the area view and the home-country map of all 3 maps (`areaNames` in `src/web/main.ts`; helpers in `src/web/maps.ts`):
+a name may stick out of its area **over sea**, never over another area; it sits on the part of its area that is on screen;
+it is never cut at the edge of the map or under a walk badge or drawn icon (such a name is hidden instead). A long name
+may take **2 or 3 lines**, split after "," or "&"; if it still doesn't fit, **North, South, West, East become N., S., W.,
+E.** (`nameLayouts`). **Map names** (drawing only; the engine and every other screen keep the area's name): on the
+100-turn map Serbia, Kosovo & North Macedonia is drawn as "Central Balkans" and Somalia as "Horn of Africa" (`MAP_NAME`).
+No rule, balance or save change. Tests: `tests/map-names.test.ts`.
+
 ## Project setup
 
 - TypeScript, run directly by Node 22.18 or newer (no build step for tests).
