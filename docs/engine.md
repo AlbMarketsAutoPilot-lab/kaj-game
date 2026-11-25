@@ -1105,7 +1105,7 @@ No rule, balance, save or screen change; the 100-turn game stays out of the setu
 
 ## The 100-turn map facts (version 2.0, step 2.12 part J4, owner-approved plan 2026-11-25)
 
-No rule, balance, save or screen change; the 100-turn game stays out of the setup screen until part J5. Two sessions.
+No rule, balance, save or screen change; the 100-turn game stays out of the setup screen until part J5. Two sessions, both done.
 
 - **Owner's decisions:** the plan as proposed; test facts **A** (every area gets 2 test-only geography facts); geography
   about **35–40%** of what a player sees, never dominating (as in step 2.3; the new facts are about half geography).
@@ -1125,9 +1125,16 @@ No rule, balance, save or screen change; the 100-turn game stays out of the setu
   each split area and sends it only to areas inside it; every area has at least 12 facts and 2 test facts, every fact a type,
   every test fact geography; Europe and Asia exactly 12 and 2 with no fact twice. Replaces J2's borrowing test. 260 tests
   pass; the web build works (5,084 KB).
+- **Session 2 (2026-11-25):** Africa 156, North America 48, South America 11 facts (215, 117 geography, 54%) and 31 test
+  facts, to be checked by the owner (`docs/facts/new100-2.md`). No area borrows any more: every area has exactly 12 facts
+  and 2 test facts, no fact twice in an area (this also ends J2's repeats in Uganda, Rwanda & Burundi). In all, 480 new
+  facts (253 geography, 53%) and 71 test facts. `docs/map100.md` notes the result. Tests: every area exactly 12 and 2.
+- **Geography (`node scripts/geo-count.ts`, now also the 100-turn map, 200 games per line):** 100-turn map facts 39%
+  geography (1,512 facts, 1,445 different); questions asked **35% (2 players), 38% (4 players)**, inside the owner's
+  35–40%. 30 turns 35% / 38%, 50 turns 36% / 38% (unchanged maps).
 - **Robot games:** robots answer at a fixed rate whatever the question, so new facts change only which question is drawn;
-  the 30- and 50-turn games are unchanged, the 100-turn lab lines can shift by chance only. One lab run of the 100-turn
-  lines is planned in session 2 (owner's approval first).
+  the 30- and 50-turn games are unchanged. Lab run of the 100-turn lines (owner-approved, games 1–3,200 per line): **identical to
+  J2 on every line**, 16 of 20 (`docs/balance-lab.md`, step 2.12 J4). 260 tests pass; the web build works (5,118 KB).
 
 ## Area names on the maps (owner, 2026-11-25; screens only)
 

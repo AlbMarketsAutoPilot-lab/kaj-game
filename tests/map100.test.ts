@@ -92,8 +92,7 @@ test('100-turn map: 3 start citizenships cut some area off in 1,084 of 109,567 s
   assert.deepEqual(startTriples(map100), { sets: 109567, traps: 1084 });
 });
 
-// Step 2.12 part J4 (facts), session 1 of 2: Europe and Asia have their own facts; Africa and the Americas still borrow.
-const DONE = ['Europe', 'Asia', 'Oceania'];
+// Step 2.12 part J4: the facts of the 100-turn map.
 
 test('J4: the sort lists every fact of each split 50-turn area, to areas that lie inside it', () => {
   const inside = (id: string, p: string) => SORT_INSIDE.get(id)?.includes(p);
@@ -105,14 +104,12 @@ test('J4: the sort lists every fact of each split 50-turn area, to areas that li
   }
 });
 
-test('J4: every area has at least 12 facts and 2 test facts; Europe and Asia exactly 12 and 2, no fact twice, every fact typed', () => {
+test('J4: every area has exactly 12 facts and 2 test facts, no fact twice in an area, every fact typed', () => {
   for (const a of areas) {
     const facts = map100.facts?.[a.id] ?? [];
     const exam = map100.examFacts?.[a.id] ?? [];
-    assert.ok(facts.length >= 12 && exam.length >= 2, a.id);
     for (const f of [...facts, ...exam]) assert.ok(FACT_TYPES[factId(f)], `no type: ${a.id} ${f.question}`);
     for (const f of exam) assert.equal(FACT_TYPES[factId(f)], 'geography', `${a.id} ${f.question}`);
-    if (!DONE.includes(a.continent)) continue;
     assert.equal(facts.length, 12, a.id);
     assert.equal(exam.length, 2, a.id);
     const ids = [...facts, ...exam].map(factId);

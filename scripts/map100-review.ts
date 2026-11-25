@@ -262,6 +262,10 @@ ${same.length} areas are the same place as on the 50-turn map and keep their 12 
 ${map50.areas.length - same.length} 50-turn areas, sorted by country, and new facts fill each to 12: at most **${nf} new facts**; with the sort (it saved
 about 10% in M3) **about ${Math.round((nf * 0.9) / 10) * 10}** for the owner to check (about ${Math.ceil((nf * 0.9) / 120)} days at 120 a day).
 
+**Done in step 2.12 part J4 (2026-11-25):** the sort saved only 24, so **480 new facts**, plus **71 new test-only geography
+facts** so that every area has 2 (owner's choice A). Sort: \`src/facts/sort100.ts\` (\`docs/facts/sort100.md\`); new facts:
+\`src/facts/new100.ts\` (\`docs/facts/new100-1.md\`, \`docs/facts/new100-2.md\`).
+
 ## Whole continents (areas ÷ 3, at least 2; the rule of every map)
 
 ${conts.map((c) => `${c} ${areas.filter((a) => a.continent === c).length} areas +${continentRewardFor(areas.filter((a) => a.continent === c).length)}`).join(' · ')}.
@@ -296,8 +300,7 @@ const ts = `// Made by \`node scripts/map100-review.ts\` from the owner-approved
 // \`inside\`: the 50-turn area(s) the area lies inside. Facts (step 2.12 part J4): an area that is the same place as on the
 // 50-turn map keeps all its facts; any other area takes the facts sorted to it by country (src/facts/sort100.ts) from
 // each 50-turn area in \`inside\` order, then its new facts (src/facts/new100.ts). The same for the test-only geography
-// facts (2 per area). J4 session 1 of 2: an area not written yet (fewer than 12 facts or 2 test facts) still borrows
-// all the facts of its 50-turn area(s), as in J2 (test only; the 100-turn game is not in the setup screen until J5).
+// facts (2 per area). Every area has exactly 12 facts and 2 test facts (tests/map100.test.ts).
 import type { Area, GameMap, Route } from '../engine/types.ts';
 import type { Fact } from '../facts/types.ts';
 import { FACTS_100_NEW, GEO_EXAM_100_NEW } from '../facts/new100.ts';
@@ -316,11 +319,10 @@ ${map.routes!.map(routeLine).join('\n')}
 
 type Sort = Readonly<Record<string, readonly string[]>>;
 
-function sortFacts(from: Record<string, Fact[]> | undefined, sort: Sort, added: Record<string, Fact[]>, need: number): Record<string, Fact[]> {
+function sortFacts(from: Record<string, Fact[]> | undefined, sort: Sort, added: Record<string, Fact[]>): Record<string, Fact[]> {
   return Object.fromEntries(AREAS.map((a) => {
     const kept = a.inside.flatMap((p) => (from?.[p] ?? []).filter((_, i) => !sort[p] || sort[p][i].split('+').includes(a.id)));
-    const facts = [...kept, ...(added[a.id] ?? [])];
-    return [a.id, facts.length >= need ? facts : a.inside.flatMap((p) => from?.[p] ?? [])];
+    return [a.id, [...kept, ...(added[a.id] ?? [])]];
   }));
 }
 
@@ -328,8 +330,8 @@ function build(): GameMap {
   const list: Area[] = AREAS.map(({ inside, ...a }) => a);
   return {
     id: 'map100', rounds: 100, areas: list, routes: ROUTES,
-    facts: sortFacts(map50.facts, SORT_100, FACTS_100_NEW, 12),
-    examFacts: sortFacts(map50.examFacts, EXAM_SORT_100, GEO_EXAM_100_NEW, 2),
+    facts: sortFacts(map50.facts, SORT_100, FACTS_100_NEW),
+    examFacts: sortFacts(map50.examFacts, EXAM_SORT_100, GEO_EXAM_100_NEW),
   };
 }
 
