@@ -1,11 +1,15 @@
 // Made by `node scripts/map100-review.ts` from the owner-approved plan (docs/map100.md, step 2.12). Do not edit by hand.
 // The 100-turn map (step 2.12, part J2): 126 areas, 11 wonders, 17 airports, 23 ports, 25 connections, the train, bus and car.
 // Area order, neighbour order and route order are the plan's: they change the robot games, so keep them.
-// `inside`: the 50-turn area(s) the area lies inside. Until step 2.12 part J4 (the facts), each area borrows the facts
-// and the test-only geography facts of its 50-turn area(s), joined in that order (for tests and the lab only; the
-// 100-turn game is not shown in the setup screen until part J5).
+// `inside`: the 50-turn area(s) the area lies inside. Facts (step 2.12 part J4): an area that is the same place as on the
+// 50-turn map keeps all its facts; any other area takes the facts sorted to it by country (src/facts/sort100.ts) from
+// each 50-turn area in `inside` order, then its new facts (src/facts/new100.ts). The same for the test-only geography
+// facts (2 per area). J4 session 1 of 2: an area not written yet (fewer than 12 facts or 2 test facts) still borrows
+// all the facts of its 50-turn area(s), as in J2 (test only; the 100-turn game is not in the setup screen until J5).
 import type { Area, GameMap, Route } from '../engine/types.ts';
 import type { Fact } from '../facts/types.ts';
+import { FACTS_100_NEW, GEO_EXAM_100_NEW } from '../facts/new100.ts';
+import { EXAM_SORT_100, SORT_100 } from '../facts/sort100.ts';
 import { map50 } from './map50.ts';
 
 interface AreaInfo extends Area { inside: string[] }
@@ -173,13 +177,23 @@ const ROUTES: Route[] = [
   { kind: "car", a: "mexico", b: "usa-east", oneWay: true },
 ];
 
-function borrow(from: Record<string, Fact[]> | undefined): Record<string, Fact[]> {
-  return Object.fromEntries(AREAS.map((a) => [a.id, a.inside.flatMap((p) => from?.[p] ?? [])]));
+type Sort = Readonly<Record<string, readonly string[]>>;
+
+function sortFacts(from: Record<string, Fact[]> | undefined, sort: Sort, added: Record<string, Fact[]>, need: number): Record<string, Fact[]> {
+  return Object.fromEntries(AREAS.map((a) => {
+    const kept = a.inside.flatMap((p) => (from?.[p] ?? []).filter((_, i) => !sort[p] || sort[p][i].split('+').includes(a.id)));
+    const facts = [...kept, ...(added[a.id] ?? [])];
+    return [a.id, facts.length >= need ? facts : a.inside.flatMap((p) => from?.[p] ?? [])];
+  }));
 }
 
 function build(): GameMap {
   const list: Area[] = AREAS.map(({ inside, ...a }) => a);
-  return { id: 'map100', rounds: 100, areas: list, routes: ROUTES, facts: borrow(map50.facts), examFacts: borrow(map50.examFacts) };
+  return {
+    id: 'map100', rounds: 100, areas: list, routes: ROUTES,
+    facts: sortFacts(map50.facts, SORT_100, FACTS_100_NEW, 12),
+    examFacts: sortFacts(map50.examFacts, EXAM_SORT_100, GEO_EXAM_100_NEW, 2),
+  };
 }
 
 export const map100: GameMap = build();
