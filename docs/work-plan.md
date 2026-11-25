@@ -919,9 +919,15 @@ engine (high, 2), J3 shapes, J4 facts (2), J5 screens (2), J6 test games (2), me
     borrows (tests: exactly 12 and 2 everywhere, no fact twice); `scripts/geo-count.ts` also counts the 100-turn map; one lab
     run of the 100-turn lines (ask first); docs.
   - **Owner (2026-11-25): the citizenship and visa test is too repetitive** (it draws only from the area's 12 facts and 2–3
-    test facts). Proposal 2.12c, waiting for the owner's answer: the visa test also uses the challenges about the area's
-    countries (capital, continent, neighbour, bigger, currency; not flags), each with a study line made from its answer;
-    measure geography with geo-count; all 3 maps; no rule or save change.
+    test facts). **2.12c, owner-approved (2026-11-25), one medium session after J4 session 2:**
+    - the visa test also uses the challenges about the area's countries (capital, continent, neighbour, bigger, currency;
+      not flags), each with a study line made from its answer ("The capital of Spain is Madrid."); measure geography with
+      geo-count (if over 35–40%, challenges less often, as in the airline quiz); all 3 maps; no rule or save change;
+    - **the notebook** (screens only): the facts before the visa test shown as a notebook page in the popup: cream lined
+      paper, red margin line, spiral rings on top; handwriting-style title "Study notes for your visa: <area>" with a
+      tilted red "VISA TEST" stamp; numbered notes in the normal game font; at the bottom "3 questions · 15 seconds each ·
+      2 right to pass" and "📖 I'm ready"; the page slides open once (no endless animation, step 2.2); fits every screen
+      size (14l); styles only, no picture files. Screenshots for the owner before committing.
 
 **2.13 (release) Release (medium, 1–2).** Full test games (2–4 players, all lengths), web at kaj.kritere.com and app.
 
