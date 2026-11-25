@@ -1113,6 +1113,22 @@ E.** (`nameLayouts`). **Map names** (drawing only; the engine and every other sc
 100-turn map Serbia, Kosovo & North Macedonia is drawn as "Central Balkans" and Somalia as "Horn of Africa" (`MAP_NAME`).
 No rule, balance or save change. Tests: `tests/map-names.test.ts`.
 
+## Big countries and area colours on the maps (step 2.12b, owner-approved 2026-11-25; screens only)
+
+All 3 maps (`colourAreas` and `buildGeo` in `src/web/maps.ts`, drawing in `drawMap` in `src/web/main.ts`):
+- **One colour per big country** (USA, Canada, Russia, China, Brazil, Australia: all parts the same colour).
+- **No two areas share a colour** when they touch on the map, have a walking link, a plane or ship route, or lie within
+  **500 km across the sea** (`SEA_KM`; also across the date line, Alaska and Russia Far East). This fixes Madagascar and the
+  mainland, and New Zealand and Australia East (50-turn map).
+- **10 colours** (owner's choice B): the 8 before, plus teal `#26a69a` and light green `#abdda4` (with 8 or 9, the 100-turn
+  map had an area with no colour left). The most constrained area is coloured first (DSatur), each with its least-used
+  free colour.
+- **Borders inside a big country** are thin and dashed (`innerBorders`: a line in the country's colour covers the normal
+  border); where a part glows (the area you stand in, one you can walk to, or one visited in the guide) the dashes go
+  over the gold line, so both show. On the game's maps and in the guide (Canada in 3 parts); not on the continent picker.
+- The colours are made in advance with the pawn spots (`node scripts/map-centres.ts` writes `src/maps/colours.ts`), so the
+  phone doesn't compute them at the start. Tests: `tests/colours.test.ts`. No rule, balance or save change.
+
 ## Project setup
 
 - TypeScript, run directly by Node 22.18 or newer (no build step for tests).

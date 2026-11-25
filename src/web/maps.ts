@@ -20,6 +20,9 @@ export interface AreaGeo {
   borderWith: Map<string, [number, number]>;
   // The outer rings of every piece (x, y as in `path`), to tell which area a point is in.
   rings: Ring[];
+  // Owner (step 2.12b): the border lines shared with another part of the same big country, by that part's id
+  // (only from the part listed first on the map), as SVG paths in world units.
+  inner: Map<string, string>;
 }
 
 // Parts drawn but ignored for zooming and icons (owner's choice, task 14 B1):
@@ -167,7 +170,7 @@ export function buildGeo(map: GameMap, shapes: Shapes, centres?: Readonly<Record
     const made = centres?.[a.id];
     const [cx, cy] = made ? [made[0], -made[1]] : best ? deepestPoint(best) : [0, 0];
     const rings = polys.map((poly) => poly[0].map(([x, y]) => [x, -y] as [number, number]));
-    out.set(a.id, { path: parts.join(''), box: { x: minx, y: miny, w: maxx - minx, h: maxy - miny }, core, centre: [cx, -cy], touches: [], borderWith: new Map(), rings });
+    out.set(a.id, { path: parts.join(''), box: { x: minx, y: miny, w: maxx - minx, h: maxy - miny }, core, centre: [cx, -cy], touches: [], borderWith: new Map(), rings, inner: new Map() });
   }
   // Areas that share a border line in the topology touch each other.
   const byArc = new Map<number, string[]>();
@@ -196,6 +199,15 @@ export function buildGeo(map: GameMap, shapes: Shapes, centres?: Readonly<Record
     const [id, other] = key.split(' ');
     const [x, y] = arc[Math.floor(arc.length / 2)];
     out.get(id)!.borderWith.set(other, [x, -y]);
+  }
+  // Borders inside a big country (step 2.12b), drawn thin and dashed.
+  const order = new Map(map.areas.map((a, i) => [a.id, i]));
+  const big = new Map(map.areas.map((a) => [a.id, a.bigCountry]));
+  for (const [k, ids] of byArc) {
+    if (ids.length !== 2 || !big.get(ids[0]) || big.get(ids[0]) !== big.get(ids[1])) continue;
+    const [a, b] = ids.sort((x, y) => order.get(x)! - order.get(y)!);
+    const inner = out.get(a)!.inner;
+    inner.set(b, (inner.get(b) ?? '') + 'M' + points[k].map(([x, y]) => `${r1(x)} ${r1(-y)}`).join('L'));
   }
   return out;
 }
@@ -246,23 +258,88 @@ export function nameLayouts(name: string): string[][] {
   return short === name ? ways(name) : [...ways(name), ...ways(short)];
 }
 
-export const AREA_COLOURS = ['#e8a33d', '#d65f4e', '#8e6bbf', '#4aa3df', '#5cb85c', '#e3cf52', '#c47a55', '#d470a8'];
+// Owner (step 2.12b): teal and light green added, so that areas across the sea can differ too.
+export const AREA_COLOURS = ['#e8a33d', '#d65f4e', '#8e6bbf', '#4aa3df', '#5cb85c', '#e3cf52', '#c47a55', '#d470a8', '#26a69a', '#abdda4'];
 
+// Owner (step 2.12b): the borders between the parts of a big country, thin and dashed, for the areas drawn (`ids`). A
+// line in the country's colour covers the normal border first; where a part glows (you stand there, can walk there,
+// or have been there in the guide) the dashes go over the gold line instead, so both show. Put it inside the group of
+// the area shapes (same scale).
+export function innerBorders(geo: Map<string, AreaGeo>, ids: Iterable<string>, fill: (id: string) => string, cls: (id: string) => string): SVGGElement {
+  const g = svg('g', { class: 'inner' });
+  const drawn = new Set(ids);
+  const glows = (id: string) => /\b(here|go|picked)\b/.test(cls(id));
+  for (const id of drawn) {
+    for (const [other, d] of geo.get(id)!.inner) {
+      if (!drawn.has(other)) continue;
+      if (!glows(id) && !glows(other)) {
+        const cover = svg('path', { d, class: `land ${cls(id)} inner-cover` });
+        cover.style.stroke = fill(id);
+        g.append(cover);
+      }
+      g.append(svg('path', { d, class: 'inner-dash' }));
+    }
+  }
+  return g;
+}
+
+// Owner (step 2.12b): areas closer than this across the sea never share a colour (Madagascar and Mozambique).
+export const SEA_KM = 500;
+
+// Area colours (owner, step 2.12b): every part of a big country has the same colour, and no two areas share a colour
+// when they touch on the map, have a walking link, a plane or ship route, or lie within SEA_KM across the sea. The
+// most constrained group is coloured first (DSatur), each with the least-used free colour (all colours appear evenly).
+// Made once per map by scripts/map-centres.ts (src/maps/colours.ts); the game reads the stored colours.
 export function colourAreas(map: GameMap, geo: Map<string, AreaGeo>): Map<string, string> {
-  const near = new Map(map.areas.map((a) => [a.id, new Set([...a.neighbours, ...geo.get(a.id)!.touches])]));
-  for (const [id, set] of near) for (const n of set) near.get(n)?.add(id);
-  const order = [...map.areas].sort((a, b) => near.get(b.id)!.size - near.get(a.id)!.size || a.id.localeCompare(b.id));
+  const group = new Map(map.areas.map((a) => [a.id, a.bigCountry ? `big:${a.bigCountry}` : a.id]));
+  const groups = [...new Set(group.values())];
+  const near = new Map(groups.map((g) => [g, new Set<string>()]));
+  const link = (a: string, b: string) => {
+    const ga = group.get(a);
+    const gb = group.get(b);
+    if (!ga || !gb || ga === gb) return;
+    near.get(ga)!.add(gb);
+    near.get(gb)!.add(ga);
+  };
+  for (const a of map.areas) {
+    for (const n of a.neighbours) link(a.id, n);
+    for (const t of geo.get(a.id)!.touches) link(a.id, t);
+  }
+  for (const r of map.routes ?? []) if (r.kind === 'airport' || r.kind === 'port') link(r.a, r.b);
+  // Across the sea: any two points of the outlines closer than SEA_KM (x = longitude, y = −latitude; 111 km a degree),
+  // also across the date line (Alaska and Russia Far East).
+  const m = SEA_KM / 111;
+  const ids = map.areas.map((a) => a.id);
+  const boxNear = (A: Box, B: Box) => [-360, 0, 360].some((s) =>
+    !(A.x - m > B.x + s + B.w || B.x + s - m > A.x + A.w || A.y - m > B.y + B.h || B.y - m > A.y + A.h));
+  const dx = (x1: number, x2: number) => { const d = Math.abs(x1 - x2) % 360; return Math.min(d, 360 - d); };
+  for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) {
+    if (!boxNear(geo.get(ids[i])!.box, geo.get(ids[j])!.box)) continue;
+    if (group.get(ids[i]) === group.get(ids[j]) || near.get(group.get(ids[i])!)!.has(group.get(ids[j])!)) continue;
+    const pb = geo.get(ids[j])!.rings.flat();
+    const close = geo.get(ids[i])!.rings.flat().some(([x1, y1]) => {
+      const c = Math.cos((y1 * Math.PI) / 180);
+      return pb.some(([x2, y2]) => Math.hypot(dx(x1, x2) * c, y1 - y2) * 111 < SEA_KM);
+    });
+    if (close) link(ids[i], ids[j]);
+  }
+  // The most constrained group first: the most different colours already next to it, then the most neighbours.
   const index = new Map<string, number>();
   const count = AREA_COLOURS.map(() => 0);
-  for (const a of order) {
-    const used = new Set([...near.get(a.id)!].map((n) => index.get(n)));
-    // The least-used free colour, so all colours appear evenly.
+  const usedNear = (g: string) => new Set([...near.get(g)!].map((n) => index.get(n)).filter((i) => i !== undefined));
+  while (index.size < groups.length) {
+    const g = groups.filter((x) => !index.has(x)).reduce((best, x) => {
+      const d = usedNear(x).size - usedNear(best).size || near.get(x)!.size - near.get(best)!.size || best.localeCompare(x);
+      return d > 0 ? x : best;
+    });
+    const used = usedNear(g);
     const free = AREA_COLOURS.map((_, i) => i).filter((i) => !used.has(i));
-    const c = free.reduce((m, i) => (count[i] < count[m] ? i : m), free[0]);
+    if (free.length === 0) throw new Error(`No colour left for ${g} on ${map.id}`);
+    const c = free.reduce((best, i) => (count[i] < count[best] ? i : best), free[0]);
     count[c]++;
-    index.set(a.id, c);
+    index.set(g, c);
   }
-  return new Map([...index].map(([id, c]) => [id, AREA_COLOURS[c]]));
+  return new Map(map.areas.map((a) => [a.id, AREA_COLOURS[index.get(group.get(a.id)!)!]]));
 }
 
 // ---------- drawn props inside their own area (owner, M5) ----------

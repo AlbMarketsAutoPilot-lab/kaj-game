@@ -196,6 +196,9 @@ main:has(.game) { max-width: none; padding: calc(6px + var(--safe-t)) calc(6px +
 .map-ask p { margin: 0 0 6px; }
 @keyframes note-fade { 0% { opacity: 0; } 6% { opacity: 1; } 85% { opacity: 1; } 100% { opacity: 0; } }
 .map-svg .land.here { stroke: var(--glow); stroke-width: 2px; }
+/* Step 2.12b: the border between two parts of a big country (USA, Canada, Russia, China, Brazil, Australia). */
+.map-svg .land.inner-cover { fill: none; stroke-width: 1.6px; pointer-events: none; }
+.map-svg .inner-dash { fill: none; stroke: rgba(10, 40, 46, 0.75); stroke-width: 0.8px; stroke-dasharray: 4 4; vector-effect: non-scaling-stroke; pointer-events: none; }
 /* Its glow: soft lines that keep their width at any zoom (maps.ts glowFor), no filter (2026-10-10). */
 .map-svg .halo { fill: none; vector-effect: non-scaling-stroke; stroke-linejoin: round; pointer-events: none; }
 .map-svg .halo.wide { stroke: rgba(255, 240, 180, 0.2); stroke-width: 10px; }
