@@ -1078,6 +1078,31 @@ setup screen** until part J5 (`SETUP_LENGTHS` = 30, 50).
   42.9% (K1-3). 100 turns: 16 of 20, boredom 25.1%, lead changes 10.52, won by 3 or less 50.2% (F3-2), every win share
   and average score as in `docs/balance-lab.md`, step 2.12. 249 tests pass; the web build works (setup: 30 and 50 turns).
 
+## The 100-turn map shapes (version 2.0, step 2.12 part J3, owner-approved plan 2026-11-22)
+
+No rule, balance, save or screen change; the 100-turn game stays out of the setup screen until part J5.
+
+- **Shapes:** `node scripts/map-shapes.ts --from <file> --map 100` makes `src/maps/shapes100.ts` (195 KB, 126 areas) and
+  `docs/map-shapes100.md` from the same Natural Earth 1:10m admin-1 data as M3 (downloaded outside the project). The
+  big-country parts use the 50-turn lists (same part ids); every other area is joined from its countries in `map100.ts`.
+  Places that are not countries in the map data go to the 100-turn area they lie in (`AREA_100`): Somaliland → Somalia,
+  Åland → Finland, Faroe Islands → Denmark & Greenland, Hong Kong and Macau → China East, Siachen Glacier → India,
+  Baikonur → Kazakhstan, Guantánamo, Puerto Rico, Trinidad and Tobago → Caribbean, Gibraltar → Spain, Isle of Man, Jersey,
+  Guernsey → United Kingdom, French Guiana → Venezuela & Guianas.
+- **Checks:** every country of the map is found in the data (none named differently beyond the old `ALIASES`); the 20
+  small countries are all drawn (each island group has at least one island shape: Maldives 5, Cabo Verde 8, São Tomé and
+  Príncipe 2, Comoros 3, Seychelles 1, Mauritius 1, Malta 2, Bahrain 1, Singapore 1, Bahamas 23; the others are joined to
+  a neighbour). Every walking link touches on the drawing except the Channel Tunnel (France ↔ United Kingdom) and the
+  Øresund Bridge (Denmark & Greenland ↔ Sweden); China West touches Myanmar without a link (as on the 30- and 50-turn
+  maps). The 30- and 50-turn shapes, re-made from the same data, are byte-identical.
+- **Pawn spots:** `node scripts/map-centres.ts` adds `map100` to `src/maps/centres.ts`; the `map30` and `map50` entries are
+  unchanged.
+- **Screens:** `SHAPES` in `src/web/main.ts` has `map100`, so a 100-turn game (a saved one) draws with its own shapes. The
+  web game file grows from 4,820 to 5,020 KB.
+- **Tests:** `tests/map-shapes100.test.ts` (every area drawn; drawn borders against walking links, with the two fixed links
+  and China West – Myanmar; the 7 islands with no walk touch no area); `tests/centres.test.ts` checks the 3 maps. The
+  "no drawn prop over another area" check for the 100-turn map waits for part J5 (owner).
+
 ## Project setup
 
 - TypeScript, run directly by Node 22.18 or newer (no build step for tests).
