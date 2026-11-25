@@ -225,6 +225,27 @@ export const continentBox = (map: GameMap, geo: Map<string, AreaGeo>, c: Contine
 
 // Risk-style colours (owner's choice, task 14 B1): areas that touch or are walking neighbours
 // never share a colour. The areas with the most neighbours are coloured first.
+// Names on the map (owner, 2026-11-25): for the drawing only; the engine and every other screen keep the area's name.
+export const MAP_NAME: Readonly<Record<string, string>> = { 'serbia-kosovo-macedonia': 'Central Balkans', somalia: 'Horn of Africa' };
+
+// The ways to write a name on the map, best first (owner, 2026-11-25): the whole name on one line, then on 2 or 3 lines
+// (split after "," or "&"), then the same with North, South, West and East shortened to N., S., W. and E.
+export function nameLayouts(name: string): string[][] {
+  const ways = (n: string): string[][] => {
+    const parts = n.split(/(?<=,|&) /);
+    const two: string[][] = [];
+    const three: string[][] = [];
+    for (let i = 1; i < parts.length; i++) two.push([parts.slice(0, i).join(' '), parts.slice(i).join(' ')]);
+    for (let i = 1; i < parts.length; i++) for (let j = i + 1; j < parts.length; j++) {
+      three.push([parts.slice(0, i).join(' '), parts.slice(i, j).join(' '), parts.slice(j).join(' ')]);
+    }
+    const widest = (l: string[]) => Math.max(...l.map((x) => [...x].length));
+    return [[n], ...two.sort((a, b) => widest(a) - widest(b)), ...three.sort((a, b) => widest(a) - widest(b))];
+  };
+  const short = name.replace(/\b(North|South|West|East)\b/g, (w) => `${w[0]}.`);
+  return short === name ? ways(name) : [...ways(name), ...ways(short)];
+}
+
 export const AREA_COLOURS = ['#e8a33d', '#d65f4e', '#8e6bbf', '#4aa3df', '#5cb85c', '#e3cf52', '#c47a55', '#d470a8'];
 
 export function colourAreas(map: GameMap, geo: Map<string, AreaGeo>): Map<string, string> {

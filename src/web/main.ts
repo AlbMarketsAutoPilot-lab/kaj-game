@@ -22,7 +22,7 @@ import { countryCapital, countryFlag, SURPRISE_FACT, WONDER_NAME, WONDER_PLACE }
 import { passportBook, recordLine, recordsBox, type PassportData } from './passport.ts';
 import { COUNTRY_CODE3 } from './passport-codes.ts';
 import { addWin, loadRecords, saveRecords, type WinRecord } from './records.ts';
-import { buildGeo, colourAreas, continentBox, glowFor, pad, propSpots, squeeze, svg, unionBox, type Box, type PropKind } from './maps.ts';
+import { buildGeo, colourAreas, continentBox, glowFor, MAP_NAME, nameLayouts, pad, propSpots, squeeze, svg, unionBox, type Box, type PropKind } from './maps.ts';
 import { airport, busStop, carRental, citizenFlag, monument, pawn, place, port, station } from './props.ts';
 import { iconEl, iconUse, installIcons, PROFILE_COLOUR } from './icons.ts';
 import { hitchScene, tripScene, wonderScene } from './scenes.ts';
@@ -2115,44 +2115,101 @@ function label(d: Drawn, x: number, y: number, text: string, cls: string, size =
   d.labels.append(g);
 }
 
-// Area names on the map (owner's request): a name shows only where it fits inside its area
-// without touching another name, at a fixed size on screen. So zooming in shows more names
-// (small areas like Europe's only when there is room). Biggest areas first. Returns the update
-// for a zoom (view units per screen pixel; the page zoom makes a page pixel uiZoom screen pixels). `shift` moves a name down (below a drawn icon).
+// Area names on the map (owner's request), at a fixed size on screen, so zooming in shows more names. Biggest areas
+// first. A name shows only where it doesn't touch another name, a badge or a drawn icon, and is fully on screen.
+// Owner (2026-11-25): it may stick out of its area over sea, never over another area; it sits on the part of its area
+// that is on screen; a long name may take 2 or 3 lines, and North, South, West, East may become N., S., W., E.
+// (`nameLayouts`); a few areas have a map name (`MAP_NAME`). Returns the update for a zoom (view units per screen
+// pixel; the page zoom makes a page pixel uiZoom screen pixels). `shift` moves a name down (below a drawn icon).
 const NAME_PX = 11;
 function areaNames(d: Drawn, ids: string[], shift: (id: string) => number = () => 0): (unit: number) => void {
   const items = ids.map((id) => {
     const g = geo.get(id)!;
-    const y = g.centre[1] + shift(id);
-    const text = svg('text', { x: g.centre[0] * d.k, y, 'text-anchor': 'middle', 'dominant-baseline': 'central' }, areaById.get(id)!.name);
+    const name = MAP_NAME[id] ?? areaById.get(id)!.name;
+    const text = svg('text', { x: g.centre[0] * d.k, y: g.centre[1] + shift(id), 'text-anchor': 'middle', 'dominant-baseline': 'central' }, name);
     d.names.append(text);
-    return { id, text, chars: [...areaById.get(id)!.name].length, x: g.centre[0] * d.k, y, w: g.core.w * d.k, h: g.core.h };
-  }).sort((a, b) => b.w * b.h - a.w * a.h);
-  // Never over another area (a long thin area like Chile): the ends of the name are tested.
-  const overOthers = (id: string, x: number, y: number, w: number) => [-0.5, -0.25, 0.25, 0.5].some((f) => {
-    const pt = new DOMPoint((x + f * w) / d.k, y);
-    return [...d.paths].some(([other, path]) => other !== id && path.isPointInFill(pt));
-  });
+    return { id, text, layouts: nameLayouts(name), x: g.centre[0] * d.k, y: g.centre[1] + shift(id), size: g.core.w * d.k * g.core.h };
+  }).sort((a, b) => b.size - a.size);
+  // Is a point (x as in the drawing) on this area? The area's box is checked first (fast).
+  const inArea = (id: string, x: number, y: number) => {
+    const b = geo.get(id)!.box;
+    const wx = x / d.k;
+    if (wx < b.x || wx > b.x + b.w || y < b.y || y > b.y + b.h) return false;
+    return d.paths.get(id)?.isPointInFill(new DOMPoint(wx, y)) ?? false;
+  };
+  const inOther = (id: string, x: number, y: number) => [...d.paths.keys()].some((o) => o !== id && inArea(o, x, y));
   const update = (unit: number) => {
     const fs = NAME_PX * uiZoom * unit;
-    const placed: { x: number; y: number; w: number; h: number }[] = [];
+    const lh = fs * 1.2;
+    // The part of the map really on screen, in drawing units.
+    const svgRect = d.root.getBoundingClientRect();
+    const paneRect = (d.root.parentElement ?? d.root).getBoundingClientRect();
+    const sc = Math.min(svgRect.width / d.vb.w, svgRect.height / d.vb.h) || 1;
+    const ox = svgRect.left + (svgRect.width - d.vb.w * sc) / 2;
+    const oy = svgRect.top + (svgRect.height - d.vb.h * sc) / 2;
+    const toX = (px: number) => d.vb.x + (px - ox) / sc;
+    const toY = (py: number) => d.vb.y + (py - oy) / sc;
+    const vis = {
+      x0: toX(Math.max(svgRect.left, paneRect.left)), x1: toX(Math.min(svgRect.right, paneRect.right)),
+      y0: toY(Math.max(svgRect.top, paneRect.top)), y1: toY(Math.min(svgRect.bottom, paneRect.bottom)),
+    };
+    // Walk badges and drawn icons count as taken.
+    const placed: Box[] = [...d.labels.children].map((g) => {
+      const r = g.getBoundingClientRect();
+      return { x: toX((r.left + r.right) / 2), y: toY((r.top + r.bottom) / 2), w: r.width / sc, h: r.height / sc };
+    });
+    // The middle of the part of each area that is on screen (a grid of test points).
+    const N = 28;
+    const seen = new Map<string, { sx: number; sy: number; n: number }>();
+    for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) {
+      const px = vis.x0 + ((i + 0.5) / N) * (vis.x1 - vis.x0);
+      const py = vis.y0 + ((j + 0.5) / N) * (vis.y1 - vis.y0);
+      const it = items.find((x) => inArea(x.id, px, py));
+      if (!it) continue;
+      const m = seen.get(it.id) ?? { sx: 0, sy: 0, n: 0 };
+      m.sx += px;
+      m.sy += py;
+      m.n++;
+      seen.set(it.id, m);
+    }
     for (const it of items) {
-      const w = it.chars * fs * 0.58;
-      const h = fs * 1.2;
-      // The centre first, then a little higher or lower.
-      const y = w <= it.w && h <= it.h * 0.8 ? [0, 1, -1, 2, -2].map((n) => it.y + n * h).find((y) =>
-        !placed.some((b) => Math.abs(b.x - it.x) < (b.w + w) / 2 && Math.abs(b.y - y) < (b.h + h) / 2)
-        && !overOthers(it.id, it.x, y, w)) : undefined;
+      let best: { x: number; y: number; lines: string[]; w: number; h: number } | undefined;
+      const m = seen.get(it.id);
+      const anchors: [number, number][] = [[it.x, it.y], ...(m ? [[m.sx / m.n, m.sy / m.n] as [number, number]] : [])];
+      for (const [ax, ay] of anchors) for (const lines of it.layouts) {
+        if (best) break;
+        const w = Math.max(...lines.map((l) => [...l].length)) * fs * 0.58;
+        const h = lines.length * lh;
+        // The middle first, then a little higher or lower, or sideways (towards the sea).
+        for (const n of [0, 1, -1, 2, -2]) for (const f of [0, -0.25, 0.25, -0.5, 0.5, -0.75, 0.75]) {
+          if (best) break;
+          const x = ax + f * w;
+          const y = ay + n * lh;
+          if (x - w / 2 < vis.x0 || x + w / 2 > vis.x1 || y - h / 2 < vis.y0 || y + h / 2 > vis.y1) continue;
+          if (placed.some((b) => Math.abs(b.x - x) < (b.w + w) / 2 && Math.abs(b.y - y) < (b.h + h) / 2)) continue;
+          const pts: [number, number][] = [];
+          for (let r = 0; r < lines.length; r++) for (const fx of [-0.5, -0.25, 0, 0.25, 0.5]) for (const fy of [-0.35, 0.35]) {
+            pts.push([x + fx * w, y - h / 2 + (r + 0.5 + fy) * lh]);
+          }
+          if (pts.some(([px, py]) => inOther(it.id, px, py))) continue; // never over another area
+          if (!pts.some(([px, py]) => inArea(it.id, px, py))) continue; // always on its own area too
+          best = { x, y, lines, w, h };
+        }
+      }
       it.text.setAttribute('font-size', String(fs));
       it.text.setAttribute('stroke-width', String(fs * 0.22));
-      it.text.style.display = y === undefined ? 'none' : '';
-      if (y !== undefined) {
-        it.text.setAttribute('y', String(y));
-        placed.push({ x: it.x, y, w, h });
+      it.text.style.display = best ? '' : 'none';
+      if (best) {
+        const b = best;
+        it.text.setAttribute('x', String(b.x));
+        it.text.setAttribute('y', String(b.y));
+        it.text.textContent = '';
+        b.lines.forEach((l, i) => it.text.append(svg('tspan', { x: b.x, dy: i === 0 ? -((b.lines.length - 1) / 2) * lh : lh }, l)));
+        placed.push({ x: b.x, y: b.y, w: b.w, h: b.h });
       }
     }
   };
-  // The fill test needs the map on the page: names are placed on the next frame.
+  // The tests need the map on the page: names are placed on the next frame.
   requestAnimationFrame(() => update(d.fs / d.px / uiZoom));
   return update;
 }

@@ -905,6 +905,9 @@ engine (high, 2), J3 shapes, J4 facts (2), J5 screens (2), J6 test games (2), me
     review page) has old area names (renamed after task 14); not changed. 252 tests pass; the web build works.
   - **Owner (2026-11-25):** the 100-turn map stays **exactly as approved in J1**: no merged area, no new name, no other
     change to the engine or the map files.
+  - **Owner (2026-11-25), screens only:** the end-of-turn popup lists the area's countries with flags and capitals (pull
+    request #91); area names on all 3 maps may stick out over sea, take 2 or 3 lines, shorten North/South/West/East, and the
+    100-turn map draws "Central Balkans" and "Horn of Africa" as map names only (`docs/engine.md`, "Area names on the maps").
 
 **2.13 (release) Release (medium, 1–2).** Full test games (2–4 players, all lengths), web at kaj.kritere.com and app.
 
