@@ -27,9 +27,9 @@ const areas = map100.areas;
 const routes = map100.routes ?? [];
 const sites = (kind: string) => new Set(routes.filter((r) => r.kind === kind).flatMap((r) => [r.a, r.b]));
 
-test('game length 100 on the 100-turn map; hidden in the setup screen until part J5', () => {
+test('game length 100 on the 100-turn map; in the setup screen since part J5', () => {
   assert.deepEqual([...GAME_LENGTHS], [30, 50, 100]);
-  assert.deepEqual([...SETUP_LENGTHS], [30, 50]);
+  assert.deepEqual([...SETUP_LENGTHS], [30, 50, 100]);
   assert.equal(mapFor(100), map100);
   assert.equal(mapById('map100'), map100);
   assert.equal(createGame({ seats: seats(2), seed: 1 }, map100).totalRounds, 100);

@@ -22,7 +22,7 @@ const S: [string[], string, string, string[], O?][] = [
  [['benelux'],'netherlands','Netherlands',['Netherlands']],[['benelux'],'belgium-luxembourg','Belgium & Luxembourg',['Belgium','Luxembourg']],
  [['alps'],'switzerland','Switzerland & Liechtenstein',['Switzerland','Liechtenstein']],[['alps'],'austria','Austria',['Austria']],
  [['italy'],'italy','Italy',['Italy','San Marino','Vatican City','Malta'],{w:true}],
- [['scandinavia'],'norway','Norway',['Norway']],[['scandinavia'],'sweden','Sweden',['Sweden']],[['scandinavia'],'denmark','Denmark & Greenland',['Denmark','Greenland']],
+ [['scandinavia'],'norway','Norway',['Norway']],[['scandinavia'],'sweden','Sweden',['Sweden']],[['scandinavia'],'denmark','Denmark',['Denmark','Greenland']],
  [['finland'],'finland','Finland',['Finland']],[['iceland'],'iceland','Iceland',['Iceland']],[['poland'],'poland','Poland',['Poland']],
  [['czechia-slovakia-hungary'],'czechia','Czechia',['Czechia']],[['czechia-slovakia-hungary'],'slovakia','Slovakia',['Slovakia']],
  [['czechia-slovakia-hungary'],'hungary','Hungary',['Hungary']],
