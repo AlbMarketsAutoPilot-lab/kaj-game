@@ -7,7 +7,8 @@
 import { apply, createGame } from '../src/engine/engine.ts';
 import { robotAction } from '../src/engine/normal-robot.ts';
 import { mapFor } from '../src/maps/index.ts';
-import { factId } from '../src/engine/quiz.ts';
+import { areaChallenges, challengeStudyLine, factId, VISA_CHALLENGE_TYPES } from '../src/engine/quiz.ts';
+import { areaById } from '../src/engine/map.ts';
 import { FACT_TYPES } from '../src/facts/tags.ts';
 import { CHALLENGES } from '../src/challenges/challenges.ts';
 import type { GameMap, GameState } from '../src/engine/types.ts';
@@ -67,7 +68,9 @@ function play(map: GameMap, players: number, seed: number, tally: Tally) {
       for (const q of s.visa.questions) add('visa test', q.id);
       for (const line of s.visa.study) {
         const fact = [...(map.facts?.[s.visa.to] ?? []), ...(map.examFacts?.[s.visa.to] ?? [])].find((f) => f.text === line);
-        add('visa test study lines', fact ? factId(fact) : undefined);
+        // Step 2.12c: challenges are read too, as a line made from their answer.
+        const challenge = areaChallenges(areaById(map, s.visa.to)).find((c) => VISA_CHALLENGE_TYPES.includes(c.type) && challengeStudyLine(c) === line);
+        add('visa test study lines', fact ? factId(fact) : challenge?.id);
       }
     }
     if (++steps > 20000) throw new Error('never ends');

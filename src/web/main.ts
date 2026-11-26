@@ -1390,15 +1390,31 @@ function renderVisaTest(box: HTMLElement, s: GameState, who: HTMLElement): void 
   const ready = () => { examReady = key; render(); };
   if (n === 0) {
     box.append(el('h2', {}, who, `: visa test for ${where}`),
-      el('p', { textContent: `${visaTestIntro(s, me, test)} Read these ${test.study.length} facts about ${where}. ${test.questions.length} questions will be asked about them, ${EXAM_SECONDS} seconds each.` }),
-      el('ol', { className: 'facts' }, ...test.study.map((line) => el('li', { textContent: line }))),
-      el('p', { className: 'small', textContent: 'Take your time. Tap "I\'m ready" when done.' }),
+      el('p', { textContent: `${visaTestIntro(s, me, test)} Read your notes: the questions are about them. Take your time.` }),
+      studyNotebook(key, where, test.study, test.questions.length),
       el('div', { className: 'row' }, button('📖 I\'m ready', ready)));
   } else {
     box.append(el('h2', {}, who, `: question ${n + 1} of ${test.questions.length}`),
       el('p', { textContent: `Ready for the next question? The ${EXAM_SECONDS}-second clock starts when you tap Start.` }),
       el('div', { className: 'row' }, button('▶ Start', ready)));
   }
+}
+
+// The notes to read before the visa test, as a notebook page (step 2.12c, owner-approved design): lined paper,
+// spiral rings, a handwritten title with a "VISA TEST" stamp, numbered notes and the test's rules at the bottom.
+// The page opens once per test: when the screen is drawn again (another popup closed), it stays still.
+let notebookOpened = '';
+function studyNotebook(key: string, where: string, lines: string[], questions: number): HTMLElement {
+  const rings = el('div', { className: 'nb-rings' });
+  rings.setAttribute('aria-hidden', 'true');
+  const still = notebookOpened === key;
+  notebookOpened = key;
+  return el('div', { className: still ? 'notebook still' : 'notebook' }, rings,
+    el('div', { className: 'nb-head' },
+      el('div', { className: 'nb-title', textContent: `Study notes for your visa: ${where}` }),
+      el('div', { className: 'nb-stamp', textContent: 'VISA TEST' })),
+    el('ol', { className: 'nb-notes' }, ...lines.map((line) => el('li', { textContent: line }))),
+    el('div', { className: 'nb-foot', textContent: `${questions} questions · ${EXAM_SECONDS} seconds each · ${VISA_TEST_PASS} right to pass` }));
 }
 
 // What the visa test decides, in one sentence (also used in the warning before the move).

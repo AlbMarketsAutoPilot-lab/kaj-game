@@ -148,7 +148,9 @@ test next turn (read 6 facts, 3 questions, 2 right to pass), Luxury granted at o
 - **Visa:** 2 points to the citizen on **every entry** into their country from outside. Moving between
   parts of the same big country is free, and the citizen enters free.
 - **Visa test, on every entry:**
-  - read 6 facts of the area, then answer 3 a/b questions in the same turn;
+  - read 6 notes about the area, then answer 3 a/b questions in the same turn; **[2.12c]** the notes come from the area's
+    facts, its test-only geography facts and the capital, neighbour and money challenges about its countries (each as
+    a sentence with its answer), shown as a notebook page;
   - 15 seconds each, started with "Start";
   - **2 of 3 right:** pay the visa and enter;
   - **fewer:** nothing paid, no entry, the turn is used.

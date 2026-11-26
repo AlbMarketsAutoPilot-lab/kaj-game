@@ -537,3 +537,42 @@ button.link { background: none; border: none; padding: 0; text-align: left; font
 .pp-rec td, .pp-rec th { padding: 2px 6px; text-align: left; }
 .pp-rec th { color: var(--muted); font-weight: 400; font-size: 0.72rem; }
 .pp-rec tr.new td { background: rgba(243, 210, 122, 0.2); }
+
+/* The visa test's study notes as a notebook page (step 2.12c, owner-approved design). Drawn with styles only (no
+   picture files); the page slides open once, nothing keeps moving (step 2.2). */
+.notebook {
+  position: relative; margin: 10px 0 12px; padding: 26px 16px 12px 52px; border-radius: 6px 6px 10px 10px;
+  --nb-line: 28px; color: #23313a; text-align: left;
+  background:
+    linear-gradient(90deg, transparent 38px, rgba(214, 64, 64, 0.55) 38px, rgba(214, 64, 64, 0.55) 40px, transparent 40px),
+    repeating-linear-gradient(180deg, transparent 0, transparent calc(var(--nb-line) - 1px), rgba(70, 120, 190, 0.28) calc(var(--nb-line) - 1px), rgba(70, 120, 190, 0.28) var(--nb-line)),
+    #fdf6e3;
+  background-position: 0 0, 0 8px, 0 0;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45), inset 0 0 30px rgba(160, 120, 60, 0.12);
+  transform-origin: top center; animation: nb-open 0.45s ease-out 1;
+}
+.nb-rings {
+  position: absolute; top: -9px; left: 22px; right: 22px; height: 18px; pointer-events: none;
+  background: radial-gradient(circle at 9px 9px, #f5f5f5 0 3px, #8a8f96 4px 6px, transparent 7px) 0 0 / 28px 18px repeat-x;
+}
+.nb-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
+.nb-title {
+  font-family: "Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive;
+  font-size: 1.25rem; font-weight: 700; color: #1d3f7a; line-height: 1.25;
+}
+.nb-stamp {
+  font-family: "Cinzel", Georgia, serif; font-weight: 700; font-size: 0.95rem; letter-spacing: 0.12em; color: #c62828;
+  border: 3px double #c62828; border-radius: 6px; padding: 2px 10px; transform: rotate(-8deg); opacity: 0.85;
+}
+.nb-notes { margin: 0; padding-left: 20px; line-height: var(--nb-line); font-size: 1rem; }
+.nb-notes li { padding-left: 4px; }
+.nb-notes li::marker { color: #1d3f7a; font-weight: 700; }
+.nb-foot { margin-top: 8px; padding-top: 4px; border-top: 1px dashed rgba(35, 49, 58, 0.35); font-size: 0.85rem; color: #4a5a63; font-weight: 600; }
+@keyframes nb-open { 0% { opacity: 0; transform: perspective(700px) rotateX(-18deg) translateY(-6px); } 100% { opacity: 1; transform: none; } }
+.notebook.still { animation: none; }
+@media (prefers-reduced-motion: reduce) { .notebook { animation: none; } }
+@media (max-height: 500px) {
+  .notebook { --nb-line: 24px; padding: 20px 12px 8px 46px; }
+  .nb-title { font-size: 1.05rem; }
+  .nb-notes { font-size: 0.9rem; }
+}
