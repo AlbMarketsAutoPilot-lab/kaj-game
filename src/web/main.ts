@@ -78,7 +78,7 @@ const VEHICLE: Record<RouteKind, string> = { airport: '✈️', port: '⚓', sta
 // Words for each way to travel (the train: task 17).
 const TRAVEL_WORDS: Readonly<Record<RouteKind, { verb: string; vehicle: string; place: string; a: string; sound: SoundName; promo: string }>> = {
   airport: { verb: 'fly', vehicle: 'plane', place: 'airport', a: 'a plane', sound: 'plane', promo: 'Airline' },
-  port: { verb: 'sail', vehicle: 'ship', place: 'port', a: 'a ship', sound: 'ship', promo: 'Airline' },
+  port: { verb: 'sail', vehicle: 'ship', place: 'port', a: 'a ship', sound: 'ship', promo: 'Ferry' },
   station: { verb: 'ride the train', vehicle: 'train', place: 'station', a: 'the train', sound: 'train', promo: 'Railway' },
   bus: { verb: 'take the bus', vehicle: 'bus', place: 'bus stop', a: 'the bus', sound: 'bus', promo: 'Bus' },
   car: { verb: 'drive', vehicle: 'car', place: 'car rental', a: 'a rented car', sound: 'car', promo: 'Car rental' },
@@ -269,7 +269,13 @@ function renderStart(): void {
   // A saved game continues on its own map (task M4).
   const savedMap = saved && 'state' in saved ? mapById(saved.state.mapId) : undefined;
   const resume = saved && 'state' in saved && savedMap
-    ? button(`Continue (round ${saved.state.round} / ${saved.state.totalRounds})`, () => { useMap(savedMap); state = saved.state; render(); })
+    ? button(`Continue (round ${saved.state.round} / ${saved.state.totalRounds})`, () => {
+      useMap(savedMap);
+      state = saved.state;
+      // Step 2.12 J6: Halfway and the last five turns are not shown again when their round has passed.
+      for (const m of milestones(state.totalRounds)) if (state.round > m.round) seenCards.add(m.key);
+      render();
+    })
     : null;
   app.replaceChildren(
     el('section', { className: 'poster' },
@@ -1574,19 +1580,28 @@ function startCountdown(key: string, seconds: number, clock: HTMLElement, onTime
   const { deadline } = countdown;
   const secs = clock.querySelector<HTMLElement>('.secs')!;
   const bar = clock.querySelector<HTMLElement>('.timebar span')!;
+  // Step 2.12 J6: one clock at a time. A question drawn twice in one redraw (in the popup and, during the
+  // 2-second pause after a closed popup, in the side panel) started two clocks and only one was stopped;
+  // the other then gave its time-out answer 4 times a second for the rest of the game.
+  clearInterval(quizTimer);
+  let id = 0;
+  let done = false;
   const tick = () => {
+    if (done) return;
     const left = Math.max(0, deadline - Date.now());
     secs.textContent = `⏱️ ${Math.ceil(left / 1000)} s`;
     bar.style.width = `${(left / (seconds * 1000)) * 100}%`;
     clock.classList.toggle('hurry', left <= 5000);
     if (left <= 0) {
+      done = true;
+      clearInterval(id);
       clearInterval(quizTimer);
       stopTimer();
       onTimeout();
     }
   };
   tick();
-  quizTimer = window.setInterval(tick, 250);
+  if (!done) id = quizTimer = window.setInterval(tick, 250);
 }
 
 // The study line behind a quiz or test question (every fact has one).
