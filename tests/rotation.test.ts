@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { CHALLENGES } from '../src/challenges/challenges.ts';
 import { apply, createGame } from '../src/engine/engine.ts';
-import { AIRLINE_CHALLENGE_ONE_IN, areaChallenges, drawFresh, factId, makeExam, makeQuestion } from '../src/engine/quiz.ts';
+import { AIRLINE_CHALLENGE_ONE_IN, areaChallenges, challengeStudyLine, drawFresh, factId, makeExam, makeQuestion, VISA_CHALLENGE_TYPES } from '../src/engine/quiz.ts';
 import { SAVE_VERSION, loadGame, saveGame } from '../src/engine/save.ts';
 import type { Player } from '../src/engine/types.ts';
 import { map30 } from '../src/maps/map30.ts';
@@ -104,7 +104,10 @@ test('airline quiz (step 2.3): about 1 question in 10 is a challenge, the rest f
 
 test('citizenship test: the 3 questions come from the rotation and are among the 6 study lines', () => {
   const me = { seen: [] as string[] } as Player;
-  const facts = [...map30.facts!.japan, ...map30.examFacts!.japan];
+  // Facts, test-only facts and (step 2.12c) the challenges about Japan except flags, by id and study line.
+  const facts = [...map30.facts!.japan, ...map30.examFacts!.japan].map((f) => ({ id: factId(f), text: f.text }));
+  const japan = map30.areas.find((a) => a.id === 'japan')!;
+  facts.push(...areaChallenges(japan).filter((c) => VISA_CHALLENGE_TYPES.includes(c.type)).map((c) => ({ id: c.id, text: challengeStudyLine(c) })));
   const asked: string[] = [];
   let seed = 4;
   for (let k = 0; k < 4; k++) {
@@ -112,12 +115,12 @@ test('citizenship test: the 3 questions come from the rotation and are among the
     seed = next;
     assert.equal(exam.study.length, 6);
     for (const q of exam.questions) {
-      const fact = facts.find((f) => factId(f) === q.id)!;
+      const fact = facts.find((f) => f.id === q.id)!;
       assert.ok(exam.study.includes(fact.text));
       asked.push(q.id!);
     }
   }
-  // 14 facts (12 + 2 test-only, step 2.3): 4 tests of 3 questions never repeat one.
+  // 14 facts (12 + 2 test-only, step 2.3) plus the challenges (step 2.12c): 4 tests of 3 questions never repeat one.
   assert.equal(new Set(asked).size, 12);
 });
 

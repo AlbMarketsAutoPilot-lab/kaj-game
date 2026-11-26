@@ -927,3 +927,15 @@ were measured again (owner-approved): `lab2.ts J4 3200 --lines=100`, games 1–3
 boredom (24–26%), lead changes (8.6–12.4), won by 3 or less (44–55%), go home, blocked turns and failed visa tests
 (15.4–16.0%). Robots answer at a fixed rate whatever the question, so which fact is drawn does not change their games.
 The 30- and 50-turn maps were not run (their facts did not change).
+
+## Step 2.12c (2026-11-26): the visa test with challenges
+
+The visa test also asks the capital, neighbour and money challenges about the area's countries (owner's choice A). Robots
+answer at the same rate, so only which questions are drawn changes, and with it the dice. Measured (owner-approved) with
+`lab2.ts C2 3200` and `lab2.ts C2-100 3200 --lines=100`, games 1–3,200 per line, the same seeds as J2:
+**30 and 50 turns 34 of 40** (J2: 33; old profiles 26 of 32, Kris Ann 8 of 8), **100 turns 18 of 20** (J2: 16). Every win
+share is within 2 points of J2 (the dice change with the questions drawn); the lines that changed fair/unfair were at the
+edge of the target (30 turns, 2 players, normal: Business 59% → 61% ❌; 50 turns, 2 players, planning: Nomad 40% ✅;
+50 turns, 4 players, normal: Business 19% → 20% ✅; 100 turns, 4 players: Backpacker 20% ✅, Nomad 31% → 30% ✅).
+Boredom 22–32% and 24–26%, lead changes 4.0–7.4 and 8.7–12.3, won by 3 or less 37–49% and 44–55%: the same as J2. Failed
+visa tests 14.8–16.2% (J2 15.1–16.1%); longest blocked streak 2, once 3 on 100 turns.

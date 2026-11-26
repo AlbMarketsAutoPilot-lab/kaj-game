@@ -106,15 +106,61 @@ export function makeQuestion(map: GameMap, to: string, seed: number, me?: Player
   return factQuestion(facts.find((f) => factId(f) === id)!, rng);
 }
 
-// Citizenship test (owner's change after task 15 planning): `studied` facts of the area to read,
-// then `count` questions about `count` of them. The questions come from the player's rotation
-// (step 2.1, `me.seen` is updated); the other study lines are drawn at random from the rest. The
-// study lines keep the area's own order, so they don't show which facts are asked. An area
-// without facts (the test maps) gets placeholder questions, each with its answer as the study line.
+// Step 2.12c (owner, 2026-11-25): the visa test also asks the challenges about the area's countries, so it repeats
+// less. Owner's choice A (measured with scripts/geo-count.ts): capital, neighbour and money only, so geography stays
+// within 35–40% of the questions asked (all 5 types: 42%); never flags (a study line can't show the flag). Each one is
+// read first as a study line made from its answer. challengeStudyLine also covers continent and bigger.
+export const VISA_CHALLENGE_TYPES: readonly Challenge['type'][] = ['capital', 'neighbour', 'currency'];
+
+// Country names that take "the" (as the other challenges write them: "the Netherlands"); the "bigger" options don't.
+let THE: Set<string> | null = null;
+function withThe(country: string): string {
+  THE ??= new Set(CHALLENGES.flatMap((c) => (c.question.includes(`the ${c.country}?`) || c.question.includes(`the ${c.country} use?`) ? [c.country] : [])));
+  return THE.has(country) ? `the ${country}` : country;
+}
+
+// The study line of a challenge, from its question and right answer ("The capital of Spain is Madrid.").
+export function challengeStudyLine(c: Challenge): string {
+  const right = c.options[c.correct];
+  const wrong = c.options[1 - c.correct];
+  const about = (prefix: string) => c.question.slice(prefix.length, -1);
+  const cap = (x: string) => x.charAt(0).toUpperCase() + x.slice(1);
+  switch (c.type) {
+    case 'capital': return `The capital of ${about('What is the capital of ')} is ${right}.`;
+    case 'continent': return `${cap(about('Where is '))} is in ${right}.`;
+    case 'neighbour': return `${cap(about('Which country borders '))} borders ${right}.`;
+    case 'bigger': return `${cap(withThe(right))} is bigger than ${withThe(wrong)}.`;
+    case 'currency': return `The money of ${about('What money does ').replace(/ use$/, '')} is the ${right}.`;
+    default: throw new Error(`no study line for a ${c.type} challenge`);
+  }
+}
+
+// One thing the visa test can ask: a fact or a challenge, with its study line.
+interface ExamItem { id: string; text: string; ask: (seed: number) => [QuizQuestion, number] }
+
+function examItems(map: GameMap, areaId: string): ExamItem[] {
+  // The area's facts plus its test-only geography facts (step 2.3), then the challenges (step 2.12c).
+  const facts = [...(map.facts?.[areaId] ?? []), ...(map.examFacts?.[areaId] ?? [])];
+  const area = map.areas.find((a) => a.id === areaId);
+  const challenges = area ? areaChallenges(area).filter((c) => VISA_CHALLENGE_TYPES.includes(c.type)) : [];
+  return [
+    ...facts.map((fact) => ({ id: factId(fact), text: fact.text, ask: (seed: number) => factQuestion(fact, seed) })),
+    ...challenges.map((c) => ({
+      id: c.id,
+      text: challengeStudyLine(c),
+      ask: (seed: number): [QuizQuestion, number] => [{ text: c.question, options: [...c.options], correct: c.correct, id: c.id }, seed],
+    })),
+  ];
+}
+
+// The visa test (citizenship test before step 2.6): `studied` lines of the area to read, then `count` questions
+// about `count` of them. The questions come from the player's rotation (step 2.1, `me.seen` is updated); the other
+// study lines are drawn at random from the rest. The study lines keep the area's own order (facts, then challenges),
+// so they don't show which ones are asked. An area with nothing to ask (the test maps) gets placeholder questions,
+// each with its answer as the study line.
 export function makeExam(map: GameMap, areaId: string, count: number, studied: number, seed: number, me?: Player): [{ questions: QuizQuestion[]; study: string[] }, number] {
-  // The area's facts plus its test-only geography facts (step 2.3).
-  const all = [...(map.facts?.[areaId] ?? []), ...(map.examFacts?.[areaId] ?? [])];
-  const ids = all.map(factId);
+  const all = examItems(map, areaId);
+  const ids = all.map((x) => x.id);
   let [asked, seen, rng] = drawFresh(ids, me?.seen ?? [], Math.min(count, studied), seed);
   if (me) me.seen = seen;
   const picked = asked.map((id) => ids.indexOf(id));
@@ -129,7 +175,7 @@ export function makeExam(map: GameMap, areaId: string, count: number, studied: n
   for (let k = 0; k < count; k++) {
     let q: QuizQuestion;
     if (k < asked.length) {
-      [q, rng] = factQuestion(all[picked[k]], rng);
+      [q, rng] = all[picked[k]].ask(rng);
     } else {
       [q, rng] = placeholderQuestion(map, areaId, rng);
       study.push(`${q.text} ${q.options[q.correct]}.`);

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { VISA_PRICE } from '../src/engine/constants.ts';
 import { apply, createGame, finalScore, legalActions, needsVisaTest } from '../src/engine/engine.ts';
-import { makeExam, makeQuestion } from '../src/engine/quiz.ts';
+import { areaChallenges, challengeStudyLine, makeExam, makeQuestion, VISA_CHALLENGE_TYPES } from '../src/engine/quiz.ts';
 import { CHALLENGES } from '../src/challenges/challenges.ts';
 import type { Action, GameMap, GameState, Profile } from '../src/engine/types.ts';
 import { map30 } from '../src/maps/map30.ts';
@@ -244,13 +244,16 @@ test('the Digital Nomad never holds a citizenship and can\'t take one', () => {
   assert.ok(!can(s, { type: 'buyCitizenship' }));
 });
 
-test('6 facts to read, in the area\'s order; the 3 questions come from 3 different ones of them', () => {
+test('6 lines to read, in the area\'s order; the 3 questions come from 3 different ones of them', () => {
   let seed = 7;
   for (const area of ['france', 'japan', 'chile']) {
     const [{ questions, study }, next] = makeExam(map30, area, 3, 6, seed);
     seed = next;
-    // The area's facts, then its test-only geography facts (step 2.3).
-    const facts = [...map30.facts![area], ...map30.examFacts![area]];
+    // The area's facts, then its test-only geography facts (step 2.3), then the challenges about its countries except
+    // flags, each with its study line (step 2.12c).
+    const challenges = areaChallenges(map30.areas.find((a) => a.id === area)!).filter((c) => VISA_CHALLENGE_TYPES.includes(c.type))
+      .map((c) => ({ text: challengeStudyLine(c), question: c.question, right: c.options[c.correct], wrong: c.options[1 - c.correct] }));
+    const facts = [...map30.facts![area], ...map30.examFacts![area], ...challenges];
     assert.equal(new Set(study).size, 6);
     const order = study.map((t) => facts.findIndex((f) => f.text === t));
     assert.ok(order.every((i, k) => i >= 0 && (k === 0 || i > order[k - 1])));
@@ -275,5 +278,21 @@ test('the airline quiz asks about the destination, from its facts or the challen
     const challenge = CHALLENGES.find((c) => c.id === q.id);
     assert.ok(fact || (challenge && japan.countries!.includes(challenge.country)), q.text);
     assert.equal(q.options[q.correct], fact ? fact.right : challenge!.options[challenge!.correct]);
+  }
+});
+
+test('step 2.12c: every challenge but flags has a study line with its right answer; flags never come in the visa test', () => {
+  for (const c of CHALLENGES.filter((x) => VISA_CHALLENGE_TYPES.includes(x.type))) {
+    const line = challengeStudyLine(c);
+    assert.ok(line.includes(c.options[c.correct]), `${c.id}: ${line}`);
+    assert.ok(/^[A-Z].*\.$/.test(line) && !line.includes('?'), `${c.id}: ${line}`);
+  }
+  assert.ok(!VISA_CHALLENGE_TYPES.includes('flag'));
+  const flags = new Set(CHALLENGES.filter((c) => c.type === 'flag').map((c) => c.id));
+  let seed = 3;
+  for (let k = 0; k < 40; k++) {
+    const [{ questions }, next] = makeExam(map30, 'france', 3, 6, seed);
+    seed = next;
+    for (const q of questions) assert.ok(!flags.has(q.id!), q.text);
   }
 });

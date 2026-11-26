@@ -1136,6 +1136,31 @@ No rule, balance, save or screen change; the 100-turn game stays out of the setu
   the 30- and 50-turn games are unchanged. Lab run of the 100-turn lines (owner-approved, games 1–3,200 per line): **identical to
   J2 on every line**, 16 of 20 (`docs/balance-lab.md`, step 2.12 J4). 260 tests pass; the web build works (5,118 KB).
 
+## The visa test with challenges and the notebook (version 2.0, step 2.12c, owner-approved 2026-11-25/26)
+
+Owner: the visa test was too repetitive (it drew only from the area's 12 facts and 2–3 test facts). No rule, save or
+balance change: only which questions the test draws, and how its notes look.
+- **Pool (`makeExam` in `src/engine/quiz.ts`):** the area's facts, its test-only geography facts, then the challenges about
+  its countries of the types in `VISA_CHALLENGE_TYPES`: **capital, neighbour and money** (owner's choice A). Each challenge
+  is read first as a study line made from its answer (`challengeStudyLine`: "The capital of Spain is Madrid.", "Spain
+  borders Andorra.", "The money of Spain is the Euro."; "the" as the other challenges write the country). Never flags (a
+  study line can't show the flag). Questions still come from the player's rotation (step 2.1), which the airline quiz shares.
+- **Pool size (average per area):** 30 turns 14 → 24, 50 turns 14 → 20, 100 turns 14 → 18.
+- **Geography (`node scripts/geo-count.ts`, 200 games per line; challenge study lines now counted too):** all 5 non-flag
+  types gave 40–42% with 4 players, over the owner's 35–40%; choice A: 30 turns 34% / 40%, 50 turns 37% / 40%, 100 turns
+  36% / 39% (2 / 4 players); the visa test itself 47–53%. Also measured: capital and money only, 34–36% / 38–39%.
+- **The notebook (screens only, `studyNotebook` in `src/web/main.ts`, `.notebook` in `web/style.css`):** the notes as a
+  notebook page: cream lined paper, red margin line, spiral rings, the title "Study notes for your visa: <area>" in a
+  handwriting font of the device (the system font where there is none), a tilted red "VISA TEST" stamp, numbered notes,
+  and "3 questions · 15 seconds each · 2 right to pass". The page opens once per test (0.45 s); redrawn after another
+  popup, it stays still; nothing keeps moving (step 2.2). Styles only, no picture files. Checked at 667×375, 900×430,
+  1280×720 and 1920×1080 (screenshots for the owner); the game file grows 5,118 → 5,122 KB.
+- **Tests:** the visa test's 6 lines in the area's order with 3 different questions, and 12 different questions in 4
+  tests, now with the challenges (`tests/citizenship.test.ts`, `tests/rotation.test.ts`; no limit changed); every
+  non-flag challenge has a study line with its answer; flags never come. 261 tests pass.
+- **Lab (owner-approved, 3,200 games per line, same seeds as J2):** 30 and 50 turns 34 of 40 (J2 33), 100 turns 18 of 20
+  (J2 16); every win share within 2 points of J2 (the dice change with the questions drawn), boredom and excitement the same (`docs/balance-lab.md`, step 2.12c).
+
 ## Area names on the maps (owner, 2026-11-25; screens only)
 
 On the area view and the home-country map of all 3 maps (`areaNames` in `src/web/main.ts`; helpers in `src/web/maps.ts`):
