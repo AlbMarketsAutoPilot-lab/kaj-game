@@ -23,7 +23,7 @@ import { countryCapital, countryFlag, SURPRISE_FACT, WONDER_NAME, WONDER_PLACE }
 import { passportBook, recordLine, recordsBox, type PassportData } from './passport.ts';
 import { COUNTRY_CODE3 } from './passport-codes.ts';
 import { addWin, loadRecords, saveRecords, type WinRecord } from './records.ts';
-import { buildGeo, colourAreas, continentBox, glowFor, innerBorders, MAP_NAME, nameLayouts, pad, propSpots, squeeze, svg, unionBox, type Box, type PropKind } from './maps.ts';
+import { areaAt, buildGeo, colourAreas, continentBox, glowFor, innerBorders, MAP_NAME, nameLayouts, pad, propSpots, squeeze, svg, unionBox, type Box, type PropKind } from './maps.ts';
 import { airport, busStop, carRental, citizenFlag, monument, pawn, place, port, station } from './props.ts';
 import { iconEl, iconUse, installIcons, PROFILE_COLOUR } from './icons.ts';
 import { hitchScene, tripScene, wonderScene } from './scenes.ts';
@@ -100,7 +100,7 @@ const BUSINESS_EARNS: Record<BusinessKind, string> = {
 };
 
 const app = document.getElementById('app')!;
-// The map of the game on screen (task M4): the 30-turn map (default) or the 50-turn map, set by
+// The map of the game on screen (task M4): the 30-turn map (default), the 50- or the 100-turn map, set by
 // useMap() when a game starts or a saved game continues. The drawings of each map are made once.
 // The 100-turn map's shapes (step 2.12, J3) are here, but its game is not in the setup screen until J5.
 const SHAPES: Record<string, Shapes> = { map30: shapes30, map50: shapes50, map100: shapes100 };
@@ -919,7 +919,7 @@ function wonderPoster(s: GameState, me: Player, actions: Action[], seen: () => v
 }
 
 // Halfway and the last five turns (owner's request): one popup each per game. Rounds 16 and 26
-// of 30; 26 and 46 of 50 (task M4).
+// of 30; 26 and 46 of 50 (task M4); 51 and 96 of 100 (step 2.12 J5).
 const milestones = (total: number) => [
   { key: 'milestone-half', round: total / 2 + 1, title: '🧭 Halfway there!', text: `Half of your journey is already behind you: ${total / 2} more turns to go. Think about where you still want to go!` },
   { key: 'milestone-last', round: total - 4, title: '⏳ The last five turns!', text: 'These are the last five turns of the journey. Make them count: new areas, wonders and the continents you still need!' },
@@ -1105,7 +1105,7 @@ function playerCard(s: GameState, seat: number): HTMLElement {
 }
 
 // When the player's next event card comes: every 3rd turn begun in an area (every 5th in the
-// 50-turn game); trip turns don't count (task 12); none in the last round (and none during a
+// 50- and 100-turn games); trip turns don't count (task 12); none in the last round (and none during a
 // citizenship request).
 function nextCardText(s: GameState, p: Player): string {
   if (s.card?.seat === p.seat && s.card.round === s.round && currentPlayer(s) === p) return '🔔 Event card this turn';
@@ -2384,6 +2384,17 @@ function renderAreaView(s: GameState, isRobot: boolean): HTMLElement {
       x = Math.min(Math.max(cx * k + dx * out, v.x + w / 2), v.x + v.width - w / 2);
       y = Math.min(Math.max(cy + dy * out, v.y + h / 2), v.y + v.height - h / 2);
       if (!overlapsPlaced(x, y, w, h)) break;
+    }
+    // Owner (step 2.12 J5, all 3 maps): a badge that covers another one, or sits on another area (the 100-turn
+    // map's small areas), moves towards its own area's centre until it sits inside it and is free.
+    const own = (bx: number, by: number) => [bx - w * 0.4, bx, bx + w * 0.4].every((px) => areaAt(geo, px / k, by) === id);
+    if (overlapsPlaced(x, y, w, h) || !own(x, y)) {
+      const [tx, ty] = geo.get(id)!.centre;
+      for (let i = 1; i <= 20; i++) {
+        const nx = Math.min(Math.max(x + ((tx * k - x) * i) / 20, v.x + w / 2), v.x + v.width - w / 2);
+        const ny = Math.min(Math.max(y + ((ty - y) * i) / 20, v.y + h / 2), v.y + v.height - h / 2);
+        if (own(nx, ny) && !overlapsPlaced(nx, ny, w, h)) { x = nx; y = ny; break; }
+      }
     }
     placed.push({ x, y, w, h });
     return [x, y];
