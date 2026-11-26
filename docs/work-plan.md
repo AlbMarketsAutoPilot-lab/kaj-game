@@ -951,6 +951,9 @@ engine (high, 2), J3 shapes, J4 facts (2), J5 screens (2), J6 test games (2), me
     and measured, then taken back: the lab gave 29 of 40 (30/50 turns, was 34) and 12 of 20 (100 turns, was 18). Maps,
     routes and saves (v22) are as before J6. The Play Store app (1.0.2) has the old clock bug until a new build.
     Details: `docs/engine.md`, step 2.12 part J6.
+  - **J6, the owner's guide changes (2026-11-26, owner-approved):** 16 slides: the pawn walks on the first slide, no "pay"
+    words, bus and car with a hitchhiking try, challenges with a real challenge, "Businesses never waste your points",
+    "Choose your traveller", clearer citizenship text. Screens only. Details: `docs/engine.md`, "The guide in 16 slides".
 
 **2.13 (release) Release (medium, 1–2).** Full test games (2–4 players, all lengths), web at kaj.kritere.com and app.
 

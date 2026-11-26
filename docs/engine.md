@@ -1254,6 +1254,20 @@ ship of task 14b went to USA West too). The owner's new routes were built and me
   balance numbers of 2.12c stand. Only the three screen fixes above stay.
 - Tests: 262 pass; the web build works.
 
+## The guide in 16 slides (step 2.12 J6, owner-approved 2026-11-26; screens only)
+
+`src/web/tutorial.ts`, from the owner's guide test: the first slide says "Tap Iberia on the map on the right 👉" and the
+pawn **walks** from France to Iberia (1.5 s, as in the game) before the next text; no "pay" words anywhere in the guide
+("use your points", "Ticket with points", "the visa goes to its citizen"); the travel slides are now 5: the bus from
+Mongolia and the car in Mexico get their own slide with a **hitchhiking try** (the game's car picture; in the guide a car
+always stops, the game's rule stays secret), and the challenges get their own slide with the game's **trip offer and a
+15-second challenge** (right +1, wrong −1, or "No thanks"); new slides **"Businesses never waste your points"** (total =
+points + businesses' prices, an example, and selling a business on your turn) and **"Choose your traveller"** (the 5
+travellers have strengths and weaknesses; read their bonuses and penalties); the citizenship slide says everyone
+**becomes** a citizen of the home country they choose (the Digital Nomad has none) and to choose that country carefully.
+Trip pictures sit on the right like the maps. Checked at 4 screen sizes: no page error; the 3 slides that scrolled before
+(Own a business, the visa facts, Breaking news) still scroll at 1280x720 and 1920x1080. No rule, balance or save change.
+
 ## Project setup
 
 - TypeScript, run directly by Node 22.18 or newer (no build step for tests).

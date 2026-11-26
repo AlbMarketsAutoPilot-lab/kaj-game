@@ -4,11 +4,13 @@
 // comes back with "📖 How to play". It is a practice board of its own: the saved game is never
 // touched.
 
-import { bigCountryPoints, BUSINESS_PRICE, FREE_TRAVEL_TURNS, MOST_BUSINESSES_BONUS, PAID_TRAVEL_TURNS, QUIZ_TRIES, VISA_TEST_FACTS, VISA_TEST_PASS, POINTS_BIG_COUNTRY_3_PARTS, POINTS_NEW_CONTINENT, POINTS_WONDER, VISA_PRICE } from '../engine/constants.ts';
+import { bigCountryPoints, BUSINESS_PRICE, CHALLENGE_POINTS, FREE_TRAVEL_TURNS, MOST_BUSINESSES_BONUS, PAID_TRAVEL_TURNS, QUIZ_TRIES, VISA_TEST_FACTS, VISA_TEST_PASS, POINTS_BIG_COUNTRY_3_PARTS, POINTS_NEW_CONTINENT, POINTS_WONDER, VISA_PRICE } from '../engine/constants.ts';
 import { batch1 } from '../facts/batch1.ts';
 import type { AreaGeo } from './maps.ts';
 import { glowFor, innerBorders, pad, squeeze, svg, unionBox } from './maps.ts';
+import { iconEl } from './icons.ts';
 import { airport, pawn, place } from './props.ts';
+import { hitchScene, tripScene } from './scenes.ts';
 import { play, stopTimer } from './sound.ts';
 
 const DONE_KEY = 'kaj-guide-done';
@@ -43,6 +45,7 @@ interface Step {
 const START_POINTS = 10;
 const PROTEST_LOSS = 2;
 const ME = '#2e86de';
+const WALK_MS = 1500; // the pawn's walk, as in the game
 
 export function runGuide(kit: GuideKit, onDone: () => void): void {
   const { app, geo, areaColour, el, button } = kit;
@@ -85,17 +88,38 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
   const tag = (x: number, y: number, size: number, text: string): SVGElement =>
     svg('text', { x, y, class: 'guide-tag', 'font-size': size, 'stroke-width': size * 0.22, 'text-anchor': 'middle', 'dominant-baseline': 'central' }, text);
   // Two neighbours: France (you are here) and Iberia (tap it to travel). The very first slide, so
-  // it says it all on the map (owner, M5): "You are here", and a hand on Iberia.
-  const firstTrip = (done: () => void): Node => el('div', {},
-    view(['france', 'iberia'], (id) => (id === 'france' ? 'here' : 'go'),
-      (id) => (id === 'iberia' ? () => { play('walk'); gain(1); done(); } : null),
+  // it says it all on the map (owner, M5): "You are here", and a hand on Iberia. Owner (J6): the pawn walks to Iberia,
+  // as in the game, before the next text.
+  const firstTrip = (done: () => void): Node => {
+    let walking = false;
+    let walker: SVGGElement | null = null;
+    const hints: SVGElement[] = [];
+    let from: [number, number] = [0, 0];
+    let to: [number, number] = [0, 0];
+    const map = view(['france', 'iberia'], (id) => (id === 'france' ? 'here' : 'go'),
+      (id) => (id === 'iberia' ? () => {
+        if (walking || !walker) return;
+        walking = true;
+        play('walk');
+        for (const h of hints) h.remove();
+        const move = svg('animateTransform', { attributeName: 'transform', type: 'translate', from: `${from[0]} ${from[1]}`, to: `${to[0]} ${to[1]}`,
+          dur: `${WALK_MS}ms`, begin: 'indefinite', fill: 'freeze', calcMode: 'spline', keySplines: '0.4 0 0.2 1', keyTimes: '0;1' });
+        walker.append(move);
+        (move as unknown as { beginElement(): void }).beginElement();
+        setTimeout(() => { gain(1); done(); }, WALK_MS + 300);
+      } : null),
       (pos, size) => {
-        const [fx, fy] = pos('france');
-        const [ix, iy] = pos('iberia');
-        return [place(pawn(ME, true), fx, fy, size * 0.55, 'You are here'), tag(fx, fy + size * 0.48, size * 0.26, 'You are here'),
-          tag(ix, iy - size * 0.08, size * 0.5, '👆'), tag(ix, iy + size * 0.36, size * 0.24, 'Tap here to continue')];
-      }),
-    el('p', { className: 'small', textContent: '🇫🇷 You are in France · tap 🇪🇸 Iberia' }));
+        from = pos('france');
+        to = pos('iberia');
+        const [ix, iy] = to;
+        // The pawn sits at (0, 0) inside a group placed on France; the walk moves the group.
+        walker = svg('g', { transform: `translate(${from[0]} ${from[1]})` }, place(pawn(ME, true), 0, 0, size * 0.55, 'You are here'));
+        hints.push(tag(from[0], from[1] + size * 0.48, size * 0.26, 'You are here'),
+          tag(ix, iy - size * 0.08, size * 0.5, '👆'), tag(ix, iy + size * 0.36, size * 0.24, 'Tap here to continue'));
+        return [walker, ...hints];
+      });
+    return el('div', {}, map, el('p', { className: 'small', textContent: '🇫🇷 You are in France · tap 🇪🇸 Iberia' }));
+  };
 
   // Canada in three parts: start in the West, walk to Central, then East.
   const CANADA = ['canada-west', 'canada-central', 'canada-east'];
@@ -178,7 +202,7 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
     return el('div', {},
       view(['france', 'iberia'], (id) => (id === (inside ? 'france' : 'iberia') ? 'here' : 'far'), undefined,
         (pos, size) => [place(pawn(ME, true), ...pos(inside ? 'france' : 'iberia'), size * 0.45, 'You')]),
-      el('p', { className: 'small', textContent: inside ? `🇫🇷 In France · ${VISA_PRICE}-point visa paid to its citizen` : '🇪🇸 Still in Iberia · nothing paid' }));
+      el('p', { className: 'small', textContent: inside ? `🇫🇷 In France · ${VISA_PRICE}-point visa to its citizen` : '🇪🇸 Still in Iberia · no points spent' }));
   };
 
   // The three ways of a trip, side by side (step 2.11: the travel slides in three parts).
@@ -188,10 +212,50 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
       .map(([icon, name, where]) => el('div', { className: 'guide-way' }, el('div', { className: 'guide-way-icon', textContent: icon }), el('strong', { textContent: name }), el('span', { className: 'small', textContent: where }))));
   const turns = (n: number) => (n === 0 ? 'arrives right away' : n === 1 ? '1 travel turn' : `${n} travel turns`);
   const payOrQuiz = (): Node => el('table', { className: 'guide-table' },
-    el('tr', {}, el('th', { textContent: '' }), el('th', { textContent: '💰 Paid ticket' }), el('th', { textContent: '🧠 Free quiz' })),
+    el('tr', {}, el('th', { textContent: '' }), el('th', { textContent: '💰 Ticket with points' }), el('th', { textContent: '🧠 Free quiz' })),
     el('tr', {}, el('td', { textContent: '✈️ 🚆 🚌 Plane, train, bus' }), el('td', { textContent: turns(PAID_TRAVEL_TURNS.airport) }), el('td', { textContent: turns(FREE_TRAVEL_TURNS.airport) })),
     el('tr', {}, el('td', { textContent: '⛴️ Ship' }), el('td', { textContent: turns(PAID_TRAVEL_TURNS.port) }), el('td', { textContent: turns(FREE_TRAVEL_TURNS.port) })),
     el('tr', {}, el('td', { textContent: '🚗 Car (Mexico)' }), el('td', { textContent: turns(PAID_TRAVEL_TURNS.car) }), el('td', { textContent: 'no quiz' })));
+
+  // Owner (J6): try to hitchhike in Mexico (the Backpacker's car). In the guide a car always stops; when one stops in
+  // the game stays a secret.
+  const hitchhike = (done: () => void): Node => {
+    const thumb = button('👍 Try to hitchhike', () => { play('car'); gain(POINTS_BIG_COUNTRY_3_PARTS); done(); });
+    thumb.className = 'primary guide-glow';
+    return el('div', {}, tripScene('car', true), el('div', { className: 'row' }, thumb));
+  };
+
+  // Owner (J6): a challenge on a long trip, as in the game: the offer, then the 15-second question, then right or wrong.
+  let challengeTries = 0;
+  let challengeRight: boolean | null = null;
+  const challenge = (done: () => void): Node => {
+    const box = el('div', {});
+    const playIt = button('🌍 Play the challenge', () => {
+      challengeTries++;
+      box.closest('.guide')?.classList.add('quiz-on'); // only the question now, as in the airline quiz
+      box.replaceChildren(el('section', { className: 'card turn guide-quiz' },
+        ...kit.question('🌍 Challenge! 💰 Which currency?', 'What money does Japan use?', ['Yen', 'Euro'], 0,
+          (i) => {
+            kit.stopClock();
+            box.closest('.guide')?.classList.remove('quiz-on');
+            challengeRight = i === 0;
+            if (challengeRight) { play('right'); gain(CHALLENGE_POINTS); } else { play('wrong'); gain(-CHALLENGE_POINTS); }
+            done();
+          },
+          `guide-challenge-${challengeTries}`, `Right +${CHALLENGE_POINTS}, wrong −${CHALLENGE_POINTS}. The journey goes on either way.`)));
+    });
+    playIt.className = 'primary guide-glow';
+    const no = button('😴 No thanks', () => { challengeRight = null; done(); });
+    box.append(tripScene('airport'),
+      el('p', { className: 'small', textContent: `The seat-belt sign goes off. A fellow passenger leans over: "Long flight… fancy a geography challenge? Right +${CHALLENGE_POINTS}, wrong −${CHALLENGE_POINTS}."` }),
+      el('div', { className: 'row' }, playIt, no));
+    return box;
+  };
+
+  // Owner (J6): the five travellers, each with strengths and weaknesses.
+  const TRAVELLERS: [Parameters<typeof iconEl>[0], string][] = [['krisann', 'Kris Ann'], ['backpacker', 'Backpacker'], ['business', 'Business Traveler'], ['luxury', 'Luxury Traveler'], ['nomad', 'Digital Nomad']];
+  const travellers = (): Node => el('div', { className: 'guide-ways' },
+    ...TRAVELLERS.map(([p, name]) => el('div', { className: 'guide-way' }, el('div', { className: 'guide-way-icon' }, iconEl(p)), el('strong', { textContent: name }))));
 
   // A country already visited: your pawn is there, and going back gives nothing.
   const revisitView = (): Node => el('div', {},
@@ -245,37 +309,61 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
   // The owner's texts (M5). **…** is shown in bold.
   const steps: Step[] = [
     { title: '🌍 Welcome, traveller!', task: true, picture: firstTrip,
-      lines: ['This is a **short guide (about 5 minutes) before your first game**. Nothing here counts: it\'s just practice.', '**KAJ is simple: the more you travel, the more points you collect!** But your turns are limited, so make every move count. When the last turn ends, the player with the **most points wins** (on equal points, **more businesses** wins).', "Let's take your first trip!"],
-      after: { title: '🎉 Your first trip!', lines: ['Every **new area** you visit gives you **+1 point**.', 'You also **pay with your points** for faster travel (**planes, ferries, trains, buses and cars**) and for fees such as visas and guided tours at wonders.'] } },
+      lines: ['This is a **short guide (about 5 minutes) before your first game**. Nothing here counts: it\'s just practice.', '**KAJ is simple: the more you travel, the more points you collect!** But your turns are limited, so make every move count. When the last turn ends, the player with the **most points wins** (on equal points, **more businesses** wins).', "Let's take your first trip! **Tap Iberia on the map on the right** 👉"],
+      after: { title: '🎉 Your first trip!', lines: ['Every **new area** you visit gives you **+1 point**.', 'You can also **use your points** for faster travel (**planes, ferries, trains, buses and cars**), for **visas** and for **guided tours** at wonders.'] } },
     { title: '💡 More points, the easy way', lines: [`Reach a **new continent: +${POINTS_NEW_CONTINENT} points**.`, `Areas with a famous **wonder 🏛️ give +${POINTS_WONDER} extra**.`, `Visit **every part of a big country** like the USA or Canada: **+${bigCountryPoints(2)} or +${POINTS_BIG_COUNTRY_3_PARTS}**.`, 'Visit **every area of a continent: a big reward**, bigger for bigger continents.'] },
     { title: '💡 Big countries, big bonus', task: true, picture: crossCanada,
       lines: ['Big countries like Canada and Russia come in parts. Visit every part for a big bonus.', '**Cross Canada to continue the guide!**'],
       after: { title: `🎉 All of Canada! +${POINTS_BIG_COUNTRY_3_PARTS}`, lines: [`You visited all 3 parts of Canada: +${POINTS_BIG_COUNTRY_3_PARTS} points.`] } },
     // Step 2.11 (owner): the travel slide in three parts, with pictures; the profiles slide is gone (players see each
     // profile when they choose it).
-    { title: '🚀 Travel faster (1/3): the ways to travel', picture: ways,
-      lines: ['In KAJ you usually travel **on foot**: one neighbouring area per turn, for free.', 'To go further and faster, take a **plane, ferry, train, bus or car**.', 'Faster travel **costs points**… unless you\'re smart and **pay with your knowledge!**'] },
-    { title: '🚀 Travel faster (2/3): the free quiz', task: true, picture: quiz,
+    { title: '🚀 Travel faster (1/5): the ways to travel', picture: ways,
+      lines: ['In KAJ you usually travel **on foot**: one neighbouring area per turn, for free.', 'To go further and faster, take a **plane, ferry, train, bus or car**.', 'Faster travel **costs points**… unless you\'re smart and **use your knowledge!**'] },
+    { title: '🚀 Travel faster (2/5): the free quiz', task: true, picture: quiz,
       lines: ['**Short on points, or want to save them?** Planes, ferries, trains and buses give you a **free ticket if you pass their quiz**.', '**Try one now!**'],
-      after: { title: '✅ Right!', lines: ['Free ticket! If only real life worked like that!', `In the game a **wrong answer uses your turn**. After **${QUIZ_TRIES} wrong answers** in the same place you must **pay**, or **go home** if you can\'t.`] } },
-    { title: '🚀 Travel faster (3/3): pay or quiz?', picture: payOrQuiz,
-      lines: ['**Paying is faster, the quiz is slower.**', '**In Mexico, rent a car 🚗** (no quiz) and get **all of the USA or all of Canada at once**. The Backpacker can\'t rent: it **tries to hitchhike** 👍.', 'On long trips, other passengers may **challenge you**: **+1** if you\'re right, **−1** if you\'re wrong.'] },
+      after: { title: '✅ Right!', lines: ['Free ticket! If only real life worked like that!', `In the game a **wrong answer uses your turn**. After **${QUIZ_TRIES} wrong answers** in the same place you must **use your points for the ticket**, or **go home** if you don\'t have enough.`] } },
+    { title: '🚀 Travel faster (3/5): points or quiz?', picture: payOrQuiz,
+      lines: ['**A ticket with points is faster, the quiz is slower.**'] },
+    // Owner (J6): the bus and the car get their own slide, with a hitchhiking try; the challenges get theirs.
+    { title: '🚀 Travel faster (4/5): bus and car', task: true, picture: hitchhike,
+      lines: ['**In Mongolia, take the bus 🚌** (Digital Nomad, Backpacker and Kris Ann) and get **all of Russia (+5) or all of China (+3) at once**.', '**In Mexico, rent a car 🚗** (no quiz) and get **all of the USA or all of Canada at once**. The Backpacker can\'t rent: it **tries to hitchhike** 👍.', '**Try to hitchhike now!**'],
+      after: { title: '👍 A car stops!', picture: () => hitchScene(true),
+        lines: [`The driver is going to the USA and has a free seat: you ride for free and get **all of the USA at once: +${POINTS_BIG_COUNTRY_3_PARTS} points**.`, 'In the game a car doesn\'t always stop. If none does, you walk on.'] } },
+    { title: '🚀 Travel faster (5/5): challenges', task: true, picture: challenge,
+      lines: ['On long trips, other passengers may **challenge you**: **+1** if you\'re right, **−1** if you\'re wrong.', 'You don\'t have to play. **Try one now!**'],
+      after: {
+        get title() { return challengeRight === null ? '😴 No thanks' : challengeRight ? `✅ Right! +${CHALLENGE_POINTS}` : `❌ Wrong: −${CHALLENGE_POINTS}`; },
+        get lines() {
+          return [challengeRight === null ? 'You can always say no: the trip goes on, and nothing changes.'
+            : challengeRight ? 'Japan uses the yen. Well done!' : 'Japan uses the yen. Better luck next time!',
+          'Challenges come on **trip turns**: on planes, ships, trains, buses and cars.'];
+        } } },
     { title: '💼 Own a business', task: true, picture: buyAirline,
-      lines: ['Want more? Own a business, and the other players pay you:', `**Businesses decide close games:** each one counts its price at the end, owning **the most businesses gives +${MOST_BUSINESSES_BONUS}**, and on equal points **more businesses wins**.`, '✈️ an airline at an airport · ⚓ a ferry agency at a port · 🚆 a train ticket booth at a station · 🚌 a bus ticket booth at the bus stop · 🚗 a car rental in Mexico · 🏛️ guided tours at a wonder.', '**Buy the airline at this airport to continue the guide.**'],
+      lines: ['Want more? Own a business, and the other players\' points come to you:', `**Businesses decide close games:** each one counts its price at the end, owning **the most businesses gives +${MOST_BUSINESSES_BONUS}**, and on equal points **more businesses wins**.`, '✈️ an airline at an airport · ⚓ a ferry agency at a port · 🚆 a train ticket booth at a station · 🚌 a bus ticket booth at the bus stop · 🚗 a car rental in Mexico · 🏛️ guided tours at a wonder.', '**Buy the airline at this airport to continue the guide.**'],
       after: { title: '🎉 You own the airline of UK & Ireland!', picture: () => airportView(true),
-        lines: ['Your flag now flies over the airport. Every time another player flies from UK & Ireland, the ticket money goes to you.'] } },
+        lines: ['Your flag now flies over the airport. Every time another player buys a plane ticket in UK & Ireland, its points go to you.'] } },
+    // Owner (J6): businesses never waste points, and they can be sold back.
+    { title: '💼 Businesses never waste your points',
+      lines: ['Buying a business **never loses points**: at the end of the game each business **counts its price**.', '**Your total = your points + the price of your businesses.**',
+        `Example: you have 10 points and buy the airline for ${BUSINESS_PRICE.airline}. You keep **${10 - BUSINESS_PRICE.airline} points + a ${BUSINESS_PRICE.airline}-point airline = still 10**, and every plane ticket bought at your airport brings you more.`,
+        '**Need points back?** On your turn, before you move, you can **offer a business to another player** for its price. If they say yes, you get your points back.',
+        'Kris Ann never owns a business.'] },
     // Step 2.11 (owner): clearer texts, and a real visa test instead of raising a flag.
     { title: '🛂 Citizenship and visas', task: true, picture: visaTest,
-      lines: ['From the first turn, everyone is a **citizen of their home country** (except the Digital Nomad).', `To enter **another player\'s citizenship country** you need a **visa**: read ${VISA_TEST_FACTS} facts about the country, answer 3 questions, **${VISA_TEST_PASS} right** to pass, then pay the **${VISA_PRICE}-point visa** to its citizen.`, 'Let\'s try: **France belongs to another player.**'],
+      lines: ['From the first turn, everyone **becomes a citizen of their home country** (the country they choose to start the game), except the **Digital Nomad, who has no citizenship**.', `To enter **another player\'s citizenship country** you need a **visa**: read ${VISA_TEST_FACTS} facts about the country, answer 3 questions, **${VISA_TEST_PASS} right** to pass, and the **${VISA_PRICE}-point visa** goes to its citizen.`, 'Let\'s try: **France belongs to another player.**'],
       after: {
         get title() { return visaRight >= VISA_TEST_PASS ? '🎉 Welcome to France!' : '⛔ No entry into France'; },
         get lines() {
           return [visaRight >= VISA_TEST_PASS
-            ? `${visaRight} of 3 right: you passed the visa test, paid the ${VISA_PRICE}-point visa to France\'s citizen and entered France.`
-            : `Only ${visaRight} of 3 right: no entry. Nothing is paid, you stay where you were, and the turn is used.`,
-          'Your own home country works the same way: **other players pay you** to enter it.'];
+            ? `${visaRight} of 3 right: you passed the visa test, your ${VISA_PRICE}-point visa went to France\'s citizen, and you entered France.`
+            : `Only ${visaRight} of 3 right: no entry. No points are spent, you stay where you were, and the turn is used.`,
+          'Your own home country works the same way: **other players\' visa points come to you** when they enter it.',
+          '**Choose your home country carefully:** a country in a key place, where many travellers pass, brings you more visas.'];
         },
         picture: visaResult } },
+    // Owner (J6): the travellers are different; read each one's bonuses and penalties before choosing.
+    { title: '🧳 Choose your traveller', picture: travellers,
+      lines: ['Every traveller is different: **Kris Ann, the Backpacker, the Business Traveler, the Luxury Traveler and the Digital Nomad** each have their own **strengths and weaknesses**.', 'Before you choose, **read each traveller\'s bonuses and penalties carefully**.'] },
     { title: '🤔 Sounds too easy?', lines: ['Here is the catch: **everything you can own, the other players can own too.**', '**Be smart about where you go and what you do!**'] },
     { title: '⏳ Don\'t waste turns', picture: revisitView, lines: ['Going back to an area you already visited gives 0 points, and the turn is gone.', 'Your turns are limited!'] },
     { title: '📱 Breaking news!', task: true, picture: protest, cls: 'event',
@@ -307,7 +395,7 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
     const buttons = el('div', { className: 'row' }, waiting ? '' : go, last ? '' : skip);
     // A map goes on the right half of the sideways screen, as big as the screen allows; the
     // text and buttons on the left (owner, 2026-10-10: the maps were too small on a phone).
-    const map = picture instanceof Element && (picture.matches('.guide-map') || picture.querySelector('.guide-map'));
+    const map = picture instanceof Element && (picture.matches('.guide-map, .trip-scene') || picture.querySelector('.guide-map, .trip-scene'));
     const body = map
       ? [el('div', { className: 'guide-split' }, el('div', { className: 'guide-text' }, ...text, buttons), el('div', { className: 'guide-pic' }, picture))]
       : [...text, picture ?? '', buttons];
