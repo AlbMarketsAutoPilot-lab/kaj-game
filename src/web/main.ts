@@ -23,7 +23,7 @@ import { countryCapital, countryFlag, SURPRISE_FACT, WONDER_NAME, WONDER_PLACE }
 import { passportBook, recordLine, recordsBox, type PassportData } from './passport.ts';
 import { COUNTRY_CODE3 } from './passport-codes.ts';
 import { addWin, loadRecords, saveRecords, type WinRecord } from './records.ts';
-import { buildGeo, colourAreas, continentBox, glowFor, innerBorders, MAP_NAME, nameLayouts, pad, propSpots, squeeze, svg, unionBox, type Box, type PropKind } from './maps.ts';
+import { areaAt, buildGeo, colourAreas, continentBox, glowFor, innerBorders, isOutlying, MAP_NAME, nameLayouts, pad, propSpots, squeeze, svg, unionBox, type Box, type PropKind } from './maps.ts';
 import { airport, busStop, carRental, citizenFlag, monument, pawn, place, port, station } from './props.ts';
 import { iconEl, iconUse, installIcons, PROFILE_COLOUR } from './icons.ts';
 import { hitchScene, tripScene, wonderScene } from './scenes.ts';
@@ -100,7 +100,7 @@ const BUSINESS_EARNS: Record<BusinessKind, string> = {
 };
 
 const app = document.getElementById('app')!;
-// The map of the game on screen (task M4): the 30-turn map (default) or the 50-turn map, set by
+// The map of the game on screen (task M4): the 30-turn map (default), the 50- or the 100-turn map, set by
 // useMap() when a game starts or a saved game continues. The drawings of each map are made once.
 // The 100-turn map's shapes (step 2.12, J3) are here, but its game is not in the setup screen until J5.
 const SHAPES: Record<string, Shapes> = { map30: shapes30, map50: shapes50, map100: shapes100 };
@@ -317,12 +317,12 @@ function renderSetup(): void {
   const kinds: SeatKind[] = ['human', 'robot', 'robot', 'robot'];
   const levels: RobotLevel[] = ['normal', 'normal', 'normal', 'normal'];
   let count = 2;
-  // The journey's length (task M4): 30 turns (default) or 50 turns. Step 2.12: 100 turns stays hidden until part J5.
+  // The journey's length (task M4): 30 turns (default), 50 turns or, since step 2.12 part J5, 100 turns.
   let turns: GameLength = SETUP_LENGTHS[0];
 
   const rows = el('div', { className: 'seats' });
   const counts = el('div', { className: 'row' });
-  const lengths = el('div', { className: 'row' });
+  const lengths = el('div', { className: 'row journey' });
   const about = el('p');
   const error = el('p', { className: 'error' });
   const draw = () => {
@@ -331,9 +331,11 @@ function renderSetup(): void {
       if (n === turns) b.className = 'chosen';
       return b;
     }));
-    about.textContent = turns === SETUP_LENGTHS[0]
-      ? `${turns} rounds around the world.`
-      : `${turns} rounds around a bigger world.`;
+    about.textContent = turns === 100
+      ? `${turns} rounds around the whole world.`
+      : turns === SETUP_LENGTHS[0]
+        ? `${turns} rounds around the world.`
+        : `${turns} rounds around a bigger world.`;
     counts.replaceChildren('Players: ', ...[2, 3, 4].map((n) => {
       const b = button(String(n), () => { count = n; draw(); });
       if (n === count) b.className = 'chosen';
@@ -919,7 +921,7 @@ function wonderPoster(s: GameState, me: Player, actions: Action[], seen: () => v
 }
 
 // Halfway and the last five turns (owner's request): one popup each per game. Rounds 16 and 26
-// of 30; 26 and 46 of 50 (task M4).
+// of 30; 26 and 46 of 50 (task M4); 51 and 96 of 100 (step 2.12 J5).
 const milestones = (total: number) => [
   { key: 'milestone-half', round: total / 2 + 1, title: '🧭 Halfway there!', text: `Half of your journey is already behind you: ${total / 2} more turns to go. Think about where you still want to go!` },
   { key: 'milestone-last', round: total - 4, title: '⏳ The last five turns!', text: 'These are the last five turns of the journey. Make them count: new areas, wonders and the continents you still need!' },
@@ -1105,7 +1107,7 @@ function playerCard(s: GameState, seat: number): HTMLElement {
 }
 
 // When the player's next event card comes: every 3rd turn begun in an area (every 5th in the
-// 50-turn game); trip turns don't count (task 12); none in the last round (and none during a
+// 50- and 100-turn games); trip turns don't count (task 12); none in the last round (and none during a
 // citizenship request).
 function nextCardText(s: GameState, p: Player): string {
   if (s.card?.seat === p.seat && s.card.round === s.round && currentPlayer(s) === p) return '🔔 Event card this turn';
@@ -2156,7 +2158,15 @@ function areaNames(d: Drawn, ids: string[], shift: (id: string) => number = () =
     if (wx < b.x || wx > b.x + b.w || y < b.y || y > b.y + b.h) return false;
     return d.paths.get(id)?.isPointInFill(new DOMPoint(wx, y)) ?? false;
   };
-  const inOther = (id: string, x: number, y: number) => [...d.paths.keys()].some((o) => o !== id && inArea(o, x, y));
+  // The other areas whose box meets a name's box (drawing units): only these can be under the name (fast).
+  const drawnIds = [...d.paths.keys()];
+  const near = (id: string, x0: number, x1: number, y0: number, y1: number) => drawnIds.filter((o) => {
+    const b = geo.get(o)!.box;
+    return o !== id && b.x <= x1 / d.k && b.x + b.w >= x0 / d.k && b.y <= y1 && b.y + b.h >= y0;
+  });
+  // The width of a line of text at size 1, measured once (step 2.12 J5: the old guess, 0.58 of the size a letter,
+  // was up to 11% short); the guess only if the page can't measure.
+  const textWidth = new Map<string, number>();
   const update = (unit: number) => {
     const fs = NAME_PX * uiZoom * unit;
     const lh = fs * 1.2;
@@ -2184,7 +2194,7 @@ function areaNames(d: Drawn, ids: string[], shift: (id: string) => number = () =
       const px = vis.x0 + ((i + 0.5) / N) * (vis.x1 - vis.x0);
       const py = vis.y0 + ((j + 0.5) / N) * (vis.y1 - vis.y0);
       const it = items.find((x) => inArea(x.id, px, py));
-      if (!it) continue;
+      if (!it || isOutlying(it.id, px / d.k)) continue; // not on a far-away part (Greenland, Hawaii)
       const m = seen.get(it.id) ?? { sx: 0, sy: 0, n: 0 };
       m.sx += px;
       m.sy += py;
@@ -2195,9 +2205,21 @@ function areaNames(d: Drawn, ids: string[], shift: (id: string) => number = () =
       let best: { x: number; y: number; lines: string[]; w: number; h: number } | undefined;
       const m = seen.get(it.id);
       const anchors: [number, number][] = [[it.x, it.y], ...(m ? [[m.sx / m.n, m.sy / m.n] as [number, number]] : [])];
+      // A line's width with the letters' outline.
+      const widthOf = (l: string) => {
+        let r = textWidth.get(l);
+        if (r === undefined) {
+          it.text.style.display = '';
+          it.text.setAttribute('font-size', '100');
+          it.text.textContent = l;
+          r = it.text.getComputedTextLength() / 100 || [...l].length * 0.58;
+          if (document.fonts.status === 'loaded') textWidth.set(l, r); // not before the game's font is ready
+        }
+        return r * fs + fs * 0.22;
+      };
       for (const [ax, ay] of anchors) for (const lines of it.layouts) {
         if (best) break;
-        const w = Math.max(...lines.map((l) => [...l].length)) * fs * 0.58;
+        const w = Math.max(...lines.map(widthOf));
         const h = lines.length * lh;
         // The middle first, then a little higher or lower, or sideways (towards the sea).
         for (const n of [0, 1, -1, 2, -2]) for (const f of [0, -0.25, 0.25, -0.5, 0.5, -0.75, 0.75]) {
@@ -2206,12 +2228,17 @@ function areaNames(d: Drawn, ids: string[], shift: (id: string) => number = () =
           const y = ay + n * lh;
           if (x - w / 2 < vis.x0 || x + w / 2 > vis.x1 || y - h / 2 < vis.y0 || y + h / 2 > vis.y1) continue;
           if (placed.some((b) => Math.abs(b.x - x) < (b.w + w) / 2 && Math.abs(b.y - y) < (b.h + h) / 2)) continue;
+          // Test points every 0.2 of a letter along each line, 5 rows (step 2.12 J5: 5 points a line missed thin land,
+          // e.g. Scotland under "Denmark & Greenland").
           const pts: [number, number][] = [];
-          for (let r = 0; r < lines.length; r++) for (const fx of [-0.5, -0.25, 0, 0.25, 0.5]) for (const fy of [-0.35, 0.35]) {
-            pts.push([x + fx * w, y - h / 2 + (r + 0.5 + fy) * lh]);
+          const steps = Math.max(4, Math.ceil(w / (fs * 0.2)));
+          for (let r = 0; r < lines.length; r++) for (let k = 0; k <= steps; k++) for (const fy of [-0.4, -0.2, 0, 0.2, 0.4]) {
+            pts.push([x - w / 2 + (k / steps) * w, y - h / 2 + (r + 0.5 + fy) * lh]);
           }
-          if (pts.some(([px, py]) => inOther(it.id, px, py))) continue; // never over another area
-          if (!pts.some(([px, py]) => inArea(it.id, px, py))) continue; // always on its own area too
+          const others = near(it.id, x - w / 2, x + w / 2, y - h / 2, y + h / 2);
+          if (others.length && pts.some(([px, py]) => others.some((o) => inArea(o, px, py)))) continue; // never over another area
+          // Always on its own area too, on its main part (never only on Greenland or Hawaii).
+          if (!pts.some(([px, py]) => inArea(it.id, px, py) && !isOutlying(it.id, px / d.k))) continue;
           best = { x, y, lines, w, h };
         }
       }
@@ -2384,6 +2411,17 @@ function renderAreaView(s: GameState, isRobot: boolean): HTMLElement {
       x = Math.min(Math.max(cx * k + dx * out, v.x + w / 2), v.x + v.width - w / 2);
       y = Math.min(Math.max(cy + dy * out, v.y + h / 2), v.y + v.height - h / 2);
       if (!overlapsPlaced(x, y, w, h)) break;
+    }
+    // Owner (step 2.12 J5, all 3 maps): a badge that covers another one, or sits on another area (the 100-turn
+    // map's small areas), moves towards its own area's centre until it sits inside it and is free.
+    const own = (bx: number, by: number) => [bx - w * 0.4, bx, bx + w * 0.4].every((px) => areaAt(geo, px / k, by) === id);
+    if (overlapsPlaced(x, y, w, h) || !own(x, y)) {
+      const [tx, ty] = geo.get(id)!.centre;
+      for (let i = 1; i <= 20; i++) {
+        const nx = Math.min(Math.max(x + ((tx * k - x) * i) / 20, v.x + w / 2), v.x + v.width - w / 2);
+        const ny = Math.min(Math.max(y + ((ty - y) * i) / 20, v.y + h / 2), v.y + v.height - h / 2);
+        if (own(nx, ny) && !overlapsPlaced(nx, ny, w, h)) { x = nx; y = ny; break; }
+      }
     }
     placed.push({ x, y, w, h });
     return [x, y];
@@ -2696,8 +2734,9 @@ function citizenshipAreasOf(id: string): string[] {
 // businesses, routes, citizenship, visits.
 // The countries of an area: a flag and a capital only when the data has them (the area details
 // and the end-of-turn popup).
+// Greenland is not a country (owner, step 2.12 J5): its land stays in its area, but no row names it.
 function countryRows(a: Area): HTMLElement[] {
-  return (a.countries ?? []).map((c) => {
+  return (a.countries ?? []).filter((c) => c !== 'Greenland').map((c) => {
     const code = countryFlag(c);
     const cap = countryCapital(c);
     return el('div', { className: 'country' },

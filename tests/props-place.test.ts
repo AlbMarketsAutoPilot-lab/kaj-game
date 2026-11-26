@@ -3,9 +3,11 @@ import { test } from 'node:test';
 import type { GameMap } from '../src/engine/types.ts';
 import { map30 } from '../src/maps/map30.ts';
 import { map50 } from '../src/maps/map50.ts';
+import { map100 } from '../src/maps/map100.ts';
 import type { Shapes } from '../src/maps/shapes.ts';
 import { shapes30 } from '../src/maps/shapes30.ts';
 import { shapes50 } from '../src/maps/shapes50.ts';
+import { shapes100 } from '../src/maps/shapes100.ts';
 import { areaAt, buildGeo, pad, propSpots, squeeze, type PropKind } from '../src/web/maps.ts';
 
 // Owner (M5): a drawn port, airport, station, bus stop or wonder never sits over another area
@@ -37,4 +39,9 @@ test('30-turn map: no drawn prop sits over another area', () => {
 
 test('50-turn map: no drawn prop sits over another area (Portugal\'s port, the UK\'s port)', () => {
   assert.deepEqual(overOthers(map50, shapes50), []);
+});
+
+// Step 2.12 part J5: the 100-turn map, which waited for its screens.
+test('100-turn map: no drawn prop sits over another area', () => {
+  assert.deepEqual(overOthers(map100, shapes100), []);
 });

@@ -1169,7 +1169,8 @@ it is never cut at the edge of the map or under a walk badge or drawn icon (such
 may take **2 or 3 lines**, split after "," or "&"; if it still doesn't fit, **North, South, West, East become N., S., W.,
 E.** (`nameLayouts`). **Map names** (drawing only; the engine and every other screen keep the area's name): on the
 100-turn map Serbia, Kosovo & North Macedonia is drawn as "Central Balkans" and Somalia as "Horn of Africa" (`MAP_NAME`).
-No rule, balance or save change. Tests: `tests/map-names.test.ts`.
+No rule, balance or save change. Tests: `tests/map-names.test.ts`. Stricter test and no names on Greenland or Hawaii
+since step 2.12 J5 ("The 100-turn screens").
 
 ## Big countries and area colours on the maps (step 2.12b, owner-approved 2026-11-25; screens only)
 
@@ -1186,6 +1187,38 @@ All 3 maps (`colourAreas` and `buildGeo` in `src/web/maps.ts`, drawing in `drawM
   over the gold line, so both show. On the game's maps and in the guide (Canada in 3 parts); not on the continent picker.
 - The colours are made in advance with the pawn spots (`node scripts/map-centres.ts` writes `src/maps/colours.ts`), so the
   phone doesn't compute them at the start. Tests: `tests/colours.test.ts`. No rule, balance or save change.
+
+## The 100-turn screens (version 2.0, step 2.12 part J5, owner-approved 2026-11-26)
+
+Screens only: no rule, balance or save change; the robot games and the balance lab are not affected (not run). The map
+stays as approved in J1 except the one name below (owner, 2026-11-26).
+
+- **Session 1:** records get a "100 turns" tab; Angkor Wat on the 100-turn map (`cambodia`) uses the existing drawing.
+  Denmark's zoom leaves Greenland out (`OUTLYING` in `src/web/maps.ts`; pawn spot remade, map30 and map50 identical).
+  Walk badges on all 3 maps move towards their own area when they overlap another badge or sit on another area
+  (`badgeSpot` in `src/web/main.ts`; script check at 667x375: wrong-area badges 30 turns 33 → 6, 50 turns 53 → 13,
+  100 turns 101 → 23; overlaps 1 → 0, 1 → 0, 9 → 2; the owner accepted the ones left, e.g. Austria's badge on Germany in
+  the Switzerland view). New props test for the 100-turn map (`tests/props-place.test.ts`).
+- **Session 2, setup:** `SETUP_LENGTHS` = 30, 50, 100; the setup text for 100 turns is "100 rounds around the whole
+  world." (30 and 50 keep theirs). The three Journey buttons have less side padding (`.journey` in `web/style.css`) so
+  they fit on one line at every screen size (before: "100 turns" took a second line at 667x375, 1280x720, 1920x1080).
+- **Denmark (owner):** Greenland is not a country. The area `denmark` is named **"Denmark"** (was "Denmark & Greenland";
+  `scripts/map100-review.ts` remade `src/maps/map100.ts` and `docs/map100.md`; only the name changed, the id stays, so
+  saves and robots are the same). Greenland's land stays in its area (as Scotland in the United Kingdom); the area
+  details and the end-of-turn popup no longer list a "Greenland" row (all 3 maps; `countryRows`).
+- **Area names (all 3 maps, `areaNames`):** a name is never over another area. The test points are now every 0.2 of a
+  letter along each line in 5 rows (before: 5 points a line, which missed thin land, e.g. Scotland under "Denmark &
+  Greenland"), with the real width of the text (measured once; the old guess was up to 11% short). Only areas whose box
+  meets the name are tested (fast). A name never goes on an area's far-away part (Greenland, Hawaii: `isOutlying`); it
+  sits on the main part or is hidden. Script check on the home maps of every continent, 3 maps, 4 sizes: names over
+  another area 40 → 1 (a thin edge of India under "Indochina", 30 turns, 900x430); a few names that touched a neighbour
+  are now hidden. Speed (CPU slowed 6×): a drag or pinch step on the area view as before; opening a continent about
+  twice as long (about 1.4 s against 0.6 s slowed, about 0.25 s against 0.1 s at normal speed).
+- **Final check (script):** a 100-turn game started from the setup screen and played 3 rounds at 667x375, 900x430,
+  1280x720 and 1920x1080 (setup, continent picker, the 6 home maps, area view, world map); no page error.
+- **App:** the Play Store app needs a new signed build with the new `index.html` in step 2.13 (versionCode raised with
+  the owner's OK).
+- Tests: `tests/map100.test.ts` checks `SETUP_LENGTHS` = 30, 50, 100. 262 tests pass; the web build works.
 
 ## Project setup
 

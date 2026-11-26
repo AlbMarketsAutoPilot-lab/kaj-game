@@ -4,10 +4,10 @@ import type { BusinessKind, Continent, Profile, RouteKind } from './types.ts';
 export const TOTAL_ROUNDS = 30;
 
 // The game lengths (task M2), the first one by default. Step 2.12 (part J2): 100 turns, on its own map (map100).
-// The setup screen shows only SETUP_LENGTHS until step 2.12 part J5 (the 100-turn screens).
+// The setup screen shows SETUP_LENGTHS: all three since step 2.12 part J5 (the 100-turn screens).
 export const GAME_LENGTHS = [30, 50, 100] as const;
 export type GameLength = (typeof GAME_LENGTHS)[number];
-export const SETUP_LENGTHS: readonly GameLength[] = [30, 50];
+export const SETUP_LENGTHS: readonly GameLength[] = [30, 50, 100];
 
 export const MIN_SEATS = 2;
 export const MAX_SEATS = 4;

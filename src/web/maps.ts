@@ -29,8 +29,12 @@ export interface AreaGeo {
 // Greenland in Scandinavia, Hawaii in USA West (Alaska is its own area since task 14b). x = longitude.
 const OUTLYING: Record<string, (x: number) => boolean> = {
   scandinavia: (x) => x < -11,
+  denmark: (x) => x < -11, // 100-turn map (step 2.12 J5): Greenland, as for Scandinavia on the 50-turn map
   'usa-west': (x) => x < -129,
 };
+
+// Is a point (longitude) on an area's far-away part? The map names never go there (owner, step 2.12 J5).
+export const isOutlying = (id: string, x: number): boolean => OUTLYING[id]?.(x) ?? false;
 
 export function svg<K extends keyof SVGElementTagNameMap>(tag: K, attrs: Record<string, string | number> = {}, ...children: (Node | string)[]): SVGElementTagNameMap[K] {
   const node = document.createElementNS(SVG, tag);

@@ -15,7 +15,7 @@ export interface WinRecord {
   players: number;
   date: string; // YYYY-MM-DD, the day the game ended
 }
-export type Records = Record<string, WinRecord[]>; // by game length: '30', '50'
+export type Records = Record<string, WinRecord[]>; // by game length: '30', '50', '100'
 
 // Better first: more points, then more areas. Equal records keep their order (older first).
 const better = (a: WinRecord, b: WinRecord) => b.points - a.points || b.areas - a.areas;

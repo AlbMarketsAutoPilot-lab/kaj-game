@@ -162,7 +162,7 @@ export function recordsBox(records: Records, turns: number, fresh: { turns: numb
     });
     card.replaceChildren(
       el('h2', { className: 'big-title', textContent: '🏆 Records on this device' }),
-      el('div', { className: 'pp-tabs' }, tab('30'), tab('50')),
+      el('div', { className: 'pp-tabs' }, tab('30'), tab('50'), tab('100')),
       list.length
         ? el('table', {}, el('tr', {}, ...['', 'Points', 'Winner', 'Areas', 'Players', 'Date'].map((h) => el('th', { textContent: h }))), ...rows)
         : el('p', { textContent: `No wins in ${shown}-turn games yet.` }),

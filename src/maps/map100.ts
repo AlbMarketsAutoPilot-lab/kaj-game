@@ -27,7 +27,7 @@ const AREAS: AreaInfo[] = [
   { id: "italy", name: "Italy", continent: "Europe", inside: ["italy"], neighbours: ["france","austria","switzerland","slovenia-croatia"], countries: ["Italy","San Marino","Vatican City","Malta"], wonder: true },
   { id: "norway", name: "Norway", continent: "Europe", inside: ["scandinavia"], neighbours: ["finland","sweden","russia-west"], countries: ["Norway"] },
   { id: "sweden", name: "Sweden", continent: "Europe", inside: ["scandinavia"], neighbours: ["norway","finland","denmark"], countries: ["Sweden"] },
-  { id: "denmark", name: "Denmark & Greenland", continent: "Europe", inside: ["scandinavia"], neighbours: ["germany","sweden"], countries: ["Denmark","Greenland"] },
+  { id: "denmark", name: "Denmark", continent: "Europe", inside: ["scandinavia"], neighbours: ["germany","sweden"], countries: ["Denmark","Greenland"] },
   { id: "finland", name: "Finland", continent: "Europe", inside: ["finland"], neighbours: ["norway","sweden","russia-west"], countries: ["Finland"] },
   { id: "iceland", name: "Iceland", continent: "Europe", inside: ["iceland"], neighbours: [], countries: ["Iceland"] },
   { id: "poland", name: "Poland", continent: "Europe", inside: ["poland"], neighbours: ["germany","belarus","czechia","baltics","slovakia","ukraine","russia-west"], countries: ["Poland"] },

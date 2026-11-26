@@ -112,6 +112,8 @@ button.big { font-size: 1.3rem; padding: 10px 34px; font-family: "Cinzel", Georg
 .legal .date { color: var(--muted); }
 .legal p, .legal li { overflow-wrap: anywhere; }
 button.chosen { background: var(--accent); color: #1c2b2b; font-weight: 700; }
+/* Step 2.12 J5: the three journey lengths (30, 50, 100 turns) fit on one line. */
+.journey button { padding-left: 10px; padding-right: 10px; }
 .setup { margin: calc(4 * var(--vh)) auto 0; }
 
 /* Landscape only (owner's decision, task 14 A1); Android is locked, a browser shows this.
