@@ -98,7 +98,7 @@ Every task also adds its part to the test board, so there is **always a playable
 | 2.9 | More wonders, history and curiosity for each, new design | medium | 2 | — | ⛔ stopped (owner, 2026-11-20): no new wonders; Petra and Angkor Wat (30 turns) and Victoria Falls (50 turns) measured 30 → 22 of 32 at 1,600 games per line; history and curiosity of the 11 wonders kept for later |
 | 2.10 | Passport with stamps, records on the device | medium | 1–2 | — | ✅ done (owner-approved design, 2026-11-20): end popup in two columns (only winners cheered, new-record line, a passport button per person, Play again and Records, no Leave); passport cover with the citizenship and flag, data page, stamps 6 a page; records top 10 by points per game length; screens only, save stays 20 |
 | 2.11 | Kris Ann, a 5th profile (the Explorer of `docs/profiles8.md`), her 8 cards with the owner's pictures | **high** | 1 | — | ✅ done (owner's final decisions, 2026-11-21): +3 per big country, bus, no business, plane 4, card mix TG with "lose a turn" half as often, her 8 cards (none twice a game, shown to everyone), robots take her first; 34 of 40 fair (old 26 of 32, Kris Ann 8 of 8) at 1,600 games per line (before 30 of 32); saves v21 |
-| 2.12 | 100-turn map in this app (J1 plan high, J2 engine high, J3–J6 medium) | **high** / medium | ~10 | — | J1 ✅ done (owner's final decisions, 2026-11-22): 126 areas (`docs/map100.md`), big countries and the 11 wonders as on the 50-turn map, 25 routes in the 2.4 style; 100 turns: cards every 5, own mix, catch-up ×3 (F3-2, 16 of 20 at 3,200 games per line); 30 and 50 turns adopt catch-up ×1 (K1-3, 32 of 40 on new games, as today, more exciting); saves v22 in J2. J2 ✅ done (2026-11-22): map100 in the engine (hidden in the setup until J5), the three card mixes, catch-up on every map, lab options, saves v22; the built game measures exactly as J1 (33 of 40, 16 of 20). J3 ✅ done (2026-11-25): shapes of the 126 areas (`src/maps/shapes100.ts`), every country found, all areas drawn, pawn spots, `SHAPES` in the screens (still hidden in the setup). The map stays exactly as in J1 (owner, 2026-11-25). Next: J4 facts (medium) |
+| 2.12 | 100-turn map in this app (J1 plan high, J2 engine high, J3–J6 medium) | **high** / medium | ~10 | — | J1 ✅ done (owner's final decisions, 2026-11-22): 126 areas (`docs/map100.md`), big countries and the 11 wonders as on the 50-turn map, 25 routes in the 2.4 style; 100 turns: cards every 5, own mix, catch-up ×3 (F3-2, 16 of 20 at 3,200 games per line); 30 and 50 turns adopt catch-up ×1 (K1-3, 32 of 40 on new games, as today, more exciting); saves v22 in J2. J2 ✅ done (2026-11-22): map100 in the engine (hidden in the setup until J5), the three card mixes, catch-up on every map, lab options, saves v22; the built game measures exactly as J1 (33 of 40, 16 of 20). J3 ✅ done (2026-11-25): shapes of the 126 areas (`src/maps/shapes100.ts`), every country found, all areas drawn, pawn spots, `SHAPES` in the screens (still hidden in the setup). The map stays exactly as in J1 (owner, 2026-11-25). J4 ✅ done (2026-11-25, 2 sessions): every area 12 facts and 2 test facts; 480 new facts (53% geography) and 71 test facts for the owner to check (`docs/facts/new100-1.md`, `new100-2.md`); questions asked 35–38% geography. Next: 2.12c (visa test with challenges, notebook), then J5 screens |
 | 2.12b | Big countries look like one country on the 30-, 50- and 100-turn maps (owner, 2026-11-25): one colour for all parts, never the colour of a neighbour (also across the sea, e.g. Madagascar; New Zealand and Australia East on the 50-turn map), thin dashed borders between the parts | medium | 1 | — || ✅ done (owner-approved, 2026-11-25): one colour per big country, dashed borders inside it; no shared colour with an area touching, linked by a route or within 500 km across the sea; 10 colours (teal and light green added); screens only (`docs/engine.md`, step 2.12b) |
 | 2.13 | Full test games, release 2.0 (web on kaj.kritere.com and app) | medium | 1–2 | — | |
 
@@ -908,6 +908,27 @@ engine (high, 2), J3 shapes, J4 facts (2), J5 screens (2), J6 test games (2), me
   - **Owner (2026-11-25), screens only:** the end-of-turn popup lists the area's countries with flags and capitals (pull
     request #91); area names on all 3 maps may stick out over sea, take 2 or 3 lines, shorten North/South/West/East, and the
     100-turn map draws "Central Balkans" and "Horn of Africa" as map names only (`docs/engine.md`, "Area names on the maps").
+
+  - **J4 plan (owner-approved, 2026-11-25):** facts sorted by country, new facts up to 12 per area; test facts **A** (2 per
+    area, new ones where the sort leaves fewer); geography about 35–40%, never dominating. Two sessions, each ending playable.
+    Details in `docs/engine.md`, step 2.12 part J4.
+  - **J4 session 1 done (2026-11-25):** `src/facts/sort100.ts` (all 29 split 50-turn areas), `src/facts/new100.ts` Europe 153
+    and Asia 112 facts (51% geography) and 40 test facts, tags, review pages (`node scripts/facts100-review.ts`). Africa and
+    the Americas still borrow until session 2. 260 tests pass; the web build works.
+  - **J4 session 2 done (2026-11-25):** Africa 156, North America 48, South America 11 facts (54% geography) and 31 test
+    facts (`docs/facts/new100-2.md`); no area borrows (tests: exactly 12 and 2 everywhere, no fact twice);
+    `scripts/geo-count.ts` also counts the 100-turn map: 35% (2 players) and 38% (4 players) geography. 260 tests pass; the
+    web build works. Lab run of the 100-turn lines (owner-approved): identical to J2 on every line, 16 of 20.
+  - **Owner (2026-11-25): the citizenship and visa test is too repetitive** (it draws only from the area's 12 facts and 2–3
+    test facts). **2.12c, owner-approved (2026-11-25), one medium session after J4 session 2:**
+    - the visa test also uses the challenges about the area's countries (capital, continent, neighbour, bigger, currency;
+      not flags), each with a study line made from its answer ("The capital of Spain is Madrid."); measure geography with
+      geo-count (if over 35–40%, challenges less often, as in the airline quiz); all 3 maps; no rule or save change;
+    - **the notebook** (screens only): the facts before the visa test shown as a notebook page in the popup: cream lined
+      paper, red margin line, spiral rings on top; handwriting-style title "Study notes for your visa: <area>" with a
+      tilted red "VISA TEST" stamp; numbered notes in the normal game font; at the bottom "3 questions · 15 seconds each ·
+      2 right to pass" and "📖 I'm ready"; the page slides open once (no endless animation, step 2.2); fits every screen
+      size (14l); styles only, no picture files. Screenshots for the owner before committing.
 
 **2.13 (release) Release (medium, 1–2).** Full test games (2–4 players, all lengths), web at kaj.kritere.com and app.
 

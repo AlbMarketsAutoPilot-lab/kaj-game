@@ -10,7 +10,16 @@ import type { GameState } from '../src/engine/types.ts';
 import { mapById, mapFor } from '../src/maps/index.ts';
 import { map50 } from '../src/maps/map50.ts';
 import { map100 } from '../src/maps/map100.ts';
+import { factId } from '../src/engine/quiz.ts';
+import { FACTS_100_NEW } from '../src/facts/new100.ts';
+import { EXAM_SORT_100, SORT_100 } from '../src/facts/sort100.ts';
+import { FACT_TYPES } from '../src/facts/tags.ts';
+import { readFileSync } from 'node:fs';
 import { seats, startTriples } from './helpers.ts';
+
+// Each area's 50-turn area(s) (`inside`, not kept in the built map): read from the made file.
+const SORT_INSIDE = new Map([...readFileSync(new URL('../src/maps/map100.ts', import.meta.url), 'utf8')
+  .matchAll(/id: "([^"]+)".*?inside: (\[[^\]]*\])/g)].map((m) => [m[1], JSON.parse(m[2]) as string[]]));
 
 // The 100-turn map (step 2.12, part J2): made by scripts/map100-review.ts from the owner-approved plan (docs/map100.md).
 
@@ -83,12 +92,33 @@ test('100-turn map: 3 start citizenships cut some area off in 1,084 of 109,567 s
   assert.deepEqual(startTriples(map100), { sets: 109567, traps: 1084 });
 });
 
-test('until part J4: each area borrows the facts and exam facts of its 50-turn area(s), in parent order', () => {
-  for (const a of areas) assert.ok((map100.facts?.[a.id] ?? []).length >= 12, a.id);
+// Step 2.12 part J4: the facts of the 100-turn map.
+
+test('J4: the sort lists every fact of each split 50-turn area, to areas that lie inside it', () => {
+  const inside = (id: string, p: string) => SORT_INSIDE.get(id)?.includes(p);
+  for (const [sort, from] of [[SORT_100, map50.facts!], [EXAM_SORT_100, map50.examFacts!]] as const) {
+    for (const [p, list] of Object.entries(sort)) {
+      assert.equal(list.length, from[p].length, p);
+      for (const to of list.flatMap((s) => s.split('+'))) if (to !== '-') assert.ok(inside(to, p), `${p} → ${to}`);
+    }
+  }
+});
+
+test('J4: every area has exactly 12 facts and 2 test facts, no fact twice in an area, every fact typed', () => {
+  for (const a of areas) {
+    const facts = map100.facts?.[a.id] ?? [];
+    const exam = map100.examFacts?.[a.id] ?? [];
+    for (const f of [...facts, ...exam]) assert.ok(FACT_TYPES[factId(f)], `no type: ${a.id} ${f.question}`);
+    for (const f of exam) assert.equal(FACT_TYPES[factId(f)], 'geography', `${a.id} ${f.question}`);
+    assert.equal(facts.length, 12, a.id);
+    assert.equal(exam.length, 2, a.id);
+    const ids = [...facts, ...exam].map(factId);
+    assert.equal(new Set(ids).size, ids.length, a.id);
+  }
+  // The same place as on the 50-turn map: the same facts. A split area: its sorted facts first, then its new ones.
   assert.deepEqual(map100.facts!.france, map50.facts!.france);
-  assert.deepEqual(map100.facts!.uk, map50.facts!['uk-ireland']);
-  assert.deepEqual(map100.facts!['uganda-rwanda-burundi'], [...map50.facts!['kenya-uganda'], ...map50.facts!.tanzania]);
-  assert.deepEqual(map100.examFacts!['uganda-rwanda-burundi'], [...(map50.examFacts!['kenya-uganda'] ?? []), ...(map50.examFacts!.tanzania ?? [])]);
+  assert.deepEqual(map100.examFacts!.france, map50.examFacts!.france);
+  assert.deepEqual(map100.facts!.uk, [...map50.facts!['uk-ireland'].filter((_, i) => SORT_100['uk-ireland'][i] === 'uk'), ...FACTS_100_NEW.uk]);
 });
 
 test('businesses: 11 guided tours, 17 airlines, 23 ferries, 3 train booths, 1 bus booth, 1 car rental', () => {

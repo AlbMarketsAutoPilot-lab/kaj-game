@@ -1103,6 +1103,39 @@ No rule, balance, save or screen change; the 100-turn game stays out of the setu
   and China West – Myanmar; the 7 islands with no walk touch no area); `tests/centres.test.ts` checks the 3 maps. The
   "no drawn prop over another area" check for the 100-turn map waits for part J5 (owner).
 
+## The 100-turn map facts (version 2.0, step 2.12 part J4, owner-approved plan 2026-11-25)
+
+No rule, balance, save or screen change; the 100-turn game stays out of the setup screen until part J5. Two sessions, both done.
+
+- **Owner's decisions:** the plan as proposed; test facts **A** (every area gets 2 test-only geography facts); geography
+  about **35–40%** of what a player sees, never dominating (as in step 2.3; the new facts are about half geography).
+- **Facts (`src/maps/map100.ts`, made by `node scripts/map100-review.ts`):** the 55 areas that are the same place as on the
+  50-turn map keep their 12 facts and 2 test facts. The 71 other areas take the facts of their 50-turn area(s) sorted by
+  country (`src/facts/sort100.ts`, `SORT_100` and `EXAM_SORT_100`, sorted by Claude fact by fact; a fact about several
+  parts goes to each, joined with "+"; "-" leaves out a fact that repeats another in the same area: Ganvié, Gulf of
+  Guinea 8), then new facts (`src/facts/new100.ts`, `FACTS_100_NEW` and `GEO_EXAM_100_NEW`) up to 12 and 2. Needed after the
+  sort: **480 new facts** (Europe 153, Asia 112, Africa 156, North America 48, South America 11; the sort saved 24, not the
+  10% of the plan) and **71 new test facts** (Europe 23, Asia 17, Africa 24, North America 5, South America 2). Every new fact
+  has its type in `src/facts/tags.ts`; every test fact is geography.
+- **Review pages** (`node scripts/facts100-review.ts`): `docs/facts/new100-1.md` (Europe and Asia), `docs/facts/new100-2.md`
+  (Africa and the Americas), `docs/facts/sort100.md` (where each 50-turn fact went).
+- **Session 1 (2026-11-25):** the whole sort; Europe and Asia written: 265 facts (136 geography, 51%) and 40 test facts, to
+  be checked by the owner. Until session 2, an area with fewer than 12 facts or 2 test facts (Africa and the Americas) still
+  borrows all the facts of its 50-turn area(s), as in J2. Tests (`tests/map100.test.ts`): the sort covers every fact of
+  each split area and sends it only to areas inside it; every area has at least 12 facts and 2 test facts, every fact a type,
+  every test fact geography; Europe and Asia exactly 12 and 2 with no fact twice. Replaces J2's borrowing test. 260 tests
+  pass; the web build works (5,084 KB).
+- **Session 2 (2026-11-25):** Africa 156, North America 48, South America 11 facts (215, 117 geography, 54%) and 31 test
+  facts, to be checked by the owner (`docs/facts/new100-2.md`). No area borrows any more: every area has exactly 12 facts
+  and 2 test facts, no fact twice in an area (this also ends J2's repeats in Uganda, Rwanda & Burundi). In all, 480 new
+  facts (253 geography, 53%) and 71 test facts. `docs/map100.md` notes the result. Tests: every area exactly 12 and 2.
+- **Geography (`node scripts/geo-count.ts`, now also the 100-turn map, 200 games per line):** 100-turn map facts 39%
+  geography (1,512 facts, 1,445 different); questions asked **35% (2 players), 38% (4 players)**, inside the owner's
+  35–40%. 30 turns 35% / 38%, 50 turns 36% / 38% (unchanged maps).
+- **Robot games:** robots answer at a fixed rate whatever the question, so new facts change only which question is drawn;
+  the 30- and 50-turn games are unchanged. Lab run of the 100-turn lines (owner-approved, games 1–3,200 per line): **identical to
+  J2 on every line**, 16 of 20 (`docs/balance-lab.md`, step 2.12 J4). 260 tests pass; the web build works (5,118 KB).
+
 ## Area names on the maps (owner, 2026-11-25; screens only)
 
 On the area view and the home-country map of all 3 maps (`areaNames` in `src/web/main.ts`; helpers in `src/web/maps.ts`):

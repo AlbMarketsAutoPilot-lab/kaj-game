@@ -1,7 +1,7 @@
 // How much geography a player sees (version 2.0, step 2.3). Run: node scripts/geo-count.ts [games per line, default 200]
 //
 // 1. Facts per type on each map (from src/facts/tags.ts; challenges are all geography).
-// 2. Robot games (normal robots, 2 and 4 players, both maps): every question actually asked, by screen
+// 2. Robot games (normal robots, 2 and 4 players, the 30-, 50- and 100-turn maps; 100 added in step 2.12 J4): every question actually asked, by screen
 //    (airline quiz, visa test, travel challenge), with the question rotation of step 2.1.
 //    The 6 study lines of the visa test are counted apart (they are read, not answered).
 import { apply, createGame } from '../src/engine/engine.ts';
@@ -74,7 +74,7 @@ function play(map: GameMap, players: number, seed: number, tally: Tally) {
   }
 }
 
-for (const turns of [30, 50] as GameLength[]) {
+for (const turns of [30, 50, 100] as GameLength[]) {
   const map = mapFor(turns);
   console.log(`\n${turns}-turn map: ${factCount(map)}`);
   for (const players of [2, 4]) {

@@ -918,3 +918,12 @@ trips. Averages: boredom 25.1%, lead changes 10.52, won by 3 or less 50.2%.
 
 Go home 40–138 per line (after 3 turns without money 0); blocked turns 0–75; longest blocked streak 2; failed visa tests
 15.4–16.0%; draws 0. Time on this machine (4 cores): 11 minutes (30 and 50 turns), 26 minutes (100 turns).
+
+## Step 2.12, part J4 (2026-11-25): the 100-turn facts change nothing in robot games
+
+After J4 (every 100-turn area with its own 12 facts and 2 test-only geography facts), the 4 lines of the 100-turn game
+were measured again (owner-approved): `lab2.ts J4 3200 --lines=100`, games 1–3,200 per line, the same seeds as J2.
+**Every line is identical to J2**: 16 of 20 (old profiles 12 of 16, Kris Ann 4 of 4), the same win shares, average scores,
+boredom (24–26%), lead changes (8.6–12.4), won by 3 or less (44–55%), go home, blocked turns and failed visa tests
+(15.4–16.0%). Robots answer at a fixed rate whatever the question, so which fact is drawn does not change their games.
+The 30- and 50-turn maps were not run (their facts did not change).
