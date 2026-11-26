@@ -939,3 +939,13 @@ edge of the target (30 turns, 2 players, normal: Business 59% → 61% ❌; 50 tu
 50 turns, 4 players, normal: Business 19% → 20% ✅; 100 turns, 4 players: Backpacker 20% ✅, Nomad 31% → 30% ✅).
 Boredom 22–32% and 24–26%, lead changes 4.0–7.4 and 8.7–12.3, won by 3 or less 37–49% and 44–55%: the same as J2. Failed
 visa tests 14.8–16.2% (J2 15.1–16.1%); longest blocked streak 2, once 3 on 100 turns.
+
+## Step 2.12 J6 (2026-11-26): the owner's route changes, measured and taken back
+
+The owner's new routes were measured (owner-approved) with `lab2.ts J6 3200` and `lab2.ts J6-100 3200 --lines=100`, games
+1–3,200 per line, the same seeds as J2. 30 and 50 turns, with only Alaska ✈️ USA East instead of USA West: **29 of 40**
+(2.12c: 34; old profiles 21 of 32, Kris Ann 8 of 8); the misses were mostly 2 players and 50 turns (Business 65–71%, Nomad
+and Luxury 30–35% with planning robots). 100 turns, with 11 more route changes (22 airports, 16 ports, 26 routes): **12 of
+20** (2.12c: 18; old profiles 9 of 16, Kris Ann 3 of 4). Boredom 21–30% and 22–26%, lead changes 4.0–7.2 and 8.9–12.1, won
+by 3 or less 35–46% and 45–54%: about the same as 2.12c. The owner took every route change back, so the 2.12c numbers stand
+(the lab was not run again).

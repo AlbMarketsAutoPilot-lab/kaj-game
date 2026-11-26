@@ -1220,6 +1220,40 @@ stays as approved in J1 except the one name below (owner, 2026-11-26).
   the owner's OK).
 - Tests: `tests/map100.test.ts` checks `SETUP_LENGTHS` = 30, 50, 100. 262 tests pass; the web build works.
 
+## The 100-turn test games (version 2.0, step 2.12 part J6, owner-approved 2026-11-26)
+
+**Test games by script (session 1).** Full 100-turn games in the web build, played by a Playwright script (kept outside the
+project): one scripted person and robots, 2, 3 and 4 players, all 5 profiles, all 6 start continents, a save and
+Continue mid-game, to the end popup, passport and records. Cards came every 5th land turn (318 of 318 expected, none in
+round 100), "Halfway" at round 51 and "The last five turns" at 96, Continue gave the same save. Screenshots at 667x375,
+900x430, 1280x720 and 1920x1080 of 38 screens (trips by plane, ship, train, bus and car, hitchhiking, the visa notebook
+and questions, arrivals in big-country parts and in a 4-country area, wonders, businesses, cards, the end popup, passport,
+records): no layout problem found by the script or by eye. Three fixes (screens only, all 3 maps, owner-approved):
+- **One question clock at a time** (`startCountdown`): a question that opened in the 2 seconds after a popup was closed
+  was drawn twice (in the popup and, during the pause, in the side panel), which started two 15-second clocks; only one
+  was stopped, and the other gave its time-out answer 4 times a second for the rest of the game (page errors; a later
+  question of the same kind would have been answered by it). Old code (in the release 1.0.2 too); found because the script
+  taps faster than people. Reproduced with a real clock; after the fix: never two clocks, no errors, and an unanswered
+  question still times out once ("Wrong answer").
+- **Continue** marks "Halfway" and "The last five turns" as shown when their round has passed (they came again after
+  Continue).
+- The ship quiz says "**Ferry** promotion" (was "Airline promotion … sail free").
+
+**Route changes tried and taken back (owner, 2026-11-26, high effort).** From the owner's test games: the Alaska flight goes
+to USA West on all 3 maps because the step 2.4 route list says "plane: Alaska–USA West" (`docs/work-plan.md`, 2.4 (D); the
+ship of task 14b went to USA West too). The owner's new routes were built and measured, then taken back (owner's choice C):
+- **Tried:** Alaska ✈️ USA East on all 3 maps; on 100 turns also USA East ✈️ Caribbean, Papua New Guinea ⛴️ Horn of Africa
+  and ⛴️ Caribbean (a line through the Panama Canal), Indonesia ✈️ Philippines, Philippines ✈️ Japan, Korea ✈️ Mongolia,
+  Sri Lanka ✈️ India and ✈️ Malaysia, Ireland ✈️ France (22 airports, 16 ports, 26 routes; stuck-state checker passed; traps
+  37 of 6,786 pairs and 795 of 109,567 start sets), save version 23.
+- **Lab (owner-approved, `lab2.ts J6 3200` and `lab2.ts J6-100 3200 --lines=100`, the same seeds as J2):** 30 and 50 turns
+  with Alaska ✈️ USA East **29 of 40** (2.12c: 34; old profiles 21 of 32, Kris Ann 8 of 8); 100 turns **12 of 20** (2.12c: 18;
+  old profiles 9 of 16, Kris Ann 3 of 4); boredom and excitement about the same.
+- **Taken back:** first the 30- and 50-turn Alaska flight, then (owner's choice C) every route change on the 100-turn map
+  and the save version. The maps, routes, colours, saves (version 22) and the robot games are exactly as before J6; the
+  balance numbers of 2.12c stand. Only the three screen fixes above stay.
+- Tests: 262 pass; the web build works.
+
 ## Project setup
 
 - TypeScript, run directly by Node 22.18 or newer (no build step for tests).
