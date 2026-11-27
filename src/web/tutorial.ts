@@ -45,16 +45,24 @@ interface Step {
 const START_POINTS = 10;
 const PROTEST_LOSS = 2;
 const ME = '#2e86de';
+// Audit 2.13: your flag on the airport in gold (blue on blue UK & Ireland could hardly be seen).
+const FLAG = '#f3c623';
 const WALK_MS = 1500; // the pawn's walk, as in the game
 
-export function runGuide(kit: GuideKit, onDone: () => void): void {
+// `doneLabel`: the last slide's button (audit 2.13: "How to play" goes back to the start, not into a game).
+export function runGuide(kit: GuideKit, onDone: () => void, doneLabel = '▶ Start my first game'): void {
   const { app, geo, areaColour, el, button } = kit;
   let points = START_POINTS;
+  // Audit 2.13: the guide's own timer (the first walk); cancelled when the guide closes, so it can't come back.
+  let closed = false;
+  let walkTimer = 0;
   let index = 0;
   let solved = false;
   let bump = false;
 
   const finish = () => {
+    closed = true;
+    clearTimeout(walkTimer);
     kit.stopClock();
     try { localStorage.setItem(DONE_KEY, '1'); } catch { /* not kept */ }
     onDone();
@@ -106,7 +114,7 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
           dur: `${WALK_MS}ms`, begin: 'indefinite', fill: 'freeze', calcMode: 'spline', keySplines: '0.4 0 0.2 1', keyTimes: '0;1' });
         walker.append(move);
         (move as unknown as { beginElement(): void }).beginElement();
-        setTimeout(() => { gain(1); done(); }, WALK_MS + 300);
+        walkTimer = window.setTimeout(() => { if (!closed) { gain(1); done(); } }, WALK_MS + 300);
       } : null),
       (pos, size) => {
         from = pos('france');
@@ -140,7 +148,7 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
 
   // UK & Ireland with its drawn airport; after buying, the airport carries your pennant.
   const airportView = (owned: boolean, onTap?: () => void): SVGSVGElement =>
-    view(['uk-ireland'], () => 'here', undefined, (pos, size) => [place(airport(owned ? ME : undefined), ...pos('uk-ireland'), size, 'Airport', onTap)]);
+    view(['uk-ireland'], () => 'here', undefined, (pos, size) => [place(airport(owned ? FLAG : undefined), ...pos('uk-ireland'), size, 'Airport', onTap)]);
   const buyAirline = (done: () => void): Node => {
     const buy = button(`✈️ Buy the airline (${BUSINESS_PRICE.airline} points)`, () => { play('coins'); gain(-BUSINESS_PRICE.airline); done(); });
     buy.className = 'primary guide-glow';
@@ -190,7 +198,7 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
       box.replaceChildren(
         el('p', { className: 'small' }, kit.flag('France'), ` 🛂 Read these ${VISA_TEST_FACTS} facts about France. The questions come next.`),
         el('ul', { className: 'guide-facts' }, ...FRANCE.map((x) => el('li', { textContent: x.text }))),
-        el('div', { className: 'row' }, ready));
+        el('div', { className: 'row stick ready' }, ready)); // audit 2.13: always on screen, as in the game
     });
     take.className = 'primary guide-glow';
     box.append(el('div', { className: 'row' }, take));
@@ -207,14 +215,14 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
 
   // The three ways of a trip, side by side (step 2.11: the travel slides in three parts).
   const ways = (): Node => el('div', { className: 'guide-ways' },
-    ...[['✈️', 'Plane', 'between airports'], ['⛴️', 'Ferry', 'between ports'], ['🚆', 'Train', 'France ↔ Russia or Turkey'],
+    ...[['✈️', 'Plane', 'between airports'], ['⚓', 'Ship', 'between ports'], ['🚆', 'Train', 'France ↔ Russia or Turkey'],
       ['🚌', 'Bus', 'Mongolia → Russia or China'], ['🚗', 'Car', 'Mexico → USA or Canada']]
       .map(([icon, name, where]) => el('div', { className: 'guide-way' }, el('div', { className: 'guide-way-icon', textContent: icon }), el('strong', { textContent: name }), el('span', { className: 'small', textContent: where }))));
   const turns = (n: number) => (n === 0 ? 'arrives right away' : n === 1 ? '1 travel turn' : `${n} travel turns`);
   const payOrQuiz = (): Node => el('table', { className: 'guide-table' },
     el('tr', {}, el('th', { textContent: '' }), el('th', { textContent: '💰 Ticket with points' }), el('th', { textContent: '🧠 Free quiz' })),
     el('tr', {}, el('td', { textContent: '✈️ 🚆 🚌 Plane, train, bus' }), el('td', { textContent: turns(PAID_TRAVEL_TURNS.airport) }), el('td', { textContent: turns(FREE_TRAVEL_TURNS.airport) })),
-    el('tr', {}, el('td', { textContent: '⛴️ Ship' }), el('td', { textContent: turns(PAID_TRAVEL_TURNS.port) }), el('td', { textContent: turns(FREE_TRAVEL_TURNS.port) })),
+    el('tr', {}, el('td', { textContent: '⚓ Ship' }), el('td', { textContent: turns(PAID_TRAVEL_TURNS.port) }), el('td', { textContent: turns(FREE_TRAVEL_TURNS.port) })),
     el('tr', {}, el('td', { textContent: '🚗 Car (Mexico)' }), el('td', { textContent: turns(PAID_TRAVEL_TURNS.car) }), el('td', { textContent: 'no quiz' })));
 
   // Owner (J6): try to hitchhike in Mexico (the Backpacker's car). In the guide a car always stops; when one stops in
@@ -268,14 +276,15 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
     const go = button('Continue guide', () => { gain(-PROTEST_LOSS); done(); });
     go.className = 'primary';
     play('card-bad');
+    // Audit 2.13: the game's own news card (who, "News from …", a title, the news and what it means).
     return el('div', {},
       el('div', { className: 'event-card' },
         el('div', { className: 'event-rays' }),
-        el('div', { className: 'event-deck', textContent: '🤷' }),
-        el('div', { className: 'event-kind', textContent: 'Country event card' }),
-        el('p', { className: 'event-text', textContent: '“A protest blocks the roads in the country you are visiting. Your plans fall apart.”' }),
-        el('div', { className: 'event-badge bad', textContent: `−${PROTEST_LOSS} points` })),
-      el('div', { className: 'row' }, go));
+        el('div', { className: 'event-kind', textContent: '🙂 You · 📰 News from France' }),
+        el('h2', { className: 'event-title', textContent: '🚧 Roads closed' }),
+        el('p', { className: 'event-text', textContent: '“A protest blocks the roads in France. Travellers\' plans fall apart.”' }),
+        el('div', { className: 'event-meaning' }, 'What this means for you: ', el('span', { className: 'event-badge bad', textContent: `−${PROTEST_LOSS} points` }))),
+      el('div', { className: 'row guide-actions' }, go));
   };
 
   // "Try one": the game's own airline quiz, with its 15-second clock.
@@ -310,7 +319,7 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
   const steps: Step[] = [
     { title: '🌍 Welcome, traveller!', task: true, picture: firstTrip,
       lines: ['This is a **short guide (about 5 minutes) before your first game**. Nothing here counts: it\'s just practice.', '**KAJ is simple: the more you travel, the more points you collect!** But your turns are limited, so make every move count. When the last turn ends, the player with the **most points wins** (on equal points, **more businesses** wins).', "Let's take your first trip! **Tap Iberia on the map on the right** 👉"],
-      after: { title: '🎉 Your first trip!', lines: ['Every **new area** you visit gives you **+1 point**.', 'You can also **use your points** for faster travel (**planes, ferries, trains, buses and cars**), for **visas** and for **guided tours** at wonders.'] } },
+      after: { title: '🎉 Your first trip!', lines: ['Every **new area** you visit gives you **+1 point**.', 'You can also **use your points** for faster travel (**planes, ships, trains, buses and cars**), for **visas** and for **guided tours** at wonders.'] } },
     { title: '💡 More points, the easy way', lines: [`Reach a **new continent: +${POINTS_NEW_CONTINENT} points**.`, `Areas with a famous **wonder 🏛️ give +${POINTS_WONDER} extra**.`, `Visit **every part of a big country** like the USA or Canada: **+${bigCountryPoints(2)} or +${POINTS_BIG_COUNTRY_3_PARTS}**.`, 'Visit **every area of a continent: a big reward**, bigger for bigger continents.'] },
     { title: '💡 Big countries, big bonus', task: true, picture: crossCanada,
       lines: ['Big countries like Canada and Russia come in parts. Visit every part for a big bonus.', '**Cross Canada to continue the guide!**'],
@@ -318,9 +327,9 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
     // Step 2.11 (owner): the travel slide in three parts, with pictures; the profiles slide is gone (players see each
     // profile when they choose it).
     { title: '🚀 Travel faster (1/5): the ways to travel', picture: ways,
-      lines: ['In KAJ you usually travel **on foot**: one neighbouring area per turn, for free.', 'To go further and faster, take a **plane, ferry, train, bus or car**.', 'Faster travel **costs points**… unless you\'re smart and **use your knowledge!**'] },
+      lines: ['In KAJ you usually travel **on foot**: one neighbouring area per turn, for free.', 'To go further and faster, take a **plane, ship, train, bus or car**.', 'Faster travel **costs points**… unless you\'re smart and **use your knowledge!**'] },
     { title: '🚀 Travel faster (2/5): the free quiz', task: true, picture: quiz,
-      lines: ['**Short on points, or want to save them?** Planes, ferries, trains and buses give you a **free ticket if you pass their quiz**.', '**Try one now!**'],
+      lines: ['**Short on points, or want to save them?** Planes, ships, trains and buses give you a **free ticket if you pass their quiz**.', '**Try one now!**'],
       after: { title: '✅ Right!', lines: ['Free ticket! If only real life worked like that!', `In the game a **wrong answer uses your turn**. After **${QUIZ_TRIES} wrong answers** in the same place you must **use your points for the ticket**, or **go home** if you don\'t have enough.`] } },
     { title: '🚀 Travel faster (3/5): points or quiz?', picture: payOrQuiz,
       lines: ['**A ticket with points is faster, the quiz is slower.**'] },
@@ -388,11 +397,15 @@ export function runGuide(kit: GuideKit, onDone: () => void): void {
       ? [el('h2', { className: 'big-title', textContent: after.title }), ...after.lines.map(line)]
       : [el('h2', { textContent: step.title }), ...step.lines.map(line)];
     const picture = after ? after.picture?.() : step.picture?.(() => { solved = true; draw(); });
-    const go = button(last ? '▶ Start my first game' : 'Next ▶', last ? finish : next);
+    const go = button(last ? doneLabel : 'Next ▶', last ? finish : next);
     go.className = 'primary';
     const skip = button('Skip guide', finish);
     const waiting = step.task && !solved;
-    const buttons = el('div', { className: 'row' }, waiting ? '' : go, last ? '' : skip);
+    // Audit 2.13: the buttons stay on screen at the bottom of the card; a picture's own button row (the news card)
+    // takes "Skip guide" beside it, instead of a second row under it.
+    const own = waiting && picture instanceof Element ? picture.querySelector('.guide-actions') : null;
+    if (own && !last) own.append(skip);
+    const buttons = el('div', { className: 'row stick' }, waiting ? '' : go, last || own ? '' : skip);
     // A map goes on the right half of the sideways screen, as big as the screen allows; the
     // text and buttons on the left (owner, 2026-10-10: the maps were too small on a phone).
     const map = picture instanceof Element && (picture.matches('.guide-map, .trip-scene') || picture.querySelector('.guide-map, .trip-scene'));

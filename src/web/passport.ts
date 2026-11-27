@@ -85,7 +85,7 @@ export function passportBook(p: PassportData, close: () => void, intro?: Passpor
     p.stamps.slice((n - 2) * PER_PAGE, (n - 1) * PER_PAGE).forEach((s, i) => {
       const k = (n - 2) * PER_PAGE + i;
       const st = el('div', { className: `pp-stamp${k % 3 === 1 ? ' round' : ''}` },
-        el('span', { className: 'c', textContent: s.continent }), img(s.flag), el('span', { className: 'n', textContent: s.name }),
+        el('span', { className: 'c', textContent: s.continent }), img(s.flag), el('span', { className: s.name.length > 14 ? 'n long' : 'n', textContent: s.name }),
         el('span', { className: 'no', textContent: `ARRIVED · ${k + 1}` }));
       st.style.color = INK[s.continent];
       st.style.transform = `rotate(${TILT[k % TILT.length]}deg)`;
