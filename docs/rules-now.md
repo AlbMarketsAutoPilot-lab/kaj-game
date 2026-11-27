@@ -71,9 +71,10 @@ an older one, the old one is shown ~~struck out~~.
   take the free time. ~~Old travel turns by profile: plane Backpacker and Nomad 1, Business and Luxury 0;
   ship Backpacker and Nomad 3, Business and Luxury 1; train, bus and car 1.~~ A paid trip after the 3rd
   wrong quiz answer is a paid trip (fast).
-- **[2.7]** Before a quiz trip, a player who could pay (Nomad, Business, Luxury) sees a notice: the quiz
+- ~~**[2.7]** Before a quiz trip, a player who could pay (Nomad, Business, Luxury) sees a notice: the quiz
   trip takes longer than the paid one. **[2.8]** The notice only informs (quiz time, paid time, a wrong answer misses
-  a turn), comes for a paid trip too, has no Cancel, and can be turned off ("Don't show this again").
+  a turn), comes for a paid trip too, has no Cancel, and can be turned off ("Don't show this again").~~
+  **[2.12 J6]** This notice is removed (owner): the quiz and the ticket start the trip right away.
 
 - **Routes:** fixed routes, 1 or 2 destinations each; all plane and ship routes are two-way.
   - 30 turns: 13 airports, 11 ports.
