@@ -344,7 +344,7 @@ function renderSetup(): void {
       return b;
     }));
     about.textContent = turns === 100
-      ? `${turns} rounds around the whole world.`
+      ? 'Best played on a big screen or at KriTere.com' // owner (2.13): no period after the website
       : turns === SETUP_LENGTHS[0]
         ? `${turns} rounds around the world.`
         : `${turns} rounds around a bigger world.`;
