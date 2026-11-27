@@ -956,8 +956,9 @@ Rules in full: `docs/rules-now.md` ([2.8]). Card texts: `docs/cards.md`.
     (`lastChips`). About 12.5 px on screen (11.5 on short screens, with a smaller profile icon).
   - World map: only the visited dots of the player whose turn it is (a robot's too), a bit bigger, kept small in small
     areas (Korea).
-  - Name box: "+🏢2 (+1)" for the most businesses (was "⭐+1").
-  - Free or paid trip (was "⚠️ Attention! The quiz trip is slower"): "[Profile]: free or paid trip", "Free quiz = 1
+  - Name box: "+🏢2 (+1)" for the most businesses (was "⭐+1"). **Step 2.12 J6:** "+🏢2=12", the businesses and the
+    total (points + businesses), without "(+1)".
+  - **Removed in step 2.12 J6 (owner).** Free or paid trip (was "⚠️ Attention! The quiz trip is slower"): "[Profile]: free or paid trip", "Free quiz = 1
     travel turn / 3-point ticket = 0 travel turns (you arrive right away) / Wrong quiz answer = miss a turn"; shown when
     the player taps the quiz or the ticket and both are possible; "Take the quiz" and "Pay N" (no Cancel).
   - Rule notices, each with "OK, I understand" and "Don't show this again" (kept on the device, `kaj-info-*-off`,
@@ -1253,6 +1254,45 @@ ship of task 14b went to USA West too). The owner's new routes were built and me
   and the save version. The maps, routes, colours, saves (version 22) and the robot games are exactly as before J6; the
   balance numbers of 2.12c stand. Only the three screen fixes above stay.
 - Tests: 262 pass; the web build works.
+
+## The guide in 16 slides (step 2.12 J6, owner-approved 2026-11-26; screens only)
+
+`src/web/tutorial.ts`, from the owner's guide test: the first slide says "Tap Iberia on the map on the right 👉" and the
+pawn **walks** from France to Iberia (1.5 s, as in the game) before the next text; no "pay" words anywhere in the guide
+("use your points", "Ticket with points", "the visa goes to its citizen"); the travel slides are now 5: the bus from
+Mongolia and the car in Mexico get their own slide with a **hitchhiking try** (the game's car picture; in the guide a car
+always stops, the game's rule stays secret), and the challenges get their own slide with the game's **trip offer and a
+15-second challenge** (right +1, wrong −1, or "No thanks"); new slides **"Businesses never waste your points"** (total =
+points + businesses' prices, an example, and selling a business on your turn) and **"Choose your traveller"** (the 5
+travellers have strengths and weaknesses; read their bonuses and penalties); the citizenship slide says everyone
+**becomes** a citizen of the home country they choose (the Digital Nomad has none) and to choose that country carefully.
+Trip pictures sit on the right like the maps. Checked at 4 screen sizes: no page error; the 3 slides that scrolled before
+(Own a business, the visa facts, Breaking news) still scroll at 1280x720 and 1920x1080. No rule, balance or save change.
+
+## The owner's screen changes after the test games (step 2.12 J6, owner-approved 2026-11-27)
+
+Screens only, all 3 maps (no rule, balance or save change; saves stay version 22):
+- **"It's your turn"**: the glow of a chip whose number went up is a soft yellow glow inside the chip.
+- **End score**: "N from businesses" (was "N assets"): the word "assets" is not shown on any screen (the copyright
+  page keeps it); the "· N businesses" count stays.
+- **Visa after a free quiz**: a free quiz to a country with a visa test shows "🛂 You need a visa!" after the right
+  answer, before the test (so the quiz isn't taken for part of the test); its fees popup then shows only the other fees.
+  A paid trip and a walk still explain the visa first.
+- **Wrong quiz answers** say what happens: 1st and 2nd "You lose this turn. Wrong answers here: n of 3."; the 3rd says
+  the ticket is bought (N points) and the player flies, or first takes the visa test, or, without the points, the trip
+  ends and the player goes home (+2 points to start again).
+- **Start passport**: after "Start", a person who is a citizen (not the Digital Nomad) sees the passport with
+  "🎉 Congratulations! You are a citizen of [country], and all other players need a visa to enter your home country."
+  (the Business also: "You can have a second citizenship in another country of your choice.") and "✔ Let's go"; only
+  the first page, no stamp page (`passportBook(…, intro)`).
+- **"Free or paid trip" notice removed** (with its "Don't show this again", `kaj-quiz-notice-off` no longer read).
+
+**Two rules tried and taken back (owner, 2026-11-27).** (A) the people choose their profile first, then the robots;
+(B) Kris Ann's card "Visa required" −2 / −1 and "The missed plane" as a 0-point card shown once a game instead of the
+notice. Lab, each rule alone against the game without them (same seeds, 3,200 games per line): Base 34 of 40 (30 and 50
+turns) and 18 of 20 (100 turns); A 32 of 40 and 15 of 20 (more points outside the target); B 33 of 40 and 16 of 20.
+Both were worse on the fair lines, so both were taken back (owner's rule); the profile order and Kris Ann's cards are
+as before J6. Tests: 262 pass; a full 100-turn game by script finished with no page error.
 
 ## Project setup
 

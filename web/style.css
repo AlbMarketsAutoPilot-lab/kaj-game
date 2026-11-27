@@ -468,7 +468,9 @@ button.link { background: none; border: none; padding: 0; text-align: left; font
 .turn-chip { border: 1px solid #e9c46a; border-radius: 8px; color: #fff; font-weight: 600; text-align: center;
   font-size: calc(12.5px / var(--ui-zoom, 1)); padding: 2px 6px; white-space: nowrap; overflow: hidden;
   text-overflow: ellipsis; text-shadow: 0 1px 2px #000; }
-.turn-chip.glow { box-shadow: 0 0 10px 3px #ffd54a; border-color: #fff3b0; }
+/* Owner (step 2.12 J6): the glow stays inside the changed chip (with a 1 px edge in the 3 px gap), so it doesn't light
+   up the chips next to it. */
+.turn-chip.glow { box-shadow: inset 0 0 6px 2px rgba(255, 213, 74, 0.9), 0 0 0 1px #ffd54a; border-color: #fff3b0; }
 /* The profile's advantages before a person confirms it. */
 .profile-good { text-align: left; margin: 6px 0 10px; padding-left: 1.2em; }
 .profile-good li { margin: 2px 0; }
@@ -494,6 +496,14 @@ button.link { background: none; border: none; padding: 0; text-align: left; font
 .fin2 .ppb { font-size: 0.7rem; padding: 3px 8px; white-space: nowrap; }
 .fin2 .row { margin-top: 4px; justify-content: center; }
 .pp-back { z-index: 20; background: rgba(2, 20, 24, 0.78); padding: 8px; }
+/* Step 2.12 J6 (owner): the passport when a person chooses the home country: a greeting above, one button below. */
+.pp-start { gap: 6px; align-content: center; }
+.pp-intro { text-align: center; color: var(--cream); max-width: 560px; }
+.pp-intro .big-title { margin: 0 0 2px; }
+.pp-intro p { margin: 0; }
+/* The greeting and the button take room: the cover and the data page fit the rest of the (zoomed) screen. */
+.pp-start .pp-cover { width: min(230px, calc((100 * var(--vh) - 190px) / 1.41)); }
+.pp-start .pp-spread { height: min(300px, calc(100 * var(--vh) - 190px)); }
 .pp-x { position: fixed; top: calc(6px + var(--safe-t)); right: calc(8px + var(--safe-r)); font-size: 1rem; padding: 4px 10px; }
 .pp-book { display: flex; flex-direction: column; align-items: center; }
 .pp-nav { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 6px; color: var(--cream); font-size: 0.8rem; }

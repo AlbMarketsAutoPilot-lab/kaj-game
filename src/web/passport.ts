@@ -60,15 +60,23 @@ export function mrz(p: PassportData): [string, string] {
 // Number of pages: the data page, then the stamp pages.
 export const pageCount = (stamps: number) => 1 + Math.max(1, Math.ceil(stamps / PER_PAGE));
 
-// The passport, over everything; `close` removes it.
-export function passportBook(p: PassportData, close: () => void): HTMLElement {
-  const pages = pageCount(p.stamps.length);
+// The passport, over everything; `close` removes it. Owner (step 2.12 J6): at the start, a greeting above the book and
+// one button below it instead of "✕ Close" (and no stamp pages, since the stamp list is empty).
+export interface PassportIntro { title: string; text: (Node | string)[]; button: string }
+export function passportBook(p: PassportData, close: () => void, intro?: PassportIntro): HTMLElement {
+  // The start passport (no stamps) has only its data page.
+  const pages = intro && p.stamps.length === 0 ? 1 : pageCount(p.stamps.length);
   // Spread 0: the data page (left: the security pattern); spread k: stamp pages 2k and 2k+1.
   const spreads = 1 + Math.ceil((pages - 1) / 2);
   let at = -1; // -1: the cover
   const box = el('div', { className: 'pp-book' });
-  const back = el('div', { className: 'modal-back pp-back' }, box, button('✕ Close', close));
-  (back.lastChild as HTMLElement).className = 'pp-x';
+  const back = intro
+    ? el('div', { className: 'modal-back pp-back pp-start' },
+      el('div', { className: 'pp-intro' }, el('h2', { className: 'big-title', textContent: intro.title }), el('p', {}, ...intro.text)),
+      box, el('div', { className: 'row' }, button(intro.button, close)))
+    : el('div', { className: 'modal-back pp-back' }, box, button('✕ Close', close));
+  if (intro) (back.lastChild!.firstChild as HTMLElement).className = 'primary';
+  else (back.lastChild as HTMLElement).className = 'pp-x';
 
   const stampPage = (n: number) => {
     const page = el('div', { className: 'pp-page' }, el('div', { className: 'pp-pno', textContent: String(n) }));
