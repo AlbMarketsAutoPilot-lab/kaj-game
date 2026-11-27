@@ -11,7 +11,6 @@ import {
   MAX_ROBOTS,
   MAX_SEATS,
   MIN_SEATS,
-  bigCountryPoints,
   bigCountryReward,
   ownsNoBusiness,
   LOSE_TURN_WEIGHT,
@@ -728,8 +727,7 @@ export function canBuyCitizenship(state: GameState, map: GameMap, me: Player): b
     || (p.profile === 'nomad' && p.home !== null && country.includes(p.home)));
 }
 
-// Start of a player's turn: on turn 3 of a request, citizenship is granted (2 or more right
-// answers) or refused (fewer).
+// Start of a player's turn: a turn begun in an area counts towards the next event card.
 function startTurn(state: GameState, map: GameMap): void {
   const me = currentPlayer(state);
   countLandTurn(state, map, me);
@@ -800,8 +798,8 @@ function wholeContinent(state: GameState, map: GameMap, me: Player, continent: C
 }
 
 // The Nomad's boss alert of this travel turn (step 2.5, owner; replaces the secret ship surprise of
-// 2026-10-11): on a ship trip to a new area, the 3rd (last) travel turn brings a challenge offer or a
-// +1 bonus, by turns. Null on any other turn, and while waiting for a taken destination.
+// 2026-10-11): on a free (quiz) ship trip to a new area, the 2nd (last) travel turn brings a challenge offer or a
+// +1 bonus, by turns (step 2.7). Null on any other turn, and while waiting for a taken destination.
 export function nomadAlert(me: Player): NomadAlert | null {
   const trip = me.travel;
   return me.profile === 'nomad' && trip?.alert && trip.turnsLeft === 1 ? trip.alert : null;

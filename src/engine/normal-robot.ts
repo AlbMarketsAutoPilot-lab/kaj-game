@@ -6,7 +6,7 @@ import { BUSINESS_PRICE, bigCountryReward, SECOND_CITIZENSHIP_PRICE, CONTINENT_B
 import { areaById } from './map.ts';
 import { nomadTripValue, planMove } from './planner.ts';
 import { nextRandom } from './rng.ts';
-import type { Action, BusinessKind, Continent, GameMap, GameState, Player, RobotLevel, RouteKind } from './types.ts';
+import type { Action, BusinessKind, Continent, GameMap, GameState, Player, RobotLevel } from './types.ts';
 
 // The robot (task 13): the random robot plus simple rules. It scores the legal moves and picks
 // the best one, with a hidden random tie-break. One robot, three levels (owner's change, task 13).

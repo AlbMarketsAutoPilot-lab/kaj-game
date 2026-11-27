@@ -148,6 +148,13 @@ main:has(.game) { max-width: none; padding: calc(6px + var(--safe-t)) calc(6px +
 /* Two rows of chips: the bigger touch areas (audit U4) do not overlap the other row. */
 .chips button.chip::after { inset: -3px 0; }
 .chip.active { box-shadow: 0 0 0 2px var(--accent); }
+/* Audit 2.13: 3 or 4 players: smaller chips, so they keep to one row where they can. */
+.chips.many { gap: 3px; }
+.chips.many .chip { padding: 1px 4px; font-size: 0.74rem; }
+.chips.many .chip .bot { font-size: 0.75em; }
+.chips.many .chip .picon { width: 1.1em; height: 1.1em; }
+/* Audit 2.13: trip buttons keep their words on one line (they go under each other if they don't fit side by side). */
+.trip-text .row button { white-space: nowrap; }
 .chip.open { background: rgba(255, 255, 255, 0.2); }
 .chip b { color: var(--accent); }
 .board { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; min-height: 0; }
@@ -269,6 +276,12 @@ button.link { background: none; border: none; padding: 0; text-align: left; font
 /* Task 14 B2: popups, countdown, guide */
 .modal-back { position: fixed; inset: 0; z-index: 5; background: rgba(2, 20, 24, 0.6); display: grid; place-items: center; padding: calc(12px + var(--safe-t)) calc(12px + var(--safe-r)) calc(12px + var(--safe-b)) calc(12px + var(--safe-l)); }
 .modal { width: min(560px, 100%); max-height: 100%; overflow-y: auto; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6); border-width: 2px; }
+/* Audit 2.13: popups are solid, so the screen behind them doesn't show through their text. */
+.modal.card:not(.phone-modal), .popup.card { background-color: #0a3238; }
+/* Audit 2.13: a popup's main buttons stay on screen at its bottom; the text above them scrolls. */
+/* (the visa notebook, the guide's visa facts and news card: the popups that can be taller than the screen) */
+.modal .row.stick.ready, .modal.guide.event .row.stick {
+  position: sticky; bottom: 0; margin-top: 6px; padding: 6px 0; background: rgba(10, 50, 56, 0.96); z-index: 3; }
 .modal h2 { font-size: 1.15rem; }
 .modal p { margin: 6px 0; }
 .modal ul { margin: 4px 0 10px; padding-left: 20px; font-size: 0.92rem; }
@@ -360,6 +373,9 @@ button.link { background: none; border: none; padding: 0; text-align: left; font
 .guide-table td:first-child { text-align: left; }
 .guide-facts { text-align: left; margin: 6px 0; padding-left: 20px; font-size: 0.9rem; }
 .guide-facts li { margin: 3px 0; }
+/* Audit 2.13: the guide's visa facts fit with their buttons (Skip guide was cut at 900x430). */
+.guide.quiz-on .guide-facts { font-size: 0.82rem; margin: 4px 0; }
+.guide.quiz-on .guide-facts li { margin: 1px 0; }
 @media (max-height: 340px) {
   .guide-way { padding: 4px 2px; } .guide-way-icon { font-size: 1.35rem; } .guide-ways { margin: 4px 0; }
   .guide-table { font-size: 0.82rem; margin: 4px 0; } .guide-table th, .guide-table td { padding: 3px 5px; }
@@ -375,7 +391,8 @@ button.link { background: none; border: none; padding: 0; text-align: left; font
    screen allows (the owner found the maps too small on a phone). */
 .modal.guide.split { width: min(980px, 100%); max-width: none; }
 .guide-split { display: grid; grid-template-columns: 1fr 1.2fr; gap: 14px; align-items: center; }
-.guide-split .guide-pic .guide-map { max-height: calc(100 * var(--vh) - 135px); }
+/* Audit 2.13: 150 px (was 135) so the longest split slide (Own a business) fits without a scroll. */
+.guide-split .guide-pic .guide-map { max-height: calc(100 * var(--vh) - 150px); }
 .guide-split .guide-pic .small { margin-top: 4px; }
 @media (max-height: 500px) {
   .modal-back { padding-top: calc(6px + var(--safe-t)); padding-bottom: calc(6px + var(--safe-b)); }
@@ -392,7 +409,7 @@ button.link { background: none; border: none; padding: 0; text-align: left; font
 /* Trip scenes (task 14j): the background painting, framed, with the plane or ship drawn on it. */
 .modal.trip { max-width: 820px; width: calc(92 * var(--vw)); }
 .trip-turn { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 16px; align-items: center; }
-.trip-text .row { flex-wrap: nowrap; }
+.trip-text .row { flex-wrap: wrap; }
 .trip-text h2 { margin-top: 0; }
 @media (max-width: 600px) { .trip-turn { grid-template-columns: 1fr; } }
 .trip-scene { border-radius: 12px; overflow: hidden; background: var(--sea) var(--bg-art) no-repeat; }
@@ -461,12 +478,12 @@ button.link { background: none; border: none; padding: 0; text-align: left; font
    a chip whose number went up since the player's last turn glows. */
 :root { --chip-fill: #c9a227; --chip-empty: #0f3b33; }
 .turn-goals { text-align: left; margin: 4px 0 2px; }
-.turn-goals-title { font-weight: 700; color: var(--gold, #e9c46a); font-size: calc(12.5px / var(--ui-zoom, 1)); margin-bottom: 3px; }
+.turn-goals-title { font-weight: 700; color: var(--gold, #e9c46a); font-size: max(12px, calc(12.5px / var(--ui-zoom, 1))); margin-bottom: 3px; }
 .turn-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3px; }
 .turn-last { display: flex; justify-content: center; gap: 3px; margin-top: 6px; }
 .turn-last .turn-chip { flex: 0 1 50%; }
 .turn-chip { border: 1px solid #e9c46a; border-radius: 8px; color: #fff; font-weight: 600; text-align: center;
-  font-size: calc(12.5px / var(--ui-zoom, 1)); padding: 2px 6px; white-space: nowrap; overflow: hidden;
+  font-size: max(12px, calc(12.5px / var(--ui-zoom, 1))); padding: 2px 6px; white-space: nowrap; overflow: hidden;
   text-overflow: ellipsis; text-shadow: 0 1px 2px #000; }
 /* Owner (step 2.12 J6): the glow stays inside the changed chip (with a 1 px edge in the 3 px gap), so it doesn't light
    up the chips next to it. */
@@ -478,7 +495,7 @@ button.link { background: none; border: none; padding: 0; text-align: left; font
 @media (max-height: 400px) {
   .handover-icon .picon { width: 40px; height: 40px; }
   .handover .big-title { margin: 2px 0; }
-  .turn-chip, .turn-goals-title { font-size: calc(11.5px / var(--ui-zoom, 1)); padding-left: 4px; padding-right: 4px; }
+  .turn-chip, .turn-goals-title { font-size: max(11px, calc(11.5px / var(--ui-zoom, 1))); padding-left: 4px; padding-right: 4px; }
 }
 
 /* Step 2.10: the end popup in two columns, the passport and the records (owner-approved mock-up). */
@@ -528,7 +545,7 @@ button.link { background: none; border: none; padding: 0; text-align: left; font
 .dp .body { display: flex; gap: 5%; flex: 1; min-height: 0; }
 .dp .photo { width: 30%; aspect-ratio: 3 / 4; align-self: flex-start; background: linear-gradient(#dfe7ea, #c9d6db); border: 1px solid #9aa; display: grid; place-items: center; }
 .dp .photo svg { width: 92%; height: 92%; }
-.dp .fields { flex: 1; font-size: clamp(0.42rem, 2.2vh, 0.62rem); line-height: 1.15; text-align: left; }
+.dp .fields { flex: 1; font-size: clamp(0.56rem, 2.6vh, 0.66rem); line-height: 1.12; text-align: left; }
 .dp .fields div { margin-bottom: 2.5%; }
 .dp .fields i { display: block; font-style: normal; font-size: 0.78em; color: #6c7a86; }
 .dp .fields b { font-size: 1.1em; color: #1d2733; }
@@ -539,6 +556,8 @@ button.link { background: none; border: none; padding: 0; text-align: left; font
   font-family: "Courier New", monospace; font-weight: 700; text-transform: uppercase; opacity: 0.85; mix-blend-mode: multiply; }
 .pp-stamp.round { border-radius: 50%; aspect-ratio: 1; width: 64%; }
 .pp-stamp .n { font-size: clamp(0.4rem, 2.2vh, 0.62rem); line-height: 1.05; }
+/* Audit 2.13: long area names (Belgium & Luxembourg, Switzerland & Liechtenstein) stay inside their stamp. */
+.pp-stamp .n.long { font-size: clamp(0.32rem, 1.6vh, 0.46rem); overflow-wrap: anywhere; max-width: 100%; }
 .pp-stamp .c { font-size: clamp(0.32rem, 1.6vh, 0.46rem); letter-spacing: 0.06em; }
 .pp-stamp img { width: 26%; margin: 2px 0; filter: saturate(0.7); opacity: 0.9; }
 .pp-stamp .no { font-size: clamp(0.3rem, 1.5vh, 0.42rem); }

@@ -56,7 +56,7 @@ function arrive(map: GameMap, me: Player, s: Sim, to: string, byBus: boolean): [
   return [gain, n];
 }
 
-function steps(state: GameState, map: GameMap, me: Player, s: Sim, reserve: number, p: number, first: boolean): Step[] {
+function steps(state: GameState, map: GameMap, me: Player, s: Sim, reserve: number, p: number): Step[] {
   const out: Step[] = [];
   const fees = (to: string) => feeTotal(entryFees(state, { ...me, area: s.area }, s.area, to));
   for (const to of areaById(map, s.area).neighbours) {
@@ -94,7 +94,7 @@ function steps(state: GameState, map: GameMap, me: Player, s: Sim, reserve: numb
         const nomad = me.profile === 'nomad' ? nomadTripValue(me, kind, s.visited.has(to), p, paid) : 0;
         const gain = g + nomad - f - (paid ? ticket! : 0);
         n.points += gain;
-        // Boarding uses a turn (the area was entered on an earlier turn, except on the first step).
+        // Boarding uses a turn, then the travel turns.
         out.push({ to, kind, gain, turns: 1 + travelTurns(me.profile!, kind, paid) + wait, sim: n, paid });
       }
     }
@@ -118,7 +118,7 @@ function frontier(map: GameMap, s: Sim): number {
 function best(state: GameState, map: GameMap, me: Player, s: Sim, depth: number, turnsLeft: number, reserve: number, p: number): number {
   if (depth === 0 || turnsLeft <= 0) return frontier(map, s);
   let top = frontier(map, s) * GAMMA;
-  for (const st of steps(state, map, me, s, reserve, p, false)) {
+  for (const st of steps(state, map, me, s, reserve, p)) {
     if (st.turns > turnsLeft) continue;
     const d = Math.pow(GAMMA, st.turns);
     top = Math.max(top, d * (st.gain + best(state, map, me, st.sim, depth - 1, turnsLeft - st.turns, reserve, p)));
@@ -134,7 +134,7 @@ export function planMove(state: GameState, map: GameMap, me: Player, legal: Acti
   };
   const turnsLeft = state.totalRounds - state.round + 1;
   let choice: Action | null = null, bestValue = -Infinity;
-  for (const st of steps(state, map, me, s, reserve, accuracy, true)) {
+  for (const st of steps(state, map, me, s, reserve, accuracy)) {
     let action: Action | undefined;
     if (st.kind === 'walk') action = legal.find((a) => a.type === 'walk' && a.to === st.to);
     else if (st.kind === 'car' && ticketPrice(me.profile!, 'car') === null) action = legal.find((a) => a.type === 'hitchhike' && a.to === st.to);
